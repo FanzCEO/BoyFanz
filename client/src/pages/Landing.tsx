@@ -1,0 +1,149 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+export default function Landing() {
+  const handleLogin = () => {
+    window.location.href = "/api/login";
+  };
+
+  return (
+    <div className="min-h-screen bg-background text-foreground" data-testid="landing-page">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/20"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="text-center">
+            <div className="flex justify-center mb-8">
+              <div className="h-16 w-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center glow-effect">
+                <i className="fas fa-bolt text-3xl text-primary-foreground"></i>
+              </div>
+            </div>
+            <h1 className="text-6xl font-bold font-display mb-6 neon-text">
+              Welcome to <span className="text-primary">Fanz</span>
+            </h1>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              The ultimate creator economy platform. Upload, monetize, and connect with your fans 
+              while maintaining full compliance and security.
+            </p>
+            <Button 
+              onClick={handleLogin} 
+              size="lg" 
+              className="glow-effect font-semibold text-lg px-8 py-4"
+              data-testid="login-button"
+            >
+              Get Started
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Features Section */}
+      <div className="py-24 bg-card/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold font-display mb-4">
+              Everything You Need to Succeed
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Powerful tools for the modern creator economy
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <i className="fas fa-cloud-upload-alt text-primary text-xl"></i>
+                </div>
+                <CardTitle>Secure Media Upload</CardTitle>
+                <CardDescription>
+                  Upload and store your content securely with enterprise-grade encryption and compliance features.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <div className="h-12 w-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
+                  <i className="fas fa-shield-alt text-secondary text-xl"></i>
+                </div>
+                <CardTitle>KYC Compliance</CardTitle>
+                <CardDescription>
+                  Built-in identity verification and compliance tools to meet regulatory requirements.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <div className="h-12 w-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
+                  <i className="fas fa-dollar-sign text-accent text-xl"></i>
+                </div>
+                <CardTitle>Instant Payouts</CardTitle>
+                <CardDescription>
+                  Get paid quickly with our streamlined payout system and multiple payment options.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <i className="fas fa-users text-primary text-xl"></i>
+                </div>
+                <CardTitle>Fan Management</CardTitle>
+                <CardDescription>
+                  Connect with your audience and build lasting relationships with powerful fan management tools.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <div className="h-12 w-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
+                  <i className="fas fa-chart-line text-secondary text-xl"></i>
+                </div>
+                <CardTitle>Analytics & Insights</CardTitle>
+                <CardDescription>
+                  Track your performance with detailed analytics and insights to grow your business.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <div className="h-12 w-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
+                  <i className="fas fa-bolt text-accent text-xl"></i>
+                </div>
+                <CardTitle>Real-time Updates</CardTitle>
+                <CardDescription>
+                  Stay connected with real-time notifications and live updates on your content and earnings.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="py-24">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <h2 className="text-4xl font-bold font-display mb-6">
+            Ready to Start Your Journey?
+          </h2>
+          <p className="text-xl text-muted-foreground mb-8">
+            Join thousands of creators who are already building their empire on Fanz.
+          </p>
+          <Button 
+            onClick={handleLogin} 
+            size="lg" 
+            className="glow-effect font-semibold text-lg px-8 py-4"
+            data-testid="cta-login-button"
+          >
+            Start Creating Today
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
