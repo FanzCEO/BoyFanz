@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowUp, DollarSign, Users, Eye, Clock, Upload, CreditCard, FileText, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
+import { formatRelativeTime } from "@/lib/dateUtils";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -15,12 +16,12 @@ export default function Dashboard() {
 
   const { data: recentMedia, isLoading: mediaLoading } = useQuery({
     queryKey: ['/api/media'],
-    select: (data) => data?.slice(0, 3), // Get only first 3 items
+    select: (data) => Array.isArray(data) ? data.slice(0, 3) : [], // Get only first 3 items
   });
 
   const { data: notifications, isLoading: notificationsLoading } = useQuery({
     queryKey: ['/api/notifications'],
-    select: (data) => data?.slice(0, 4), // Get only first 4 items
+    select: (data) => Array.isArray(data) ? data.slice(0, 4) : [], // Get only first 4 items
   });
 
   const getStatusColor = (status: string) => {
@@ -168,7 +169,7 @@ export default function Dashboard() {
                         {media.title}
                       </p>
                       <p className="text-sm text-muted-foreground" data-testid={`media-date-${media.id}`}>
-                        {new Date(media.createdAt).toRelativeTimeString()}
+                        {formatRelativeTime(media.createdAt)}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -221,7 +222,7 @@ export default function Dashboard() {
                         {notification.payloadJson?.message || 'Notification'}
                       </p>
                       <p className="text-xs text-muted-foreground" data-testid={`notification-time-${notification.id}`}>
-                        {new Date(notification.createdAt).toRelativeTimeString()}
+                        {formatRelativeTime(notification.createdAt)}
                       </p>
                     </div>
                   </div>
