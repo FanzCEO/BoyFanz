@@ -14,19 +14,17 @@ export default function Landing() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
             <div className="flex justify-center mb-8">
-              <img 
-                src="@assets/boyfanz logo_1757453915373.PNG" 
-                alt="BoyFanz Logo" 
-                className="h-24 w-auto glow-effect rounded-lg"
-              />
+              <div className="h-24 w-24 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center glow-effect">
+                <i className="fas fa-fire text-5xl text-primary-foreground"></i>
+              </div>
             </div>
-            <h1 className="text-6xl font-bold font-display mb-6 neon-text">
-              Welcome to <span className="text-primary">BoyFanz</span>
+            <h1 className="text-6xl font-bold font-heading mb-6 neon-text tracking-tight">
+              Welcome to <span className="text-primary font-display tracking-wider">BoyFanz</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              <span className="text-lg font-semibold text-secondary block mb-2">Every Man's Playground</span>
-              The ultimate creator economy platform. Upload, monetize, and connect with your fans 
-              while maintaining full compliance and security.
+              <span className="text-2xl font-display font-black text-secondary block mb-3 tracking-wide uppercase">Every Man's Playground</span>
+              <span className="font-body">The ultimate creator economy platform. Upload, monetize, and connect with your fans 
+              while maintaining full compliance and security.</span>
             </p>
             <Button 
               onClick={handleLogin} 
@@ -44,10 +42,10 @@ export default function Landing() {
       <div className="py-24 bg-card/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold font-display mb-4">
+            <h2 className="text-4xl font-bold font-heading mb-4 tracking-tight">
               Everything You Need to Succeed
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-xl text-muted-foreground font-body">
               Powerful tools for the modern creator economy
             </p>
           </div>
@@ -131,11 +129,11 @@ export default function Landing() {
       {/* CTA Section */}
       <div className="py-24">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold font-display mb-6">
+          <h2 className="text-4xl font-bold font-heading mb-6 tracking-tight">
             Ready to Start Your Journey?
           </h2>
-          <p className="text-xl text-muted-foreground mb-8">
-            Join thousands of creators who are already building their empire on BoyFanz.
+          <p className="text-xl text-muted-foreground mb-8 font-body">
+            Join thousands of creators who are already building their empire on <span className="font-display font-black text-primary tracking-wide">BoyFanz</span>.
           </p>
           <Button 
             onClick={handleLogin} 

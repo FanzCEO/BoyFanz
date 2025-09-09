@@ -1,4 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -44,10 +46,11 @@
   --sidebar-ring: hsl(0, 100%, 50%);
   
   /* Typography */
-  --font-sans: "Inter", sans-serif;
+  --font-sans: "Rajdhani", "Inter", sans-serif;
   --font-serif: "Georgia", serif;
   --font-mono: "Menlo", monospace;
   --font-display: "Orbitron", sans-serif;
+  --font-heading: "Rajdhani", sans-serif;
 }
 
 .light {
@@ -83,7 +86,26 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-display), var(--font-sans);
+    font-family: var(--font-heading), var(--font-sans);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .font-display {
+    font-family: var(--font-display) !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase;
+  }
+
+  .font-heading {
+    font-family: var(--font-heading) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  .font-body {
+    font-family: "Inter", sans-serif !important;
   }
 }
 
@@ -100,7 +122,7 @@
   
   /* Neon text effect */
   .neon-text {
-    text-shadow: 0 0 10px currentColor;
+    text-shadow: 0 0 8px currentColor, 0 0 16px currentColor, 0 0 24px currentColor;
   }
   
   /* Status badge colors */
