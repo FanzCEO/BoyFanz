@@ -422,7 +422,7 @@ export default function Settings() {
                     No API keys
                   </h3>
                   <p className="text-muted-foreground mb-4" data-testid="no-api-keys-description">
-                    Create your first API key to access the Fanz API
+                    Create your first API key to access the BoyFanz API
                   </p>
                   <Button onClick={() => createApiKeyMutation.mutate({ scopes: ['read'] })} data-testid="create-first-api-key-button">
                     <Plus className="mr-2 h-4 w-4" />

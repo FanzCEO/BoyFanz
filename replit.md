@@ -1,6 +1,6 @@
 # Overview
 
-Fanz is a creator economy platform designed for content creators to upload, monetize, and connect with their fans while maintaining full compliance and security. The platform features a neon/varsity aesthetic with dark mode as default, providing a modern and engaging user experience. Built specifically for the Replit environment, it offers comprehensive tools for media management, payment processing, KYC compliance, moderation workflows, and real-time notifications.
+BoyFanz is a creator economy platform designed for content creators to upload, monetize, and connect with their fans while maintaining full compliance and security. With the slogan "Every Man's Playground", the platform features a dark, edgy neon aesthetic with vibrant red and golden accents. Built specifically for the Replit environment, it offers comprehensive tools for media management, payment processing, KYC compliance, moderation workflows, and real-time notifications.
 
 # User Preferences
 

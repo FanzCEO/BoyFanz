@@ -330,7 +330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Fanz API Documentation</title>
+          <title>BoyFanz API Documentation</title>
           <meta charset="utf-8"/>
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
@@ -350,7 +350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const openApiSpec = {
       openapi: '3.0.0',
       info: {
-        title: 'Fanz API',
+        title: 'BoyFanz API',
         version: '1.0.0',
         description: 'Creator economy platform API',
       },

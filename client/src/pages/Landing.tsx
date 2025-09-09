@@ -14,14 +14,17 @@ export default function Landing() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
             <div className="flex justify-center mb-8">
-              <div className="h-16 w-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center glow-effect">
-                <i className="fas fa-bolt text-3xl text-primary-foreground"></i>
-              </div>
+              <img 
+                src="@assets/boyfanz logo_1757453915373.PNG" 
+                alt="BoyFanz Logo" 
+                className="h-24 w-auto glow-effect rounded-lg"
+              />
             </div>
             <h1 className="text-6xl font-bold font-display mb-6 neon-text">
-              Welcome to <span className="text-primary">Fanz</span>
+              Welcome to <span className="text-primary">BoyFanz</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              <span className="text-lg font-semibold text-secondary block mb-2">Every Man's Playground</span>
               The ultimate creator economy platform. Upload, monetize, and connect with your fans 
               while maintaining full compliance and security.
             </p>
@@ -132,7 +135,7 @@ export default function Landing() {
             Ready to Start Your Journey?
           </h2>
           <p className="text-xl text-muted-foreground mb-8">
-            Join thousands of creators who are already building their empire on Fanz.
+            Join thousands of creators who are already building their empire on BoyFanz.
           </p>
           <Button 
             onClick={handleLogin} 

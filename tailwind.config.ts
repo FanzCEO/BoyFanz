@@ -121,10 +121,10 @@ export default {
         },
         "glow": {
           "0%, 100%": {
-            "box-shadow": "0 0 20px rgba(220, 20, 60, 0.3)",
+            "box-shadow": "0 0 20px rgba(255, 0, 0, 0.4)",
           },
           "50%": {
-            "box-shadow": "0 0 30px rgba(220, 20, 60, 0.5)",
+            "box-shadow": "0 0 30px rgba(255, 0, 0, 0.6)",
           },
         },
       },
@@ -141,9 +141,9 @@ export default {
         xs: "2px",
       },
       boxShadow: {
-        glow: "0 0 20px rgba(220, 20, 60, 0.3)",
-        "glow-lg": "0 0 30px rgba(220, 20, 60, 0.5)",
-        "silver-glow": "0 0 15px rgba(192, 192, 192, 0.4)",
+        glow: "0 0 20px rgba(255, 0, 0, 0.4)",
+        "glow-lg": "0 0 30px rgba(255, 0, 0, 0.6)",
+        "golden-glow": "0 0 15px rgba(255, 215, 0, 0.5)",
         neon: "0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor",
       },
       textShadow: {
@@ -163,14 +163,14 @@ export default {
         '.text-shadow-neon-strong': {
           textShadow: '0 0 10px currentColor, 0 0 20px currentColor',
         },
-        '.text-shadow-silver': {
-          textShadow: '0 0 8px rgba(192, 192, 192, 0.6)',
+        '.text-shadow-golden': {
+          textShadow: '0 0 8px rgba(255, 215, 0, 0.7)',
         },
         '.bg-gradient-neon': {
           background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%)',
         },
-        '.bg-gradient-crimson-silver': {
-          background: 'linear-gradient(135deg, hsl(348, 83%, 47%) 0%, hsl(0, 0%, 75%) 100%)',
+        '.bg-gradient-red-golden': {
+          background: 'linear-gradient(135deg, hsl(0, 100%, 50%) 0%, hsl(45, 80%, 60%) 100%)',
         },
         '.border-gradient-neon': {
           border: '1px solid transparent',
@@ -178,9 +178,9 @@ export default {
           backgroundOrigin: 'border-box',
           backgroundClip: 'content-box, border-box',
         },
-        '.border-silver-glow': {
-          border: '1px solid hsl(0, 0%, 75%)',
-          boxShadow: '0 0 15px rgba(192, 192, 192, 0.2)',
+        '.border-golden-glow': {
+          border: '1px solid hsl(45, 80%, 60%)',
+          boxShadow: '0 0 15px rgba(255, 215, 0, 0.3)',
         },
       }
       addUtilities(newUtilities)

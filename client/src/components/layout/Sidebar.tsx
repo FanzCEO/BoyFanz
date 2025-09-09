@@ -30,10 +30,15 @@ export default function Sidebar({ user }: SidebarProps) {
         {/* Logo */}
         <div className="flex h-16 items-center px-6 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-              <i className="fas fa-bolt text-primary-foreground text-lg"></i>
+            <img 
+              src="@assets/boyfanz logo_1757453915373.PNG" 
+              alt="BoyFanz Logo" 
+              className="h-10 w-auto"
+            />
+            <div className="flex flex-col">
+              <span className="font-display font-bold text-xl neon-text text-primary">BoyFanz</span>
+              <span className="text-xs text-secondary font-medium">Every Man's Playground</span>
             </div>
-            <span className="font-display font-bold text-xl neon-text text-primary">Fanz</span>
           </div>
         </div>
 
