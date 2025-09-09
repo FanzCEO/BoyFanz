@@ -7,9 +7,9 @@
 
 :root {
   /* Dark theme colors matching neon/varsity aesthetic */
-  --background: hsl(0, 0%, 2%);
+  --background: hsl(0, 0%, 1%);
   --foreground: hsl(0, 0%, 98%);
-  --card: hsl(0, 0%, 5%);
+  --card: hsl(15, 15%, 4%);
   --card-foreground: hsl(0, 0%, 98%);
   --popover: hsl(0, 0%, 7%);
   --popover-foreground: hsl(0, 0%, 98%);
@@ -23,8 +23,8 @@
   --accent-foreground: hsl(0, 0%, 9%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-foreground: hsl(0, 0%, 98%);
-  --border: hsl(0, 0%, 20%);
-  --input: hsl(0, 0%, 20%);
+  --border: hsl(15, 15%, 15%);
+  --input: hsl(15, 15%, 18%);
   --ring: hsl(0, 100%, 50%);
   --radius: 0.5rem;
   
@@ -36,7 +36,7 @@
   --chart-5: hsl(340, 75%, 55%);
   
   /* Sidebar colors */
-  --sidebar: hsl(0, 0%, 3%);
+  --sidebar: hsl(0, 0%, 2%);
   --sidebar-foreground: hsl(0, 0%, 98%);
   --sidebar-primary: hsl(0, 100%, 50%);
   --sidebar-primary-foreground: hsl(0, 0%, 9%);
@@ -130,26 +130,33 @@
     filter: brightness(1.1);
   }
   
-  /* Authentic neon sign effects */
+  /* Underground club neon tube effects */
   .neon-sign {
-    color: hsl(0, 100%, 50%);
+    color: hsl(0, 100%, 55%);
+    font-weight: 900;
     text-shadow: 
-      0 0 1px #fff,
       0 0 2px #fff,
-      0 0 4px hsl(0, 100%, 50%),
-      0 0 8px hsl(0, 100%, 50%),
-      0 0 12px hsl(0, 100%, 50%);
-    animation: neon-flicker 2s infinite alternate;
+      0 0 4px #fff,
+      0 0 6px hsl(0, 100%, 50%),
+      0 0 10px hsl(0, 100%, 50%),
+      0 0 16px hsl(0, 100%, 45%),
+      0 0 22px hsl(0, 85%, 40%);
+    animation: neon-flicker 3s ease-in-out infinite alternate;
+    -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.1);
+    text-stroke: 0.5px rgba(255, 255, 255, 0.1);
   }
   
   .neon-sign-golden {
-    color: hsl(45, 80%, 60%);
+    color: hsl(50, 100%, 65%);
+    font-weight: 700;
     text-shadow: 
-      0 0 1px #fff,
       0 0 2px #fff,
-      0 0 4px hsl(45, 80%, 60%),
-      0 0 8px hsl(45, 80%, 60%),
-      0 0 12px hsl(45, 80%, 60%);
+      0 0 4px #fff,
+      0 0 6px hsl(50, 100%, 60%),
+      0 0 10px hsl(50, 90%, 55%),
+      0 0 16px hsl(45, 80%, 50%);
+    -webkit-text-stroke: 0.3px rgba(255, 255, 255, 0.1);
+    text-stroke: 0.3px rgba(255, 255, 255, 0.1);
   }
   
   /* Neon tube outline effect */
@@ -295,3 +302,35 @@
     overflow: hidden;
   }
 }
+
+/* Underground club atmosphere effects - Raw & Gritty */
+.smoky-bg {
+  background: 
+    radial-gradient(ellipse at top, rgba(20, 20, 20, 0.9) 0%, transparent 70%),
+    radial-gradient(ellipse at bottom, rgba(40, 20, 20, 0.6) 0%, transparent 70%),
+    linear-gradient(180deg, hsl(0, 0%, 1%) 0%, hsl(15, 10%, 2%) 100%);
+}
+
+.club-glow {
+  box-shadow: 
+    0 0 20px rgba(255, 0, 0, 0.1),
+    inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.retro-border {
+  border-color: rgba(255, 0, 0, 0.3);
+  box-shadow: 
+    0 0 10px rgba(255, 0, 0, 0.1),
+    inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Enhanced neon flicker for that underground club vibe */
+@keyframes neon-flicker {
+  0% { opacity: 1; filter: brightness(1.1); }
+  2% { opacity: 0.9; filter: brightness(0.95); }
+  4% { opacity: 1; filter: brightness(1.15); }
+  97% { opacity: 1; filter: brightness(1.1); }
+  98% { opacity: 0.95; filter: brightness(1.05); }
+  100% { opacity: 1; filter: brightness(1.1); }
+}
+

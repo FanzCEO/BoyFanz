@@ -7,10 +7,10 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground" data-testid="landing-page">
+    <div className="min-h-screen bg-background text-foreground smoky-bg" data-testid="landing-page">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/5"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
             <div className="flex justify-center mb-8">
@@ -41,7 +41,7 @@ export default function Landing() {
       </div>
 
       {/* Features Section */}
-      <div className="py-24 bg-card/50">
+      <div className="py-24 bg-card/30 club-glow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold font-heading mb-4 tracking-tight">

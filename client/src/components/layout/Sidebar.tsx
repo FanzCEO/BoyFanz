@@ -25,7 +25,7 @@ export default function Sidebar({ user }: SidebarProps) {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-card border-r border-border" data-testid="sidebar">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-card border-r retro-border smoky-bg" data-testid="sidebar">
       <div className="flex h-full flex-col">
         {/* Logo */}
         <div className="flex h-16 items-center px-6 border-b border-border">
