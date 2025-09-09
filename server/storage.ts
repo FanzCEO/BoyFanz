@@ -9,6 +9,7 @@ import {
   auditLogs,
   webhooks,
   apiKeys,
+  themeSettings,
   type User,
   type UpsertUser,
   type Profile,
@@ -20,6 +21,9 @@ import {
   type AuditLog,
   type Webhook,
   type ApiKey,
+  type ThemeSettings,
+  type InsertThemeSettings,
+  type UpdateThemeSettings,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, count, sql } from "drizzle-orm";
@@ -69,6 +73,15 @@ export interface IStorage {
   // API key operations
   createApiKey(apiKey: Omit<ApiKey, 'id' | 'createdAt'>): Promise<ApiKey>;
   getApiKeys(userId: string): Promise<ApiKey[]>;
+  
+  // Theme operations
+  createTheme(theme: InsertThemeSettings): Promise<ThemeSettings>;
+  getThemes(): Promise<ThemeSettings[]>;
+  getTheme(id: string): Promise<ThemeSettings | undefined>;
+  getActiveTheme(): Promise<ThemeSettings | undefined>;
+  updateTheme(id: string, updates: UpdateThemeSettings): Promise<ThemeSettings>;
+  setActiveTheme(id: string): Promise<void>;
+  deleteTheme(id: string): Promise<void>;
   
   // Stats operations
   getDashboardStats(userId: string): Promise<{
@@ -309,6 +322,46 @@ export class DatabaseStorage implements IStorage {
       contentViews: 184000, // Mock value
       pendingReviews: pendingCount.count,
     };
+  }
+
+  // Theme operations
+  async createTheme(theme: InsertThemeSettings): Promise<ThemeSettings> {
+    const [newTheme] = await db.insert(themeSettings).values(theme).returning();
+    return newTheme;
+  }
+
+  async getThemes(): Promise<ThemeSettings[]> {
+    return await db.select().from(themeSettings).orderBy(desc(themeSettings.createdAt));
+  }
+
+  async getTheme(id: string): Promise<ThemeSettings | undefined> {
+    const [theme] = await db.select().from(themeSettings).where(eq(themeSettings.id, id));
+    return theme;
+  }
+
+  async getActiveTheme(): Promise<ThemeSettings | undefined> {
+    const [theme] = await db.select().from(themeSettings).where(eq(themeSettings.isActive, true));
+    return theme;
+  }
+
+  async updateTheme(id: string, updates: UpdateThemeSettings): Promise<ThemeSettings> {
+    const [theme] = await db
+      .update(themeSettings)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(themeSettings.id, id))
+      .returning();
+    return theme;
+  }
+
+  async setActiveTheme(id: string): Promise<void> {
+    // First, deactivate all themes
+    await db.update(themeSettings).set({ isActive: false });
+    // Then activate the selected theme
+    await db.update(themeSettings).set({ isActive: true }).where(eq(themeSettings.id, id));
+  }
+
+  async deleteTheme(id: string): Promise<void> {
+    await db.delete(themeSettings).where(eq(themeSettings.id, id));
   }
 }
 

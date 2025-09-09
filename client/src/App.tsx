@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
 import Media from "@/pages/Media";
@@ -12,6 +13,7 @@ import Payouts from "@/pages/Payouts";
 import Notifications from "@/pages/Notifications";
 import ModerationQueue from "@/pages/Admin/ModerationQueue";
 import UserManagement from "@/pages/Admin/UserManagement";
+import ThemeManager from "@/pages/Admin/ThemeManager";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/layout/Sidebar";
@@ -19,6 +21,7 @@ import Header from "@/components/layout/Header";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
+  useTheme(); // Apply active theme
 
   if (isLoading) {
     return (
@@ -54,6 +57,7 @@ function Router() {
             <Route path="/notifications" component={Notifications} />
             <Route path="/admin/moderation" component={ModerationQueue} />
             <Route path="/admin/users" component={UserManagement} />
+            <Route path="/admin/themes" component={ThemeManager} />
             <Route path="/settings" component={Settings} />
             <Route component={NotFound} />
           </Switch>

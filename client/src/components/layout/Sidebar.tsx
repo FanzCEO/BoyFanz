@@ -21,6 +21,7 @@ export default function Sidebar({ user }: SidebarProps) {
   const adminItems = [
     { path: "/admin/moderation", icon: "fas fa-tasks", label: "Moderation Queue", badge: "7" },
     { path: "/admin/users", icon: "fas fa-users", label: "User Management" },
+    { path: "/admin/themes", icon: "fas fa-palette", label: "Theme Manager" },
     { path: "/settings", icon: "fas fa-chart-bar", label: "Analytics" },
   ];
 

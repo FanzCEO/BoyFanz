@@ -209,6 +209,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Theme management routes (admin only)
+  app.get('/api/themes', async (req, res) => {
+    try {
+      const themes = await storage.getThemes();
+      res.json(themes);
+    } catch (error) {
+      console.error("Error fetching themes:", error);
+      res.status(500).json({ message: "Failed to fetch themes" });
+    }
+  });
+
+  app.get('/api/themes/active', async (req, res) => {
+    try {
+      const theme = await storage.getActiveTheme();
+      res.json(theme);
+    } catch (error) {
+      console.error("Error fetching active theme:", error);
+      res.status(500).json({ message: "Failed to fetch active theme" });
+    }
+  });
+
+  app.post('/api/themes', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const theme = await storage.createTheme(req.body);
+      res.json(theme);
+    } catch (error) {
+      console.error("Error creating theme:", error);
+      res.status(500).json({ message: "Failed to create theme" });
+    }
+  });
+
+  app.put('/api/themes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const theme = await storage.updateTheme(req.params.id, req.body);
+      res.json(theme);
+    } catch (error) {
+      console.error("Error updating theme:", error);
+      res.status(500).json({ message: "Failed to update theme" });
+    }
+  });
+
+  app.put('/api/themes/:id/activate', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      await storage.setActiveTheme(req.params.id);
+      res.json({ message: "Theme activated" });
+    } catch (error) {
+      console.error("Error activating theme:", error);
+      res.status(500).json({ message: "Failed to activate theme" });
+    }
+  });
+
+  app.delete('/api/themes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      await storage.deleteTheme(req.params.id);
+      res.json({ message: "Theme deleted" });
+    } catch (error) {
+      console.error("Error deleting theme:", error);
+      res.status(500).json({ message: "Failed to delete theme" });
+    }
+  });
+
   // Payout routes
   app.get('/api/payouts', isAuthenticated, async (req: any, res) => {
     try {

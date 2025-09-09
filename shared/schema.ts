@@ -178,6 +178,44 @@ export const apiKeys = pgTable("api_keys", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Theme settings
+export const themeSettings = pgTable("theme_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  isActive: boolean("is_active").default(false),
+  colors: jsonb("colors").notNull().default({
+    primary: "hsl(0, 100%, 50%)",
+    primaryForeground: "hsl(0, 0%, 100%)",
+    secondary: "hsl(45, 80%, 60%)",
+    secondaryForeground: "hsl(0, 0%, 0%)",
+    background: "hsl(0, 0%, 1%)",
+    foreground: "hsl(0, 0%, 100%)",
+    card: "hsl(15, 15%, 4%)",
+    cardForeground: "hsl(0, 0%, 100%)",
+    accent: "hsl(50, 100%, 65%)",
+    accentForeground: "hsl(0, 0%, 0%)",
+    border: "hsl(15, 15%, 15%)",
+    input: "hsl(15, 15%, 18%)",
+    muted: "hsl(0, 0%, 10%)",
+    mutedForeground: "hsl(0, 0%, 60%)",
+    destructive: "hsl(0, 84%, 60%)",
+    destructiveForeground: "hsl(0, 0%, 100%)"
+  }),
+  typography: jsonb("typography").notNull().default({
+    fontDisplay: "Orbitron",
+    fontHeading: "Rajdhani",
+    fontBody: "Inter"
+  }),
+  effects: jsonb("effects").notNull().default({
+    neonIntensity: 1,
+    glowEnabled: true,
+    smokyBackground: true,
+    flickerEnabled: true
+  }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Notifications
 export const notificationKindEnum = pgEnum("notification_kind", ["payout", "moderation", "kyc", "system", "fan_activity"]);
 
@@ -266,6 +304,21 @@ export const insertWebhookSchema = createInsertSchema(webhooks).pick({
   eventsJson: true,
 });
 
+export const insertThemeSettingsSchema = createInsertSchema(themeSettings).pick({
+  name: true,
+  colors: true,
+  typography: true,
+  effects: true,
+});
+
+export const updateThemeSettingsSchema = createInsertSchema(themeSettings).pick({
+  name: true,
+  isActive: true,
+  colors: true,
+  typography: true,
+  effects: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -278,3 +331,6 @@ export type KycVerification = typeof kycVerifications.$inferSelect;
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type Webhook = typeof webhooks.$inferSelect;
 export type ApiKey = typeof apiKeys.$inferSelect;
+export type ThemeSettings = typeof themeSettings.$inferSelect;
+export type InsertThemeSettings = z.infer<typeof insertThemeSettingsSchema>;
+export type UpdateThemeSettings = z.infer<typeof updateThemeSettingsSchema>;
