@@ -34,8 +34,8 @@ export default function Sidebar({ user }: SidebarProps) {
               <i className="fas fa-fire text-primary-foreground text-lg"></i>
             </div>
             <div className="flex flex-col">
-              <span className="font-display font-bold text-xl neon-text text-primary tracking-wider">BoyFanz</span>
-              <span className="text-xs text-secondary font-heading font-semibold tracking-wide uppercase">Every Man's Playground</span>
+              <span className="font-display font-bold text-xl neon-sign tracking-wider">BoyFanz</span>
+              <span className="text-xs neon-sign-golden font-heading font-semibold tracking-wide uppercase">Every Man's Playground</span>
             </div>
           </div>
         </div>

@@ -50,6 +50,10 @@ export const profiles = pgTable("profiles", {
   bio: text("bio"),
   avatarUrl: varchar("avatar_url"),
   publicFlags: jsonb("public_flags").default({}),
+  onboardingCompleted: boolean("onboarding_completed").default(false),
+  profileTheme: varchar("profile_theme").default("default"),
+  engagementLevel: integer("engagement_level").default(0),
+  totalPoints: integer("total_points").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

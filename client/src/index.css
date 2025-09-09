@@ -110,19 +110,52 @@
 }
 
 @layer components {
-  /* Neon glow effects */
+  /* Subtle glow effects */
   .glow-effect {
-    box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+    box-shadow: 0 0 8px rgba(255, 0, 0, 0.2);
     transition: box-shadow 0.3s ease;
   }
   
   .glow-effect:hover {
-    box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+    box-shadow: 0 0 12px rgba(255, 0, 0, 0.3);
   }
   
   /* Neon text effect */
   .neon-text {
-    text-shadow: 0 0 8px currentColor, 0 0 16px currentColor, 0 0 24px currentColor;
+    text-shadow: 
+      0 0 2px currentColor,
+      0 0 4px currentColor,
+      0 0 6px currentColor,
+      0 0 8px currentColor;
+    filter: brightness(1.1);
+  }
+  
+  /* Authentic neon sign effects */
+  .neon-sign {
+    color: hsl(0, 100%, 50%);
+    text-shadow: 
+      0 0 1px #fff,
+      0 0 2px #fff,
+      0 0 4px hsl(0, 100%, 50%),
+      0 0 8px hsl(0, 100%, 50%),
+      0 0 12px hsl(0, 100%, 50%);
+    animation: neon-flicker 2s infinite alternate;
+  }
+  
+  .neon-sign-golden {
+    color: hsl(45, 80%, 60%);
+    text-shadow: 
+      0 0 1px #fff,
+      0 0 2px #fff,
+      0 0 4px hsl(45, 80%, 60%),
+      0 0 8px hsl(45, 80%, 60%),
+      0 0 12px hsl(45, 80%, 60%);
+  }
+  
+  /* Neon tube outline effect */
+  .neon-outline {
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
+    text-stroke: 1px rgba(255, 255, 255, 0.1);
   }
   
   /* Status badge colors */

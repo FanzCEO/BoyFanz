@@ -121,10 +121,10 @@ export default {
         },
         "glow": {
           "0%, 100%": {
-            "box-shadow": "0 0 20px rgba(255, 0, 0, 0.4)",
+            "box-shadow": "0 0 8px rgba(255, 0, 0, 0.2)",
           },
           "50%": {
-            "box-shadow": "0 0 30px rgba(255, 0, 0, 0.6)",
+            "box-shadow": "0 0 12px rgba(255, 0, 0, 0.3)",
           },
         },
       },
@@ -141,9 +141,9 @@ export default {
         xs: "2px",
       },
       boxShadow: {
-        glow: "0 0 20px rgba(255, 0, 0, 0.4)",
-        "glow-lg": "0 0 30px rgba(255, 0, 0, 0.6)",
-        "golden-glow": "0 0 15px rgba(255, 215, 0, 0.5)",
+        glow: "0 0 8px rgba(255, 0, 0, 0.2)",
+        "glow-lg": "0 0 12px rgba(255, 0, 0, 0.3)",
+        "golden-glow": "0 0 8px rgba(255, 215, 0, 0.3)",
         neon: "0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor",
       },
       textShadow: {

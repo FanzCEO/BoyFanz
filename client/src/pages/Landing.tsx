@@ -18,11 +18,11 @@ export default function Landing() {
                 <i className="fas fa-fire text-5xl text-primary-foreground"></i>
               </div>
             </div>
-            <h1 className="text-6xl font-bold font-heading mb-6 neon-text tracking-tight">
-              Welcome to <span className="text-primary font-display tracking-wider">BoyFanz</span>
+            <h1 className="text-6xl font-bold font-heading mb-6 tracking-tight">
+              Welcome to <span className="neon-sign font-display tracking-wider">BoyFanz</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              <span className="text-2xl font-display font-black text-secondary block mb-3 tracking-wide uppercase">Every Man's Playground</span>
+              <span className="text-2xl font-display font-black neon-sign-golden block mb-3 tracking-wide uppercase">Every Man's Playground</span>
               <span className="font-body">The ultimate creator economy platform. Upload, monetize, and connect with your fans 
               while maintaining full compliance and security.</span>
             </p>
