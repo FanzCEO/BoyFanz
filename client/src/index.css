@@ -11,9 +11,9 @@
   --card-foreground: hsl(0, 0%, 98%);
   --popover: hsl(0, 0%, 7%);
   --popover-foreground: hsl(0, 0%, 98%);
-  --primary: hsl(195, 100%, 50%);
+  --primary: hsl(348, 83%, 47%);
   --primary-foreground: hsl(0, 0%, 9%);
-  --secondary: hsl(262, 83%, 58%);
+  --secondary: hsl(0, 0%, 75%);
   --secondary-foreground: hsl(0, 0%, 98%);
   --muted: hsl(0, 0%, 15%);
   --muted-foreground: hsl(0, 0%, 60%);
@@ -23,12 +23,12 @@
   --destructive-foreground: hsl(0, 0%, 98%);
   --border: hsl(0, 0%, 20%);
   --input: hsl(0, 0%, 20%);
-  --ring: hsl(195, 100%, 50%);
+  --ring: hsl(348, 83%, 47%);
   --radius: 0.5rem;
   
   /* Chart colors */
-  --chart-1: hsl(195, 100%, 50%);
-  --chart-2: hsl(262, 83%, 58%);
+  --chart-1: hsl(348, 83%, 47%);
+  --chart-2: hsl(0, 0%, 75%);
   --chart-3: hsl(142, 71%, 45%);
   --chart-4: hsl(25, 95%, 53%);
   --chart-5: hsl(340, 75%, 55%);
@@ -36,12 +36,12 @@
   /* Sidebar colors */
   --sidebar: hsl(0, 0%, 7%);
   --sidebar-foreground: hsl(0, 0%, 98%);
-  --sidebar-primary: hsl(195, 100%, 50%);
+  --sidebar-primary: hsl(348, 83%, 47%);
   --sidebar-primary-foreground: hsl(0, 0%, 9%);
   --sidebar-accent: hsl(0, 0%, 15%);
-  --sidebar-accent-foreground: hsl(195, 100%, 50%);
+  --sidebar-accent-foreground: hsl(0, 0%, 75%);
   --sidebar-border: hsl(0, 0%, 20%);
-  --sidebar-ring: hsl(195, 100%, 50%);
+  --sidebar-ring: hsl(348, 83%, 47%);
   
   /* Typography */
   --font-sans: "Inter", sans-serif;
@@ -90,12 +90,12 @@
 @layer components {
   /* Neon glow effects */
   .glow-effect {
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    box-shadow: 0 0 20px rgba(220, 20, 60, 0.3);
     transition: box-shadow 0.3s ease;
   }
   
   .glow-effect:hover {
-    box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+    box-shadow: 0 0 30px rgba(220, 20, 60, 0.5);
   }
   
   /* Neon text effect */
@@ -152,12 +152,12 @@
   /* Enhanced button styles for neon theme */
   .btn-neon {
     @apply bg-primary text-primary-foreground;
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    box-shadow: 0 0 20px rgba(220, 20, 60, 0.3);
     transition: all 0.3s ease;
   }
 
   .btn-neon:hover {
-    box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+    box-shadow: 0 0 30px rgba(220, 20, 60, 0.5);
     transform: translateY(-1px);
   }
 

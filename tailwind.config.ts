@@ -121,10 +121,10 @@ export default {
         },
         "glow": {
           "0%, 100%": {
-            "box-shadow": "0 0 20px rgba(0, 212, 255, 0.3)",
+            "box-shadow": "0 0 20px rgba(220, 20, 60, 0.3)",
           },
           "50%": {
-            "box-shadow": "0 0 30px rgba(0, 212, 255, 0.5)",
+            "box-shadow": "0 0 30px rgba(220, 20, 60, 0.5)",
           },
         },
       },
@@ -141,8 +141,9 @@ export default {
         xs: "2px",
       },
       boxShadow: {
-        glow: "0 0 20px rgba(0, 212, 255, 0.3)",
-        "glow-lg": "0 0 30px rgba(0, 212, 255, 0.5)",
+        glow: "0 0 20px rgba(220, 20, 60, 0.3)",
+        "glow-lg": "0 0 30px rgba(220, 20, 60, 0.5)",
+        "silver-glow": "0 0 15px rgba(192, 192, 192, 0.4)",
         neon: "0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor",
       },
       textShadow: {
@@ -162,14 +163,24 @@ export default {
         '.text-shadow-neon-strong': {
           textShadow: '0 0 10px currentColor, 0 0 20px currentColor',
         },
+        '.text-shadow-silver': {
+          textShadow: '0 0 8px rgba(192, 192, 192, 0.6)',
+        },
         '.bg-gradient-neon': {
           background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%)',
+        },
+        '.bg-gradient-crimson-silver': {
+          background: 'linear-gradient(135deg, hsl(348, 83%, 47%) 0%, hsl(0, 0%, 75%) 100%)',
         },
         '.border-gradient-neon': {
           border: '1px solid transparent',
           backgroundImage: 'linear-gradient(var(--background), var(--background)), linear-gradient(135deg, var(--primary), var(--secondary), var(--accent))',
           backgroundOrigin: 'border-box',
           backgroundClip: 'content-box, border-box',
+        },
+        '.border-silver-glow': {
+          border: '1px solid hsl(0, 0%, 75%)',
+          boxShadow: '0 0 15px rgba(192, 192, 192, 0.2)',
         },
       }
       addUtilities(newUtilities)
