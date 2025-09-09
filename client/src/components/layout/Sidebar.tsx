@@ -33,7 +33,7 @@ export default function Sidebar({ user }: SidebarProps) {
             <img 
               src="/boyfanz-logo.png" 
               alt="BoyFanz Logo" 
-              className="h-12 w-auto"
+              className="h-24 w-auto"
             />
             <div className="flex flex-col">
               <span className="font-display font-bold text-xl neon-sign tracking-wider">BoyFanz</span>
