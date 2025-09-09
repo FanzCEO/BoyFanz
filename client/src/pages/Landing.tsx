@@ -14,9 +14,11 @@ export default function Landing() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
             <div className="flex justify-center mb-8">
-              <div className="h-24 w-24 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center glow-effect">
-                <i className="fas fa-fire text-5xl text-primary-foreground"></i>
-              </div>
+              <img 
+                src="/boyfanz-logo.png" 
+                alt="BoyFanz Logo" 
+                className="h-32 w-auto glow-effect rounded-lg"
+              />
             </div>
             <h1 className="text-6xl font-bold font-heading mb-6 tracking-tight">
               Welcome to <span className="neon-sign font-display tracking-wider">BoyFanz</span>
