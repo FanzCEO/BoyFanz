@@ -161,6 +161,13 @@ export class DatabaseStorage implements IStorage {
       .where(eq(mediaAssets.id, id));
   }
 
+  async updateMediaAsset(id: string, updates: Partial<any>): Promise<void> {
+    await db
+      .update(mediaAssets)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(mediaAssets.id, id));
+  }
+
   // Moderation operations
   async getModerationQueue(limit = 50): Promise<(ModerationQueueItem & { media: MediaAsset; owner: User })[]> {
     return db.select({
@@ -172,6 +179,10 @@ export class DatabaseStorage implements IStorage {
       notes: moderationQueue.notes,
       decidedAt: moderationQueue.decidedAt,
       createdAt: moderationQueue.createdAt,
+      aiRecommendation: moderationQueue.aiRecommendation,
+      aiConfidence: moderationQueue.aiConfidence,
+      escalationReason: moderationQueue.escalationReason,
+      priority: moderationQueue.priority,
       media: mediaAssets,
       owner: users,
     })
@@ -179,7 +190,7 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(mediaAssets, eq(moderationQueue.mediaId, mediaAssets.id))
       .innerJoin(users, eq(mediaAssets.ownerId, users.id))
       .where(eq(moderationQueue.status, 'pending'))
-      .orderBy(desc(moderationQueue.createdAt))
+      .orderBy(desc(moderationQueue.priority), desc(moderationQueue.createdAt))
       .limit(limit);
   }
 
@@ -261,6 +272,32 @@ export class DatabaseStorage implements IStorage {
   async createAuditLog(log: Omit<AuditLog, 'id' | 'createdAt'>): Promise<AuditLog> {
     const [auditLog] = await db.insert(auditLogs).values(log).returning();
     return auditLog;
+  }
+
+  // 2257 Compliance operations
+  async create2257Record(record: Omit<any, 'id' | 'createdAt'>): Promise<any> {
+    const [created] = await db.insert(records2257).values(record).returning();
+    return created;
+  }
+
+  async get2257Records(userId: string): Promise<any[]> {
+    return db.select().from(records2257).where(eq(records2257.userId, userId));
+  }
+
+  async getKycByExternalId(externalId: string): Promise<any | undefined> {
+    const [kyc] = await db.select().from(kycVerifications).where(eq(kycVerifications.externalId, externalId));
+    return kyc;
+  }
+
+  async updateUser(id: string, updates: Partial<any>): Promise<void> {
+    await db
+      .update(users)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(users.id, id));
+  }
+
+  async getMediaAssetsByOwner(ownerId: string): Promise<any[]> {
+    return db.select().from(mediaAssets).where(eq(mediaAssets.ownerId, ownerId));
   }
 
   async getAuditLogs(limit = 100): Promise<AuditLog[]> {
