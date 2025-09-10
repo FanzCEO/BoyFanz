@@ -1,30 +1,60 @@
 import { storage } from "../storage";
 import { notificationService } from "./notificationService";
+import { aiModerationService } from "./aiModerationService";
 
 class ModerationService {
   async addToQueue(mediaId: string, reason?: string) {
     try {
-      // Create moderation queue entry
+      // Get media asset for AI analysis
+      const mediaAsset = await storage.getMediaAsset(mediaId);
+      if (!mediaAsset) {
+        throw new Error('Media asset not found');
+      }
+
+      // Perform AI analysis
+      const aiResult = await aiModerationService.processAutoModeration(mediaAsset);
+      
+      // Update media asset with AI analysis
+      await storage.updateMediaAsset(mediaId, {
+        aiAnalysisJson: aiResult.analysis,
+        riskScore: aiResult.analysis.riskScore,
+        contentTags: aiResult.analysis.contentTags
+      });
+
+      if (aiResult.action === 'auto_approve') {
+        await this.autoApprove(mediaId, aiResult.analysis);
+        return;
+      }
+      
+      if (aiResult.action === 'auto_reject') {
+        await this.autoReject(mediaId, aiResult.analysis);
+        return;
+      }
+
+      // Add to human review queue
+      const priority = aiResult.analysis.riskScore > 70 ? 3 : 
+                      aiResult.analysis.riskScore > 40 ? 2 : 1;
+      
       const queueEntry = {
         mediaId,
-        reason: reason || 'Automatic review required',
+        reason: reason || 'AI-flagged for human review',
         status: 'pending' as const,
+        aiRecommendation: aiResult.analysis.recommendation,
+        aiConfidence: aiResult.analysis.confidence,
+        priority
       };
 
-      // Note: We don't have a direct method to insert into moderation queue
-      // This would need to be added to the storage interface
       console.log('Adding to moderation queue:', queueEntry);
-
-      // For now, just update the media asset status
       await storage.updateMediaAssetStatus(mediaId, 'pending');
 
       // Notify admins about new item in queue
-      // This is simplified - in reality we'd get all admin users
       await notificationService.sendSystemNotification({
         kind: 'system',
         payloadJson: {
-          message: 'New content awaiting moderation',
-          mediaId
+          message: `New content awaiting moderation (Risk: ${aiResult.analysis.riskScore})`,
+          mediaId,
+          priority,
+          aiRecommendation: aiResult.analysis.recommendation
         }
       });
 
@@ -32,6 +62,55 @@ class ModerationService {
       console.error('Error adding to moderation queue:', error);
       throw error;
     }
+  }
+
+  async autoApprove(mediaId: string, analysis: any) {
+    await storage.updateMediaAssetStatus(mediaId, 'approved');
+    
+    const mediaAsset = await storage.getMediaAsset(mediaId);
+    if (mediaAsset) {
+      await notificationService.sendNotification(mediaAsset.ownerId, {
+        kind: 'moderation',
+        payloadJson: {
+          message: 'Your content has been automatically approved',
+          mediaTitle: mediaAsset.title,
+          status: 'approved'
+        }
+      });
+    }
+
+    await storage.createAuditLog({
+      actorId: 'system',
+      action: 'content_auto_approved',
+      targetType: 'media_asset',
+      targetId: mediaId,
+      diffJson: { analysis, confidence: analysis.confidence }
+    });
+  }
+
+  async autoReject(mediaId: string, analysis: any) {
+    await storage.updateMediaAssetStatus(mediaId, 'rejected');
+    
+    const mediaAsset = await storage.getMediaAsset(mediaId);
+    if (mediaAsset) {
+      await notificationService.sendNotification(mediaAsset.ownerId, {
+        kind: 'moderation',
+        payloadJson: {
+          message: 'Your content was automatically rejected',
+          mediaTitle: mediaAsset.title,
+          status: 'rejected',
+          reasons: analysis.flaggedReasons
+        }
+      });
+    }
+
+    await storage.createAuditLog({
+      actorId: 'system',
+      action: 'content_auto_rejected',
+      targetType: 'media_asset',
+      targetId: mediaId,
+      diffJson: { analysis, reasons: analysis.flaggedReasons }
+    });
   }
 
   async approve(queueId: string, reviewerId: string, notes?: string) {

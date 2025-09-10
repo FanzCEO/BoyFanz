@@ -85,7 +85,7 @@ export const records2257 = pgTable("records_2257", {
 });
 
 // Media assets
-export const mediaStatusEnum = pgEnum("media_status", ["pending", "approved", "rejected", "processing"]);
+export const mediaStatusEnum = pgEnum("media_status", ["pending", "approved", "rejected", "processing", "flagged", "ai_reviewing", "escalated"]);
 
 export const mediaAssets = pgTable("media_assets", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -98,12 +98,15 @@ export const mediaAssets = pgTable("media_assets", {
   checksum: varchar("checksum").notNull(),
   status: mediaStatusEnum("status").default("pending").notNull(),
   flagsJson: jsonb("flags_json").default({}),
+  aiAnalysisJson: jsonb("ai_analysis_json").default({}),
+  riskScore: integer("risk_score").default(0),
+  contentTags: text("content_tags").array(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Moderation queue
-export const moderationStatusEnum = pgEnum("moderation_status", ["pending", "approved", "rejected"]);
+export const moderationStatusEnum = pgEnum("moderation_status", ["pending", "approved", "rejected", "escalated", "auto_approved", "auto_rejected"]);
 
 export const moderationQueue = pgTable("moderation_queue", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -113,6 +116,10 @@ export const moderationQueue = pgTable("moderation_queue", {
   reviewerId: varchar("reviewer_id").references(() => users.id),
   notes: text("notes"),
   decidedAt: timestamp("decided_at"),
+  aiRecommendation: varchar("ai_recommendation"),
+  aiConfidence: integer("ai_confidence"),
+  escalationReason: text("escalation_reason"),
+  priority: integer("priority").default(1),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
