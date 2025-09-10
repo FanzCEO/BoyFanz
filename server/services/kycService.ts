@@ -202,7 +202,7 @@ class KycService {
 
       // Notify user of full verification
       await notificationService.sendNotification(userId, {
-        kind: 'compliance',
+        kind: 'system',
         payloadJson: {
           message: 'Congratulations! Your account is now fully verified and compliant.',
           status: 'verified'
