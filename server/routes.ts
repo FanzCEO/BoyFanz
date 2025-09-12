@@ -301,7 +301,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/earnings/stats', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const period = req.query.period as string;
+      const period = req.query.period as '24h' | '7d' | '30d' | 'all' | undefined;
       const stats = await earningsService.getEarningsStats(userId, period);
       res.json(stats);
     } catch (error) {
