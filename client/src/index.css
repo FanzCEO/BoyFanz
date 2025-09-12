@@ -207,6 +207,71 @@
     pointer-events: none;
     z-index: 1;
   }
+
+  /* Seductive crimson red neon for headings - provocative and weathered */
+  .neon-crimson-heading {
+    color: hsl(348, 85%, 55%);
+    font-weight: 800;
+    text-shadow: 
+      0 0 2px rgba(255, 255, 255, 0.9),
+      0 0 4px rgba(255, 255, 255, 0.6),
+      0 0 6px hsl(348, 90%, 60%),
+      0 0 10px hsl(348, 80%, 55%),
+      0 0 16px hsl(348, 70%, 50%),
+      0 0 22px hsl(348, 60%, 45%),
+      0 0 28px hsl(348, 50%, 40%),
+      /* Burned out sections - seductive dimming */
+      4px 0 0 rgba(20, 0, 0, 0.9),
+      -3px 1px 0 rgba(40, 0, 10, 0.8),
+      0 3px 0 rgba(30, 0, 5, 0.7),
+      /* Crack lines with sultry shadows */
+      2px 2px 0 rgba(0, 0, 0, 0.6),
+      -1px -2px 0 rgba(0, 0, 0, 0.5);
+    animation: crimson-seductive-flicker 18s ease-in-out infinite;
+    filter: contrast(1.3) brightness(1.1) saturate(1.2);
+    position: relative;
+    letter-spacing: 0.05em;
+  }
+  
+  /* Weathered crack overlay for crimson headings */
+  .neon-crimson-heading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      linear-gradient(88deg, transparent 18%, rgba(0,0,0,0.85) 19%, transparent 21%),
+      linear-gradient(175deg, transparent 42%, rgba(40,0,10,0.8) 43%, transparent 45%),
+      linear-gradient(25deg, transparent 68%, rgba(20,0,5,0.9) 69%, transparent 71%),
+      linear-gradient(135deg, transparent 85%, rgba(0,0,0,0.7) 86%, transparent 88%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Clean white neon for body text - subtle but elegant */
+  .neon-white-body {
+    color: hsl(0, 0%, 95%);
+    text-shadow: 
+      0 0 1px rgba(255, 255, 255, 0.8),
+      0 0 2px rgba(255, 255, 255, 0.6),
+      0 0 4px rgba(255, 255, 255, 0.4),
+      0 0 6px rgba(255, 255, 255, 0.2),
+      0 0 8px rgba(240, 240, 255, 0.1);
+    animation: white-neon-pulse 8s ease-in-out infinite;
+    filter: brightness(1.05);
+  }
+
+  /* Accessibility: Disable animations for users with motion sensitivity */
+  @media (prefers-reduced-motion: reduce) {
+    .neon-crimson-heading,
+    .neon-white-body,
+    .neon-sign,
+    .neon-sign-golden {
+      animation: none !important;
+    }
+  }
   
   /* Neon tube outline effect */
   .neon-outline {
@@ -592,6 +657,203 @@
       0 0 5px hsl(45, 70%, 45%),
       0 0 8px hsl(40, 60%, 40%);
     filter: brightness(1.0) contrast(1.1);
+  }
+}
+
+/* Seductive crimson flicker with erotic timing and burn outs */
+@keyframes crimson-seductive-flicker {
+  0% { 
+    opacity: 1;
+    text-shadow: 
+      0 0 2px rgba(255, 255, 255, 0.9),
+      0 0 4px rgba(255, 255, 255, 0.6),
+      0 0 6px hsl(348, 90%, 60%),
+      0 0 10px hsl(348, 80%, 55%),
+      0 0 16px hsl(348, 70%, 50%),
+      0 0 22px hsl(348, 60%, 45%),
+      0 0 28px hsl(348, 50%, 40%);
+    filter: brightness(1.1) contrast(1.3) saturate(1.2);
+  }
+  5% { 
+    opacity: 0.6;
+    text-shadow: 
+      0 0 1px rgba(200, 150, 150, 0.7),
+      0 0 2px rgba(180, 120, 120, 0.5),
+      0 0 3px hsl(348, 70%, 45%),
+      0 0 6px hsl(348, 60%, 40%),
+      0 0 10px hsl(348, 50%, 35%),
+      0 0 14px hsl(348, 40%, 30%),
+      0 0 18px hsl(348, 30%, 25%);
+    filter: brightness(0.7) contrast(1.6) saturate(1.4);
+  }
+  8% { 
+    opacity: 1;
+    text-shadow: 
+      0 0 2px rgba(255, 255, 255, 0.9),
+      0 0 4px rgba(255, 255, 255, 0.6),
+      0 0 6px hsl(348, 90%, 60%),
+      0 0 10px hsl(348, 80%, 55%),
+      0 0 16px hsl(348, 70%, 50%),
+      0 0 22px hsl(348, 60%, 45%),
+      0 0 28px hsl(348, 50%, 40%);
+    filter: brightness(1.1) contrast(1.3) saturate(1.2);
+  }
+  15% { 
+    opacity: 0.3;
+    text-shadow: 
+      0 0 1px rgba(100, 60, 60, 0.6),
+      0 0 1px rgba(80, 40, 40, 0.4),
+      0 0 2px hsl(348, 50%, 35%),
+      0 0 3px hsl(348, 40%, 30%),
+      0 0 5px hsl(348, 30%, 25%),
+      0 0 7px hsl(348, 20%, 20%),
+      0 0 9px hsl(348, 15%, 15%);
+    filter: brightness(0.4) contrast(2.0) saturate(1.8);
+  }
+  20% { 
+    opacity: 0.9;
+    text-shadow: 
+      0 0 2px rgba(240, 200, 200, 0.8),
+      0 0 3px rgba(220, 180, 180, 0.6),
+      0 0 5px hsl(348, 80%, 55%),
+      0 0 8px hsl(348, 70%, 50%),
+      0 0 12px hsl(348, 60%, 45%),
+      0 0 16px hsl(348, 50%, 40%),
+      0 0 20px hsl(348, 40%, 35%);
+    filter: brightness(0.9) contrast(1.4) saturate(1.3);
+  }
+  32% { 
+    opacity: 0.1;
+    text-shadow: 
+      0 0 1px rgba(60, 20, 20, 0.5),
+      0 0 1px rgba(40, 10, 10, 0.3),
+      0 0 1px hsl(348, 30%, 20%),
+      0 0 1px hsl(348, 20%, 15%),
+      0 0 2px hsl(348, 15%, 12%),
+      0 0 2px hsl(348, 10%, 10%),
+      0 0 3px hsl(348, 8%, 8%);
+    filter: brightness(0.2) contrast(3.0) saturate(2.0);
+  }
+  38% { 
+    opacity: 1;
+    text-shadow: 
+      0 0 2px rgba(255, 255, 255, 0.9),
+      0 0 4px rgba(255, 255, 255, 0.6),
+      0 0 6px hsl(348, 90%, 60%),
+      0 0 10px hsl(348, 80%, 55%),
+      0 0 16px hsl(348, 70%, 50%),
+      0 0 22px hsl(348, 60%, 45%),
+      0 0 28px hsl(348, 50%, 40%);
+    filter: brightness(1.1) contrast(1.3) saturate(1.2);
+  }
+  55% { 
+    opacity: 0.4;
+    text-shadow: 
+      0 0 1px rgba(150, 100, 100, 0.6),
+      0 0 2px rgba(130, 80, 80, 0.4),
+      0 0 3px hsl(348, 60%, 40%),
+      0 0 5px hsl(348, 50%, 35%),
+      0 0 8px hsl(348, 40%, 30%),
+      0 0 11px hsl(348, 30%, 25%),
+      0 0 14px hsl(348, 25%, 20%);
+    filter: brightness(0.5) contrast(1.7) saturate(1.5);
+  }
+  72% { 
+    opacity: 0.05;
+    text-shadow: 
+      0 0 1px rgba(30, 10, 10, 0.4),
+      0 0 1px rgba(20, 5, 5, 0.2),
+      0 0 0px hsl(348, 20%, 15%),
+      0 0 1px hsl(348, 15%, 12%),
+      0 0 1px hsl(348, 10%, 10%),
+      0 0 1px hsl(348, 8%, 8%),
+      0 0 1px hsl(348, 5%, 5%);
+    filter: brightness(0.1) contrast(4.0) saturate(3.0);
+  }
+  78% { 
+    opacity: 0.8;
+    text-shadow: 
+      0 0 2px rgba(255, 220, 220, 0.8),
+      0 0 3px rgba(240, 200, 200, 0.6),
+      0 0 5px hsl(348, 85%, 58%),
+      0 0 9px hsl(348, 75%, 53%),
+      0 0 13px hsl(348, 65%, 48%),
+      0 0 17px hsl(348, 55%, 43%),
+      0 0 21px hsl(348, 45%, 38%);
+    filter: brightness(0.8) contrast(1.4) saturate(1.3);
+  }
+  90% { 
+    opacity: 0.6;
+    text-shadow: 
+      0 0 1px rgba(180, 140, 140, 0.7),
+      0 0 2px rgba(160, 120, 120, 0.5),
+      0 0 4px hsl(348, 70%, 45%),
+      0 0 7px hsl(348, 60%, 40%),
+      0 0 10px hsl(348, 50%, 35%),
+      0 0 13px hsl(348, 40%, 30%),
+      0 0 16px hsl(348, 35%, 25%);
+    filter: brightness(0.6) contrast(1.6) saturate(1.4);
+  }
+  100% { 
+    opacity: 1;
+    text-shadow: 
+      0 0 2px rgba(255, 255, 255, 0.9),
+      0 0 4px rgba(255, 255, 255, 0.6),
+      0 0 6px hsl(348, 90%, 60%),
+      0 0 10px hsl(348, 80%, 55%),
+      0 0 16px hsl(348, 70%, 50%),
+      0 0 22px hsl(348, 60%, 45%),
+      0 0 28px hsl(348, 50%, 40%);
+    filter: brightness(1.1) contrast(1.3) saturate(1.2);
+  }
+}
+
+/* Subtle white neon pulse for body text */
+@keyframes white-neon-pulse {
+  0% { 
+    text-shadow: 
+      0 0 1px rgba(255, 255, 255, 0.8),
+      0 0 2px rgba(255, 255, 255, 0.6),
+      0 0 4px rgba(255, 255, 255, 0.4),
+      0 0 6px rgba(255, 255, 255, 0.2),
+      0 0 8px rgba(240, 240, 255, 0.1);
+    filter: brightness(1.05);
+  }
+  25% { 
+    text-shadow: 
+      0 0 1px rgba(255, 255, 255, 0.9),
+      0 0 2px rgba(255, 255, 255, 0.7),
+      0 0 4px rgba(255, 255, 255, 0.5),
+      0 0 6px rgba(255, 255, 255, 0.3),
+      0 0 8px rgba(240, 240, 255, 0.15);
+    filter: brightness(1.1);
+  }
+  50% { 
+    text-shadow: 
+      0 0 1px rgba(255, 255, 255, 0.7),
+      0 0 2px rgba(255, 255, 255, 0.5),
+      0 0 4px rgba(255, 255, 255, 0.3),
+      0 0 6px rgba(255, 255, 255, 0.15),
+      0 0 8px rgba(240, 240, 255, 0.08);
+    filter: brightness(1.0);
+  }
+  75% { 
+    text-shadow: 
+      0 0 1px rgba(255, 255, 255, 0.9),
+      0 0 2px rgba(255, 255, 255, 0.7),
+      0 0 4px rgba(255, 255, 255, 0.5),
+      0 0 6px rgba(255, 255, 255, 0.3),
+      0 0 8px rgba(240, 240, 255, 0.15);
+    filter: brightness(1.1);
+  }
+  100% { 
+    text-shadow: 
+      0 0 1px rgba(255, 255, 255, 0.8),
+      0 0 2px rgba(255, 255, 255, 0.6),
+      0 0 4px rgba(255, 255, 255, 0.4),
+      0 0 6px rgba(255, 255, 255, 0.2),
+      0 0 8px rgba(240, 240, 255, 0.1);
+    filter: brightness(1.05);
   }
 }
 
