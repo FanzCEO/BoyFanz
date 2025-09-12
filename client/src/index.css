@@ -336,7 +336,7 @@
   100% { opacity: 1; filter: brightness(1.1); }
 }
 
-/* Old seedy bar neon sign flickering - dusty and worn */
+/* Vintage flickering neon sign for seedy bar atmosphere */
 @keyframes vintage-flicker {
   0% { 
     opacity: 1;
@@ -348,13 +348,13 @@
       0 0 8px hsl(40, 60%, 40%);
   }
   2% { 
-    opacity: 0.7;
+    opacity: 0.8;
     text-shadow: 
-      0 0 1px rgba(255, 255, 255, 0.5),
-      0 0 2px rgba(255, 255, 255, 0.2),
-      0 0 2px hsl(45, 60%, 40%),
-      0 0 3px hsl(45, 50%, 35%),
-      0 0 5px hsl(40, 40%, 30%);
+      0 0 1px rgba(255, 255, 255, 0.6),
+      0 0 2px rgba(255, 255, 255, 0.3),
+      0 0 2px hsl(45, 70%, 45%),
+      0 0 4px hsl(45, 60%, 40%),
+      0 0 6px hsl(40, 50%, 35%);
   }
   4% { 
     opacity: 1;
@@ -366,33 +366,15 @@
       0 0 8px hsl(40, 60%, 40%);
   }
   8% { 
-    opacity: 0.85;
+    opacity: 0.9;
     text-shadow: 
-      0 0 1px rgba(255, 255, 255, 0.6),
-      0 0 2px rgba(255, 255, 255, 0.3),
-      0 0 2px hsl(45, 70%, 45%),
-      0 0 4px hsl(45, 60%, 40%),
-      0 0 6px hsl(40, 50%, 35%);
-  }
-  92% { 
-    opacity: 1;
-    text-shadow: 
-      0 0 1px rgba(255, 255, 255, 0.8),
-      0 0 2px rgba(255, 255, 255, 0.4),
-      0 0 3px hsl(45, 80%, 50%),
-      0 0 5px hsl(45, 70%, 45%),
-      0 0 8px hsl(40, 60%, 40%);
+      0 0 1px rgba(255, 255, 255, 0.7),
+      0 0 2px rgba(255, 255, 255, 0.35),
+      0 0 2px hsl(45, 75%, 48%),
+      0 0 4px hsl(45, 65%, 42%),
+      0 0 7px hsl(40, 55%, 38%);
   }
   94% { 
-    opacity: 0.75;
-    text-shadow: 
-      0 0 1px rgba(255, 255, 255, 0.4),
-      0 0 2px rgba(255, 255, 255, 0.15),
-      0 0 2px hsl(45, 55%, 38%),
-      0 0 3px hsl(45, 45%, 33%),
-      0 0 4px hsl(40, 35%, 28%);
-  }
-  96% { 
     opacity: 1;
     text-shadow: 
       0 0 1px rgba(255, 255, 255, 0.8),
@@ -400,6 +382,15 @@
       0 0 3px hsl(45, 80%, 50%),
       0 0 5px hsl(45, 70%, 45%),
       0 0 8px hsl(40, 60%, 40%);
+  }
+  96% { 
+    opacity: 0.85;
+    text-shadow: 
+      0 0 1px rgba(255, 255, 255, 0.65),
+      0 0 2px rgba(255, 255, 255, 0.32),
+      0 0 2px hsl(45, 72%, 47%),
+      0 0 4px hsl(45, 62%, 41%),
+      0 0 6px hsl(40, 52%, 36%);
   }
   100% { 
     opacity: 1;
