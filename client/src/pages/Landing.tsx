@@ -20,8 +20,8 @@ export default function Landing() {
                 className="h-64 w-auto glow-effect rounded-lg"
               />
             </div>
-            <p className="text-xl mb-8 max-w-2xl mx-auto">
-              <span className="text-2xl font-display font-black neon-sign-golden block mb-3 tracking-wide uppercase">Every Man's Playground</span>
+            <p className="text-2xl mb-8 max-w-2xl mx-auto">
+              <span className="text-3xl font-display font-black neon-sign-golden block mb-3 tracking-wide uppercase">Every Man's Playground</span>
               <span className="font-body neon-white-body">The ultimate creator economy platform. Upload, monetize, and connect with your fans 
               while maintaining full compliance and security.</span>
             </p>
@@ -41,10 +41,10 @@ export default function Landing() {
       <div className="py-24 bg-card/30 club-glow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold font-heading mb-4 tracking-tight neon-crimson-heading">
+            <h2 className="text-5xl font-bold font-heading mb-4 tracking-tight neon-crimson-heading">
               Everything You Need to Succeed
             </h2>
-            <p className="text-xl font-body neon-white-body">
+            <p className="text-2xl font-body neon-white-body">
               Powerful tools for the modern creator economy
             </p>
           </div>
@@ -128,10 +128,10 @@ export default function Landing() {
       {/* CTA Section */}
       <div className="py-24">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold font-heading mb-6 tracking-tight neon-crimson-heading">
+          <h2 className="text-5xl font-bold font-heading mb-6 tracking-tight neon-crimson-heading">
             Ready to Start Your Journey?
           </h2>
-          <p className="text-xl mb-8 font-body neon-white-body">
+          <p className="text-2xl mb-8 font-body neon-white-body">
             Join thousands of creators who are already building their empire on <span className="font-display font-black neon-sign tracking-wide">BoyFanz</span>.
           </p>
           <Button 
