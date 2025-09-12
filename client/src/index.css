@@ -148,7 +148,7 @@
       /* Crack simulation with offset shadows */
       1px 1px 0 rgba(0, 0, 0, 0.6),
       -1px -1px 0 rgba(0, 0, 0, 0.5);
-    animation: neon-flicker-damaged 4s ease-in-out infinite;
+    animation: neon-flicker-damaged 12s ease-in-out infinite;
     -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.1);
     text-stroke: 0.5px rgba(255, 255, 255, 0.1);
     position: relative;
@@ -187,7 +187,7 @@
       1px -1px 0 rgba(0, 0, 0, 0.5);
     -webkit-text-stroke: 0.2px rgba(255, 255, 255, 0.05);
     text-stroke: 0.2px rgba(255, 255, 255, 0.05);
-    animation: vintage-flicker-damaged 5s ease-in-out infinite;
+    animation: vintage-flicker-damaged 15s ease-in-out infinite;
     filter: contrast(1.1) brightness(0.9);
     position: relative;
   }
