@@ -9,6 +9,8 @@ import { kycService } from "./services/kycService";
 import { payoutService } from "./services/payoutService";
 import { moderationService } from "./services/moderationService";
 import { notificationService } from "./services/notificationService";
+import { earningsService } from "./services/earningsService";
+import { watermarkService } from "./services/watermarkService";
 import { rateLimit } from "./middleware/rateLimit";
 import { validateRequest } from "./middleware/validation";
 import { insertMediaAssetSchema, insertPayoutRequestSchema, insertWebhookSchema } from "@shared/schema";
@@ -83,6 +85,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...mediaData,
         ownerId: userId,
       });
+
+      // Apply watermark to new media
+      if (mediaData.s3Key) {
+        await watermarkService.applyWatermark(mediaAsset.id, userId, mediaData.s3Key);
+      }
 
       // Add to moderation queue
       await moderationService.addToQueue(mediaAsset.id);
@@ -287,6 +294,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting theme:", error);
       res.status(500).json({ message: "Failed to delete theme" });
+    }
+  });
+
+  // Earnings routes
+  app.get('/api/earnings/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const period = req.query.period as string;
+      const stats = await earningsService.getEarningsStats(userId, period);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching earnings stats:", error);
+      res.status(500).json({ message: "Failed to fetch earnings stats" });
+    }
+  });
+
+  app.get('/api/earnings/breakdown', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const breakdown = await earningsService.getEarningsBreakdown(userId);
+      res.json(breakdown);
+    } catch (error) {
+      console.error("Error fetching earnings breakdown:", error);
+      res.status(500).json({ message: "Failed to fetch earnings breakdown" });
+    }
+  });
+
+  app.post('/api/earnings/subscription', isAuthenticated, async (req: any, res) => {
+    try {
+      const fanUserId = req.user.claims.sub;
+      const { creatorUserId, amount } = req.body;
+      const transaction = await earningsService.processSubscriptionPayment(fanUserId, creatorUserId, amount);
+      res.json(transaction);
+    } catch (error) {
+      console.error("Error processing subscription:", error);
+      res.status(500).json({ message: "Failed to process subscription payment" });
+    }
+  });
+
+  app.post('/api/earnings/ppv', isAuthenticated, async (req: any, res) => {
+    try {
+      const fanUserId = req.user.claims.sub;
+      const { creatorUserId, mediaId, amount } = req.body;
+      const transaction = await earningsService.processPPVPurchase(fanUserId, creatorUserId, mediaId, amount);
+      res.json(transaction);
+    } catch (error) {
+      console.error("Error processing PPV purchase:", error);
+      res.status(500).json({ message: "Failed to process PPV purchase" });
+    }
+  });
+
+  app.post('/api/earnings/tip', isAuthenticated, async (req: any, res) => {
+    try {
+      const fanUserId = req.user.claims.sub;
+      const { creatorUserId, amount, message } = req.body;
+      const transaction = await earningsService.processTip(fanUserId, creatorUserId, amount, message);
+      res.json(transaction);
+    } catch (error) {
+      console.error("Error processing tip:", error);
+      res.status(500).json({ message: "Failed to process tip" });
+    }
+  });
+
+  app.post('/api/earnings/tokens', isAuthenticated, async (req: any, res) => {
+    try {
+      const fanUserId = req.user.claims.sub;
+      const { creatorUserId, tokenCount, tokenValue } = req.body;
+      const transaction = await earningsService.processLiveStreamTokens(fanUserId, creatorUserId, tokenCount, tokenValue);
+      res.json(transaction);
+    } catch (error) {
+      console.error("Error processing live stream tokens:", error);
+      res.status(500).json({ message: "Failed to process live stream tokens" });
+    }
+  });
+
+  app.get('/api/earnings/top', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const limit = parseInt(req.query.limit as string) || 10;
+      const topEarners = await earningsService.getTopEarners(limit);
+      res.json(topEarners);
+    } catch (error) {
+      console.error("Error fetching top earners:", error);
+      res.status(500).json({ message: "Failed to fetch top earners" });
+    }
+  });
+
+  // Watermark routes
+  app.get('/api/watermark/verify/:mediaId', isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await watermarkService.verifyWatermark(req.params.mediaId);
+      res.json(result);
+    } catch (error) {
+      console.error("Error verifying watermark:", error);
+      res.status(500).json({ message: "Failed to verify watermark" });
+    }
+  });
+
+  app.get('/api/watermark/report/:mediaId', isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await watermarkService.getForensicReport(req.params.mediaId);
+      res.json(result);
+    } catch (error) {
+      console.error("Error generating forensic report:", error);
+      res.status(500).json({ message: "Failed to generate forensic report" });
     }
   });
 
