@@ -30,15 +30,18 @@ export const sessions = pgTable(
 export const userRoleEnum = pgEnum("user_role", ["fan", "creator", "admin"]);
 export const userStatusEnum = pgEnum("user_status", ["active", "suspended", "pending"]);
 
-// Users table for Replit Auth
+// Users table for both Replit Auth and local username/password auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: varchar("username").unique(), // For local auth
   email: varchar("email").unique(),
+  password: varchar("password"), // For local auth (hashed)
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   role: userRoleEnum("role").default("fan").notNull(),
   status: userStatusEnum("status").default("active").notNull(),
+  authProvider: varchar("auth_provider").default("replit").notNull(), // "replit" or "local"
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -278,11 +281,28 @@ export const moderationQueueRelations = relations(moderationQueue, ({ one }) => 
 // Zod schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   id: true,
+  username: true,
   email: true,
+  password: true,
   firstName: true,
   lastName: true,
   profileImageUrl: true,
   role: true,
+  authProvider: true,
+});
+
+export const loginUserSchema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(1),
+});
+
+export const registerUserSchema = z.object({
+  username: z.string().min(3).max(30),
+  email: z.string().email(),
+  password: z.string().min(6),
+  role: z.enum(["fan", "creator", "admin"]).default("fan"),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
 });
 
 export const insertProfileSchema = createInsertSchema(profiles).pick({
@@ -329,6 +349,9 @@ export const updateThemeSettingsSchema = createInsertSchema(themeSettings).pick(
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
+export type LoginUser = z.infer<typeof loginUserSchema>;
+export type RegisterUser = z.infer<typeof registerUserSchema>;
 export type Profile = typeof profiles.$inferSelect;
 export type MediaAsset = typeof mediaAssets.$inferSelect;
 export type ModerationQueueItem = typeof moderationQueue.$inferSelect;

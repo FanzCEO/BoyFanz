@@ -18,6 +18,10 @@ import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
+// Auth pages
+import StarzSignup from "@/pages/auth/StarzSignup";
+import FanzSignup from "@/pages/auth/FanzSignup";
+import Login from "@/pages/auth/Login";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -38,6 +42,9 @@ function Router() {
     return (
       <Switch>
         <Route path="/" component={Landing} />
+        <Route path="/auth/starz-signup" component={StarzSignup} />
+        <Route path="/auth/fanz-signup" component={FanzSignup} />
+        <Route path="/auth/login" component={Login} />
         <Route component={NotFound} />
       </Switch>
     );

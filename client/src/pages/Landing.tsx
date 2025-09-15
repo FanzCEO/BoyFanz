@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export default function Landing() {
   const handleLogin = () => {
-    window.location.href = "/api/login";
+    // Redirect to unified login page instead of direct Replit auth
+    window.location.href = "/auth/login";
   };
 
   return (
@@ -41,7 +42,7 @@ export default function Landing() {
       <div className="py-24 bg-card/30 club-glow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold font-heading mb-4 tracking-tight neon-crimson-heading">
+            <h2 className="text-5xl font-bold font-heading mb-4 tracking-tight neon-crimson-heading neon-heartbeat">
               Everything You Need to Succeed
             </h2>
             <p className="text-2xl font-body neon-white-body">
@@ -55,7 +56,7 @@ export default function Landing() {
                 <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                   <i className="fas fa-cloud-upload-alt text-primary text-xl"></i>
                 </div>
-                <CardTitle className="neon-crimson-heading">Secure Media Upload</CardTitle>
+                <CardTitle className="neon-crimson-heading neon-flicker">Secure Media Upload</CardTitle>
                 <CardDescription className="neon-white-body">
                   Upload and store your content securely with enterprise-grade encryption and compliance features.
                 </CardDescription>
@@ -67,7 +68,7 @@ export default function Landing() {
                 <div className="h-12 w-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
                   <i className="fas fa-shield-alt text-secondary text-xl"></i>
                 </div>
-                <CardTitle className="neon-crimson-heading">KYC Compliance</CardTitle>
+                <CardTitle className="neon-crimson-heading neon-buzz">KYC Compliance</CardTitle>
                 <CardDescription className="neon-white-body">
                   Built-in identity verification and compliance tools to meet regulatory requirements.
                 </CardDescription>
@@ -79,7 +80,7 @@ export default function Landing() {
                 <div className="h-12 w-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
                   <i className="fas fa-dollar-sign text-accent text-xl"></i>
                 </div>
-                <CardTitle className="neon-crimson-heading">Instant Payouts</CardTitle>
+                <CardTitle className="neon-crimson-heading neon-heartbeat">Instant Payouts</CardTitle>
                 <CardDescription className="neon-white-body">
                   Get paid quickly with our streamlined payout system and multiple payment options.
                 </CardDescription>
@@ -91,7 +92,7 @@ export default function Landing() {
                 <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                   <i className="fas fa-users text-primary text-xl"></i>
                 </div>
-                <CardTitle className="neon-crimson-heading">Fan Management</CardTitle>
+                <CardTitle className="neon-crimson-heading neon-breathe">Fan Management</CardTitle>
                 <CardDescription className="neon-white-body">
                   Connect with your audience and build lasting relationships with powerful fan management tools.
                 </CardDescription>
@@ -103,7 +104,7 @@ export default function Landing() {
                 <div className="h-12 w-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
                   <i className="fas fa-chart-line text-secondary text-xl"></i>
                 </div>
-                <CardTitle className="neon-crimson-heading">Analytics & Insights</CardTitle>
+                <CardTitle className="neon-crimson-heading neon-dying">Analytics & Insights</CardTitle>
                 <CardDescription className="neon-white-body">
                   Track your performance with detailed analytics and insights to grow your business.
                 </CardDescription>
@@ -115,7 +116,7 @@ export default function Landing() {
                 <div className="h-12 w-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
                   <i className="fas fa-bolt text-accent text-xl"></i>
                 </div>
-                <CardTitle className="neon-crimson-heading">Real-time Updates</CardTitle>
+                <CardTitle className="neon-crimson-heading neon-strobe">Real-time Updates</CardTitle>
                 <CardDescription className="neon-white-body">
                   Stay connected with real-time notifications and live updates on your content and earnings.
                 </CardDescription>
@@ -128,7 +129,7 @@ export default function Landing() {
       {/* CTA Section */}
       <div className="py-24">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-5xl font-bold font-heading mb-6 tracking-tight neon-crimson-heading">
+          <h2 className="text-5xl font-bold font-heading mb-6 tracking-tight neon-crimson-heading neon-breathe">
             Ready to Start Your Journey?
           </h2>
           <p className="text-2xl mb-8 font-body neon-white-body">
