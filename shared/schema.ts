@@ -289,10 +289,10 @@ export const cmsMenus = pgTable("cms_menus", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const cmsMenuItems = pgTable("cms_menu_items", {
+export const cmsMenuItems: any = pgTable("cms_menu_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   menuId: varchar("menu_id").notNull().references(() => cmsMenus.id, { onDelete: "cascade" }),
-  parentId: varchar("parent_id").references(() => cmsMenuItems.id),
+  parentId: varchar("parent_id"),
   title: varchar("title").notNull(),
   url: varchar("url").notNull(),
   sortOrder: integer("sort_order").default(0),
