@@ -188,7 +188,7 @@ export const apiKeys = pgTable("api_keys", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Theme settings
+// Theme settings (legacy - keeping for backward compatibility)
 export const themeSettings = pgTable("theme_settings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: varchar("name").notNull(),
@@ -224,6 +224,86 @@ export const themeSettings = pgTable("theme_settings", {
   }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// CMS Theme System (new architecture)
+export const versionStatusEnum = pgEnum("version_status", ["draft", "published", "archived"]);
+export const pageStatusEnum = pgEnum("page_status", ["draft", "published"]);
+
+export const cmsThemes = pgTable("cms_themes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  isActive: boolean("is_active").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const cmsThemeVersions = pgTable("cms_theme_versions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  themeId: varchar("theme_id").notNull().references(() => cmsThemes.id, { onDelete: "cascade" }),
+  label: varchar("label").notNull().default("v1"),
+  status: versionStatusEnum("status").default("draft").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const cmsThemeSettings = pgTable("cms_theme_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  themeVersionId: varchar("theme_version_id").notNull().references(() => cmsThemeVersions.id, { onDelete: "cascade" }),
+  settingsJson: jsonb("settings_json").notNull().default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const cmsThemeAssets = pgTable("cms_theme_assets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  themeVersionId: varchar("theme_version_id").notNull().references(() => cmsThemeVersions.id, { onDelete: "cascade" }),
+  path: varchar("path").notNull(),
+  storageKey: varchar("storage_key").notNull(),
+  mimeType: varchar("mime_type"),
+  sizeBytes: integer("size_bytes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const cmsPages = pgTable("cms_pages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  slug: varchar("slug").notNull().unique(),
+  title: varchar("title").notNull(),
+  template: varchar("template").notNull().default("page"),
+  status: pageStatusEnum("status").default("draft").notNull(),
+  seoJson: jsonb("seo_json").notNull().default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const cmsPageSections = pgTable("cms_page_sections", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  pageId: varchar("page_id").notNull().references(() => cmsPages.id, { onDelete: "cascade" }),
+  type: varchar("type").notNull(),
+  sortOrder: integer("sort_order").notNull(),
+  propsJson: jsonb("props_json").notNull().default({}),
+});
+
+export const cmsMenus = pgTable("cms_menus", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  handle: varchar("handle").notNull().unique(),
+  title: varchar("title").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const cmsMenuItems = pgTable("cms_menu_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  menuId: varchar("menu_id").notNull().references(() => cmsMenus.id, { onDelete: "cascade" }),
+  parentId: varchar("parent_id").references(() => cmsMenuItems.id),
+  title: varchar("title").notNull(),
+  url: varchar("url").notNull(),
+  sortOrder: integer("sort_order").default(0),
+});
+
+export const cmsPublishes = pgTable("cms_publishes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  actorId: varchar("actor_id").notNull().references(() => users.id),
+  themeVersionId: varchar("theme_version_id").notNull().references(() => cmsThemeVersions.id),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Notifications
@@ -346,6 +426,51 @@ export const updateThemeSettingsSchema = createInsertSchema(themeSettings).pick(
   effects: true,
 });
 
+// CMS schemas
+export const insertCmsThemeSchema = createInsertSchema(cmsThemes).pick({
+  name: true,
+});
+
+export const insertCmsThemeVersionSchema = createInsertSchema(cmsThemeVersions).pick({
+  label: true,
+});
+
+export const insertCmsThemeSettingsSchema = createInsertSchema(cmsThemeSettings).pick({
+  settingsJson: true,
+});
+
+export const insertCmsThemeAssetSchema = createInsertSchema(cmsThemeAssets).pick({
+  path: true,
+  storageKey: true,
+  mimeType: true,
+  sizeBytes: true,
+});
+
+export const insertCmsPageSchema = createInsertSchema(cmsPages).pick({
+  slug: true,
+  title: true,
+  template: true,
+  status: true,
+  seoJson: true,
+});
+
+export const insertCmsPageSectionSchema = createInsertSchema(cmsPageSections).pick({
+  type: true,
+  sortOrder: true,
+  propsJson: true,
+});
+
+export const insertCmsMenuSchema = createInsertSchema(cmsMenus).pick({
+  handle: true,
+  title: true,
+});
+
+export const insertCmsMenuItemSchema = createInsertSchema(cmsMenuItems).pick({
+  title: true,
+  url: true,
+  sortOrder: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -364,3 +489,22 @@ export type ApiKey = typeof apiKeys.$inferSelect;
 export type ThemeSettings = typeof themeSettings.$inferSelect;
 export type InsertThemeSettings = z.infer<typeof insertThemeSettingsSchema>;
 export type UpdateThemeSettings = z.infer<typeof updateThemeSettingsSchema>;
+
+// CMS Types
+export type CmsTheme = typeof cmsThemes.$inferSelect;
+export type CmsThemeVersion = typeof cmsThemeVersions.$inferSelect;
+export type CmsThemeSettings = typeof cmsThemeSettings.$inferSelect;
+export type CmsThemeAsset = typeof cmsThemeAssets.$inferSelect;
+export type CmsPage = typeof cmsPages.$inferSelect;
+export type CmsPageSection = typeof cmsPageSections.$inferSelect;
+export type CmsMenu = typeof cmsMenus.$inferSelect;
+export type CmsMenuItem = typeof cmsMenuItems.$inferSelect;
+export type CmsPublish = typeof cmsPublishes.$inferSelect;
+export type InsertCmsTheme = z.infer<typeof insertCmsThemeSchema>;
+export type InsertCmsThemeVersion = z.infer<typeof insertCmsThemeVersionSchema>;
+export type InsertCmsThemeSettings = z.infer<typeof insertCmsThemeSettingsSchema>;
+export type InsertCmsThemeAsset = z.infer<typeof insertCmsThemeAssetSchema>;
+export type InsertCmsPage = z.infer<typeof insertCmsPageSchema>;
+export type InsertCmsPageSection = z.infer<typeof insertCmsPageSectionSchema>;
+export type InsertCmsMenu = z.infer<typeof insertCmsMenuSchema>;
+export type InsertCmsMenuItem = z.infer<typeof insertCmsMenuItemSchema>;
