@@ -47,32 +47,32 @@ export default function Sidebar({ user }: SidebarProps) {
         <nav className="flex-1 px-3 py-4" data-testid="sidebar-nav">
           <div className="space-y-1">
             {navItems.map((item) => (
-              <Link key={item.path} href={item.path}>
-                <a
-                  className={cn(
-                    "sidebar-link flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all",
-                    isActive(item.path)
-                      ? "active bg-primary/10 text-primary border-r-2 border-primary"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                >
-                  <i className={`${item.icon} w-4`}></i>
-                  {item.label}
-                  {item.badge && (
-                    <span className={cn(
-                      "ml-auto text-xs px-2 py-0.5 rounded-full",
-                      item.badge === "KYC" 
-                        ? "bg-yellow-500 text-yellow-900"
-                        : "bg-primary text-primary-foreground"
-                    )}>
-                      {item.badge}
-                    </span>
-                  )}
-                  {item.dot && (
-                    <span className="ml-auto w-2 h-2 bg-primary rounded-full notification-dot"></span>
-                  )}
-                </a>
+              <Link 
+                key={item.path} 
+                href={item.path}
+                className={cn(
+                  "sidebar-link flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all",
+                  isActive(item.path)
+                    ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+                data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+              >
+                <i className={`${item.icon} w-4`}></i>
+                {item.label}
+                {item.badge && (
+                  <span className={cn(
+                    "ml-auto text-xs px-2 py-0.5 rounded-full",
+                    item.badge === "KYC" 
+                      ? "bg-yellow-500 text-yellow-900"
+                      : "bg-primary text-primary-foreground"
+                  )}>
+                    {item.badge}
+                  </span>
+                )}
+                {item.dot && (
+                  <span className="ml-auto w-2 h-2 bg-primary rounded-full notification-dot"></span>
+                )}
               </Link>
             ))}
           </div>
@@ -84,24 +84,24 @@ export default function Sidebar({ user }: SidebarProps) {
               </h3>
               <div className="mt-2 space-y-1">
                 {adminItems.map((item) => (
-                  <Link key={item.path} href={item.path}>
-                    <a
-                      className={cn(
-                        "sidebar-link flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all",
-                        isActive(item.path)
-                          ? "active bg-primary/10 text-primary border-r-2 border-primary"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                      )}
-                      data-testid={`admin-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      <i className={`${item.icon} w-4`}></i>
-                      {item.label}
-                      {item.badge && (
-                        <span className="ml-auto bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full">
-                          {item.badge}
-                        </span>
-                      )}
-                    </a>
+                  <Link 
+                    key={item.path} 
+                    href={item.path}
+                    className={cn(
+                      "sidebar-link flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all",
+                      isActive(item.path)
+                        ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                    data-testid={`admin-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                  >
+                    <i className={`${item.icon} w-4`}></i>
+                    {item.label}
+                    {item.badge && (
+                      <span className="ml-auto bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full">
+                        {item.badge}
+                      </span>
+                    )}
                   </Link>
                 ))}
               </div>
@@ -126,10 +126,12 @@ export default function Sidebar({ user }: SidebarProps) {
                 {user?.role || 'Creator'}
               </p>
             </div>
-            <Link href="/settings">
-              <a className="text-muted-foreground hover:text-foreground" data-testid="settings-button">
-                <i className="fas fa-cog"></i>
-              </a>
+            <Link 
+              href="/settings"
+              className="text-muted-foreground hover:text-foreground" 
+              data-testid="settings-button"
+            >
+              <i className="fas fa-cog"></i>
             </Link>
           </div>
         </div>

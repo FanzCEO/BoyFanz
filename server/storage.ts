@@ -683,11 +683,11 @@ export class DatabaseStorage implements IStorage {
       .limit(limit + 1);
 
     const hasMore = results.length > limit;
-    const posts = results.slice(0, limit);
+    const postsData = results.slice(0, limit);
     
     let nextCursor: { createdAt: Date; id: string } | undefined;
-    if (hasMore && posts.length > 0) {
-      const lastPost = posts[posts.length - 1];
+    if (hasMore && postsData.length > 0) {
+      const lastPost = postsData[postsData.length - 1];
       nextCursor = {
         createdAt: lastPost.posts.createdAt!,
         id: lastPost.posts.id,
@@ -695,7 +695,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     return {
-      posts: posts.map(row => ({
+      posts: postsData.map((row: any) => ({
         ...row.posts,
         creator: row.users,
       })),

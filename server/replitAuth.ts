@@ -100,8 +100,8 @@ export async function setupAuth(app: Express) {
     passport.use(strategy);
   }
 
-  passport.serializeUser((user: Express.User, cb) => cb(null, user));
-  passport.deserializeUser((user: Express.User, cb) => cb(null, user));
+  // Note: Unified serialization is handled in auth.ts
+  // Remove duplicate serializers to prevent conflicts
 
   app.get("/api/login", (req, res, next) => {
     passport.authenticate(`replitauth:${req.hostname}`, {
