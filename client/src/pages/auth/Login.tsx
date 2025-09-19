@@ -5,12 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useCSRF } from "@/hooks/useCSRF";
 import { LogIn, Crown, Heart, Zap, Shield, Star, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const { loginMutation, user } = useAuth();
+  const { csrfToken, isLoading: csrfLoading } = useCSRF();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     username: "",
@@ -30,6 +32,15 @@ export default function Login() {
       toast({
         title: "Missing Information",
         description: "Please enter your username and password",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!csrfToken) {
+      toast({
+        title: "Security Error",
+        description: "Security token not available. Please refresh the page.",
         variant: "destructive",
       });
       return;
@@ -96,10 +107,15 @@ export default function Login() {
               <Button
                 type="submit"
                 className="w-full bg-accent hover:bg-accent/80 text-white font-semibold py-3 glow-effect"
-                disabled={loginMutation.isPending}
+                disabled={loginMutation.isPending || csrfLoading || !csrfToken}
                 data-testid="button-login"
               >
-                {loginMutation.isPending ? "Signing In..." : "Enter the Playground"}
+                {loginMutation.isPending 
+                  ? "Signing In..." 
+                  : csrfLoading 
+                  ? "Loading..."
+                  : "Enter the Playground"
+                }
               </Button>
             </form>
 
