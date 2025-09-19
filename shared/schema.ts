@@ -1,6 +1,8 @@
 import { sql } from 'drizzle-orm';
 import {
   index,
+  unique,
+  check,
   jsonb,
   pgTable,
   timestamp,
@@ -343,7 +345,15 @@ export const subscriptions = pgTable("subscriptions", {
   cancelledAt: timestamp("cancelled_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  // Unique constraint to prevent duplicate subscriptions
+  uniqueFanCreator: unique().on(table.fanId, table.creatorId),
+  // Indexes for performance - composite indexes for common filters
+  creatorStatusIdx: index("idx_subs_creator_status").on(table.creatorId, table.status),
+  fanStatusIdx: index("idx_subs_fan_status").on(table.fanId, table.status),
+  statusIdx: index("idx_subscriptions_status").on(table.status),
+  currentPeriodEndIdx: index("idx_subscriptions_current_period_end").on(table.currentPeriodEnd),
+}));
 
 // Posts
 export const postTypeEnum = pgEnum("post_type", ["photo", "video", "audio", "text", "reel", "story", "live"]);
@@ -370,7 +380,12 @@ export const posts = pgTable("posts", {
   expiresAt: timestamp("expires_at"), // For stories
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  // Critical indexes for feed queries and performance
+  creatorCreatedAtIdx: index("idx_posts_creator_created_at").on(table.creatorId, table.createdAt.desc()),
+  visibilityIdx: index("idx_posts_visibility").on(table.visibility),
+  scheduledForIdx: index("idx_posts_scheduled_for").on(table.scheduledFor),
+}));
 
 // Post Media (for multiple files per post)
 export const postMedia = pgTable("post_media", {
@@ -391,7 +406,11 @@ export const comments: any = pgTable("comments", {
   likesCount: integer("likes_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  // Indexes for comment queries
+  postIdCreatedAtIdx: index("idx_comments_post_created_at").on(table.postId, table.createdAt),
+  userIdIdx: index("idx_comments_user_id").on(table.userId),
+}));
 
 // Likes
 export const likes = pgTable("likes", {
@@ -400,7 +419,16 @@ export const likes = pgTable("likes", {
   postId: varchar("post_id").references(() => posts.id, { onDelete: "cascade" }),
   commentId: varchar("comment_id").references(() => comments.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  // Unique constraints to prevent duplicate likes
+  uniqueUserPost: unique().on(table.userId, table.postId),
+  uniqueUserComment: unique().on(table.userId, table.commentId),
+  // Check constraint to ensure exactly one of postId or commentId is set
+  checkExactlyOneTarget: check("chk_like_exactly_one", sql`(post_id IS NOT NULL)::int + (comment_id IS NOT NULL)::int = 1`),
+  // Performance indexes for likes queries
+  postIdIdx: index("idx_likes_post_id").on(table.postId),
+  commentIdIdx: index("idx_likes_comment_id").on(table.commentId),
+}));
 
 // Messages
 export const messageTypeEnum = pgEnum("message_type", ["text", "photo", "video", "audio", "tip", "welcome"]);
@@ -417,7 +445,13 @@ export const messages = pgTable("messages", {
   isMassMessage: boolean("is_mass_message").default(false),
   readAt: timestamp("read_at"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  // Critical indexes for inbox and conversation queries
+  receiverCreatedAtIdx: index("idx_messages_receiver_created_at").on(table.receiverId, table.createdAt.desc()),
+  senderCreatedAtIdx: index("idx_messages_sender_created_at").on(table.senderId, table.createdAt.desc()),
+  senderReceiverIdx: index("idx_messages_sender_receiver").on(table.senderId, table.receiverId),
+  readAtIdx: index("idx_messages_read_at").on(table.readAt),
+}));
 
 // Tips/Transactions
 export const transactionTypeEnum = pgEnum("transaction_type", ["subscription", "tip", "post_purchase", "message_purchase", "welcome_message", "live_stream"]);
@@ -436,7 +470,14 @@ export const transactions = pgTable("transactions", {
   referenceId: varchar("reference_id"), // ID of related post, message, etc.
   referenceType: varchar("reference_type"), // "post", "message", "subscription"
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  // Critical indexes for payouts, analytics, and earnings queries
+  toUserCreatedAtIdx: index("idx_tx_to_created_at").on(table.toUserId, table.createdAt.desc()),
+  fromUserCreatedAtIdx: index("idx_tx_from_created_at").on(table.fromUserId, table.createdAt.desc()),
+  statusIdx: index("idx_tx_status").on(table.status),
+  typeIdx: index("idx_tx_type").on(table.type),
+  toUserStatusIdx: index("idx_tx_to_status").on(table.toUserId, table.status),
+}));
 
 // Categories
 export const categories = pgTable("categories", {
