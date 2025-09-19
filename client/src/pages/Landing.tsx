@@ -18,7 +18,7 @@ export default function Landing() {
               <img 
                 src="/boyfanz-logo.png" 
                 alt="BoyFanz Logo" 
-                className="h-64 w-auto glow-effect rounded-lg"
+                className="h-32 w-auto glow-effect rounded-lg"
               />
             </div>
             <p className="text-2xl mb-8 max-w-2xl mx-auto">

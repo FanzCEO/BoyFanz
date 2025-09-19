@@ -29,12 +29,12 @@ export default function Sidebar({ user }: SidebarProps) {
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-card border-r retro-border smoky-bg" data-testid="sidebar">
       <div className="flex h-full flex-col">
         {/* Logo */}
-        <div className="flex h-16 items-center px-6 border-b border-border">
+        <div className="flex h-20 items-center px-6 border-b border-border">
           <div className="flex items-center gap-3">
             <img 
               src="/boyfanz-logo.png" 
               alt="BoyFanz Logo" 
-              className="h-24 w-auto"
+              className="h-12 w-auto"
             />
             <div className="flex flex-col">
               <span className="font-display font-bold text-xl neon-sign tracking-wider">BoyFanz</span>
