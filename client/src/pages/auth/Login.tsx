@@ -106,39 +106,33 @@ export default function Login() {
             <div className="mt-8 text-center space-y-4">
               <p className="text-sm neon-white-body">
                 Forgot your password?{" "}
-                <Link href="/auth/reset-password">
-                  <a className="text-accent hover:underline font-semibold" data-testid="link-reset-password">
-                    Reset it here
-                  </a>
+                <Link href="/auth/reset-password" className="text-accent hover:underline font-semibold" data-testid="link-reset-password">
+                  Reset it here
                 </Link>
               </p>
               
               <div className="border-t border-muted/20 pt-4">
                 <p className="text-sm neon-white-body mb-4">Don't have an account yet?</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Link href="/auth/starz-signup">
-                    <a className="block">
-                      <Button 
-                        variant="outline" 
-                        className="w-full border-primary/30 hover:bg-primary/10 text-primary hover:text-primary"
-                        data-testid="button-join-starz"
-                      >
-                        <Crown className="w-4 h-4 mr-2" />
-                        Join as Starz
-                      </Button>
-                    </a>
+                  <Link href="/auth/starz-signup" className="block">
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-primary/30 hover:bg-primary/10 text-primary hover:text-primary"
+                      data-testid="button-join-starz"
+                    >
+                      <Crown className="w-4 h-4 mr-2" />
+                      Join as Starz
+                    </Button>
                   </Link>
-                  <Link href="/auth/fanz-signup">
-                    <a className="block">
-                      <Button 
-                        variant="outline" 
-                        className="w-full border-secondary/30 hover:bg-secondary/10 text-secondary hover:text-secondary"
-                        data-testid="button-join-fanz"
-                      >
-                        <Heart className="w-4 h-4 mr-2" />
-                        Join as Fanz
-                      </Button>
-                    </a>
+                  <Link href="/auth/fanz-signup" className="block">
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-secondary/30 hover:bg-secondary/10 text-secondary hover:text-secondary"
+                      data-testid="button-join-fanz"
+                    >
+                      <Heart className="w-4 h-4 mr-2" />
+                      Join as Fanz
+                    </Button>
                   </Link>
                 </div>
               </div>
