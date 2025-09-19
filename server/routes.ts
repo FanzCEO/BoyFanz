@@ -14,7 +14,14 @@ import { earningsService } from "./services/earningsService";
 import { watermarkService } from "./services/watermarkService";
 import { rateLimit } from "./middleware/rateLimit";
 import { validateRequest } from "./middleware/validation";
-import { insertMediaAssetSchema, insertPayoutRequestSchema, insertWebhookSchema } from "@shared/schema";
+import { 
+  insertMediaAssetSchema, 
+  insertPayoutRequestSchema, 
+  insertWebhookSchema,
+  insertCreatorProfileSchema,
+  insertSubscriptionSchema,
+  insertPostSchema
+} from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -404,6 +411,308 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating forensic report:", error);
       res.status(500).json({ message: "Failed to generate forensic report" });
+    }
+  });
+
+  // Creator Profile routes
+  app.get('/api/creator-profiles/:userId', async (req, res) => {
+    try {
+      const creatorProfile = await storage.getCreatorProfile(req.params.userId);
+      if (!creatorProfile) {
+        return res.status(404).json({ message: "Creator profile not found" });
+      }
+      res.json(creatorProfile);
+    } catch (error) {
+      console.error("Error fetching creator profile:", error);
+      res.status(500).json({ message: "Failed to fetch creator profile" });
+    }
+  });
+
+  app.post('/api/creator-profiles', isAuthenticated, validateRequest(insertCreatorProfileSchema), async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const creatorProfile = await storage.createCreatorProfile({
+        ...req.body,
+        userId,
+      });
+      res.status(201).json(creatorProfile);
+    } catch (error) {
+      console.error("Error creating creator profile:", error);
+      res.status(500).json({ message: "Failed to create creator profile" });
+    }
+  });
+
+  app.put('/api/creator-profiles', isAuthenticated, validateRequest(insertCreatorProfileSchema), async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const updatedProfile = await storage.updateCreatorProfile(userId, req.body);
+      res.json(updatedProfile);
+    } catch (error) {
+      console.error("Error updating creator profile:", error);
+      res.status(500).json({ message: "Failed to update creator profile" });
+    }
+  });
+
+  app.get('/api/creators', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const category = req.query.category as string;
+      const creators = await storage.getCreators(limit, category);
+      res.json(creators);
+    } catch (error) {
+      console.error("Error fetching creators:", error);
+      res.status(500).json({ message: "Failed to fetch creators" });
+    }
+  });
+
+  // Subscription routes
+  // Validation schema for subscription creation
+  const createSubscriptionSchema = z.object({
+    creatorId: z.string().uuid("Invalid creator ID format"),
+  });
+
+  app.post('/api/subscriptions', isAuthenticated, validateRequest(createSubscriptionSchema), async (req: any, res) => {
+    try {
+      const fanId = req.user.claims.sub;
+      const { creatorId } = req.body;
+      
+      // Prevent self-subscription
+      if (fanId === creatorId) {
+        return res.status(400).json({ message: "Cannot subscribe to yourself" });
+      }
+      
+      // Check for existing active/pending subscription
+      const existingSubscription = await storage.getSubscription(fanId, creatorId);
+      if (existingSubscription && (existingSubscription.status === 'active' || existingSubscription.status === 'pending')) {
+        return res.status(409).json({ message: "Already subscribed or subscription pending" });
+      }
+      
+      // Get creator profile to get the monthly price
+      const creatorProfile = await storage.getCreatorProfile(creatorId);
+      if (!creatorProfile) {
+        return res.status(404).json({ message: "Creator not found" });
+      }
+      
+      const subscription = await storage.createSubscription({
+        fanId,
+        creatorId,
+        status: 'pending',
+        monthlyPriceCents: creatorProfile.monthlyPriceCents,
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        stripeSubscriptionId: null,
+        cancelledAt: null,
+      });
+      
+      res.status(201).json(subscription);
+    } catch (error) {
+      console.error("Error creating subscription:", error);
+      res.status(500).json({ message: "Failed to create subscription" });
+    }
+  });
+
+  app.get('/api/subscriptions/creator/:creatorId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const creatorId = req.params.creatorId;
+      
+      // Only allow creators to view their own subscriber list or admins
+      const user = await storage.getUser(userId);
+      if (userId !== creatorId && user?.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied - can only view own subscribers" });
+      }
+      
+      const subscriptions = await storage.getCreatorSubscriptions(creatorId);
+      res.json(subscriptions);
+    } catch (error) {
+      console.error("Error fetching creator subscriptions:", error);
+      res.status(500).json({ message: "Failed to fetch subscriptions" });
+    }
+  });
+
+  app.get('/api/subscriptions/fan', isAuthenticated, async (req: any, res) => {
+    try {
+      const fanId = req.user.claims.sub;
+      const subscriptions = await storage.getFanSubscriptions(fanId);
+      res.json(subscriptions);
+    } catch (error) {
+      console.error("Error fetching fan subscriptions:", error);
+      res.status(500).json({ message: "Failed to fetch subscriptions" });
+    }
+  });
+
+  // Posts routes
+  app.post('/api/posts', isAuthenticated, validateRequest(insertPostSchema), async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const post = await storage.createPost({
+        ...req.body,
+        creatorId,
+      });
+      res.status(201).json(post);
+    } catch (error) {
+      console.error("Error creating post:", error);
+      res.status(500).json({ message: "Failed to create post" });
+    }
+  });
+
+  app.get('/api/posts/:postId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const post = await storage.getPost(req.params.postId);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      // Check if user can access this post
+      if (post.visibility === 'free' || post.creatorId === userId) {
+        // Free posts or creator's own posts - full access
+        res.json(post);
+      } else {
+        // Premium/subscribers-only content - check subscription
+        const subscription = await storage.getSubscription(userId, post.creatorId);
+        const hasActiveSubscription = subscription && 
+          subscription.status === 'active' &&
+          subscription.currentPeriodStart && subscription.currentPeriodStart <= new Date() &&
+          (!subscription.currentPeriodEnd || subscription.currentPeriodEnd > new Date());
+          
+        if (hasActiveSubscription) {
+          res.json(post);
+        } else {
+          // Return limited metadata for non-subscribers
+          res.json({
+            id: post.id,
+            creatorId: post.creatorId,
+            type: post.type,
+            visibility: post.visibility,
+            title: post.title,
+            priceCents: post.priceCents,
+            thumbnailUrl: post.thumbnailUrl,
+            likesCount: post.likesCount,
+            commentsCount: post.commentsCount,
+            createdAt: post.createdAt,
+            // Exclude premium content fields
+            content: "Subscribe to view this content",
+            mediaUrls: [],
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching post:", error);
+      res.status(500).json({ message: "Failed to fetch post" });
+    }
+  });
+
+  app.get('/api/posts/creator/:creatorId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const creatorId = req.params.creatorId;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const posts = await storage.getCreatorPosts(creatorId, limit);
+      
+      // Check subscription status for premium content filtering
+      const subscription = await storage.getSubscription(userId, creatorId);
+      const hasActiveSubscription = subscription && 
+        subscription.status === 'active' &&
+        subscription.currentPeriodStart && subscription.currentPeriodStart <= new Date() &&
+        (!subscription.currentPeriodEnd || subscription.currentPeriodEnd > new Date());
+      
+      // Filter posts based on access rights
+      const filteredPosts = posts.map(post => {
+        if (post.visibility === 'free' || post.creatorId === userId || hasActiveSubscription) {
+          return post;
+        } else {
+          // Return limited metadata for premium posts
+          return {
+            id: post.id,
+            creatorId: post.creatorId,
+            type: post.type,
+            visibility: post.visibility,
+            title: post.title,
+            priceCents: post.priceCents,
+            thumbnailUrl: post.thumbnailUrl,
+            likesCount: post.likesCount,
+            commentsCount: post.commentsCount,
+            createdAt: post.createdAt,
+            content: "Subscribe to view this content",
+            mediaUrls: [],
+          };
+        }
+      });
+      
+      res.json(filteredPosts);
+    } catch (error) {
+      console.error("Error fetching creator posts:", error);
+      res.status(500).json({ message: "Failed to fetch posts" });
+    }
+  });
+
+  // Helper function to check if user can view full post content
+  const canViewFullPost = async (userId: string, post: any): Promise<boolean> => {
+    if (post.visibility === 'free' || post.creatorId === userId) {
+      return true;
+    }
+    
+    const subscription = await storage.getSubscription(userId, post.creatorId);
+    return !!(subscription && 
+      subscription.status === 'active' &&
+      subscription.currentPeriodStart && subscription.currentPeriodStart <= new Date() &&
+      (!subscription.currentPeriodEnd || subscription.currentPeriodEnd > new Date()));
+  };
+
+  // Helper function to create limited post metadata
+  const createLimitedPostMetadata = (post: any) => ({
+    id: post.id,
+    creatorId: post.creatorId,
+    type: post.type,
+    visibility: post.visibility,
+    title: post.title,
+    priceCents: post.priceCents,
+    thumbnailUrl: post.thumbnailUrl,
+    likesCount: post.likesCount,
+    commentsCount: post.commentsCount,
+    createdAt: post.createdAt,
+    content: "Subscribe to view this content",
+    mediaUrls: [],
+  });
+
+  app.get('/api/feed', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const cursor = req.query.cursor ? JSON.parse(req.query.cursor as string) : undefined;
+      
+      if (cursor) {
+        cursor.createdAt = new Date(cursor.createdAt);
+      }
+      
+      const feed = await storage.getFeedPosts(userId, limit, cursor);
+      
+      // Apply access control to each post in the feed
+      const filteredPosts = await Promise.all(
+        feed.posts.map(async (postWithCreator) => {
+          const post = postWithCreator;
+          const hasAccess = await canViewFullPost(userId, post);
+          
+          if (hasAccess) {
+            return post;
+          } else {
+            return {
+              ...createLimitedPostMetadata(post),
+              creator: postWithCreator.creator,
+            };
+          }
+        })
+      );
+      
+      res.json({
+        posts: filteredPosts,
+        nextCursor: feed.nextCursor,
+        hasMore: feed.hasMore,
+      });
+    } catch (error) {
+      console.error("Error fetching feed:", error);
+      res.status(500).json({ message: "Failed to fetch feed" });
     }
   });
 
