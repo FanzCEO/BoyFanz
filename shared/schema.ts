@@ -306,6 +306,200 @@ export const cmsPublishes = pgTable("cms_publishes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Creator Economy Platform Tables
+
+// Creator Profiles (extended from basic profiles)
+export const creatorProfiles = pgTable("creator_profiles", {
+  userId: varchar("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  monthlyPriceCents: integer("monthly_price_cents").notNull().default(0),
+  isVerified: boolean("is_verified").default(false),
+  verificationBadge: varchar("verification_badge").default("none"), // "verified", "featured", "none"
+  coverImageUrl: varchar("cover_image_url"),
+  socialProfiles: jsonb("social_profiles").default({}),
+  welcomeMessageEnabled: boolean("welcome_message_enabled").default(false),
+  welcomeMessageText: text("welcome_message_text"),
+  welcomeMessagePriceCents: integer("welcome_message_price_cents").default(0),
+  categories: text("categories").array().default([]),
+  totalEarningsCents: integer("total_earnings_cents").default(0),
+  totalSubscribers: integer("total_subscribers").default(0),
+  isOnline: boolean("is_online").default(false),
+  lastActiveAt: timestamp("last_active_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Subscriptions
+export const subscriptionStatusEnum = pgEnum("subscription_status", ["active", "cancelled", "expired", "pending"]);
+
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fanId: varchar("fan_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  status: subscriptionStatusEnum("status").default("pending").notNull(),
+  monthlyPriceCents: integer("monthly_price_cents").notNull(),
+  currentPeriodStart: timestamp("current_period_start"),
+  currentPeriodEnd: timestamp("current_period_end"),
+  cancelledAt: timestamp("cancelled_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Posts
+export const postTypeEnum = pgEnum("post_type", ["photo", "video", "audio", "text", "reel", "story", "live"]);
+export const postVisibilityEnum = pgEnum("post_visibility", ["free", "premium", "subscribers_only"]);
+
+export const posts = pgTable("posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: postTypeEnum("type").notNull(),
+  visibility: postVisibilityEnum("visibility").default("free").notNull(),
+  title: varchar("title"),
+  content: text("content"),
+  priceCents: integer("price_cents").default(0),
+  mediaUrls: text("media_urls").array().default([]),
+  thumbnailUrl: varchar("thumbnail_url"),
+  hashtags: text("hashtags").array().default([]),
+  isScheduled: boolean("is_scheduled").default(false),
+  scheduledFor: timestamp("scheduled_for"),
+  likesCount: integer("likes_count").default(0),
+  commentsCount: integer("comments_count").default(0),
+  viewsCount: integer("views_count").default(0),
+  isProcessing: boolean("is_processing").default(false),
+  processingStatus: varchar("processing_status").default("pending"),
+  expiresAt: timestamp("expires_at"), // For stories
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Post Media (for multiple files per post)
+export const postMedia = pgTable("post_media", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  postId: varchar("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+  mediaAssetId: varchar("media_asset_id").notNull().references(() => mediaAssets.id, { onDelete: "cascade" }),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Comments  
+export const comments: any = pgTable("comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  postId: varchar("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  parentId: varchar("parent_id"), // For nested comments - will reference comments.id
+  likesCount: integer("likes_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Likes
+export const likes = pgTable("likes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  postId: varchar("post_id").references(() => posts.id, { onDelete: "cascade" }),
+  commentId: varchar("comment_id").references(() => comments.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Messages
+export const messageTypeEnum = pgEnum("message_type", ["text", "photo", "video", "audio", "tip", "welcome"]);
+
+export const messages = pgTable("messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  senderId: varchar("sender_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  receiverId: varchar("receiver_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: messageTypeEnum("type").default("text").notNull(),
+  content: text("content"),
+  mediaUrl: varchar("media_url"),
+  priceCents: integer("price_cents").default(0),
+  isPaid: boolean("is_paid").default(false),
+  isMassMessage: boolean("is_mass_message").default(false),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Tips/Transactions
+export const transactionTypeEnum = pgEnum("transaction_type", ["subscription", "tip", "post_purchase", "message_purchase", "welcome_message", "live_stream"]);
+export const transactionStatusEnum = pgEnum("transaction_status", ["pending", "completed", "failed", "refunded"]);
+
+export const transactions = pgTable("transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fromUserId: varchar("from_user_id").notNull().references(() => users.id),
+  toUserId: varchar("to_user_id").notNull().references(() => users.id),
+  type: transactionTypeEnum("type").notNull(),
+  amountCents: integer("amount_cents").notNull(),
+  platformFeeCents: integer("platform_fee_cents").default(0),
+  creatorEarningsCents: integer("creator_earnings_cents").notNull(),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  status: transactionStatusEnum("status").default("pending").notNull(),
+  referenceId: varchar("reference_id"), // ID of related post, message, etc.
+  referenceType: varchar("reference_type"), // "post", "message", "subscription"
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Categories
+export const categories = pgTable("categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull().unique(),
+  slug: varchar("slug").notNull().unique(),
+  description: text("description"),
+  imageUrl: varchar("image_url"),
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Live Streams
+export const streamStatusEnum = pgEnum("stream_status", ["scheduled", "live", "ended", "cancelled"]);
+export const streamTypeEnum = pgEnum("stream_type", ["public", "private", "subscribers_only"]);
+
+export const liveStreams = pgTable("live_streams", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  type: streamTypeEnum("type").default("public").notNull(),
+  status: streamStatusEnum("status").default("scheduled").notNull(),
+  priceCents: integer("price_cents").default(0),
+  streamKey: varchar("stream_key"),
+  streamUrl: varchar("stream_url"),
+  thumbnailUrl: varchar("thumbnail_url"),
+  viewersCount: integer("viewers_count").default(0),
+  maxViewers: integer("max_viewers").default(0),
+  scheduledFor: timestamp("scheduled_for"),
+  startedAt: timestamp("started_at"),
+  endedAt: timestamp("ended_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Stream Viewers
+export const streamViewers = pgTable("stream_viewers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamId: varchar("stream_id").notNull().references(() => liveStreams.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  joinedAt: timestamp("joined_at").defaultNow(),
+  leftAt: timestamp("left_at"),
+});
+
+// Reports
+export const reportTypeEnum = pgEnum("report_type", ["spam", "harassment", "inappropriate_content", "copyright", "fake_account", "other"]);
+export const reportStatusEnum = pgEnum("report_status", ["pending", "reviewing", "resolved", "dismissed"]);
+
+export const reports = pgTable("reports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  reporterId: varchar("reporter_id").notNull().references(() => users.id),
+  reportedUserId: varchar("reported_user_id").references(() => users.id),
+  reportedPostId: varchar("reported_post_id").references(() => posts.id),
+  type: reportTypeEnum("type").notNull(),
+  reason: text("reason").notNull(),
+  status: reportStatusEnum("status").default("pending").notNull(),
+  reviewerId: varchar("reviewer_id").references(() => users.id),
+  reviewNotes: text("review_notes"),
+  resolvedAt: timestamp("resolved_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Notifications
 export const notificationKindEnum = pgEnum("notification_kind", ["payout", "moderation", "kyc", "system", "fan_activity"]);
 
@@ -471,6 +665,82 @@ export const insertCmsMenuItemSchema = createInsertSchema(cmsMenuItems).pick({
   sortOrder: true,
 });
 
+// Creator Economy Schemas
+export const insertCreatorProfileSchema = createInsertSchema(creatorProfiles).pick({
+  monthlyPriceCents: true,
+  coverImageUrl: true,
+  socialProfiles: true,
+  welcomeMessageEnabled: true,
+  welcomeMessageText: true,
+  welcomeMessagePriceCents: true,
+  categories: true,
+});
+
+export const insertSubscriptionSchema = createInsertSchema(subscriptions).pick({
+  fanId: true,
+  creatorId: true,
+  monthlyPriceCents: true,
+});
+
+export const insertPostSchema = createInsertSchema(posts).pick({
+  type: true,
+  visibility: true,
+  title: true,
+  content: true,
+  priceCents: true,
+  hashtags: true,
+  scheduledFor: true,
+});
+
+export const insertCommentSchema = createInsertSchema(comments).pick({
+  postId: true,
+  content: true,
+  parentId: true,
+});
+
+export const insertMessageSchema = createInsertSchema(messages).pick({
+  receiverId: true,
+  type: true,
+  content: true,
+  mediaUrl: true,
+  priceCents: true,
+  isMassMessage: true,
+});
+
+export const insertTransactionSchema = createInsertSchema(transactions).pick({
+  fromUserId: true,
+  toUserId: true,
+  type: true,
+  amountCents: true,
+  platformFeeCents: true,
+  creatorEarningsCents: true,
+  referenceId: true,
+  referenceType: true,
+});
+
+export const insertCategorySchema = createInsertSchema(categories).pick({
+  name: true,
+  slug: true,
+  description: true,
+  imageUrl: true,
+  sortOrder: true,
+});
+
+export const insertLiveStreamSchema = createInsertSchema(liveStreams).pick({
+  title: true,
+  description: true,
+  type: true,
+  priceCents: true,
+  scheduledFor: true,
+});
+
+export const insertReportSchema = createInsertSchema(reports).pick({
+  reportedUserId: true,
+  reportedPostId: true,
+  type: true,
+  reason: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -508,3 +778,26 @@ export type InsertCmsPage = z.infer<typeof insertCmsPageSchema>;
 export type InsertCmsPageSection = z.infer<typeof insertCmsPageSectionSchema>;
 export type InsertCmsMenu = z.infer<typeof insertCmsMenuSchema>;
 export type InsertCmsMenuItem = z.infer<typeof insertCmsMenuItemSchema>;
+
+// Creator Economy Types
+export type CreatorProfile = typeof creatorProfiles.$inferSelect;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type Post = typeof posts.$inferSelect;
+export type PostMedia = typeof postMedia.$inferSelect;
+export type Comment = typeof comments.$inferSelect;
+export type Like = typeof likes.$inferSelect;
+export type Message = typeof messages.$inferSelect;
+export type Transaction = typeof transactions.$inferSelect;
+export type Category = typeof categories.$inferSelect;
+export type LiveStream = typeof liveStreams.$inferSelect;
+export type StreamViewer = typeof streamViewers.$inferSelect;
+export type Report = typeof reports.$inferSelect;
+export type InsertCreatorProfile = z.infer<typeof insertCreatorProfileSchema>;
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+export type InsertPost = z.infer<typeof insertPostSchema>;
+export type InsertComment = z.infer<typeof insertCommentSchema>;
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
+export type InsertCategory = z.infer<typeof insertCategorySchema>;
+export type InsertLiveStream = z.infer<typeof insertLiveStreamSchema>;
+export type InsertReport = z.infer<typeof insertReportSchema>;

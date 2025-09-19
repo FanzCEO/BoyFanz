@@ -25,6 +25,17 @@ import {
   type ThemeSettings,
   type InsertThemeSettings,
   type UpdateThemeSettings,
+  // Creator Economy Types
+  type CreatorProfile,
+  type Subscription,
+  type Post,
+  type Comment,
+  type Like,
+  type Message,
+  type Transaction,
+  type Category,
+  type LiveStream,
+  type Report,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, count, sql } from "drizzle-orm";
@@ -88,6 +99,53 @@ export interface IStorage {
   setActiveTheme(id: string): Promise<void>;
   deleteTheme(id: string): Promise<void>;
   
+  // Creator Economy Operations
+  
+  // Creator Profiles
+  createCreatorProfile(profile: Omit<CreatorProfile, 'id' | 'createdAt' | 'updatedAt'>): Promise<CreatorProfile>;
+  getCreatorProfile(userId: string): Promise<CreatorProfile | undefined>;
+  updateCreatorProfile(userId: string, updates: Partial<CreatorProfile>): Promise<CreatorProfile>;
+  getCreators(limit?: number, categoryFilter?: string): Promise<(CreatorProfile & { user: User })[]>;
+
+  // Subscriptions
+  createSubscription(subscription: Omit<Subscription, 'id' | 'createdAt' | 'updatedAt'>): Promise<Subscription>;
+  getSubscription(fanId: string, creatorId: string): Promise<Subscription | undefined>;
+  getCreatorSubscriptions(creatorId: string): Promise<(Subscription & { fan: User })[]>;
+  getFanSubscriptions(fanId: string): Promise<(Subscription & { creator: User })[]>;
+  updateSubscription(subscriptionId: string, updates: Partial<Subscription>): Promise<Subscription>;
+
+  // Posts
+  createPost(post: Omit<Post, 'id' | 'createdAt' | 'updatedAt'>): Promise<Post>;
+  getPost(postId: string): Promise<Post | undefined>;
+  getCreatorPosts(creatorId: string, limit?: number): Promise<Post[]>;
+  getFeedPosts(userId: string, limit?: number): Promise<(Post & { creator: User })[]>;
+  updatePost(postId: string, updates: Partial<Post>): Promise<Post>;
+  deletePost(postId: string): Promise<void>;
+
+  // Comments & Likes
+  createComment(comment: Omit<Comment, 'id' | 'createdAt' | 'updatedAt'>): Promise<Comment>;
+  getPostComments(postId: string): Promise<(Comment & { user: User })[]>;
+  likePost(userId: string, postId: string): Promise<void>;
+  unlikePost(userId: string, postId: string): Promise<void>;
+
+  // Messages
+  createMessage(message: Omit<Message, 'id' | 'createdAt'>): Promise<Message>;
+  getConversation(userId1: string, userId2: string, limit?: number): Promise<(Message & { sender: User; receiver: User })[]>;
+  getUserConversations(userId: string): Promise<{ otherUser: User; lastMessage: Message; unreadCount: number }[]>;
+  markMessageRead(messageId: string): Promise<void>;
+
+  // Transactions
+  createTransaction(transaction: Omit<Transaction, 'id' | 'createdAt'>): Promise<Transaction>;
+  getCreatorEarnings(creatorId: string, startDate?: Date, endDate?: Date): Promise<Transaction[]>;
+  getFanPurchases(fanId: string, limit?: number): Promise<Transaction[]>;
+
+  // Live Streams
+  createLiveStream(stream: Omit<LiveStream, 'id' | 'createdAt'>): Promise<LiveStream>;
+  getLiveStream(streamId: string): Promise<LiveStream | undefined>;
+  getCreatorStreams(creatorId: string): Promise<LiveStream[]>;
+  getActiveStreams(): Promise<(LiveStream & { creator: User })[]>;
+  updateStreamStatus(streamId: string, status: string): Promise<void>;
+
   // Stats operations
   getDashboardStats(userId: string): Promise<{
     totalRevenue: number;
@@ -420,6 +478,131 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTheme(id: string): Promise<void> {
     await db.delete(themeSettings).where(eq(themeSettings.id, id));
+  }
+
+  // Creator Economy Methods (stub implementations - will implement properly next)
+  async createCreatorProfile(profile: any): Promise<CreatorProfile> {
+    throw new Error("Creator profiles not implemented yet");
+  }
+
+  async getCreatorProfile(userId: string): Promise<CreatorProfile | undefined> {
+    return undefined;
+  }
+
+  async updateCreatorProfile(userId: string, updates: Partial<CreatorProfile>): Promise<CreatorProfile> {
+    throw new Error("Not implemented yet");
+  }
+
+  async getCreators(limit?: number, categoryFilter?: string): Promise<any[]> {
+    return [];
+  }
+
+  async createSubscription(subscription: any): Promise<Subscription> {
+    throw new Error("Not implemented yet");
+  }
+
+  async getSubscription(fanId: string, creatorId: string): Promise<Subscription | undefined> {
+    return undefined;
+  }
+
+  async getCreatorSubscriptions(creatorId: string): Promise<any[]> {
+    return [];
+  }
+
+  async getFanSubscriptions(fanId: string): Promise<any[]> {
+    return [];
+  }
+
+  async updateSubscription(subscriptionId: string, updates: Partial<Subscription>): Promise<Subscription> {
+    throw new Error("Not implemented yet");
+  }
+
+  async createPost(post: any): Promise<Post> {
+    throw new Error("Not implemented yet");
+  }
+
+  async getPost(postId: string): Promise<Post | undefined> {
+    return undefined;
+  }
+
+  async getCreatorPosts(creatorId: string, limit?: number): Promise<Post[]> {
+    return [];
+  }
+
+  async getFeedPosts(userId: string, limit?: number): Promise<any[]> {
+    return [];
+  }
+
+  async updatePost(postId: string, updates: Partial<Post>): Promise<Post> {
+    throw new Error("Not implemented yet");
+  }
+
+  async deletePost(postId: string): Promise<void> {
+    throw new Error("Not implemented yet");
+  }
+
+  async createComment(comment: any): Promise<Comment> {
+    throw new Error("Not implemented yet");
+  }
+
+  async getPostComments(postId: string): Promise<any[]> {
+    return [];
+  }
+
+  async likePost(userId: string, postId: string): Promise<void> {
+    throw new Error("Not implemented yet");
+  }
+
+  async unlikePost(userId: string, postId: string): Promise<void> {
+    throw new Error("Not implemented yet");
+  }
+
+  async createMessage(message: any): Promise<Message> {
+    throw new Error("Not implemented yet");
+  }
+
+  async getConversation(userId1: string, userId2: string, limit?: number): Promise<any[]> {
+    return [];
+  }
+
+  async getUserConversations(userId: string): Promise<any[]> {
+    return [];
+  }
+
+  async markMessageRead(messageId: string): Promise<void> {
+    throw new Error("Not implemented yet");
+  }
+
+  async createTransaction(transaction: any): Promise<Transaction> {
+    throw new Error("Not implemented yet");
+  }
+
+  async getCreatorEarnings(creatorId: string, startDate?: Date, endDate?: Date): Promise<Transaction[]> {
+    return [];
+  }
+
+  async getFanPurchases(fanId: string, limit?: number): Promise<Transaction[]> {
+    return [];
+  }
+
+  async createLiveStream(stream: any): Promise<LiveStream> {
+    throw new Error("Not implemented yet");
+  }
+
+  async getLiveStream(streamId: string): Promise<LiveStream | undefined> {
+    return undefined;
+  }
+
+  async getCreatorStreams(creatorId: string): Promise<LiveStream[]> {
+    return [];
+  }
+
+  async getActiveStreams(): Promise<any[]> {
+    return [];
+  }
+
+  async updateStreamStatus(streamId: string, status: string): Promise<void> {
+    throw new Error("Not implemented yet");
   }
 }
 
