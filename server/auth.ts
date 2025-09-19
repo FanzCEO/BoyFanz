@@ -32,6 +32,42 @@ async function comparePasswords(supplied: string, stored: string): Promise<boole
 }
 
 export function setupLocalAuth(app: Express) {
+  // Unified session serialization for both local and OIDC users
+  // Don't override if already configured by replitAuth
+  if (!passport._serializers || passport._serializers.length === 0) {
+    passport.serializeUser((user: any, done) => {
+      // Handle both OIDC users (with expires_at) and local users (with id only)
+      if (user.expires_at) {
+        // OIDC user - store full object for token refresh
+        done(null, { type: 'oidc', user });
+      } else {
+        // Local user - store ID only
+        done(null, { type: 'local', id: user.id });
+      }
+    });
+
+    passport.deserializeUser(async (data: any, done) => {
+      try {
+        if (data.type === 'oidc') {
+          // OIDC user - return stored object
+          return done(null, data.user);
+        } else if (data.type === 'local') {
+          // Local user - fetch from database
+          const user = await storage.getUser(data.id);
+          if (!user) return done(null, false);
+          
+          // Don't include password in session
+          const { password, ...userWithoutPassword } = user;
+          done(null, userWithoutPassword);
+        } else {
+          done(null, false);
+        }
+      } catch (error) {
+        done(error);
+      }
+    });
+  }
+
   // Local username/password authentication strategy
   passport.use("local", new LocalStrategy(async (username, password, done) => {
     try {
@@ -76,7 +112,7 @@ export function setupLocalAuth(app: Express) {
         username: validatedData.username,
         email: validatedData.email,
         password: hashedPassword,
-        role: validatedData.role,
+        role: "fan" as const, // SECURITY: Always create users as fans, ignore client role
         firstName: validatedData.firstName || null,
         lastName: validatedData.lastName || null,
         authProvider: "local" as const,

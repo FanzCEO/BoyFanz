@@ -387,7 +387,7 @@ export default function Settings() {
                     </div>
                   ))}
                 </div>
-              ) : apiKeys && apiKeys.length > 0 ? (
+              ) : apiKeys && Array.isArray(apiKeys) && apiKeys.length > 0 ? (
                 <div className="space-y-4">
                   {apiKeys.map((apiKey: any) => (
                     <div key={apiKey.id} className="flex items-center justify-between p-4 border border-border rounded-lg" data-testid={`api-key-${apiKey.id}`}>
@@ -463,7 +463,7 @@ export default function Settings() {
                     </div>
                   ))}
                 </div>
-              ) : webhooks && webhooks.length > 0 ? (
+              ) : webhooks && Array.isArray(webhooks) && webhooks.length > 0 ? (
                 <div className="space-y-4">
                   {webhooks.map((webhook: any) => (
                     <div key={webhook.id} className="flex items-center justify-between p-4 border border-border rounded-lg" data-testid={`webhook-${webhook.id}`}>

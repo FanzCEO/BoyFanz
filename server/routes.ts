@@ -35,7 +35,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -52,7 +52,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard stats
   app.get('/api/dashboard/stats', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const stats = await storage.getDashboardStats(userId);
       res.json(stats);
     } catch (error) {
@@ -64,7 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Media routes
   app.get('/api/media', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const limit = parseInt(req.query.limit as string) || 50;
       const mediaAssets = await storage.getMediaAssets(userId, limit);
       res.json(mediaAssets);
@@ -87,7 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/media', isAuthenticated, validateRequest(insertMediaAssetSchema), async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const mediaData = req.body;
       
       const mediaAsset = await storage.createMediaAsset({
@@ -194,7 +194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // KYC routes
   app.get('/api/kyc/status', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const kyc = await storage.getKycVerification(userId);
       res.json(kyc || { status: 'pending' });
     } catch (error) {
@@ -205,7 +205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/kyc/verify', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const verification = await kycService.initiateVerification(userId);
       res.json(verification);
     } catch (error) {
@@ -309,7 +309,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Earnings routes
   app.get('/api/earnings/stats', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const period = req.query.period as '24h' | '7d' | '30d' | 'all' | undefined;
       const stats = await earningsService.getEarningsStats(userId, period);
       res.json(stats);
@@ -321,7 +321,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/earnings/breakdown', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const breakdown = await earningsService.getEarningsBreakdown(userId);
       res.json(breakdown);
     } catch (error) {
@@ -430,7 +430,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/creator-profiles', isAuthenticated, validateRequest(insertCreatorProfileSchema), async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const creatorProfile = await storage.createCreatorProfile({
         ...req.body,
         userId,
@@ -444,7 +444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/creator-profiles', isAuthenticated, validateRequest(insertCreatorProfileSchema), async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const updatedProfile = await storage.updateCreatorProfile(userId, req.body);
       res.json(updatedProfile);
     } catch (error) {
@@ -513,7 +513,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/subscriptions/creator/:creatorId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const creatorId = req.params.creatorId;
       
       // Only allow creators to view their own subscriber list or admins
@@ -558,7 +558,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/posts/:postId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const post = await storage.getPost(req.params.postId);
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
@@ -605,7 +605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/posts/creator/:creatorId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const creatorId = req.params.creatorId;
       const limit = parseInt(req.query.limit as string) || 50;
       const posts = await storage.getCreatorPosts(creatorId, limit);
@@ -678,7 +678,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/feed', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const limit = parseInt(req.query.limit as string) || 50;
       const cursor = req.query.cursor ? JSON.parse(req.query.cursor as string) : undefined;
       
@@ -719,7 +719,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Payout routes
   app.get('/api/payouts', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const payouts = await storage.getPayoutRequests(userId);
       res.json(payouts);
     } catch (error) {
@@ -730,7 +730,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/payouts', isAuthenticated, validateRequest(insertPayoutRequestSchema), async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const payout = await payoutService.createPayoutRequest(userId, req.body);
       res.status(201).json(payout);
     } catch (error) {
@@ -742,7 +742,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Notification routes
   app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const limit = parseInt(req.query.limit as string) || 50;
       const notifications = await storage.getNotifications(userId, limit);
       res.json(notifications);
@@ -765,7 +765,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Webhook management routes
   app.get('/api/webhooks', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const webhooks = await storage.getWebhooks(userId);
       res.json(webhooks);
     } catch (error) {
@@ -776,7 +776,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/webhooks', isAuthenticated, validateRequest(insertWebhookSchema), async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const webhook = await storage.createWebhook({
         ...req.body,
         userId,
@@ -792,7 +792,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API key management routes
   app.get('/api/api-keys', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const apiKeys = await storage.getApiKeys(userId);
       res.json(apiKeys);
     } catch (error) {
@@ -803,7 +803,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/api-keys', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const keyValue = crypto.randomUUID();
       const keyHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(keyValue));
       
