@@ -22,6 +22,7 @@ import Header from "@/components/layout/Header";
 import StarzSignup from "@/pages/auth/StarzSignup";
 import FanzSignup from "@/pages/auth/FanzSignup";
 import Login from "@/pages/auth/Login";
+import ResetPassword from "@/pages/auth/ResetPassword";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -45,6 +46,7 @@ function Router() {
         <Route path="/auth/starz-signup" component={StarzSignup} />
         <Route path="/auth/fanz-signup" component={FanzSignup} />
         <Route path="/auth/login" component={Login} />
+        <Route path="/auth/reset-password" component={ResetPassword} />
         <Route component={NotFound} />
       </Switch>
     );
