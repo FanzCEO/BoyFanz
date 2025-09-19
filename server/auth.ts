@@ -33,9 +33,8 @@ async function comparePasswords(supplied: string, stored: string): Promise<boole
 
 export function setupLocalAuth(app: Express) {
   // Unified session serialization for both local and OIDC users
-  // Don't override if already configured by replitAuth
-  if (!passport._serializers || passport._serializers.length === 0) {
-    passport.serializeUser((user: any, done) => {
+  // Set up serialization (will override replitAuth but handle both types)
+  passport.serializeUser((user: any, done) => {
       // Handle both OIDC users (with expires_at) and local users (with id only)
       if (user.expires_at) {
         // OIDC user - store full object for token refresh
@@ -66,7 +65,6 @@ export function setupLocalAuth(app: Express) {
         done(error);
       }
     });
-  }
 
   // Local username/password authentication strategy
   passport.use("local", new LocalStrategy(async (username, password, done) => {
