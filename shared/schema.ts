@@ -717,20 +717,30 @@ export const insertCreatorProfileSchema = createInsertSchema(creatorProfiles).pi
   categories: true,
 });
 
-export const insertSubscriptionSchema = createInsertSchema(subscriptions).pick({
+export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
+  id: true,
   fanId: true,
   creatorId: true,
+  stripeSubscriptionId: true,
+  status: true,
   monthlyPriceCents: true,
+  currentPeriodStart: true,
+  currentPeriodEnd: true,
+  cancelledAt: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
-export const insertPostSchema = createInsertSchema(posts).pick({
-  type: true,
-  visibility: true,
-  title: true,
-  content: true,
-  priceCents: true,
-  hashtags: true,
-  scheduledFor: true,
+export const insertPostSchema = createInsertSchema(posts).omit({
+  id: true,
+  creatorId: true,
+  likesCount: true,
+  commentsCount: true,
+  viewsCount: true,
+  isProcessing: true,
+  processingStatus: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertCommentSchema = createInsertSchema(comments).pick({
@@ -739,24 +749,47 @@ export const insertCommentSchema = createInsertSchema(comments).pick({
   parentId: true,
 });
 
-export const insertMessageSchema = createInsertSchema(messages).pick({
-  receiverId: true,
-  type: true,
-  content: true,
-  mediaUrl: true,
-  priceCents: true,
-  isMassMessage: true,
+export const insertLikeSchema = createInsertSchema(likes).pick({
+  postId: true,
+  commentId: true,
+}).superRefine((data, ctx) => {
+  const hasPostId = !!data.postId;
+  const hasCommentId = !!data.commentId;
+  
+  if (!hasPostId && !hasCommentId) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Either postId or commentId is required",
+      path: ["postId"],
+    });
+  }
+  
+  if (hasPostId && hasCommentId) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Cannot like both a post and comment simultaneously",
+      path: ["postId"],
+    });
+  }
 });
 
-export const insertTransactionSchema = createInsertSchema(transactions).pick({
+export const insertMessageSchema = createInsertSchema(messages).omit({
+  id: true,
+  senderId: true,
+  readAt: true,
+  isPaid: true,
+  createdAt: true,
+});
+
+export const insertTransactionSchema = createInsertSchema(transactions).omit({
+  id: true,
   fromUserId: true,
   toUserId: true,
-  type: true,
-  amountCents: true,
   platformFeeCents: true,
   creatorEarningsCents: true,
-  referenceId: true,
-  referenceType: true,
+  status: true,
+  stripePaymentIntentId: true,
+  createdAt: true,
 });
 
 export const insertCategorySchema = createInsertSchema(categories).pick({
@@ -837,6 +870,7 @@ export type InsertCreatorProfile = z.infer<typeof insertCreatorProfileSchema>;
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
 export type InsertPost = z.infer<typeof insertPostSchema>;
 export type InsertComment = z.infer<typeof insertCommentSchema>;
+export type InsertLike = z.infer<typeof insertLikeSchema>;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
