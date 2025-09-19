@@ -13,6 +13,8 @@ import { notificationService } from "./services/notificationService";
 import { earningsService } from "./services/earningsService";
 import { watermarkService } from "./services/watermarkService";
 import { rateLimit } from "./middleware/rateLimit";
+import { uploadRateLimit } from "./middleware/authRateLimit";
+import { csrfProtection } from "./middleware/csrf";
 import { validateRequest } from "./middleware/validation";
 import { 
   insertMediaAssetSchema, 
@@ -74,7 +76,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/media/upload', isAuthenticated, async (req: any, res) => {
+  app.post('/api/media/upload', isAuthenticated, uploadRateLimit, async (req: any, res) => {
     try {
       const objectStorageService = new ObjectStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
@@ -85,7 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/media', isAuthenticated, validateRequest(insertMediaAssetSchema), async (req: any, res) => {
+  app.post('/api/media', isAuthenticated, csrfProtection, uploadRateLimit, validateRequest(insertMediaAssetSchema), async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const mediaData = req.body;
@@ -161,7 +163,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/moderation/:id/approve', isAuthenticated, async (req: any, res) => {
+  app.put('/api/moderation/:id/approve', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -176,7 +178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/moderation/:id/reject', isAuthenticated, async (req: any, res) => {
+  app.put('/api/moderation/:id/reject', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -203,7 +205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/kyc/verify', isAuthenticated, async (req: any, res) => {
+  app.post('/api/kyc/verify', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const verification = await kycService.initiateVerification(userId);
@@ -246,7 +248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/themes', isAuthenticated, async (req: any, res) => {
+  app.post('/api/themes', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -261,7 +263,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/themes/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/themes/:id', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -276,7 +278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/themes/:id/activate', isAuthenticated, async (req: any, res) => {
+  app.put('/api/themes/:id/activate', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -291,7 +293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/themes/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/themes/:id', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -330,7 +332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/earnings/subscription', isAuthenticated, async (req: any, res) => {
+  app.post('/api/earnings/subscription', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
       const fanUserId = req.user.claims.sub;
       const { creatorUserId, amount } = req.body;
@@ -342,7 +344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/earnings/ppv', isAuthenticated, async (req: any, res) => {
+  app.post('/api/earnings/ppv', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
       const fanUserId = req.user.claims.sub;
       const { creatorUserId, mediaId, amount } = req.body;
@@ -354,7 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/earnings/tip', isAuthenticated, async (req: any, res) => {
+  app.post('/api/earnings/tip', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
       const fanUserId = req.user.claims.sub;
       const { creatorUserId, amount, message } = req.body;
@@ -366,7 +368,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/earnings/tokens', isAuthenticated, async (req: any, res) => {
+  app.post('/api/earnings/tokens', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
       const fanUserId = req.user.claims.sub;
       const { creatorUserId, tokenCount, tokenValue } = req.body;
@@ -428,7 +430,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/creator-profiles', isAuthenticated, validateRequest(insertCreatorProfileSchema), async (req: any, res) => {
+  app.post('/api/creator-profiles', isAuthenticated, csrfProtection, validateRequest(insertCreatorProfileSchema), async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const creatorProfile = await storage.createCreatorProfile({
@@ -442,7 +444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/creator-profiles', isAuthenticated, validateRequest(insertCreatorProfileSchema), async (req: any, res) => {
+  app.put('/api/creator-profiles', isAuthenticated, csrfProtection, validateRequest(insertCreatorProfileSchema), async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const updatedProfile = await storage.updateCreatorProfile(userId, req.body);
@@ -471,7 +473,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     creatorId: z.string().uuid("Invalid creator ID format"),
   });
 
-  app.post('/api/subscriptions', isAuthenticated, validateRequest(createSubscriptionSchema), async (req: any, res) => {
+  app.post('/api/subscriptions', isAuthenticated, csrfProtection, validateRequest(createSubscriptionSchema), async (req: any, res) => {
     try {
       const fanId = req.user.claims.sub;
       const { creatorId } = req.body;
@@ -542,7 +544,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Posts routes
-  app.post('/api/posts', isAuthenticated, validateRequest(insertPostSchema), async (req: any, res) => {
+  app.post('/api/posts', isAuthenticated, csrfProtection, validateRequest(insertPostSchema), async (req: any, res) => {
     try {
       const creatorId = req.user.claims.sub;
       const post = await storage.createPost({
@@ -728,7 +730,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/payouts', isAuthenticated, validateRequest(insertPayoutRequestSchema), async (req: any, res) => {
+  app.post('/api/payouts', isAuthenticated, csrfProtection, validateRequest(insertPayoutRequestSchema), async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const payout = await payoutService.createPayoutRequest(userId, req.body);
@@ -752,7 +754,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
+  app.put('/api/notifications/:id/read', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
       await storage.markNotificationRead(req.params.id);
       res.json({ message: "Notification marked as read" });
@@ -801,7 +803,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/api-keys', isAuthenticated, async (req: any, res) => {
+  app.post('/api/api-keys', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const keyValue = crypto.randomUUID();

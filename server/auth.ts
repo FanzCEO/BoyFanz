@@ -7,6 +7,9 @@ import { promisify } from "util";
 import { storage } from "./storage";
 import { loginUserSchema, registerUserSchema, User as SchemaUser } from "@shared/schema";
 import { z } from "zod";
+import { authRateLimit, registrationRateLimit } from "./middleware/authRateLimit";
+import { logger } from "./logger";
+import { csrfProtection } from "./middleware/csrf";
 
 type AuthUser = Omit<SchemaUser, 'password'>;
 
@@ -87,8 +90,8 @@ export function setupLocalAuth(app: Express) {
     }
   }));
 
-  // Local auth routes
-  app.post("/api/register", async (req, res, next) => {
+  // Local auth routes with rate limiting and CSRF protection
+  app.post("/api/register", registrationRateLimit, csrfProtection, async (req, res, next) => {
     try {
       // Validate request body
       const validatedData = registerUserSchema.parse(req.body);
@@ -140,7 +143,7 @@ export function setupLocalAuth(app: Express) {
     }
   });
 
-  app.post("/api/login", (req, res, next) => {
+  app.post("/api/login", authRateLimit, csrfProtection, (req, res, next) => {
     try {
       // Validate request body
       const validatedData = loginUserSchema.parse(req.body);
