@@ -30,7 +30,18 @@ import {
   ppvPurchaseSchema,
   tipSchema,
   liveStreamTokensSchema,
-  moderationDecisionSchema
+  moderationDecisionSchema,
+  // Enhanced Subscription System Schemas
+  insertSubscriptionPlanSchema,
+  updateSubscriptionPlanSchema,
+  insertPromoCodeSchema,
+  updatePromoCodeSchema,
+  validatePromoCodeSchema,
+  applyPromoCodeSchema,
+  createSubscriptionEnhancedSchema,
+  // Lovense Integration Schemas
+  updateLovenseIntegrationSettingsSchema,
+  lovenseDeviceControlSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -630,6 +641,204 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching device actions:", error);
       res.status(500).json({ message: "Failed to fetch device actions" });
+    }
+  });
+
+  // Enhanced Subscription System API Routes
+  // Subscription Plans Management (Creator Only)
+  app.get('/api/subscription-plans/:creatorId', async (req, res) => {
+    try {
+      const { creatorId } = req.params;
+      const plans = await storage.getCreatorSubscriptionPlans(creatorId);
+      res.json(plans);
+    } catch (error) {
+      console.error("Error fetching subscription plans:", error);
+      res.status(500).json({ message: "Failed to fetch subscription plans" });
+    }
+  });
+
+  app.get('/api/subscription-plans/creator/my-plans', isAuthenticated, async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const plans = await storage.getCreatorSubscriptionPlans(creatorId);
+      res.json(plans);
+    } catch (error) {
+      console.error("Error fetching creator's subscription plans:", error);
+      res.status(500).json({ message: "Failed to fetch subscription plans" });
+    }
+  });
+
+  app.post('/api/subscription-plans', isAuthenticated, csrfProtection, validateRequest(insertSubscriptionPlanSchema), async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const planData = { ...req.body, creatorId };
+      const plan = await storage.createSubscriptionPlan(planData);
+      res.json(plan);
+    } catch (error) {
+      console.error("Error creating subscription plan:", error);
+      res.status(500).json({ message: "Failed to create subscription plan" });
+    }
+  });
+
+  app.put('/api/subscription-plans/:planId', isAuthenticated, csrfProtection, validateRequest(updateSubscriptionPlanSchema), async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const { planId } = req.params;
+      
+      // Verify plan belongs to creator
+      const existingPlan = await storage.getSubscriptionPlan(planId);
+      if (!existingPlan || existingPlan.creatorId !== creatorId) {
+        return res.status(404).json({ message: "Subscription plan not found" });
+      }
+      
+      const updatedPlan = await storage.updateSubscriptionPlan(planId, req.body);
+      res.json(updatedPlan);
+    } catch (error) {
+      console.error("Error updating subscription plan:", error);
+      res.status(500).json({ message: "Failed to update subscription plan" });
+    }
+  });
+
+  app.delete('/api/subscription-plans/:planId', isAuthenticated, csrfProtection, async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const { planId } = req.params;
+      
+      // Verify plan belongs to creator
+      const existingPlan = await storage.getSubscriptionPlan(planId);
+      if (!existingPlan || existingPlan.creatorId !== creatorId) {
+        return res.status(404).json({ message: "Subscription plan not found" });
+      }
+      
+      await storage.deleteSubscriptionPlan(planId);
+      res.json({ success: true, message: "Subscription plan deleted" });
+    } catch (error) {
+      console.error("Error deleting subscription plan:", error);
+      res.status(500).json({ message: "Failed to delete subscription plan" });
+    }
+  });
+
+  // Promo Code Management (Creator Only)
+  app.get('/api/promo-codes/my-codes', isAuthenticated, async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const promoCodes = await storage.getCreatorPromoCodes(creatorId);
+      res.json(promoCodes);
+    } catch (error) {
+      console.error("Error fetching promo codes:", error);
+      res.status(500).json({ message: "Failed to fetch promo codes" });
+    }
+  });
+
+  app.post('/api/promo-codes', isAuthenticated, csrfProtection, validateRequest(insertPromoCodeSchema), async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const promoCodeData = { ...req.body, creatorId };
+      const promoCode = await storage.createPromoCode(promoCodeData);
+      res.json(promoCode);
+    } catch (error) {
+      console.error("Error creating promo code:", error);
+      res.status(500).json({ message: "Failed to create promo code" });
+    }
+  });
+
+  app.put('/api/promo-codes/:codeId', isAuthenticated, csrfProtection, validateRequest(updatePromoCodeSchema), async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const { codeId } = req.params;
+      
+      // Verify promo code belongs to creator
+      const existingCode = await storage.getCreatorPromoCodes(creatorId);
+      const codeExists = existingCode.find(code => code.id === codeId);
+      
+      if (!codeExists) {
+        return res.status(404).json({ message: "Promo code not found" });
+      }
+      
+      const updatedCode = await storage.updatePromoCode(codeId, req.body);
+      res.json(updatedCode);
+    } catch (error) {
+      console.error("Error updating promo code:", error);
+      res.status(500).json({ message: "Failed to update promo code" });
+    }
+  });
+
+  // Promo Code Validation and Application (Public)
+  app.post('/api/promo-codes/validate', isAuthenticated, validateRequest(validatePromoCodeSchema), async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { code, subscriptionPlanId } = req.body;
+      
+      if (!subscriptionPlanId) {
+        return res.status(400).json({ message: "Subscription plan ID is required" });
+      }
+      
+      const validation = await storage.validatePromoCode(code, subscriptionPlanId, userId);
+      res.json(validation);
+    } catch (error) {
+      console.error("Error validating promo code:", error);
+      res.status(500).json({ message: "Failed to validate promo code" });
+    }
+  });
+
+  app.post('/api/promo-codes/apply', isAuthenticated, csrfProtection, validateRequest(applyPromoCodeSchema), async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { code, subscriptionPlanId } = req.body;
+      
+      // Validate promo code first
+      const validation = await storage.validatePromoCode(code, subscriptionPlanId, userId);
+      
+      if (!validation.valid) {
+        return res.status(400).json({ 
+          message: validation.error || "Invalid promo code",
+          valid: false 
+        });
+      }
+      
+      // Record usage (would integrate with actual subscription creation)
+      const usage = await storage.recordPromoCodeUsage({
+        promoCodeId: validation.promoCode!.id,
+        userId,
+        originalPriceCents: validation.discountedPrice! + validation.savings!,
+        discountedPriceCents: validation.discountedPrice!,
+        savingsCents: validation.savings!,
+      });
+      
+      res.json({
+        valid: true,
+        applied: true,
+        usage,
+        savings: validation.savings,
+        finalPrice: validation.discountedPrice
+      });
+    } catch (error) {
+      console.error("Error applying promo code:", error);
+      res.status(500).json({ message: "Failed to apply promo code" });
+    }
+  });
+
+  // Enhanced Subscriptions (Fan Subscriptions)
+  app.get('/api/subscriptions/enhanced', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const subscriptions = await storage.getUserEnhancedSubscriptions(userId);
+      res.json(subscriptions);
+    } catch (error) {
+      console.error("Error fetching enhanced subscriptions:", error);
+      res.status(500).json({ message: "Failed to fetch subscriptions" });
+    }
+  });
+
+  app.post('/api/subscriptions/enhanced', isAuthenticated, csrfProtection, validateRequest(createSubscriptionEnhancedSchema), async (req: any, res) => {
+    try {
+      const fanId = req.user.claims.sub;
+      const subscriptionData = { ...req.body, fanId };
+      const subscription = await storage.createEnhancedSubscription(subscriptionData);
+      res.json(subscription);
+    } catch (error) {
+      console.error("Error creating enhanced subscription:", error);
+      res.status(500).json({ message: "Failed to create subscription" });
     }
   });
 

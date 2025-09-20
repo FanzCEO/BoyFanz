@@ -992,6 +992,231 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(lovenseDeviceActions.createdAt))
       .limit(limit);
   }
+
+  // Enhanced Subscription System Operations
+  async getCreatorSubscriptionPlans(creatorId: string): Promise<SubscriptionPlan[]> {
+    return await db.select().from(subscriptionPlans)
+      .where(and(
+        eq(subscriptionPlans.creatorId, creatorId),
+        eq(subscriptionPlans.isActive, true)
+      ))
+      .orderBy(subscriptionPlans.sortOrder, subscriptionPlans.priceCents);
+  }
+
+  async getSubscriptionPlan(planId: string): Promise<SubscriptionPlan | undefined> {
+    const result = await db.select().from(subscriptionPlans)
+      .where(eq(subscriptionPlans.id, planId))
+      .limit(1);
+    return result[0];
+  }
+
+  async createSubscriptionPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan> {
+    const result = await db.insert(subscriptionPlans)
+      .values({
+        ...plan,
+        originalPriceCents: plan.originalPriceCents || plan.priceCents,
+      })
+      .returning();
+    return result[0];
+  }
+
+  async updateSubscriptionPlan(planId: string, updates: Partial<SubscriptionPlan>): Promise<SubscriptionPlan> {
+    const result = await db.update(subscriptionPlans)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(subscriptionPlans.id, planId))
+      .returning();
+    return result[0];
+  }
+
+  async deleteSubscriptionPlan(planId: string): Promise<boolean> {
+    await db.update(subscriptionPlans)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(subscriptionPlans.id, planId));
+    return true;
+  }
+
+  // Promo Code Operations
+  async getPromoCodeByCode(code: string): Promise<PromoCode | undefined> {
+    const result = await db.select().from(promoCodes)
+      .where(and(
+        eq(promoCodes.code, code.toUpperCase()),
+        eq(promoCodes.isActive, true),
+        eq(promoCodes.status, 'active')
+      ))
+      .limit(1);
+    return result[0];
+  }
+
+  async getCreatorPromoCodes(creatorId: string): Promise<PromoCode[]> {
+    return await db.select().from(promoCodes)
+      .where(eq(promoCodes.creatorId, creatorId))
+      .orderBy(desc(promoCodes.createdAt));
+  }
+
+  async createPromoCode(promoCode: InsertPromoCode): Promise<PromoCode> {
+    const result = await db.insert(promoCodes)
+      .values({
+        ...promoCode,
+        code: promoCode.code.toUpperCase(),
+      })
+      .returning();
+    return result[0];
+  }
+
+  async updatePromoCode(codeId: string, updates: Partial<PromoCode>): Promise<PromoCode> {
+    const result = await db.update(promoCodes)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(promoCodes.id, codeId))
+      .returning();
+    return result[0];
+  }
+
+  async validatePromoCode(code: string, planId: string, userId: string): Promise<{
+    valid: boolean;
+    promoCode?: PromoCode;
+    error?: string;
+    discountedPrice?: number;
+    savings?: number;
+  }> {
+    const promoCode = await this.getPromoCodeByCode(code);
+    
+    if (!promoCode) {
+      return { valid: false, error: 'Invalid promo code' };
+    }
+
+    // Check if code is active and valid
+    const now = new Date();
+    if (promoCode.validUntil && new Date(promoCode.validUntil) < now) {
+      await db.update(promoCodes)
+        .set({ status: 'expired', updatedAt: new Date() })
+        .where(eq(promoCodes.id, promoCode.id));
+      return { valid: false, error: 'Promo code has expired' };
+    }
+
+    // Check usage limits
+    if (promoCode.maxUsageCount && promoCode.currentUsageCount >= promoCode.maxUsageCount) {
+      await db.update(promoCodes)
+        .set({ status: 'exhausted', updatedAt: new Date() })
+        .where(eq(promoCodes.id, promoCode.id));
+      return { valid: false, error: 'Promo code usage limit reached' };
+    }
+
+    // Check if user has already used this code (for first-time only codes)
+    if (promoCode.firstTimeOnly) {
+      const existingUsage = await db.select().from(promoCodeUsages)
+        .where(and(
+          eq(promoCodeUsages.promoCodeId, promoCode.id),
+          eq(promoCodeUsages.userId, userId)
+        ))
+        .limit(1);
+      
+      if (existingUsage.length > 0) {
+        return { valid: false, error: 'This promo code can only be used once per user' };
+      }
+    }
+
+    // Check if code applies to this plan
+    if (promoCode.applicablePlans.length > 0 && !promoCode.applicablePlans.includes(planId)) {
+      return { valid: false, error: 'This promo code is not valid for the selected plan' };
+    }
+
+    // Get plan details for price calculation
+    const plan = await this.getSubscriptionPlan(planId);
+    if (!plan) {
+      return { valid: false, error: 'Invalid subscription plan' };
+    }
+
+    // Check minimum purchase requirement
+    if (plan.priceCents < promoCode.minPurchaseCents) {
+      return { valid: false, error: `Minimum purchase of $${promoCode.minPurchaseCents / 100} required` };
+    }
+
+    // Calculate discount
+    let discountedPrice = plan.priceCents;
+    let savings = 0;
+
+    switch (promoCode.type) {
+      case 'percentage':
+        if (promoCode.discountPercentage) {
+          savings = Math.round((plan.priceCents * promoCode.discountPercentage) / 100);
+          discountedPrice = plan.priceCents - savings;
+        }
+        break;
+      case 'fixed_amount':
+        if (promoCode.discountAmountCents) {
+          savings = Math.min(promoCode.discountAmountCents, plan.priceCents);
+          discountedPrice = plan.priceCents - savings;
+        }
+        break;
+      case 'free_trial':
+        // Free trial doesn't affect price but extends trial period
+        discountedPrice = plan.priceCents;
+        savings = 0;
+        break;
+    }
+
+    return {
+      valid: true,
+      promoCode,
+      discountedPrice: Math.max(0, discountedPrice),
+      savings
+    };
+  }
+
+  async recordPromoCodeUsage(usage: InsertPromoCodeUsage): Promise<PromoCodeUsage> {
+    const result = await db.insert(promoCodeUsages)
+      .values(usage)
+      .returning();
+
+    // Update promo code usage count
+    await db.update(promoCodes)
+      .set({
+        currentUsageCount: sql`${promoCodes.currentUsageCount} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(promoCodes.id, usage.promoCodeId));
+
+    return result[0];
+  }
+
+  // Enhanced Subscription Operations
+  async createEnhancedSubscription(subscription: InsertSubscriptionEnhanced): Promise<SubscriptionEnhanced> {
+    const result = await db.insert(subscriptionsEnhanced)
+      .values(subscription)
+      .returning();
+
+    // Update subscription plan subscriber count
+    await db.update(subscriptionPlans)
+      .set({
+        currentSubscribers: sql`${subscriptionPlans.currentSubscribers} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(subscriptionPlans.id, subscription.subscriptionPlanId));
+
+    return result[0];
+  }
+
+  async getEnhancedSubscription(fanId: string, creatorId: string): Promise<SubscriptionEnhanced | undefined> {
+    const result = await db.select().from(subscriptionsEnhanced)
+      .where(and(
+        eq(subscriptionsEnhanced.fanId, fanId),
+        eq(subscriptionsEnhanced.creatorId, creatorId)
+      ))
+      .limit(1);
+    return result[0];
+  }
+
+  async getUserEnhancedSubscriptions(userId: string): Promise<SubscriptionEnhanced[]> {
+    return await db.select().from(subscriptionsEnhanced)
+      .where(eq(subscriptionsEnhanced.fanId, userId))
+      .orderBy(desc(subscriptionsEnhanced.createdAt));
+  }
+
+  async getCreatorEnhancedSubscriptions(creatorId: string): Promise<SubscriptionEnhanced[]> {
+    return await db.select().from(subscriptionsEnhanced)
+      .where(eq(subscriptionsEnhanced.creatorId, creatorId))
+      .orderBy(desc(subscriptionsEnhanced.createdAt));
+  }
 }
 
 export const storage = new DatabaseStorage();

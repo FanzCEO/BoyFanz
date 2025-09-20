@@ -359,6 +359,107 @@ export const subscriptions = pgTable("subscriptions", {
   currentPeriodEndIdx: index("idx_subscriptions_current_period_end").on(table.currentPeriodEnd),
 }));
 
+// Enhanced Subscription System
+export const subscriptionPlanDurationEnum = pgEnum("subscription_plan_duration", ["weekly", "monthly", "quarterly", "semi_annually", "yearly"]);
+
+// Subscription Plans (Multiple pricing tiers per creator)
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name").notNull(), // "VIP", "Premium", "Gold", etc.
+  description: text("description"),
+  duration: subscriptionPlanDurationEnum("duration").notNull(),
+  priceCents: integer("price_cents").notNull(),
+  originalPriceCents: integer("original_price_cents"), // For showing discounts
+  discountPercentage: integer("discount_percentage").default(0),
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  benefits: jsonb("benefits").default([]), // List of benefits
+  maxSubscribers: integer("max_subscribers"), // Limited availability
+  currentSubscribers: integer("current_subscribers").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  creatorActiveIdx: index("idx_plans_creator_active").on(table.creatorId, table.isActive),
+  creatorSortIdx: index("idx_plans_creator_sort").on(table.creatorId, table.sortOrder),
+}));
+
+// Promotional Codes
+export const promoCodeStatusEnum = pgEnum("promo_code_status", ["active", "expired", "exhausted", "disabled"]);
+export const promoCodeTypeEnum = pgEnum("promo_code_type", ["percentage", "fixed_amount", "free_trial"]);
+
+export const promoCodes = pgTable("promo_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id").references(() => users.id, { onDelete: "cascade" }), // null = global
+  code: varchar("code").notNull().unique(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  type: promoCodeTypeEnum("type").notNull(),
+  discountPercentage: integer("discount_percentage"), // For percentage type
+  discountAmountCents: integer("discount_amount_cents"), // For fixed amount type
+  freeTrialDays: integer("free_trial_days"), // For free trial type
+  minPurchaseCents: integer("min_purchase_cents").default(0),
+  maxUsageCount: integer("max_usage_count"), // null = unlimited
+  currentUsageCount: integer("current_usage_count").default(0),
+  validFrom: timestamp("valid_from").defaultNow(),
+  validUntil: timestamp("valid_until"),
+  isActive: boolean("is_active").default(true),
+  status: promoCodeStatusEnum("status").default("active").notNull(),
+  applicablePlans: text("applicable_plans").array().default([]), // Plan IDs
+  firstTimeOnly: boolean("first_time_only").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  codeIdx: index("idx_promo_codes_code").on(table.code),
+  creatorActiveIdx: index("idx_promo_codes_creator_active").on(table.creatorId, table.isActive),
+  statusIdx: index("idx_promo_codes_status").on(table.status),
+}));
+
+// Promo Code Usage Tracking
+export const promoCodeUsages = pgTable("promo_code_usages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  promoCodeId: varchar("promo_code_id").notNull().references(() => promoCodes.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  subscriptionId: varchar("subscription_id").references(() => subscriptions.id, { onDelete: "set null" }),
+  originalPriceCents: integer("original_price_cents").notNull(),
+  discountedPriceCents: integer("discounted_price_cents").notNull(),
+  savingsCents: integer("savings_cents").notNull(),
+  usedAt: timestamp("used_at").defaultNow(),
+}, (table) => ({
+  promoCodeIdx: index("idx_promo_usage_code").on(table.promoCodeId),
+  userIdx: index("idx_promo_usage_user").on(table.userId),
+}));
+
+// Update subscriptions table to reference subscription plans
+export const subscriptionsEnhanced = pgTable("subscriptions_enhanced", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fanId: varchar("fan_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  subscriptionPlanId: varchar("subscription_plan_id").notNull().references(() => subscriptionPlans.id, { onDelete: "cascade" }),
+  promoCodeId: varchar("promo_code_id").references(() => promoCodes.id, { onDelete: "set null" }),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  status: subscriptionStatusEnum("status").default("pending").notNull(),
+  originalPriceCents: integer("original_price_cents").notNull(),
+  finalPriceCents: integer("final_price_cents").notNull(), // After discounts
+  discountAppliedCents: integer("discount_applied_cents").default(0),
+  nextBillingDate: timestamp("next_billing_date").notNull(),
+  currentPeriodStart: timestamp("current_period_start"),
+  currentPeriodEnd: timestamp("current_period_end"),
+  trialEndDate: timestamp("trial_end_date"), // Free trial support
+  autoRenew: boolean("auto_renew").default(true),
+  cancelledAt: timestamp("cancelled_at"),
+  cancelReason: text("cancel_reason"),
+  renewalCount: integer("renewal_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  uniqueFanCreator: unique().on(table.fanId, table.creatorId),
+  creatorStatusIdx: index("idx_subs_enh_creator_status").on(table.creatorId, table.status),
+  fanStatusIdx: index("idx_subs_enh_fan_status").on(table.fanId, table.status),
+  nextBillingIdx: index("idx_subs_enh_next_billing").on(table.nextBillingDate),
+  planIdx: index("idx_subs_enh_plan").on(table.subscriptionPlanId),
+}));
+
 // Posts
 export const postTypeEnum = pgEnum("post_type", ["photo", "video", "audio", "text", "reel", "story", "live"]);
 export const postVisibilityEnum = pgEnum("post_visibility", ["free", "premium", "subscribers_only"]);
@@ -959,6 +1060,49 @@ export const insertReportSchema = createInsertSchema(reports).pick({
   reason: true,
 });
 
+// Enhanced Subscription System Schemas
+export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  currentSubscribers: true,
+});
+export type InsertSubscriptionPlanType = z.infer<typeof insertSubscriptionPlanSchema>;
+
+export const updateSubscriptionPlanSchema = insertSubscriptionPlanSchema.partial();
+export type UpdateSubscriptionPlanType = z.infer<typeof updateSubscriptionPlanSchema>;
+
+export const insertPromoCodeSchema = createInsertSchema(promoCodes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  currentUsageCount: true,
+});
+export type InsertPromoCodeType = z.infer<typeof insertPromoCodeSchema>;
+
+export const updatePromoCodeSchema = insertPromoCodeSchema.partial();
+export type UpdatePromoCodeType = z.infer<typeof updatePromoCodeSchema>;
+
+export const validatePromoCodeSchema = z.object({
+  code: z.string().min(1),
+  subscriptionPlanId: z.string().optional(),
+});
+export type ValidatePromoCodeType = z.infer<typeof validatePromoCodeSchema>;
+
+export const applyPromoCodeSchema = z.object({
+  code: z.string().min(1),
+  subscriptionPlanId: z.string(),
+});
+export type ApplyPromoCodeType = z.infer<typeof applyPromoCodeSchema>;
+
+export const createSubscriptionEnhancedSchema = createInsertSchema(subscriptionsEnhanced).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  renewalCount: true,
+});
+export type CreateSubscriptionEnhancedType = z.infer<typeof createSubscriptionEnhancedSchema>;
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -1026,6 +1170,17 @@ export const insertDelegatedPermissionSchema = createInsertSchema(delegatedPermi
 
 // Creator Economy Types
 export type CreatorProfile = typeof creatorProfiles.$inferSelect;
+
+// Enhanced Subscription System Types
+export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
+export type InsertSubscriptionPlan = typeof subscriptionPlans.$inferInsert;
+export type PromoCode = typeof promoCodes.$inferSelect;
+export type InsertPromoCode = typeof promoCodes.$inferInsert;
+export type PromoCodeUsage = typeof promoCodeUsages.$inferSelect;
+export type InsertPromoCodeUsage = typeof promoCodeUsages.$inferInsert;
+export type SubscriptionEnhanced = typeof subscriptionsEnhanced.$inferSelect;
+export type InsertSubscriptionEnhanced = typeof subscriptionsEnhanced.$inferInsert;
+
 export type Subscription = typeof subscriptions.$inferSelect;
 export type Post = typeof posts.$inferSelect;
 export type PostMedia = typeof postMedia.$inferSelect;
