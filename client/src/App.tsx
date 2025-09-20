@@ -23,6 +23,15 @@ import StarzSignup from "@/pages/auth/StarzSignup";
 import FanzSignup from "@/pages/auth/FanzSignup";
 import Login from "@/pages/auth/Login";
 import ResetPassword from "@/pages/auth/ResetPassword";
+// Creator Economy pages
+import CreatorProfile from "@/pages/CreatorProfile";
+import PostsFeed from "@/pages/PostsFeed";
+import SearchCreators from "@/pages/SearchCreators";
+import Messages from "@/pages/Messages";
+import PostView from "@/pages/PostView";
+import EarningsPage from "@/pages/Creator/EarningsPage";
+import Blog from "@/pages/Blog";
+import Contact from "@/pages/Contact";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -69,6 +78,14 @@ function Router() {
             <Route path="/admin/users" component={UserManagement} />
             <Route path="/admin/themes" component={ThemeManager} />
             <Route path="/settings" component={Settings} />
+            <Route path="/creator/:userId" component={CreatorProfile} />
+            <Route path="/feed" component={PostsFeed} />
+            <Route path="/search" component={SearchCreators} />
+            <Route path="/messages" component={Messages} />
+            <Route path="/post/:postId" component={PostView} />
+            <Route path="/earnings" component={EarningsPage} />
+            <Route path="/blog" component={Blog} />
+            <Route path="/contact" component={Contact} />
             <Route component={NotFound} />
           </Switch>
         </main>
