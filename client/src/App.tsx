@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";\nimport { useIsMobile } from "@/hooks/use-mobile";\nimport { cn } from "@/lib/utils";
 import { useEffect } from "react";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
@@ -37,6 +37,7 @@ import Contact from "@/pages/Contact";
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
   const [location, navigate] = useLocation();
+  const isMobile = useIsMobile();
   useTheme(); // Apply active theme
 
   // Protected routes that require authentication
@@ -84,9 +85,12 @@ function Router() {
   return (
     <div className="min-h-screen bg-background">
       <Sidebar user={user} />
-      <div className="ml-64">
+      <div className={cn(
+        "transition-all duration-300",
+        "md:ml-64" // Only add left margin on desktop
+      )}>
         <Header user={user} />
-        <main className="p-6">
+        <main className="p-4 md:p-6">
           <Switch>
             <Route path="/" component={Dashboard} />
             <Route path="/media" component={Media} />
