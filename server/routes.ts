@@ -67,13 +67,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return true;
     }
     
-    // Moderators must have specific delegated permission
+    // Only moderators can have delegated admin permissions
     if (user?.role === 'moderator') {
       return await storage.hasPermission(userId, requiredPermission);
     }
     
-    // Regular users must have specific delegated permission
-    return await storage.hasPermission(userId, requiredPermission);
+    // Regular users (fan, creator) cannot access admin functions
+    return false;
   }
 
   // Auth routes
@@ -418,11 +418,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Cannot modify your own permissions" });
       }
 
+      // Set audit fields server-side for integrity
       const delegation = await storage.grantPermission({
         userId,
         permission,
         granted: true,
-        grantedBy: adminUserId,
+        grantedBy: adminUserId, // Set server-side, never trust client
       });
 
       res.json(delegation);

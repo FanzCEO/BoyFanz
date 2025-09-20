@@ -101,8 +101,6 @@ export default function DelegationManager() {
       return apiRequest('POST', '/api/admin/delegations/grant', {
         userId,
         permission,
-        granted: true,
-        grantedBy: user?.claims?.sub,
       });
     },
     onSuccess: () => {
@@ -145,8 +143,8 @@ export default function DelegationManager() {
   });
 
   const filteredUsers = Array.isArray(users) ? users.filter((u: any) => 
-    u.username.toLowerCase().includes(userSearch.toLowerCase()) ||
-    u.email?.toLowerCase().includes(userSearch.toLowerCase())
+    (u.username?.toLowerCase() ?? "").includes(userSearch.toLowerCase()) ||
+    (u.email?.toLowerCase() ?? "").includes(userSearch.toLowerCase())
   ) : [];
 
   const getUserPermissions = (userId: string) => {
