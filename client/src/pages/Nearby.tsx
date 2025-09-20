@@ -6,7 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'wouter';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { 
   MapPin,
   Users,
@@ -15,8 +18,17 @@ import {
   MessageCircle,
   Navigation,
   Filter,
-  Search
+  Search,
+  Map
 } from 'lucide-react';
+
+// Fix for default markers in react-leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
 interface NearbyCreator {
   id: string;
@@ -29,16 +41,114 @@ interface NearbyCreator {
   location: {
     city: string;
     state: string;
+    lat: number;
+    lng: number;
   };
   lastActiveAt: string;
   isOnline: boolean;
   tags: string[];
 }
 
+// Custom marker icon for creators
+const creatorIcon = new L.Icon({
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+// Online creator marker (green)
+const onlineCreatorIcon = new L.Icon({
+  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+    <svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12.5 0C5.596 0 0 5.596 0 12.5c0 12.5 12.5 28.5 12.5 28.5s12.5-16 12.5-28.5C25 5.596 19.404 0 12.5 0z" fill="#10b981"/>
+      <circle cx="12.5" cy="12.5" r="8" fill="white"/>
+      <circle cx="12.5" cy="12.5" r="5" fill="#10b981"/>
+    </svg>
+  `),
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
+
+const CreatorMap = ({ creators, center }: { creators: NearbyCreator[], center: [number, number] }) => {
+  return (
+    <MapContainer 
+      center={center} 
+      zoom={11} 
+      style={{ height: '400px', width: '100%' }}
+      className="rounded-lg overflow-hidden"
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      {creators.map((creator) => (
+        <Marker 
+          key={creator.id}
+          position={[creator.location.lat, creator.location.lng]}
+          icon={creator.isOnline ? onlineCreatorIcon : creatorIcon}
+        >
+          <Popup>
+            <div className="p-2 min-w-[200px]">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-xs font-bold">
+                  {creator.username[0]?.toUpperCase()}
+                </div>
+                <div>
+                  <div className="font-semibold text-sm">{creator.username}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {creator.location.city}, {creator.location.state}
+                  </div>
+                </div>
+              </div>
+              <div className="text-xs text-muted-foreground mb-2">
+                {creator.followerCount.toLocaleString()} followers • {creator.distance.toFixed(1)} mi
+              </div>
+              {creator.bio && (
+                <div className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                  {creator.bio}
+                </div>
+              )}
+              <div className="flex gap-1">
+                <a 
+                  href={`/creator/${creator.id}`} 
+                  className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded hover:bg-primary/80 transition-colors"
+                >
+                  View Profile
+                </a>
+              </div>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+    </MapContainer>
+  );
+};
+
 export default function Nearby() {
   const { user } = useAuth();
   const [searchRadius, setSearchRadius] = useState(25);
   const [locationFilter, setLocationFilter] = useState('');
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [userLocation, setUserLocation] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
+
+  // Get user's location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation([position.coords.latitude, position.coords.longitude]);
+        },
+        (error) => {
+          console.log('Location access denied, using default location');
+        }
+      );
+    }
+  }, []);
 
   const { data: nearbyCreators = [], isLoading } = useQuery<NearbyCreator[]>({
     queryKey: ['/api/creators/nearby', searchRadius],
@@ -112,6 +222,28 @@ export default function Nearby() {
         </div>
       </div>
 
+      {/* View Toggle */}
+      <div className="flex items-center gap-2 mb-6">
+        <Button
+          variant={viewMode === 'list' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setViewMode('list')}
+          data-testid="list-view-button"
+        >
+          <Users className="h-4 w-4 mr-2" />
+          List View
+        </Button>
+        <Button
+          variant={viewMode === 'map' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setViewMode('map')}
+          data-testid="map-view-button"
+        >
+          <Map className="h-4 w-4 mr-2" />
+          Map View
+        </Button>
+      </div>
+
       {/* Search and Filter Controls */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <Card className="p-4">
@@ -161,6 +293,24 @@ export default function Nearby() {
         </Card>
       </div>
 
+      {/* Map or List View */}
+      {viewMode === 'map' && filteredCreators.length > 0 && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Map className="h-5 w-5" />
+              Creators Map
+            </CardTitle>
+            <CardDescription>
+              Click on markers to view creator profiles • Green markers indicate online creators
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CreatorMap creators={filteredCreators} center={userLocation} />
+          </CardContent>
+        </Card>
+      )}
+
       {filteredCreators.length === 0 ? (
         <Card className="text-center py-16">
           <CardContent>
@@ -182,7 +332,7 @@ export default function Nearby() {
             </div>
           </CardContent>
         </Card>
-      ) : (
+      ) : viewMode === 'list' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCreators.map((creator) => (
             <Card key={creator.id} className="overflow-hidden hover:shadow-lg transition-all duration-200 group" data-testid={`creator-${creator.id}`}>

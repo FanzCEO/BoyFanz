@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useCSRF } from '@/hooks/useCSRF';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Link } from 'wouter';
 import { 
@@ -84,7 +85,7 @@ const PostCard = ({ post }: { post: Post }) => {
       return apiRequest('POST', '/api/posts/like', { postId: post.id });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/posts/feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       toast({
         title: "Liked!",
         description: "Added to your likes",
@@ -313,13 +314,17 @@ const PostComposer = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { csrfToken, isLoading: csrfLoading } = useCSRF();
 
   const createPostMutation = useMutation({
     mutationFn: async (postData: { content: string; type: string }) => {
+      if (!csrfToken) {
+        throw new Error('CSRF token not available. Please refresh the page.');
+      }
       return apiRequest('POST', '/api/posts', postData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/posts/feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       setContent('');
       setIsExpanded(false);
       toast({
@@ -338,6 +343,14 @@ const PostComposer = () => {
 
   const handleSubmit = () => {
     if (!content.trim()) return;
+    if (!csrfToken) {
+      toast({
+        title: "Error",
+        description: "Security token not ready. Please wait a moment and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
     createPostMutation.mutate({ content, type: 'text' });
   };
 
@@ -388,10 +401,10 @@ const PostComposer = () => {
                     size="sm" 
                     className="bg-red-600 hover:bg-red-700 text-white"
                     onClick={handleSubmit}
-                    disabled={!content.trim() || createPostMutation.isPending}
+                    disabled={!content.trim() || createPostMutation.isPending || csrfLoading || !csrfToken}
                     data-testid="publish-button"
                   >
-                    {createPostMutation.isPending ? 'Publishing...' : 'Publish'}
+                    {csrfLoading ? 'Loading...' : createPostMutation.isPending ? 'Publishing...' : 'Publish'}
                   </Button>
                 </div>
               </div>
@@ -523,9 +536,11 @@ const AdSpace = () => {
 export default function SocialHome() {
   const { user } = useAuth();
 
-  const { data: posts = [], isLoading: postsLoading } = useQuery<Post[]>({
-    queryKey: ['/api/posts/feed'],
+  const { data: feedData, isLoading: postsLoading } = useQuery({
+    queryKey: ['/api/feed'],
   });
+
+  const posts = feedData?.posts || [];
 
   const { data: userWithStory } = useQuery({
     queryKey: ['/api/user/story-status'],
