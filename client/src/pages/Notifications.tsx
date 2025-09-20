@@ -1,284 +1,466 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, BellOff, Check, DollarSign, Shield, Users, Settings } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { 
+  Bell,
+  RotateCcw,
+  ChevronDown,
+  Home,
+  Edit,
+  MessageCircle,
+  Wallet,
+  Users,
+  Film,
+  Award,
+  Settings,
+  Shield,
+  Lock,
+  MapPin,
+  Eye,
+  DollarSign,
+  CreditCard,
+  Banknote,
+  Menu,
+  X
+} from "lucide-react";
+import { Link } from 'wouter';
+import { useState } from 'react';
+
+interface Notification {
+  id: string;
+  userId: string;
+  kind: 'payout' | 'moderation' | 'kyc' | 'system' | 'fan_activity';
+  payloadJson: {
+    message?: string;
+    username?: string;
+    action?: string;
+  };
+  readAt?: string;
+  createdAt: string;
+}
+
+// Mock notification data based on the screenshots
+const mockNotifications = [
+  {
+    id: '1',
+    type: 'subscription',
+    username: 'max4496',
+    action: 'has subscribed to your content',
+    time: '8 minutes ago',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40&h=40&fit=crop&crop=face',
+    readAt: undefined
+  },
+  {
+    id: '2',
+    type: 'subscription',
+    username: 'david1942',
+    action: 'has subscribed to your content',
+    time: 'yesterday',
+    avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=40&h=40&fit=crop&crop=face',
+    readAt: '2024-09-19T10:00:00Z'
+  },
+  {
+    id: '3',
+    type: 'like',
+    username: 'nicholas1808',
+    action: 'like you post Needing to take care of business',
+    time: '3 days ago',
+    avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=40&h=40&fit=crop&crop=face',
+    readAt: undefined
+  },
+  {
+    id: '4',
+    type: 'like',
+    username: 'nicholas1808',
+    action: 'like you post Random pics and videos',
+    time: '3 days ago',
+    avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=40&h=40&fit=crop&crop=face',
+    readAt: '2024-09-17T14:30:00Z'
+  },
+  {
+    id: '5',
+    type: 'like',
+    username: 'nicholas1808',
+    action: 'like you post Jerk off during work',
+    time: '3 days ago',
+    avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=40&h=40&fit=crop&crop=face',
+    readAt: '2024-09-17T14:30:00Z'
+  },
+  {
+    id: '6',
+    type: 'like',
+    username: 'nicholas1808',
+    action: 'like you post With @DFWCowboyTopXL Episode 1 of many',
+    time: '3 days ago',
+    avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=40&h=40&fit=crop&crop=face',
+    readAt: '2024-09-17T14:30:00Z'
+  },
+  {
+    id: '7',
+    type: 'like',
+    username: 'nicholas1808',
+    action: 'like you post Get you some!',
+    time: '3 days ago',
+    avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=40&h=40&fit=crop&crop=face',
+    readAt: '2024-09-17T14:30:00Z'
+  },
+  {
+    id: '8',
+    type: 'like',
+    username: 'nicholas1808',
+    action: 'like you post Just sitting here working from the couch with my d...',
+    time: '3 days ago',
+    avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=40&h=40&fit=crop&crop=face',
+    readAt: '2024-09-17T14:30:00Z'
+  },
+  {
+    id: '9',
+    type: 'like',
+    username: 'nicholas1808',
+    action: 'like you post Just some fun. @Damienwinters is on one of these',
+    time: '3 days ago',
+    avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=40&h=40&fit=crop&crop=face',
+    readAt: '2024-09-17T14:30:00Z'
+  },
+  {
+    id: '10',
+    type: 'like',
+    username: 'nicholas1808',
+    action: 'like you post Need some help with this',
+    time: '3 days ago',
+    avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=40&h=40&fit=crop&crop=face',
+    readAt: '2024-09-17T14:30:00Z'
+  },
+  {
+    id: '11',
+    type: 'like',
+    username: 'nicholas1808',
+    action: 'like you post My twink days',
+    time: '3 days ago',
+    avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=40&h=40&fit=crop&crop=face',
+    readAt: '2024-09-17T14:30:00Z'
+  },
+  {
+    id: '12',
+    type: 'like',
+    username: 'nicholas1808',
+    action: 'like you post Fun in florida @Damienwinters',
+    time: '3 days ago',
+    avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=40&h=40&fit=crop&crop=face',
+    readAt: '2024-09-17T14:30:00Z'
+  }
+];
+
+const sidebarSections = [
+  {
+    title: "ACCOUNT",
+    items: [
+      { icon: Home, label: "Dashboard", href: "/dashboard" },
+      { icon: Eye, label: "My page", href: "/creator/me" },
+      { icon: Edit, label: "Edit my page", href: "/creator/me/edit" },
+      { icon: MessageCircle, label: "Conversations", href: "/messages" },
+      { icon: Wallet, label: "Wallet", href: "/wallet" },
+      { icon: Users, label: "Referrals", href: "/referrals" },
+      { icon: Film, label: "My stories", href: "/stories" },
+      { icon: Award, label: "Verified account!", href: "/verify", highlight: true }
+    ]
+  },
+  {
+    title: "LIVE STREAMING PRIVATE",
+    items: [
+      { icon: Settings, label: "Settings", href: "/streaming/settings" },
+      { icon: MessageCircle, label: "Requests received", href: "/streaming/requests" },
+      { icon: MessageCircle, label: "Requests sent", href: "/streaming/sent" }
+    ]
+  },
+  {
+    title: "SUBSCRIPTION",
+    items: [
+      { icon: DollarSign, label: "Subscription price", href: "/subscriptions/price" },
+      { icon: Users, label: "My subscribers", href: "/subscriptions/subscribers" },
+      { icon: Users, label: "My subscriptions", href: "/subscriptions/mine" }
+    ]
+  },
+  {
+    title: "PRIVACY AND SECURITY",
+    items: [
+      { icon: Shield, label: "Privacy and Security", href: "/settings/privacy" },
+      { icon: Lock, label: "Password", href: "/settings/password" },
+      { icon: MapPin, label: "Block Countries", href: "/settings/countries" },
+      { icon: Eye, label: "Restricted users", href: "/settings/restricted" }
+    ]
+  },
+  {
+    title: "PAYMENTS",
+    items: [
+      { icon: CreditCard, label: "Payments", href: "/payments" },
+      { icon: DollarSign, label: "Payments received", href: "/payments/received" },
+      { icon: Banknote, label: "Payout method", href: "/payouts" },
+      { icon: DollarSign, label: "Withdrawals", href: "/withdrawals" }
+    ]
+  }
+];
 
 export default function Notifications() {
+  const [filter, setFilter] = useState("all");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
-  const { data: notifications, isLoading } = useQuery({
+  // Utility function to format timestamps
+  const formatTimeAgo = (dateString: string) => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return 'just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 86400 * 7) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    return 'over a week ago';
+  };
+
+  // Function to normalize notification type for filtering
+  const getNotificationType = (notification: any) => {
+    if (notification.kind) {
+      // API notification
+      if (notification.kind === 'fan_activity') {
+        const message = notification.payloadJson?.message || '';
+        if (message.includes('subscribed')) return 'subscription';
+        if (message.includes('like')) return 'like';
+        if (message.includes('comment')) return 'comment';
+      }
+      return notification.kind;
+    }
+    // Mock notification
+    return notification.type;
+  };
+
+  // Use real API data
+  const { data: apiNotifications = [], isLoading, refetch } = useQuery<Notification[]>({
     queryKey: ['/api/notifications'],
   });
 
-  const markReadMutation = useMutation({
-    mutationFn: async (notificationId: string) => {
-      return apiRequest('PUT', `/api/notifications/${notificationId}/read`, {});
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const getNotificationIcon = (kind: string) => {
-    switch (kind) {
-      case 'payout': return <DollarSign className="h-5 w-5 text-primary" />;
-      case 'moderation': return <Check className="h-5 w-5 text-accent" />;
-      case 'kyc': return <Shield className="h-5 w-5 text-yellow-500" />;
-      case 'fan_activity': return <Users className="h-5 w-5 text-secondary" />;
-      case 'system': return <Settings className="h-5 w-5 text-muted-foreground" />;
-      default: return <Bell className="h-5 w-5 text-muted-foreground" />;
-    }
+  // Refresh notifications
+  const handleRefresh = () => {
+    refetch();
   };
 
-  const getNotificationBgColor = (kind: string) => {
-    switch (kind) {
-      case 'payout': return 'bg-primary/10';
-      case 'moderation': return 'bg-accent/10';
-      case 'kyc': return 'bg-yellow-500/10';
-      case 'fan_activity': return 'bg-secondary/10';
-      case 'system': return 'bg-muted/10';
-      default: return 'bg-muted/10';
-    }
-  };
+  // Transform API notifications to match UI format or use mock data as fallback
+  const allNotifications = apiNotifications.length > 0 ? 
+    apiNotifications.map(notification => ({
+      id: notification.id,
+      type: getNotificationType(notification),
+      username: notification.payloadJson?.username || 'User',
+      action: notification.payloadJson?.action || notification.payloadJson?.message || 'performed an action',
+      time: formatTimeAgo(notification.createdAt),
+      avatar: `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40&h=40&fit=crop&crop=face&${notification.id}`,
+      readAt: notification.readAt
+    })) : mockNotifications;
 
-  const unreadNotifications = notifications?.filter((n: any) => !n.readAt) || [];
-  const readNotifications = notifications?.filter((n: any) => n.readAt) || [];
-
-  const formatTimeAgo = (date: string) => {
-    const now = new Date();
-    const notificationDate = new Date(date);
-    const diffInSeconds = Math.floor((now.getTime() - notificationDate.getTime()) / 1000);
-    
-    if (diffInSeconds < 60) return 'Just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    return `${Math.floor(diffInSeconds / 86400)}d ago`;
-  };
-
-  const NotificationItem = ({ notification, isUnread = false }: { notification: any; isUnread?: boolean }) => (
-    <div 
-      className={`flex items-start gap-4 p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors ${isUnread ? 'bg-primary/5 border-primary/20' : ''}`}
-      data-testid={`notification-${notification.id}`}
-    >
-      <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${getNotificationBgColor(notification.kind)}`}>
-        {getNotificationIcon(notification.kind)}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className={`text-sm ${isUnread ? 'font-medium' : ''}`} data-testid={`notification-message-${notification.id}`}>
-          {notification.payloadJson?.message || 'Notification'}
-        </p>
-        <p className="text-xs text-muted-foreground mt-1" data-testid={`notification-time-${notification.id}`}>
-          {formatTimeAgo(notification.createdAt)}
-        </p>
-      </div>
-      <div className="flex items-center gap-2">
-        {isUnread && (
-          <Badge variant="secondary" className="h-2 w-2 p-0 rounded-full bg-primary"></Badge>
-        )}
-        {isUnread && (
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => markReadMutation.mutate(notification.id)}
-            disabled={markReadMutation.isPending}
-            data-testid={`mark-read-${notification.id}`}
-          >
-            <Check className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
-    </div>
-  );
+  // Filter notifications based on selected filter
+  const filteredNotifications = filter === "all" ? allNotifications : 
+    allNotifications.filter(notification => {
+      const notificationType = getNotificationType(notification);
+      switch (filter) {
+        case 'subscription':
+        case 'subscriptions':
+          return notificationType === 'subscription' || (notificationType === 'fan_activity' && notification.action.includes('subscribed'));
+        case 'like':
+        case 'likes':
+          return notificationType === 'like' || (notificationType === 'fan_activity' && notification.action.includes('like'));
+        case 'comments':
+          return notificationType === 'comment' || (notificationType === 'fan_activity' && notification.action.includes('comment'));
+        default:
+          return true;
+      }
+    });
 
   return (
-    <div className="space-y-6" data-testid="notifications-page">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold font-display" data-testid="page-title">Notifications</h1>
-          <p className="text-muted-foreground" data-testid="page-description">
-            Stay updated with your platform activity
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          {unreadNotifications.length > 0 && (
-            <Badge variant="secondary" data-testid="unread-count">
-              {unreadNotifications.length} unread
-            </Badge>
-          )}
-          <Button variant="outline" data-testid="notification-settings-button">
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </Button>
-        </div>
+    <div className="flex min-h-screen bg-background text-foreground" data-testid="notifications-page">
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Left Sidebar */}
+      <div className={`fixed md:static inset-y-0 left-0 w-72 bg-card border-r border-border p-6 overflow-y-auto transform transition-transform duration-200 z-50 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+        {sidebarSections.map((section, sectionIdx) => (
+          <div key={section.title} className={`${sectionIdx > 0 ? 'mt-8' : ''}`}>
+            <h3 className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+              {section.title}
+            </h3>
+            <div className="space-y-1">
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link key={item.label} href={item.href}>
+                    <div className="flex items-center gap-3 px-3 py-2 text-sm rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group">
+                      <Icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
+                      <span className={`${item.highlight ? 'text-primary font-medium' : 'text-foreground'}`}>
+                        {item.label}
+                      </span>
+                      <ChevronDown className="h-3 w-3 text-muted-foreground ml-auto" />
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Notification Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-card border-border">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                <DollarSign className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Payout Updates</p>
-                <p className="text-lg font-semibold" data-testid="payout-notifications-count">
-                  {notifications?.filter((n: any) => n.kind === 'payout').length || 0}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Main Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-4xl mx-auto p-4 md:p-8">
+          {/* Mobile Header */}
+          <div className="flex items-center justify-between mb-6 md:hidden">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarOpen(true)}
+              data-testid="mobile-menu-button"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
 
-        <Card className="bg-card border-border">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 bg-accent/10 rounded-lg flex items-center justify-center">
-                <Check className="h-4 w-4 text-accent" />
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Bell className="h-6 w-6 text-primary" />
+                <h1 className="text-2xl font-bold" data-testid="page-title">
+                  Notifications
+                </h1>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRefresh}
+                  disabled={isLoading}
+                  data-testid="refresh-button"
+                >
+                  <RotateCcw className={`h-5 w-5 text-muted-foreground ${isLoading ? 'animate-spin' : ''}`} />
+                </Button>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Moderation</p>
-                <p className="text-lg font-semibold" data-testid="moderation-notifications-count">
-                  {notifications?.filter((n: any) => n.kind === 'moderation').length || 0}
-                </p>
-              </div>
+              <p className="text-muted-foreground text-sm" data-testid="page-description">
+                New subscribers, likes and new comments
+              </p>
             </div>
-          </CardContent>
-        </Card>
 
-        <Card className="bg-card border-border">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 bg-secondary/10 rounded-lg flex items-center justify-center">
-                <Users className="h-4 w-4 text-secondary" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Fan Activity</p>
-                <p className="text-lg font-semibold" data-testid="fan-activity-notifications-count">
-                  {notifications?.filter((n: any) => n.kind === 'fan_activity').length || 0}
-                </p>
-              </div>
+            {/* Filter Dropdown */}
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" className="p-1">
+                <Settings className="h-4 w-4" />
+              </Button>
+              <Select value={filter} onValueChange={setFilter}>
+                <SelectTrigger className="w-24 h-8 text-sm" data-testid="filter-select">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="subscriptions">Subscriptions</SelectItem>
+                  <SelectItem value="likes">Likes</SelectItem>
+                  <SelectItem value="comments">Comments</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card className="bg-card border-border">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 bg-yellow-500/10 rounded-lg flex items-center justify-center">
-                <Shield className="h-4 w-4 text-yellow-500" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Compliance</p>
-                <p className="text-lg font-semibold" data-testid="kyc-notifications-count">
-                  {notifications?.filter((n: any) => n.kind === 'kyc').length || 0}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Notifications Tabs */}
-      <Tabs defaultValue="unread" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="unread" data-testid="unread-tab">
-            Unread ({unreadNotifications.length})
-          </TabsTrigger>
-          <TabsTrigger value="all" data-testid="all-tab">
-            All ({notifications?.length || 0})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="unread" className="space-y-4 mt-6">
-          {isLoading ? (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-start gap-4 p-4 border rounded-lg animate-pulse">
-                  <div className="h-10 w-10 bg-muted rounded-lg"></div>
-                  <div className="flex-1">
-                    <div className="h-4 bg-muted rounded mb-2"></div>
-                    <div className="h-3 bg-muted rounded w-1/3"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : unreadNotifications.length > 0 ? (
-            <div className="space-y-4">
-              {unreadNotifications.map((notification: any) => (
-                <NotificationItem key={notification.id} notification={notification} isUnread={true} />
-              ))}
-            </div>
-          ) : (
-            <Card className="bg-card border-border">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                  <BellOff className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2" data-testid="no-unread-title">
-                  All caught up!
-                </h3>
-                <p className="text-muted-foreground text-center" data-testid="no-unread-description">
-                  You have no unread notifications at the moment.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="all" className="space-y-4 mt-6">
-          {isLoading ? (
+          {/* Loading State */}
+          {isLoading && (
             <div className="space-y-4">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex items-start gap-4 p-4 border rounded-lg animate-pulse">
-                  <div className="h-10 w-10 bg-muted rounded-lg"></div>
+                <div key={i} className="flex items-center gap-3 p-4 border-b border-border/40 animate-pulse">
+                  <div className="h-12 w-12 bg-muted rounded-full flex-shrink-0" />
                   <div className="flex-1">
-                    <div className="h-4 bg-muted rounded mb-2"></div>
-                    <div className="h-3 bg-muted rounded w-1/3"></div>
+                    <div className="h-4 bg-muted rounded mb-2 w-3/4" />
+                    <div className="h-3 bg-muted rounded w-1/4" />
                   </div>
                 </div>
               ))}
             </div>
-          ) : notifications && notifications.length > 0 ? (
-            <div className="space-y-4">
-              {notifications.map((notification: any) => (
-                <NotificationItem 
-                  key={notification.id} 
-                  notification={notification} 
-                  isUnread={!notification.readAt}
-                />
-              ))}
-            </div>
-          ) : (
-            <Card className="bg-card border-border">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                  <Bell className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2" data-testid="no-notifications-title">
-                  No notifications yet
-                </h3>
-                <p className="text-muted-foreground text-center" data-testid="no-notifications-description">
-                  We'll notify you when there's activity on your account.
-                </p>
-              </CardContent>
-            </Card>
           )}
-        </TabsContent>
-      </Tabs>
+
+          {/* Notifications List */}
+          {!isLoading && (
+            <>
+              {filteredNotifications.length === 0 ? (
+                <Card className="text-center py-16">
+                  <CardContent>
+                    <Bell className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No notifications found</h3>
+                    <p className="text-muted-foreground">
+                      {filter === "all" 
+                        ? "You don't have any notifications yet."
+                        : `No ${filter} notifications found.`
+                      }
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-0">
+                  {filteredNotifications.map((notification, index) => (
+                    <div 
+                      key={notification.id}
+                      className={`flex items-center gap-3 p-4 hover:bg-muted/30 transition-colors border-b border-border/40 last:border-b-0 ${!notification.readAt ? 'bg-primary/5' : ''}`}
+                      data-testid={`notification-${notification.id}`}
+                    >
+                      {/* Avatar */}
+                      <div className="relative flex-shrink-0">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage 
+                            src={notification.avatar} 
+                            alt={notification.username}
+                            className="object-cover"
+                          />
+                          <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+                            {notification.username.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        {/* Verified Badge */}
+                        <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
+                          <Award className="h-3 w-3 text-white" />
+                        </div>
+                      </div>
+
+                      {/* Notification Content */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-foreground" data-testid={`notification-message-${notification.id}`}>
+                          <span className="font-medium">{notification.username}</span>{' '}
+                          <span className="text-muted-foreground">{notification.action}</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1" data-testid={`notification-time-${notification.id}`}>
+                          {notification.time}
+                        </p>
+                      </div>
+
+                      {/* Unread indicator */}
+                      {!notification.readAt && (
+                        <div className="h-2 w-2 bg-primary rounded-full flex-shrink-0" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Load More */}
+              {filteredNotifications.length > 0 && filteredNotifications.length >= 10 && (
+                <div className="flex justify-center mt-8">
+                  <Button variant="outline" className="px-8" disabled>
+                    Load More (Coming Soon)
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

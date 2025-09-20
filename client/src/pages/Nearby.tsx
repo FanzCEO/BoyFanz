@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'wouter';
 import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { 
@@ -114,12 +114,12 @@ const CreatorMap = ({ creators, center }: { creators: NearbyCreator[], center: [
                 </div>
               )}
               <div className="flex gap-1">
-                <a 
+                <Link 
                   href={`/creator/${creator.id}`} 
-                  className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded hover:bg-primary/80 transition-colors"
+                  className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded hover:bg-primary/80 transition-colors inline-block"
                 >
                   View Profile
-                </a>
+                </Link>
               </div>
             </div>
           </Popup>
@@ -151,7 +151,7 @@ export default function Nearby() {
   }, []);
 
   const { data: nearbyCreators = [], isLoading } = useQuery<NearbyCreator[]>({
-    queryKey: ['/api/creators/nearby', searchRadius],
+    queryKey: ['/api/creators/nearby', { radius: searchRadius, center: userLocation }],
   });
 
   const formatDistance = (miles: number) => {
@@ -175,6 +175,12 @@ export default function Nearby() {
     locationFilter === '' ||
     creator.location.city.toLowerCase().includes(locationFilter.toLowerCase()) ||
     creator.location.state.toLowerCase().includes(locationFilter.toLowerCase())
+  );
+
+  // Filter creators that have valid coordinates for map display
+  const mappableCreators = filteredCreators.filter(creator => 
+    creator.location?.lat && creator.location?.lng &&
+    Number.isFinite(creator.location.lat) && Number.isFinite(creator.location.lng)
   );
 
   if (isLoading) {
@@ -294,7 +300,7 @@ export default function Nearby() {
       </div>
 
       {/* Map or List View */}
-      {viewMode === 'map' && filteredCreators.length > 0 && (
+      {viewMode === 'map' && (
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -303,10 +309,13 @@ export default function Nearby() {
             </CardTitle>
             <CardDescription>
               Click on markers to view creator profiles • Green markers indicate online creators
+              {mappableCreators.length === 0 && filteredCreators.length > 0 && (
+                <span className="text-yellow-600"> • Some creators may not appear due to missing location data</span>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <CreatorMap creators={filteredCreators} center={userLocation} />
+            <CreatorMap creators={mappableCreators} center={userLocation} />
           </CardContent>
         </Card>
       )}
