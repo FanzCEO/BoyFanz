@@ -1,10 +1,11 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
+import { useEffect } from "react";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
 import Media from "@/pages/Media";
@@ -35,7 +36,21 @@ import Contact from "@/pages/Contact";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
+  const [location, navigate] = useLocation();
   useTheme(); // Apply active theme
+
+  // Protected routes that require authentication
+  const protectedRoutes = ['/feed', '/messages', '/post', '/earnings', '/media', '/compliance', '/payouts', '/notifications', '/settings', '/admin'];
+  
+  // Check if current route is protected
+  const isProtectedRoute = protectedRoutes.some(route => location.startsWith(route));
+
+  // Redirect to login if trying to access protected route while unauthenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated && isProtectedRoute) {
+      navigate('/auth/login');
+    }
+  }, [isLoading, isAuthenticated, isProtectedRoute, navigate]);
 
   if (isLoading) {
     return (
@@ -56,6 +71,11 @@ function Router() {
         <Route path="/auth/fanz-signup" component={FanzSignup} />
         <Route path="/auth/login" component={Login} />
         <Route path="/auth/reset-password" component={ResetPassword} />
+        {/* Public pages for discovery */}
+        <Route path="/creator/:userId" component={CreatorProfile} />
+        <Route path="/search" component={SearchCreators} />
+        <Route path="/blog" component={Blog} />
+        <Route path="/contact" component={Contact} />
         <Route component={NotFound} />
       </Switch>
     );
