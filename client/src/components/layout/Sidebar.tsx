@@ -31,7 +31,7 @@ export default function Sidebar({ user }: SidebarProps) {
     { path: "/subscriptions", icon: "fas fa-star", label: "Subscriptions" },
     { path: "/release-forms", icon: "fas fa-file-contract", label: "Release Forms" },
     { path: "/nearby", icon: "fas fa-map-marker-alt", label: "Near by me" },
-  ];
+  ] as Array<{ path: string; icon: string; label: string; dot?: boolean; badge?: string }>;
 
   const adminItems = [
     { path: "/admin/moderation", icon: "fas fa-tasks", label: "Moderation Queue", badge: "7" },

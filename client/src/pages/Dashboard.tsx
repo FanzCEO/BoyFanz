@@ -53,7 +53,7 @@ export default function Dashboard() {
               <div>
                 <p className="text-sm text-muted-foreground">Total Revenue</p>
                 <p className="text-2xl font-bold" data-testid="total-revenue">
-                  ${statsLoading ? "..." : (stats?.totalRevenue || 0).toLocaleString()}
+                  ${statsLoading ? "..." : ((stats as any)?.totalRevenue || 0).toLocaleString()}
                 </p>
               </div>
               <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -74,7 +74,7 @@ export default function Dashboard() {
               <div>
                 <p className="text-sm text-muted-foreground">Active Fans</p>
                 <p className="text-2xl font-bold" data-testid="active-fans">
-                  {statsLoading ? "..." : (stats?.activeFans || 0).toLocaleString()}
+                  {statsLoading ? "..." : ((stats as any)?.activeFans || 0).toLocaleString()}
                 </p>
               </div>
               <div className="h-12 w-12 bg-secondary/10 rounded-lg flex items-center justify-center">
@@ -95,7 +95,7 @@ export default function Dashboard() {
               <div>
                 <p className="text-sm text-muted-foreground">Content Views</p>
                 <p className="text-2xl font-bold" data-testid="content-views">
-                  {statsLoading ? "..." : `${Math.floor((stats?.contentViews || 0) / 1000)}K`}
+                  {statsLoading ? "..." : `${Math.floor(((stats as any)?.contentViews || 0) / 1000)}K`}
                 </p>
               </div>
               <div className="h-12 w-12 bg-accent/10 rounded-lg flex items-center justify-center">
@@ -116,7 +116,7 @@ export default function Dashboard() {
               <div>
                 <p className="text-sm text-muted-foreground">Pending Reviews</p>
                 <p className="text-2xl font-bold text-yellow-500" data-testid="pending-reviews">
-                  {statsLoading ? "..." : stats?.pendingReviews || 0}
+                  {statsLoading ? "..." : (stats as any)?.pendingReviews || 0}
                 </p>
               </div>
               <div className="h-12 w-12 bg-yellow-500/10 rounded-lg flex items-center justify-center">
