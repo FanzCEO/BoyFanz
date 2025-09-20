@@ -10,10 +10,15 @@ import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
+import SocialHome from "@/pages/SocialHome";
 import Media from "@/pages/Media";
 import Compliance from "@/pages/Compliance";
 import Payouts from "@/pages/Payouts";
 import Notifications from "@/pages/Notifications";
+import Purchased from "@/pages/Purchased";
+import Subscriptions from "@/pages/Subscriptions";
+import ReleaseForms from "@/pages/ReleaseForms";
+import Nearby from "@/pages/Nearby";
 import ModerationQueue from "@/pages/Admin/ModerationQueue";
 import UserManagement from "@/pages/Admin/UserManagement";
 import DelegationManager from "@/pages/Admin/DelegationManager";
@@ -44,7 +49,7 @@ function Router() {
   useTheme(); // Apply active theme
 
   // Protected routes that require authentication
-  const protectedRoutes = ['/feed', '/messages', '/post', '/earnings', '/media', '/compliance', '/payouts', '/notifications', '/settings', '/admin'];
+  const protectedRoutes = ['/feed', '/messages', '/post', '/earnings', '/media', '/compliance', '/payouts', '/notifications', '/settings', '/admin', '/purchased', '/subscriptions', '/release-forms', '/nearby'];
   
   // Check if current route is protected
   const isProtectedRoute = protectedRoutes.some(route => location.startsWith(route));
@@ -95,11 +100,16 @@ function Router() {
         <Header user={user} />
         <main className="p-4 md:p-6">
           <Switch>
-            <Route path="/" component={Dashboard} />
+            <Route path="/" component={SocialHome} />
+            <Route path="/dashboard" component={Dashboard} />
             <Route path="/media" component={Media} />
             <Route path="/compliance" component={Compliance} />
             <Route path="/payouts" component={Payouts} />
             <Route path="/notifications" component={Notifications} />
+            <Route path="/purchased" component={Purchased} />
+            <Route path="/subscriptions" component={Subscriptions} />
+            <Route path="/release-forms" component={ReleaseForms} />
+            <Route path="/nearby" component={Nearby} />
             <Route path="/admin/moderation" component={ModerationQueue} />
             <Route path="/admin/moderation-queue" component={ModerationQueue} />
             <Route path="/admin/users" component={UserManagement} />

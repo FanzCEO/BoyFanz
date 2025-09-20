@@ -22,14 +22,15 @@ export default function Sidebar({ user }: SidebarProps) {
   };
   
   const navItems = [
-    { path: "/", icon: "fas fa-tachometer-alt", label: "Dashboard" },
-    { path: "/feed", icon: "fas fa-home", label: "Feed" },
-    { path: "/search", icon: "fas fa-search", label: "Discover" },
+    { path: "/", icon: "fas fa-home", label: "Home" },
+    { path: `/creator/${user?.id}`, icon: "fas fa-user", label: "My page" },
+    { path: "/dashboard", icon: "fas fa-tachometer-alt", label: "Dashboard" },
+    { path: "/purchased", icon: "fas fa-shopping-bag", label: "Purchased" },
     { path: "/messages", icon: "fas fa-comments", label: "Messages", dot: true },
-    { path: "/media", icon: "fas fa-photo-video", label: "Media Assets", badge: "3" },
-    { path: "/compliance", icon: "fas fa-shield-alt", label: "Compliance", badge: "KYC" },
-    { path: "/payouts", icon: "fas fa-dollar-sign", label: "Payouts" },
-    { path: "/notifications", icon: "fas fa-bell", label: "Notifications", dot: true },
+    { path: "/search", icon: "fas fa-search", label: "Explore" },
+    { path: "/subscriptions", icon: "fas fa-star", label: "Subscriptions" },
+    { path: "/release-forms", icon: "fas fa-file-contract", label: "Release Forms" },
+    { path: "/nearby", icon: "fas fa-map-marker-alt", label: "Near by me" },
   ];
 
   const adminItems = [
