@@ -934,7 +934,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Missing userId parameter" });
       }
       
+      // Validate otherUserId format
+      if (!otherUserId.match(/^[0-9a-fA-F-]{36}$/)) {
+        return res.status(400).json({ message: "Invalid userId format" });
+      }
+      
+      // Prevent users from accessing conversations they're not part of
+      // The storage.getConversation should only return messages where the authenticated user
+      // is either the sender or receiver
       const messages = await storage.getConversation(userId, otherUserId, limit);
+      
+      // Additional security check: ensure all returned messages involve the authenticated user
+      const unauthorizedMessages = messages.filter(msg => 
+        msg.senderId !== userId && msg.receiverId !== userId
+      );
+      
+      if (unauthorizedMessages.length > 0) {
+        console.warn(`Authorization violation: User ${userId} attempted to access unauthorized messages`);
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
       res.json(messages);
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -947,9 +966,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const senderId = req.user.claims.sub;
       const messageData = req.body;
       
+      // Prevent users from trying to send messages as someone else
+      if (messageData.senderId && messageData.senderId !== senderId) {
+        return res.status(403).json({ message: "Cannot send messages as another user" });
+      }
+      
+      // Validate receiverId format
+      if (!messageData.receiverId?.match(/^[0-9a-fA-F-]{36}$/)) {
+        return res.status(400).json({ message: "Invalid receiverId format" });
+      }
+      
+      // Prevent self-messaging (optional business rule)
+      if (messageData.receiverId === senderId) {
+        return res.status(400).json({ message: "Cannot send messages to yourself" });
+      }
+      
       const message = await storage.createMessage({
         ...messageData,
-        senderId,
+        senderId, // Always use authenticated user as sender
         isPaid: messageData.priceCents > 0,
         isMassMessage: false,
         readAt: null,
