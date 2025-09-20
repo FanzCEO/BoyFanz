@@ -414,3 +414,26 @@
 .club-input::placeholder {
   color: rgba(255, 255, 255, 0.4);
 }
+
+/* Homepage background with authentic underground club image */
+.homepage-bg {
+  background: 
+    linear-gradient(135deg, 
+      rgba(0, 0, 0, 0.7) 0%, 
+      rgba(20, 0, 0, 0.6) 25%,
+      rgba(0, 0, 0, 0.8) 50%,
+      rgba(10, 0, 0, 0.7) 75%,
+      rgba(0, 0, 0, 0.9) 100%
+    ),
+    url('/homepage.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+/* Ensure text remains readable over the background */
+.homepage-bg .relative {
+  position: relative;
+  z-index: 10;
+}

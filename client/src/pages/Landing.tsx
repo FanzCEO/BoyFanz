@@ -8,10 +8,11 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground smoky-bg" data-testid="landing-page">
+    <div className="min-h-screen bg-background text-foreground homepage-bg" data-testid="landing-page">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/5"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/10"></div>
+        <div className="absolute inset-0 bg-black/40"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
             <div className="flex justify-center mb-8">
