@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Send, 
   MessageCircle, 
@@ -14,7 +18,10 @@ import {
   Video,
   DollarSign,
   MoreVertical,
-  Search
+  Search,
+  Lock,
+  Unlock,
+  CreditCard
 } from 'lucide-react';
 
 interface Message {
@@ -124,7 +131,11 @@ const ConversationList = ({
   );
 };
 
-const MessageBubble = ({ message, isOwn }: { message: Message; isOwn: boolean }) => {
+const MessageBubble = ({ message, isOwn, onPurchase }: { 
+  message: Message; 
+  isOwn: boolean; 
+  onPurchase: (message: Message) => void;
+}) => {
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -139,6 +150,9 @@ const MessageBubble = ({ message, isOwn }: { message: Message; isOwn: boolean })
     });
   };
 
+  const isPaidMessage = message.priceCents > 0;
+  const canViewContent = isOwn || !isPaidMessage || message.isPaid;
+
   return (
     <div 
       className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`}
@@ -147,7 +161,9 @@ const MessageBubble = ({ message, isOwn }: { message: Message; isOwn: boolean })
       <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
         isOwn 
           ? 'bg-primary text-primary-foreground' 
-          : 'bg-muted'
+          : isPaidMessage && !canViewContent 
+            ? 'bg-gradient-to-r from-red-600/20 to-red-700/20 border border-red-500/30'
+            : 'bg-muted'
       }`}>
         {message.type === 'tip' && (
           <div className="flex items-center gap-2 mb-2 text-amber-400">
@@ -158,19 +174,71 @@ const MessageBubble = ({ message, isOwn }: { message: Message; isOwn: boolean })
           </div>
         )}
 
-        {message.type === 'text' && message.content && (
-          <p className="text-sm">{message.content}</p>
+        {/* Paid Message Header */}
+        {isPaidMessage && !isOwn && (
+          <div className="flex items-center gap-2 mb-2 text-red-400">
+            {canViewContent ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+            <span className="text-xs font-semibold">
+              {canViewContent ? 'Unlocked' : 'Paid Message'} - {formatCurrency(message.priceCents)}
+            </span>
+          </div>
         )}
 
-        {(message.type === 'photo' || message.type === 'video') && message.mediaUrl && (
+        {/* Message Content */}
+        {message.type === 'text' && (
+          <>
+            {canViewContent ? (
+              <p className="text-sm">{message.content}</p>
+            ) : (
+              <div className="text-center py-2">
+                <Lock className="h-6 w-6 mx-auto mb-2 text-red-400" />
+                <p className="text-xs text-muted-foreground mb-3">
+                  This message is locked. Pay {formatCurrency(message.priceCents)} to unlock.
+                </p>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => onPurchase(message)}
+                  className="bg-red-600 hover:bg-red-700"
+                  data-testid={`unlock-message-${message.id}`}
+                >
+                  <CreditCard className="h-3 w-3 mr-1" />
+                  Unlock {formatCurrency(message.priceCents)}
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+
+        {(message.type === 'photo' || message.type === 'video') && (
           <div className="mb-2">
-            <img 
-              src={message.mediaUrl} 
-              alt="Message media"
-              className="rounded max-w-full h-auto"
-            />
-            {message.content && (
-              <p className="text-sm mt-2">{message.content}</p>
+            {canViewContent && message.mediaUrl ? (
+              <>
+                <img 
+                  src={message.mediaUrl} 
+                  alt="Message media"
+                  className="rounded max-w-full h-auto"
+                />
+                {message.content && (
+                  <p className="text-sm mt-2">{message.content}</p>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <Lock className="h-8 w-8 mx-auto mb-2 text-red-400" />
+                <p className="text-xs text-muted-foreground mb-3">
+                  Premium media content - Pay {formatCurrency(message.priceCents)} to unlock.
+                </p>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => onPurchase(message)}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  <CreditCard className="h-3 w-3 mr-1" />
+                  Unlock {formatCurrency(message.priceCents)}
+                </Button>
+              </div>
             )}
           </div>
         )}
@@ -182,6 +250,11 @@ const MessageBubble = ({ message, isOwn }: { message: Message; isOwn: boolean })
           {message.readAt && isOwn && (
             <span className="text-xs opacity-75">Read</span>
           )}
+          {isPaidMessage && isOwn && (
+            <Badge variant="outline" className="text-xs bg-green-600/20 text-green-400 border-green-600/30">
+              {formatCurrency(message.priceCents)}
+            </Badge>
+          )}
         </div>
       </div>
     </div>
@@ -191,6 +264,11 @@ const MessageBubble = ({ message, isOwn }: { message: Message; isOwn: boolean })
 export default function Messages() {
   const [selectedUserId, setSelectedUserId] = useState<string>();
   const [newMessage, setNewMessage] = useState('');
+  const [isPaidMessage, setIsPaidMessage] = useState(false);
+  const [messagePrice, setMessagePrice] = useState('');
+  const [showPaymentDialog, setShowPaymentDialog] = useState<Message | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: conversations = [] } = useQuery<Conversation[]>({
     queryKey: ['/api/messages/conversations'],
@@ -201,28 +279,93 @@ export default function Messages() {
     enabled: !!selectedUserId,
   });
 
+  const { data: currentUser } = useQuery<{ id: string; role: string }>({
+    queryKey: ['/api/auth/me'],
+  });
+
+  // Send Message Mutation
+  const sendMessageMutation = useMutation({
+    mutationFn: async (messageData: any) => {
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(messageData),
+      });
+      if (!response.ok) throw new Error('Failed to send message');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/messages', selectedUserId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/messages/conversations'] });
+      setNewMessage('');
+      setIsPaidMessage(false);
+      setMessagePrice('');
+      toast({
+        title: "Message sent!",
+        description: isPaidMessage ? `Paid message sent for $${messagePrice}` : "Message sent successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Purchase Message Mutation  
+  const purchaseMessageMutation = useMutation({
+    mutationFn: async (messageId: string) => {
+      const response = await fetch(`/api/messages/${messageId}/purchase`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+      if (!response.ok) throw new Error('Failed to purchase message');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/messages', selectedUserId] });
+      setShowPaymentDialog(null);
+      toast({
+        title: "Message unlocked!",
+        description: "You can now view the message content.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Payment failed",
+        description: "Unable to process payment. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedUserId) return;
 
-    try {
-      const response = await fetch('/api/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          receiverId: selectedUserId,
-          type: 'text',
-          content: newMessage,
-        }),
-      });
+    const priceCents = isPaidMessage && messagePrice ? parseFloat(messagePrice) * 100 : 0;
 
-      if (response.ok) {
-        setNewMessage('');
-        // Refetch messages
-      }
-    } catch (error) {
-      console.error('Failed to send message:', error);
-    }
+    sendMessageMutation.mutate({
+      receiverId: selectedUserId,
+      type: 'text',
+      content: newMessage,
+      priceCents,
+      isPaid: isPaidMessage
+    });
   };
+
+  const handlePurchaseMessage = (message: Message) => {
+    purchaseMessageMutation.mutate(message.id);
+  };
+
+  const isCreator = currentUser?.role === 'creator';
 
   const currentUserId = 'current-user'; // This would come from auth context
 
@@ -305,6 +448,7 @@ export default function Messages() {
                         key={message.id}
                         message={message}
                         isOwn={message.senderId === currentUserId}
+                        onPurchase={handlePurchaseMessage}
                       />
                     ))}
                   </div>
@@ -313,6 +457,40 @@ export default function Messages() {
 
               {/* Message Input */}
               <div className="p-4 border-t border-border bg-muted/30">
+                {/* Paid Message Settings (Creators Only) */}
+                {isCreator && (
+                  <div className="mb-3 p-3 bg-card rounded-lg border border-border">
+                    <div className="flex items-center justify-between mb-2">
+                      <Label htmlFor="paid-message" className="text-sm font-medium">
+                        Charge for this message
+                      </Label>
+                      <Switch
+                        id="paid-message"
+                        checked={isPaidMessage}
+                        onCheckedChange={setIsPaidMessage}
+                        data-testid="paid-message-toggle"
+                      />
+                    </div>
+                    {isPaidMessage && (
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          max="999.99"
+                          value={messagePrice}
+                          onChange={(e) => setMessagePrice(e.target.value)}
+                          placeholder="0.00"
+                          className="w-20 text-sm"
+                          data-testid="message-price-input"
+                        />
+                        <span className="text-xs text-muted-foreground">USD</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
                 <div className="flex items-center gap-2">
                   <Button variant="ghost" size="icon" data-testid="attach-image">
                     <Image className="h-4 w-4" />
@@ -328,16 +506,28 @@ export default function Messages() {
                     <Input
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
-                      placeholder="Type a message..."
+                      placeholder={
+                        isPaidMessage && messagePrice
+                          ? `Type paid message ($${messagePrice})...`
+                          : "Type a message..."
+                      }
                       onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                       data-testid="message-input"
+                      className={isPaidMessage ? "border-red-500/50 focus:border-red-500" : ""}
                     />
                     <Button 
                       onClick={handleSendMessage}
-                      disabled={!newMessage.trim()}
+                      disabled={!newMessage.trim() || (isPaidMessage && !messagePrice) || sendMessageMutation.isPending}
                       data-testid="send-message"
+                      className={isPaidMessage ? "bg-red-600 hover:bg-red-700" : ""}
                     >
-                      <Send className="h-4 w-4" />
+                      {sendMessageMutation.isPending ? (
+                        <div className="h-4 w-4 animate-spin border-2 border-background border-t-transparent rounded-full" />
+                      ) : isPaidMessage ? (
+                        <Lock className="h-4 w-4" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 </div>

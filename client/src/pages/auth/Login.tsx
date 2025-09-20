@@ -159,7 +159,7 @@ export default function Login() {
         {/* Right side - Hero Section */}
         <div className="flex flex-col justify-center space-y-8 p-8">
           <div className="text-center lg:text-left">
-            <h1 className="text-5xl font-bold font-heading mb-4 neon-crimson-heading neon-flicker">
+            <h1 className="text-5xl font-bold font-heading mb-4 neon-sign-golden neon-flicker">
               Every Man's Playground
             </h1>
             <p className="text-xl neon-white-body neon-breathe mb-8">
