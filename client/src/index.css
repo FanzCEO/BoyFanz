@@ -137,6 +137,53 @@
     animation: subtle-flicker 12s ease-in-out infinite;
     filter: brightness(0.85) contrast(1.0);
   }
+  
+  /* Glass morphism backgrounds */
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  }
+
+  /* Underground club neon effects */
+  .neon-red {
+    color: hsl(0, 85%, 60%);
+    text-shadow: 
+      0 0 2px hsl(0, 80%, 50%),
+      0 0 4px hsl(0, 70%, 45%),
+      0 0 6px hsl(0, 60%, 40%);
+    animation: subtle-flicker 6s ease-in-out infinite;
+  }
+
+  .neon-crimson {
+    color: hsl(0, 90%, 58%);
+    text-shadow: 
+      0 0 3px hsl(0, 85%, 55%),
+      0 0 6px hsl(0, 80%, 50%),
+      0 0 12px hsl(0, 75%, 45%);
+    animation: crimson-flicker 8s ease-in-out infinite;
+  }
+
+  .neon-outline {
+    border: 1px solid rgba(255, 0, 0, 0.3);
+  }
+
+  /* Clean white neon for body text - no glow, subtle flicker */
+  .neon-white-body {
+    color: hsl(0, 0%, 95%);
+    animation: white-neon-flicker 8s ease-in-out infinite;
+    filter: brightness(1.05);
+  }
+
+  /* Underground gritty red accents for contrast */
+  .text-accent {
+    color: hsl(0, 80%, 65%);
+    text-shadow: 
+      0 0 2px hsl(0, 80%, 50%),
+      0 0 4px hsl(0, 70%, 45%),
+      0 0 6px hsl(0, 60%, 40%);
+  }
 }
 
 /* Subtle flicker animation for muted effects */
@@ -161,4 +208,209 @@
     opacity: 1;
     filter: brightness(0.85) contrast(1.0);
   }
+}
+
+/* Crimson neon flicker animation for dangerous/seductive effect */
+@keyframes crimson-flicker {
+  0% { 
+    opacity: 1;
+    text-shadow: 
+      0 0 3px hsl(0, 85%, 55%),
+      0 0 6px hsl(0, 80%, 50%),
+      0 0 12px hsl(0, 75%, 45%);
+    filter: brightness(1.1) contrast(1.2);
+  }
+  15% { 
+    opacity: 0.88;
+    text-shadow: 
+      0 0 2px hsl(0, 80%, 50%),
+      0 0 4px hsl(0, 75%, 45%),
+      0 0 8px hsl(0, 70%, 40%);
+    filter: brightness(0.95) contrast(1.0);
+  }
+  30% { 
+    opacity: 0.94;
+    text-shadow: 
+      0 0 3px hsl(0, 82%, 52%),
+      0 0 5px hsl(0, 77%, 47%),
+      0 0 10px hsl(0, 72%, 42%);
+    filter: brightness(1.05) contrast(1.1);
+  }
+  50% { 
+    opacity: 0.85;
+    text-shadow: 
+      0 0 2px hsl(0, 78%, 48%),
+      0 0 4px hsl(0, 73%, 43%),
+      0 0 7px hsl(0, 68%, 38%);
+    filter: brightness(0.9) contrast(0.95);
+  }
+  70% { 
+    opacity: 0.92;
+    text-shadow: 
+      0 0 3px hsl(0, 83%, 53%),
+      0 0 5px hsl(0, 78%, 48%),
+      0 0 9px hsl(0, 73%, 43%);
+    filter: brightness(1.0) contrast(1.05);
+  }
+  85% { 
+    opacity: 0.89;
+    text-shadow: 
+      0 0 2px hsl(0, 81%, 51%),
+      0 0 4px hsl(0, 76%, 46%),
+      0 0 8px hsl(0, 71%, 41%);
+    filter: brightness(0.97) contrast(1.02);
+  }
+  100% { 
+    opacity: 1;
+    text-shadow: 
+      0 0 3px hsl(0, 85%, 55%),
+      0 0 6px hsl(0, 80%, 50%),
+      0 0 12px hsl(0, 75%, 45%);
+    filter: brightness(1.1) contrast(1.2);
+  }
+}
+
+/* White neon flicker animation - subtle stripper bar style, no white glow */
+@keyframes white-neon-flicker {
+  0% { 
+    opacity: 1;
+    filter: brightness(1.05);
+  }
+  15% { 
+    opacity: 0.92;
+    filter: brightness(0.98);
+  }
+  30% { 
+    opacity: 0.96;
+    filter: brightness(1.02);
+  }
+  50% { 
+    opacity: 0.89;
+    filter: brightness(0.95);
+  }
+  70% { 
+    opacity: 0.95;
+    filter: brightness(1.01);
+  }
+  85% { 
+    opacity: 0.91;
+    filter: brightness(0.97);
+  }
+  100% { 
+    opacity: 1;
+    filter: brightness(1.05);
+  }
+}
+
+/* Underground club atmosphere effects - Raw & Gritty */
+.smoky-bg {
+  background: 
+    radial-gradient(circle at 25% 25%, rgba(255, 0, 0, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(255, 0, 0, 0.05) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(20, 0, 0, 0.95) 100%);
+}
+
+.retro-border {
+  border: 2px solid;
+  border-image: linear-gradient(45deg, 
+    rgba(255, 0, 0, 0.8), 
+    rgba(255, 50, 50, 0.4), 
+    rgba(255, 0, 0, 0.8)
+  ) 1;
+  box-shadow: 
+    inset 0 0 20px rgba(255, 0, 0, 0.1),
+    0 0 20px rgba(255, 0, 0, 0.1);
+}
+
+.gritty-texture {
+  background: 
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 98px,
+      rgba(255, 0, 0, 0.03) 100px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 98px,
+      rgba(0, 0, 0, 0.1) 100px
+    );
+}
+
+/* Underground club buttons and interactive elements */
+.club-button {
+  background: linear-gradient(135deg, 
+    rgba(255, 0, 0, 0.2) 0%, 
+    rgba(100, 0, 0, 0.4) 100%
+  );
+  border: 1px solid rgba(255, 0, 0, 0.3);
+  text-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
+  box-shadow: 
+    0 4px 15px rgba(255, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.club-button:hover {
+  background: linear-gradient(135deg, 
+    rgba(255, 0, 0, 0.3) 0%, 
+    rgba(120, 0, 0, 0.5) 100%
+  );
+  box-shadow: 
+    0 6px 20px rgba(255, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Seductive scrollbar for underground feel */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 0, 0, 0.5) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, 
+    rgba(255, 0, 0, 0.7) 0%, 
+    rgba(150, 0, 0, 0.5) 100%
+  );
+  border-radius: 4px;
+  border: 1px solid rgba(255, 0, 0, 0.2);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, 
+    rgba(255, 0, 0, 0.9) 0%, 
+    rgba(180, 0, 0, 0.7) 100%
+  );
+}
+
+/* Underground club form styling */
+.club-input {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 0, 0, 0.3);
+  color: hsl(0, 0%, 95%);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.club-input:focus {
+  border-color: rgba(255, 0, 0, 0.6);
+  box-shadow: 
+    0 0 0 2px rgba(255, 0, 0, 0.1),
+    0 0 8px rgba(255, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.club-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
 }
