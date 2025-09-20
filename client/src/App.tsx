@@ -65,6 +65,7 @@ function Router() {
             <Route path="/payouts" component={Payouts} />
             <Route path="/notifications" component={Notifications} />
             <Route path="/admin/moderation" component={ModerationQueue} />
+            <Route path="/admin/moderation-queue" component={ModerationQueue} />
             <Route path="/admin/users" component={UserManagement} />
             <Route path="/admin/themes" component={ThemeManager} />
             <Route path="/settings" component={Settings} />
