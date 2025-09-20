@@ -25,7 +25,7 @@ export default function ModerationQueue() {
 
   const { data: moderationQueue, isLoading } = useQuery({
     queryKey: ['/api/moderation/queue'],
-    enabled: user?.role === 'admin',
+    enabled: user?.role === 'admin' || user?.role === 'moderator',
   });
 
   const approveMutation = useMutation({
@@ -128,7 +128,7 @@ export default function ModerationQueue() {
               <div>
                 <p className="text-sm text-muted-foreground">Pending Review</p>
                 <p className="text-2xl font-bold text-yellow-500" data-testid="pending-count">
-                  {moderationQueue?.length || 0}
+                  {Array.isArray(moderationQueue) ? moderationQueue.length : 0}
                 </p>
               </div>
             </div>
@@ -193,9 +193,9 @@ export default function ModerationQueue() {
                 </div>
               ))}
             </div>
-          ) : moderationQueue && moderationQueue.length > 0 ? (
+          ) : Array.isArray(moderationQueue) && moderationQueue.length > 0 ? (
             <div className="space-y-4">
-              {moderationQueue.map((item: any) => (
+              {moderationQueue?.map((item: any) => (
                 <div 
                   key={item.id} 
                   className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"

@@ -34,6 +34,16 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 
+// Admin delegation validation schemas
+const updateUserRoleSchema = z.object({
+  role: z.enum(['fan', 'creator', 'moderator'])
+});
+
+const delegationPermissionSchema = z.object({
+  userId: z.string().uuid(),
+  permission: z.enum(['moderation_queue', 'content_approval', 'theme_management', 'analytics_access', 'user_management'])
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
@@ -42,8 +52,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Rate limiting
   app.use('/api/', rateLimit);
 
-  // Helper function to check admin/moderator access and delegated permissions
-  async function hasAdminAccess(userId: string, requiredPermission?: string): Promise<boolean> {
+  // Helper function to check if user is admin (for admin-only operations)
+  async function isAdmin(userId: string): Promise<boolean> {
+    const user = await storage.getUser(userId);
+    return user?.role === 'admin';
+  }
+
+  // Helper function to check admin/moderator access with specific permission requirements
+  async function hasAdminAccess(userId: string, requiredPermission: string): Promise<boolean> {
     const user = await storage.getUser(userId);
     
     // Full admin always has access
@@ -51,17 +67,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return true;
     }
     
-    // Moderators have access to moderation functions
+    // Moderators must have specific delegated permission
     if (user?.role === 'moderator') {
-      return true;
-    }
-    
-    // Check delegated permissions if specified
-    if (requiredPermission) {
       return await storage.hasPermission(userId, requiredPermission);
     }
     
-    return false;
+    // Regular users must have specific delegated permission
+    return await storage.hasPermission(userId, requiredPermission);
   }
 
   // Auth routes
@@ -335,6 +347,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting theme:", error);
       res.status(500).json({ message: "Failed to delete theme" });
+    }
+  });
+
+  // Admin delegation management routes (admin-only)
+  app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      if (!(await isAdmin(userId))) {
+        return res.status(403).json({ message: "Access denied - Admin privileges required" });
+      }
+
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.put('/api/admin/users/:userId/role', isAuthenticated, csrfProtection, validateRequest(updateUserRoleSchema), async (req: any, res) => {
+    try {
+      const adminUserId = req.user.claims.sub;
+      if (!(await isAdmin(adminUserId))) {
+        return res.status(403).json({ message: "Access denied - Admin privileges required" });
+      }
+
+      const { userId } = req.params;
+      const { role } = req.body;
+
+      // Prevent users from modifying their own role
+      if (userId === adminUserId) {
+        return res.status(400).json({ message: "Cannot modify your own role" });
+      }
+
+      await storage.updateUserRole(userId, role);
+      res.json({ message: "User role updated successfully" });
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      res.status(500).json({ message: "Failed to update user role" });
+    }
+  });
+
+  app.get('/api/admin/delegations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      if (!(await isAdmin(userId))) {
+        return res.status(403).json({ message: "Access denied - Admin privileges required" });
+      }
+
+      const delegations = await storage.getAllDelegatedPermissions();
+      res.json(delegations);
+    } catch (error) {
+      console.error("Error fetching delegations:", error);
+      res.status(500).json({ message: "Failed to fetch delegations" });
+    }
+  });
+
+  app.post('/api/admin/delegations/grant', isAuthenticated, csrfProtection, validateRequest(delegationPermissionSchema), async (req: any, res) => {
+    try {
+      const adminUserId = req.user.claims.sub;
+      if (!(await isAdmin(adminUserId))) {
+        return res.status(403).json({ message: "Access denied - Admin privileges required" });
+      }
+
+      const { userId, permission } = req.body;
+      
+      // Prevent admins from modifying their own permissions
+      if (userId === adminUserId) {
+        return res.status(400).json({ message: "Cannot modify your own permissions" });
+      }
+
+      const delegation = await storage.grantPermission({
+        userId,
+        permission,
+        granted: true,
+        grantedBy: adminUserId,
+      });
+
+      res.json(delegation);
+    } catch (error) {
+      console.error("Error granting permission:", error);
+      res.status(500).json({ message: "Failed to grant permission" });
+    }
+  });
+
+  app.post('/api/admin/delegations/revoke', isAuthenticated, csrfProtection, validateRequest(delegationPermissionSchema), async (req: any, res) => {
+    try {
+      const adminUserId = req.user.claims.sub;
+      if (!(await isAdmin(adminUserId))) {
+        return res.status(403).json({ message: "Access denied - Admin privileges required" });
+      }
+
+      const { userId, permission } = req.body;
+      
+      // Prevent admins from modifying their own permissions
+      if (userId === adminUserId) {
+        return res.status(400).json({ message: "Cannot modify your own permissions" });
+      }
+
+      await storage.revokePermission(userId, permission);
+      res.json({ message: "Permission revoked successfully" });
+    } catch (error) {
+      console.error("Error revoking permission:", error);
+      res.status(500).json({ message: "Failed to revoke permission" });
     }
   });
 

@@ -35,6 +35,7 @@ export default function Sidebar({ user }: SidebarProps) {
   const adminItems = [
     { path: "/admin/moderation", icon: "fas fa-tasks", label: "Moderation Queue", badge: "7" },
     { path: "/admin/users", icon: "fas fa-users", label: "User Management" },
+    { path: "/admin/delegation", icon: "fas fa-key", label: "Delegation Manager" },
     { path: "/admin/themes", icon: "fas fa-palette", label: "Theme Manager" },
     { path: "/settings", icon: "fas fa-chart-bar", label: "Analytics" },
   ];
@@ -92,7 +93,7 @@ export default function Sidebar({ user }: SidebarProps) {
         </div>
 
         {/* Creator Section */}
-        {(user?.role === 'creator' || user?.role === 'admin') && (
+        {(user?.role === 'creator' || user?.role === 'admin' || user?.role === 'moderator') && (
           <div className="mt-6 md:mt-8">
             <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Creator
@@ -154,7 +155,7 @@ export default function Sidebar({ user }: SidebarProps) {
         </div>
 
         {/* Admin Section */}
-        {user?.role === 'admin' && (
+        {(user?.role === 'admin' || user?.role === 'moderator') && (
           <div className="mt-6 md:mt-8">
             <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Administration

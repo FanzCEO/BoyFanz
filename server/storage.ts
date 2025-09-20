@@ -63,6 +63,8 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User>;
+  getAllUsers(): Promise<User[]>;
+  updateUserRole(userId: string, role: string): Promise<void>;
   
   // Profile operations
   getProfile(userId: string): Promise<Profile | undefined>;
@@ -178,6 +180,7 @@ export interface IStorage {
   revokePermission(userId: string, permission: string): Promise<void>;
   getUserPermissions(userId: string): Promise<DelegatedPermission[]>;
   hasPermission(userId: string, permission: string): Promise<boolean>;
+  getAllDelegatedPermissions(): Promise<DelegatedPermission[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -216,6 +219,17 @@ export class DatabaseStorage implements IStorage {
   async createUser(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
     const [user] = await db.insert(users).values(userData).returning();
     return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(users.createdAt);
+  }
+
+  async updateUserRole(userId: string, role: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ role: role as any, updatedAt: new Date() })
+      .where(eq(users.id, userId));
   }
 
   // Profile operations
@@ -851,6 +865,14 @@ export class DatabaseStorage implements IStorage {
         eq(delegatedPermissions.granted, true)
       ));
     return !!result;
+  }
+
+  async getAllDelegatedPermissions(): Promise<DelegatedPermission[]> {
+    return await db
+      .select()
+      .from(delegatedPermissions)
+      .where(eq(delegatedPermissions.granted, true))
+      .orderBy(delegatedPermissions.createdAt);
   }
 }
 

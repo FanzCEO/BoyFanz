@@ -12,7 +12,7 @@ type RegisterData = {
   username: string;
   email: string;
   password: string;
-  role: "fan" | "creator" | "admin";
+  role: "fan" | "creator" | "admin" | "moderator";
   firstName?: string;
   lastName?: string;
 };

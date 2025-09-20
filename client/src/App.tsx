@@ -16,6 +16,7 @@ import Payouts from "@/pages/Payouts";
 import Notifications from "@/pages/Notifications";
 import ModerationQueue from "@/pages/Admin/ModerationQueue";
 import UserManagement from "@/pages/Admin/UserManagement";
+import DelegationManager from "@/pages/Admin/DelegationManager";
 import ThemeManager from "@/pages/Admin/ThemeManager";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
@@ -102,6 +103,7 @@ function Router() {
             <Route path="/admin/moderation" component={ModerationQueue} />
             <Route path="/admin/moderation-queue" component={ModerationQueue} />
             <Route path="/admin/users" component={UserManagement} />
+            <Route path="/admin/delegation" component={DelegationManager} />
             <Route path="/admin/themes" component={ThemeManager} />
             <Route path="/settings" component={Settings} />
             <Route path="/creator/:userId" component={CreatorProfile} />

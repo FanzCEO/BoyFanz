@@ -56,7 +56,7 @@ export default function ThemeManager() {
 
   const { data: themes, isLoading } = useQuery({
     queryKey: ['/api/themes'],
-    enabled: (user as any)?.role === 'admin',
+    enabled: (user as any)?.role === 'admin' || (user as any)?.role === 'moderator',
   });
 
   const { data: activeTheme } = useQuery({
