@@ -507,7 +507,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const fanUserId = req.user.claims.sub;
       const { creatorUserId, amount, message } = req.body;
+      
+      // Process the financial transaction
       const transaction = await earningsService.processTip(fanUserId, creatorUserId, amount, message);
+      
+      // Trigger Lovense device vibration if integrated
+      try {
+        const { lovenseService } = await import('./services/lovenseService');
+        await lovenseService.processTipVibration(creatorUserId, amount, fanUserId);
+      } catch (lovenseError) {
+        console.log("Lovense integration not available or failed:", lovenseError);
+      }
+      
       res.json(transaction);
     } catch (error) {
       console.error("Error processing tip:", error);
@@ -524,6 +535,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error processing live stream tokens:", error);
       res.status(500).json({ message: "Failed to process live stream tokens" });
+    }
+  });
+
+  // Lovense Integration Routes (Creator Only)
+  app.get('/api/lovense/settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const { lovenseService } = await import('./services/lovenseService');
+      const settings = await lovenseService.getCreatorSettings(creatorId);
+      res.json(settings || {});
+    } catch (error) {
+      console.error("Error fetching Lovense settings:", error);
+      res.status(500).json({ message: "Failed to fetch Lovense settings" });
+    }
+  });
+
+  app.put('/api/lovense/settings', isAuthenticated, csrfProtection, validateRequest(updateLovenseIntegrationSettingsSchema), async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const { lovenseService } = await import('./services/lovenseService');
+      const updated = await lovenseService.updateCreatorSettings(creatorId, req.body);
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating Lovense settings:", error);
+      res.status(500).json({ message: "Failed to update Lovense settings" });
+    }
+  });
+
+  app.get('/api/lovense/devices', isAuthenticated, async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const { lovenseService } = await import('./services/lovenseService');
+      const devices = await lovenseService.getCreatorDevices(creatorId);
+      res.json(devices);
+    } catch (error) {
+      console.error("Error fetching Lovense devices:", error);
+      res.status(500).json({ message: "Failed to fetch devices" });
+    }
+  });
+
+  app.post('/api/lovense/sync', isAuthenticated, csrfProtection, async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const { lovenseService } = await import('./services/lovenseService');
+      const result = await lovenseService.syncDevices(creatorId);
+      res.json(result);
+    } catch (error) {
+      console.error("Error syncing Lovense devices:", error);
+      res.status(500).json({ message: "Failed to sync devices" });
+    }
+  });
+
+  app.post('/api/lovense/control', isAuthenticated, csrfProtection, validateRequest(lovenseDeviceControlSchema), async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const { deviceId, ...control } = req.body;
+      const { lovenseService } = await import('./services/lovenseService');
+      const result = await lovenseService.controlDevice(creatorId, deviceId, control);
+      res.json(result);
+    } catch (error) {
+      console.error("Error controlling Lovense device:", error);
+      res.status(500).json({ message: "Failed to control device" });
+    }
+  });
+
+  app.post('/api/lovense/test/:deviceId', isAuthenticated, csrfProtection, async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const { deviceId } = req.params;
+      const { lovenseService } = await import('./services/lovenseService');
+      const result = await lovenseService.testDevice(creatorId, deviceId);
+      res.json(result);
+    } catch (error) {
+      console.error("Error testing Lovense device:", error);
+      res.status(500).json({ message: "Failed to test device" });
+    }
+  });
+
+  app.get('/api/lovense/actions/:deviceId', isAuthenticated, async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const { deviceId } = req.params;
+      const limit = parseInt(req.query.limit as string) || 50;
+      
+      // Verify device belongs to creator
+      const device = await storage.getLovenseDevice(deviceId);
+      if (!device || device.creatorId !== creatorId) {
+        return res.status(404).json({ message: "Device not found" });
+      }
+      
+      const actions = await storage.getLovenseDeviceActions(deviceId, limit);
+      res.json(actions);
+    } catch (error) {
+      console.error("Error fetching device actions:", error);
+      res.status(500).json({ message: "Failed to fetch device actions" });
     }
   });
 

@@ -51,6 +51,17 @@ import {
   delegatedPermissions,
   type DelegatedPermission,
   type InsertDelegatedPermission,
+  // Lovense integration
+  type InsertLovenseDevice,
+  type LovenseDevice,
+  type InsertLovenseDeviceAction,
+  type LovenseDeviceAction,
+  type InsertLovenseIntegrationSettings,
+  type LovenseIntegrationSettings,
+  type UpdateLovenseIntegrationSettings,
+  lovenseDevices,
+  lovenseDeviceActions,
+  lovenseIntegrationSettings,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, count, sql } from "drizzle-orm";
@@ -181,6 +192,18 @@ export interface IStorage {
   getUserPermissions(userId: string): Promise<DelegatedPermission[]>;
   hasPermission(userId: string, permission: string): Promise<boolean>;
   getAllDelegatedPermissions(): Promise<DelegatedPermission[]>;
+
+  // Lovense integration operations
+  getLovenseIntegrationSettings(creatorId: string): Promise<LovenseIntegrationSettings | undefined>;
+  updateLovenseIntegrationSettings(creatorId: string, settings: UpdateLovenseIntegrationSettings): Promise<LovenseIntegrationSettings>;
+  getLovenseDevices(creatorId: string): Promise<LovenseDevice[]>;
+  getLovenseDevice(deviceId: string): Promise<LovenseDevice | undefined>;
+  getLovenseDeviceByDeviceId(creatorId: string, deviceId: string): Promise<LovenseDevice | undefined>;
+  createLovenseDevice(creatorId: string, device: InsertLovenseDevice): Promise<LovenseDevice>;
+  updateLovenseDevice(deviceId: string, updates: Partial<LovenseDevice>): Promise<LovenseDevice>;
+  getActiveLovenseDevices(creatorId: string): Promise<LovenseDevice[]>;
+  createLovenseDeviceAction(action: InsertLovenseDeviceAction): Promise<LovenseDeviceAction>;
+  getLovenseDeviceActions(deviceId: string, limit?: number): Promise<LovenseDeviceAction[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -873,6 +896,101 @@ export class DatabaseStorage implements IStorage {
       .from(delegatedPermissions)
       .where(eq(delegatedPermissions.granted, true))
       .orderBy(delegatedPermissions.createdAt);
+  }
+
+  // Lovense integration operations
+  async getLovenseIntegrationSettings(creatorId: string): Promise<LovenseIntegrationSettings | undefined> {
+    const result = await db.select().from(lovenseIntegrationSettings)
+      .where(eq(lovenseIntegrationSettings.creatorId, creatorId))
+      .limit(1);
+    return result[0];
+  }
+
+  async updateLovenseIntegrationSettings(creatorId: string, settings: UpdateLovenseIntegrationSettings): Promise<LovenseIntegrationSettings> {
+    const updatedSettings = { 
+      ...settings, 
+      updatedAt: new Date().toISOString() 
+    };
+    
+    const result = await db.insert(lovenseIntegrationSettings)
+      .values({
+        creatorId,
+        ...settings,
+        updatedAt: new Date().toISOString()
+      })
+      .onConflictDoUpdate({
+        target: lovenseIntegrationSettings.creatorId,
+        set: updatedSettings
+      })
+      .returning();
+    
+    return result[0];
+  }
+
+  async getLovenseDevices(creatorId: string): Promise<LovenseDevice[]> {
+    return await db.select().from(lovenseDevices)
+      .where(eq(lovenseDevices.creatorId, creatorId))
+      .orderBy(desc(lovenseDevices.lastConnected));
+  }
+
+  async getLovenseDevice(deviceId: string): Promise<LovenseDevice | undefined> {
+    const result = await db.select().from(lovenseDevices)
+      .where(eq(lovenseDevices.id, deviceId))
+      .limit(1);
+    return result[0];
+  }
+
+  async getLovenseDeviceByDeviceId(creatorId: string, deviceId: string): Promise<LovenseDevice | undefined> {
+    const result = await db.select().from(lovenseDevices)
+      .where(and(
+        eq(lovenseDevices.creatorId, creatorId),
+        eq(lovenseDevices.deviceId, deviceId)
+      ))
+      .limit(1);
+    return result[0];
+  }
+
+  async createLovenseDevice(creatorId: string, device: InsertLovenseDevice): Promise<LovenseDevice> {
+    const result = await db.insert(lovenseDevices)
+      .values({
+        ...device,
+        creatorId,
+        status: 'disconnected',
+        lastConnected: new Date().toISOString()
+      })
+      .returning();
+    return result[0];
+  }
+
+  async updateLovenseDevice(deviceId: string, updates: Partial<LovenseDevice>): Promise<LovenseDevice> {
+    const result = await db.update(lovenseDevices)
+      .set(updates)
+      .where(eq(lovenseDevices.id, deviceId))
+      .returning();
+    return result[0];
+  }
+
+  async getActiveLovenseDevices(creatorId: string): Promise<LovenseDevice[]> {
+    return await db.select().from(lovenseDevices)
+      .where(and(
+        eq(lovenseDevices.creatorId, creatorId),
+        eq(lovenseDevices.isEnabled, true),
+        eq(lovenseDevices.status, 'connected')
+      ));
+  }
+
+  async createLovenseDeviceAction(action: InsertLovenseDeviceAction): Promise<LovenseDeviceAction> {
+    const result = await db.insert(lovenseDeviceActions)
+      .values(action)
+      .returning();
+    return result[0];
+  }
+
+  async getLovenseDeviceActions(deviceId: string, limit: number = 50): Promise<LovenseDeviceAction[]> {
+    return await db.select().from(lovenseDeviceActions)
+      .where(eq(lovenseDeviceActions.deviceId, deviceId))
+      .orderBy(desc(lovenseDeviceActions.createdAt))
+      .limit(limit);
   }
 }
 

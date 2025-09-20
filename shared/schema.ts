@@ -527,6 +527,59 @@ export const streamViewers = pgTable("stream_viewers", {
   leftAt: timestamp("left_at"),
 });
 
+// Lovense Device Integration
+export const lovenseDeviceStatusEnum = pgEnum("lovense_device_status", ["connected", "disconnected", "error"]);
+export const lovenseActionTypeEnum = pgEnum("lovense_action_type", ["tip", "manual", "pattern", "remote_control"]);
+
+export const lovenseDevices = pgTable("lovense_devices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  deviceId: varchar("device_id").notNull(), // Lovense device ID
+  deviceName: varchar("device_name").notNull(),
+  deviceType: varchar("device_type").notNull(), // "lush", "domi", "nora", etc.
+  status: lovenseDeviceStatusEnum("status").default("disconnected").notNull(),
+  isEnabled: boolean("is_enabled").default(true),
+  batteryLevel: integer("battery_level"),
+  lastConnected: timestamp("last_connected"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  creatorDeviceIdx: index("idx_lovense_creator_device").on(table.creatorId, table.deviceId),
+}));
+
+export const lovenseDeviceActions = pgTable("lovense_device_actions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  deviceId: varchar("device_id").notNull().references(() => lovenseDevices.id, { onDelete: "cascade" }),
+  streamId: varchar("stream_id").references(() => liveStreams.id, { onDelete: "cascade" }),
+  triggeredByUserId: varchar("triggered_by_user_id").references(() => users.id, { onDelete: "set null" }),
+  actionType: lovenseActionTypeEnum("action_type").notNull(),
+  intensity: integer("intensity"), // 0-20 for Lovense devices
+  duration: integer("duration"), // Duration in seconds
+  pattern: varchar("pattern"), // Pattern name or custom pattern
+  tipAmount: integer("tip_amount_cents"), // Tip amount that triggered this action
+  metadata: jsonb("metadata").default({}), // Additional data like custom patterns, messages
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  deviceCreatedIdx: index("idx_lovense_actions_device_created").on(table.deviceId, table.createdAt.desc()),
+  streamCreatedIdx: index("idx_lovense_actions_stream_created").on(table.streamId, table.createdAt.desc()),
+}));
+
+export const lovenseIntegrationSettings = pgTable("lovense_integration_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
+  isEnabled: boolean("is_enabled").default(false),
+  connectAppToken: varchar("connect_app_token"), // Lovense Connect app token
+  domainKey: varchar("domain_key"), // Platform domain key for Lovense API
+  tipMinimum: integer("tip_minimum_cents").default(100), // Minimum tip to trigger device (in cents)
+  tipMaximum: integer("tip_maximum_cents").default(10000), // Maximum tip for max intensity
+  intensityMapping: jsonb("intensity_mapping").default({}), // Custom tip-to-intensity mapping
+  allowRemoteControl: boolean("allow_remote_control").default(false),
+  allowPatterns: boolean("allow_patterns").default(true),
+  customPatterns: jsonb("custom_patterns").default({}), // User-defined patterns
+  lastSync: timestamp("last_sync"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Reports
 export const reportTypeEnum = pgEnum("report_type", ["spam", "harassment", "inappropriate_content", "copyright", "fake_account", "other"]);
 export const reportStatusEnum = pgEnum("report_status", ["pending", "reviewing", "resolved", "dismissed"]);
@@ -820,6 +873,64 @@ export const liveStreamTokensSchema = z.object({
   tokenValue: z.number().int().min(1, "Token value must be at least 1 cent").max(10000, "Token value too high"),
 });
 
+// Lovense Integration Schemas
+export const insertLovenseDeviceSchema = createInsertSchema(lovenseDevices).pick({
+  deviceId: true,
+  deviceName: true,
+  deviceType: true,
+  isEnabled: true,
+});
+
+export const insertLovenseDeviceActionSchema = createInsertSchema(lovenseDeviceActions).pick({
+  deviceId: true,
+  streamId: true,
+  actionType: true,
+  intensity: true,
+  duration: true,
+  pattern: true,
+  tipAmount: true,
+  metadata: true,
+});
+
+export const insertLovenseIntegrationSettingsSchema = createInsertSchema(lovenseIntegrationSettings).pick({
+  isEnabled: true,
+  connectAppToken: true,
+  domainKey: true,
+  tipMinimum: true,
+  tipMaximum: true,
+  intensityMapping: true,
+  allowRemoteControl: true,
+  allowPatterns: true,
+  customPatterns: true,
+});
+
+export const updateLovenseIntegrationSettingsSchema = createInsertSchema(lovenseIntegrationSettings).pick({
+  isEnabled: true,
+  connectAppToken: true,
+  domainKey: true,
+  tipMinimum: true,
+  tipMaximum: true,
+  intensityMapping: true,
+  allowRemoteControl: true,
+  allowPatterns: true,
+  customPatterns: true,
+});
+
+// Device control schemas for API endpoints
+export const lovenseDeviceControlSchema = z.object({
+  action: z.enum(['vibrate', 'rotate', 'pump', 'stop']),
+  intensity: z.number().min(0).max(20).optional(),
+  duration: z.number().min(1).max(300).optional(), // Max 5 minutes
+  pattern: z.string().optional(),
+});
+
+export const lovenseTestDeviceSchema = z.object({
+  deviceId: z.string(),
+  action: z.enum(['test_vibration', 'check_battery', 'ping']),
+  intensity: z.number().min(1).max(10).optional().default(5),
+  duration: z.number().min(1).max(5).optional().default(2),
+});
+
 // Moderation API validation schemas
 export const moderationDecisionSchema = z.object({
   notes: z.string().max(1000, "Notes too long").optional(),
@@ -936,6 +1047,17 @@ export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type InsertLiveStream = z.infer<typeof insertLiveStreamSchema>;
 export type InsertReport = z.infer<typeof insertReportSchema>;
+
+// Lovense Integration Types
+export type LovenseDevice = typeof lovenseDevices.$inferSelect;
+export type LovenseDeviceAction = typeof lovenseDeviceActions.$inferSelect;
+export type LovenseIntegrationSettings = typeof lovenseIntegrationSettings.$inferSelect;
+export type InsertLovenseDevice = z.infer<typeof insertLovenseDeviceSchema>;
+export type InsertLovenseDeviceAction = z.infer<typeof insertLovenseDeviceActionSchema>;
+export type InsertLovenseIntegrationSettings = z.infer<typeof insertLovenseIntegrationSettingsSchema>;
+export type UpdateLovenseIntegrationSettings = z.infer<typeof updateLovenseIntegrationSettingsSchema>;
+export type LovenseDeviceControl = z.infer<typeof lovenseDeviceControlSchema>;
+export type LovenseTestDevice = z.infer<typeof lovenseTestDeviceSchema>;
 
 // Admin delegation types
 export type DelegatedPermission = typeof delegatedPermissions.$inferSelect;
