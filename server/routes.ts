@@ -22,7 +22,10 @@ import {
   insertWebhookSchema,
   insertCreatorProfileSchema,
   insertSubscriptionSchema,
-  insertPostSchema
+  insertPostSchema,
+  insertMessageSchema,
+  insertCommentSchema,
+  insertLikeSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -939,27 +942,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/messages', isAuthenticated, csrfProtection, async (req: any, res) => {
+  app.post('/api/messages', isAuthenticated, csrfProtection, validateRequest(insertMessageSchema), async (req: any, res) => {
     try {
       const senderId = req.user.claims.sub;
-      const { receiverId, type = 'text', content, mediaUrl, priceCents = 0 } = req.body;
-      
-      if (!receiverId) {
-        return res.status(400).json({ message: "Missing receiverId" });
-      }
-      
-      if (!content && !mediaUrl) {
-        return res.status(400).json({ message: "Message must have content or media" });
-      }
+      const messageData = req.body;
       
       const message = await storage.createMessage({
+        ...messageData,
         senderId,
-        receiverId,
-        type,
-        content,
-        mediaUrl,
-        priceCents,
-        isPaid: priceCents > 0,
+        isPaid: messageData.priceCents > 0,
         isMassMessage: false,
         readAt: null,
       });
@@ -1034,20 +1025,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/comments', isAuthenticated, csrfProtection, async (req: any, res) => {
+  app.post('/api/comments', isAuthenticated, csrfProtection, validateRequest(insertCommentSchema), async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { postId, content, parentId } = req.body;
-      
-      if (!postId || !content) {
-        return res.status(400).json({ message: "Missing postId or content" });
-      }
+      const commentData = req.body;
       
       const comment = await storage.createComment({
-        postId,
+        ...commentData,
         userId,
-        content,
-        parentId: parentId || null,
         likesCount: 0,
       });
       
@@ -1059,14 +1044,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Likes routes
-  app.post('/api/posts/like', isAuthenticated, csrfProtection, async (req: any, res) => {
+  app.post('/api/posts/like', isAuthenticated, csrfProtection, validateRequest(insertLikeSchema), async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { postId } = req.body;
-      
-      if (!postId) {
-        return res.status(400).json({ message: "Missing postId" });
-      }
       
       await storage.likePost(userId, postId);
       res.json({ message: "Post liked successfully" });
@@ -1076,7 +1057,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/posts/:postId/like', isAuthenticated, csrfProtection, async (req: any, res) => {
+  // Validation schema for DELETE parameter
+  const unlikePostSchema = z.object({
+    postId: z.string().uuid("Invalid post ID format")
+  });
+
+  app.delete('/api/posts/:postId/like', isAuthenticated, csrfProtection, validateRequest(unlikePostSchema, 'params'), async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const postId = req.params.postId;
