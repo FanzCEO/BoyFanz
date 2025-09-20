@@ -796,6 +796,35 @@ export const insertTransactionSchema = createInsertSchema(transactions).omit({
   createdAt: true,
 });
 
+// Earnings API validation schemas
+export const subscriptionPaymentSchema = z.object({
+  creatorUserId: z.string().uuid("Invalid creator ID format"),
+  amount: z.number().int().min(1, "Amount must be at least 1 cent").max(100000000, "Amount too large"),
+});
+
+export const ppvPurchaseSchema = z.object({
+  creatorUserId: z.string().uuid("Invalid creator ID format"),
+  mediaId: z.string().uuid("Invalid media ID format"),
+  amount: z.number().int().min(1, "Amount must be at least 1 cent").max(100000000, "Amount too large"),
+});
+
+export const tipSchema = z.object({
+  creatorUserId: z.string().uuid("Invalid creator ID format"),
+  amount: z.number().int().min(1, "Amount must be at least 1 cent").max(100000000, "Amount too large"),
+  message: z.string().min(1, "Message cannot be empty").max(500, "Message too long").optional(),
+});
+
+export const liveStreamTokensSchema = z.object({
+  creatorUserId: z.string().uuid("Invalid creator ID format"),
+  tokenCount: z.number().int().min(1, "Token count must be at least 1").max(10000, "Too many tokens"),
+  tokenValue: z.number().int().min(1, "Token value must be at least 1 cent").max(10000, "Token value too high"),
+});
+
+// Moderation API validation schemas
+export const moderationDecisionSchema = z.object({
+  notes: z.string().max(1000, "Notes too long").optional(),
+});
+
 export const insertCategorySchema = createInsertSchema(categories).pick({
   name: true,
   slug: true,

@@ -25,7 +25,12 @@ import {
   insertPostSchema,
   insertMessageSchema,
   insertCommentSchema,
-  insertLikeSchema
+  insertLikeSchema,
+  subscriptionPaymentSchema,
+  ppvPurchaseSchema,
+  tipSchema,
+  liveStreamTokensSchema,
+  moderationDecisionSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -166,7 +171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/moderation/:id/approve', isAuthenticated, csrfProtection, async (req: any, res) => {
+  app.put('/api/moderation/:id/approve', isAuthenticated, csrfProtection, validateRequest(moderationDecisionSchema), async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -181,7 +186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/moderation/:id/reject', isAuthenticated, csrfProtection, async (req: any, res) => {
+  app.put('/api/moderation/:id/reject', isAuthenticated, csrfProtection, validateRequest(moderationDecisionSchema), async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -335,7 +340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/earnings/subscription', isAuthenticated, csrfProtection, async (req: any, res) => {
+  app.post('/api/earnings/subscription', isAuthenticated, csrfProtection, validateRequest(subscriptionPaymentSchema), async (req: any, res) => {
     try {
       const fanUserId = req.user.claims.sub;
       const { creatorUserId, amount } = req.body;
@@ -347,7 +352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/earnings/ppv', isAuthenticated, csrfProtection, async (req: any, res) => {
+  app.post('/api/earnings/ppv', isAuthenticated, csrfProtection, validateRequest(ppvPurchaseSchema), async (req: any, res) => {
     try {
       const fanUserId = req.user.claims.sub;
       const { creatorUserId, mediaId, amount } = req.body;
@@ -359,7 +364,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/earnings/tip', isAuthenticated, csrfProtection, async (req: any, res) => {
+  app.post('/api/earnings/tip', isAuthenticated, csrfProtection, validateRequest(tipSchema), async (req: any, res) => {
     try {
       const fanUserId = req.user.claims.sub;
       const { creatorUserId, amount, message } = req.body;
@@ -371,7 +376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/earnings/tokens', isAuthenticated, csrfProtection, async (req: any, res) => {
+  app.post('/api/earnings/tokens', isAuthenticated, csrfProtection, validateRequest(liveStreamTokensSchema), async (req: any, res) => {
     try {
       const fanUserId = req.user.claims.sub;
       const { creatorUserId, tokenCount, tokenValue } = req.body;
@@ -893,6 +898,175 @@ export async function registerRoutes(app: Express): Promise<Server> {
             security: [{ sessionAuth: [] }],
             responses: {
               '201': { description: 'Media asset created' }
+            }
+          }
+        },
+        '/messages/conversations': {
+          get: {
+            summary: 'Get user conversations',
+            security: [{ sessionAuth: [] }],
+            responses: {
+              '200': { description: 'List of user conversations with other users' }
+            }
+          }
+        },
+        '/messages': {
+          get: {
+            summary: 'Get conversation messages',
+            security: [{ sessionAuth: [] }],
+            parameters: [
+              {
+                name: 'userId',
+                in: 'query',
+                required: true,
+                schema: { type: 'string', format: 'uuid' },
+                description: 'Other user ID to get conversation with'
+              },
+              {
+                name: 'limit',
+                in: 'query',
+                schema: { type: 'integer', default: 50 },
+                description: 'Maximum number of messages to return'
+              }
+            ],
+            responses: {
+              '200': { description: 'Messages in conversation' },
+              '400': { description: 'Missing or invalid userId parameter' },
+              '403': { description: 'Access denied to conversation' }
+            }
+          },
+          post: {
+            summary: 'Send a message',
+            security: [{ sessionAuth: [] }],
+            requestBody: {
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    required: ['receiverId'],
+                    properties: {
+                      receiverId: { type: 'string', format: 'uuid' },
+                      type: { type: 'string', enum: ['text', 'photo', 'video', 'audio', 'tip', 'welcome'] },
+                      content: { type: 'string' },
+                      mediaUrl: { type: 'string' },
+                      priceCents: { type: 'integer', minimum: 0 }
+                    }
+                  }
+                }
+              }
+            },
+            responses: {
+              '201': { description: 'Message sent successfully' },
+              '400': { description: 'Invalid request data' },
+              '403': { description: 'Cannot send message as another user' }
+            }
+          }
+        },
+        '/messages/{id}/read': {
+          put: {
+            summary: 'Mark message as read',
+            security: [{ sessionAuth: [] }],
+            parameters: [
+              {
+                name: 'id',
+                in: 'path',
+                required: true,
+                schema: { type: 'string', format: 'uuid' },
+                description: 'Message ID to mark as read'
+              }
+            ],
+            responses: {
+              '200': { description: 'Message marked as read' },
+              '403': { description: 'Only recipient can mark message as read' },
+              '404': { description: 'Message not found or access denied' }
+            }
+          }
+        },
+        '/posts/{postId}/comments': {
+          get: {
+            summary: 'Get post comments',
+            security: [{ sessionAuth: [] }],
+            parameters: [
+              {
+                name: 'postId',
+                in: 'path',
+                required: true,
+                schema: { type: 'string', format: 'uuid' },
+                description: 'Post ID to get comments for'
+              }
+            ],
+            responses: {
+              '200': { description: 'List of comments for the post' }
+            }
+          }
+        },
+        '/comments': {
+          post: {
+            summary: 'Create a comment',
+            security: [{ sessionAuth: [] }],
+            requestBody: {
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    required: ['postId', 'content'],
+                    properties: {
+                      postId: { type: 'string', format: 'uuid' },
+                      content: { type: 'string' },
+                      parentId: { type: 'string', format: 'uuid', nullable: true }
+                    }
+                  }
+                }
+              }
+            },
+            responses: {
+              '201': { description: 'Comment created successfully' },
+              '400': { description: 'Missing postId or content' }
+            }
+          }
+        },
+        '/posts/like': {
+          post: {
+            summary: 'Like a post',
+            security: [{ sessionAuth: [] }],
+            requestBody: {
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    required: ['postId'],
+                    properties: {
+                      postId: { type: 'string', format: 'uuid' }
+                    }
+                  }
+                }
+              }
+            },
+            responses: {
+              '200': { description: 'Post liked successfully' },
+              '400': { description: 'Missing postId' }
+            }
+          }
+        },
+        '/posts/{postId}/like': {
+          delete: {
+            summary: 'Unlike a post',
+            security: [{ sessionAuth: [] }],
+            parameters: [
+              {
+                name: 'postId',
+                in: 'path',
+                required: true,
+                schema: { type: 'string', format: 'uuid' },
+                description: 'Post ID to unlike'
+              }
+            ],
+            responses: {
+              '200': { description: 'Post unliked successfully' },
+              '400': { description: 'Invalid post ID format' }
             }
           }
         }
