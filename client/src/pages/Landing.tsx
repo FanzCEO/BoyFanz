@@ -152,27 +152,27 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="space-y-2">
-              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Terms & Conditions</a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">About Us</a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Cookies Policy</a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Complaint Policy</a>
+              <a href="/compliance" className="block text-sm text-gray-600 hover:text-gray-800">Terms & Conditions</a>
+              <a href="/blog" className="block text-sm text-gray-600 hover:text-gray-800">About Us</a>
+              <a href="/compliance" className="block text-sm text-gray-600 hover:text-gray-800">Cookies Policy</a>
+              <a href="/contact" className="block text-sm text-gray-600 hover:text-gray-800">Complaint Policy</a>
             </div>
             <div className="space-y-2">
-              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Privacy & Age Verification</a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Content Management Policy and Data Governance Procedures</a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Legal Library & Ethics Policy</a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Cancellation Policy</a>
+              <a href="/compliance" className="block text-sm text-gray-600 hover:text-gray-800">Privacy & Age Verification</a>
+              <a href="/compliance" className="block text-sm text-gray-600 hover:text-gray-800">Content Management Policy and Data Governance Procedures</a>
+              <a href="/compliance" className="block text-sm text-gray-600 hover:text-gray-800">Legal Library & Ethics Policy</a>
+              <a href="/compliance" className="block text-sm text-gray-600 hover:text-gray-800">Cancellation Policy</a>
             </div>
             <div className="space-y-2">
-              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Adult Star Model Release: 2257 and Agreement with Fanz™ Unlimited Network LLC</a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Transaction/Chargeback Policy</a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Want to Request a New Feature?</a>
+              <a href="/release-forms" className="block text-sm text-gray-600 hover:text-gray-800">Adult Star Model Release: 2257 and Agreement with Fanz™ Unlimited Network LLC</a>
+              <a href="/compliance" className="block text-sm text-gray-600 hover:text-gray-800">Transaction/Chargeback Policy</a>
+              <a href="/contact" className="block text-sm text-gray-600 hover:text-gray-800">Want to Request a New Feature?</a>
               <a href="/contact" className="block text-sm text-gray-600 hover:text-gray-800">Contact us</a>
             </div>
             <div className="space-y-2">
-              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Adult Co-Star Model Release: 2257 and Agreement with Fanz™ Unlimited Network LLC</a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Tech Support</a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Become a VIP</a>
+              <a href="/release-forms" className="block text-sm text-gray-600 hover:text-gray-800">Adult Co-Star Model Release: 2257 and Agreement with Fanz™ Unlimited Network LLC</a>
+              <a href="/contact" className="block text-sm text-gray-600 hover:text-gray-800">Tech Support</a>
+              <a href="/subscriptions" className="block text-sm text-gray-600 hover:text-gray-800">Become a VIP</a>
               <a href="/blog" className="block text-sm text-gray-600 hover:text-gray-800">Blog</a>
             </div>
           </div>
