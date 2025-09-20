@@ -1,151 +1,218 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useState } from "react";
+import { Male, DollarSign, Heart, Users } from "lucide-react";
 
 export default function Landing() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+
   const handleLogin = () => {
-    // Redirect to unified login page instead of direct Replit auth
-    window.location.href = "/auth/login";
+    window.location.href = `/auth/login?email=${encodeURIComponent(email)}`;
+  };
+
+  const handleSignup = () => {
+    window.location.href = "/auth/starz-signup";
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground homepage-bg" data-testid="landing-page">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/10"></div>
-        <div className="absolute inset-0 bg-black/40"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center">
-            <div className="flex justify-center mb-8">
-              <img 
-                src="/boyfanz-logo.png" 
-                alt="BoyFanz Logo" 
-                className="h-32 w-auto glow-effect rounded-lg"
-              />
+    <div className="min-h-screen homepage-bg" data-testid="landing-page">
+      {/* Main Content */}
+      <div className="min-h-screen flex items-center justify-center px-4 py-8">
+        <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          
+          {/* Left Side - Branding & Selling Points */}
+          <div className="text-left space-y-8">
+            {/* Logo and Branding */}
+            <div className="mb-12">
+              <div className="flex items-center mb-4">
+                <img 
+                  src="/boyfanz-logo.png" 
+                  alt="BoyFanz Logo" 
+                  className="h-16 w-auto glow-effect mr-4"
+                />
+                <div>
+                  <h1 className="text-4xl font-display font-black neon-sign tracking-wide uppercase mb-2">
+                    BOYFANZ
+                  </h1>
+                  <p className="text-xl font-display font-black neon-sign-golden tracking-wide uppercase">
+                    Every Man's Playground
+                  </p>
+                </div>
+              </div>
             </div>
-            <p className="text-2xl mb-8 max-w-2xl mx-auto">
-              <span className="text-3xl font-display font-black neon-sign-golden block mb-3 tracking-wide uppercase">Every Man's Playground</span>
-              <span className="font-body neon-white-body">The ultimate creator economy platform. Upload, monetize, and connect with your fans 
-              while maintaining full compliance and security.</span>
+
+            {/* Selling Points */}
+            <div className="space-y-6">
+              <div className="flex items-center space-x-4">
+                <div className="flex-shrink-0">
+                  <Male className="h-6 w-6 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-lg font-semibold text-white">Built for Boyz, By Boyz</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <div className="flex-shrink-0">
+                  <DollarSign className="h-6 w-6 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-lg font-semibold text-white">All Hustle, All Yours. Creators Keep 100% of their earnings.</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <div className="flex-shrink-0">
+                  <Heart className="h-6 w-6 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-lg font-semibold text-white">Every kink welcome</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <div className="flex-shrink-0">
+                  <Users className="h-6 w-6 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-lg font-semibold text-white">We highlight all creators, not just top 1%</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side - Login Form */}
+          <div className="flex justify-center lg:justify-end">
+            <Card className="w-full max-w-md bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+              <CardHeader className="pb-4">
+                <h2 className="text-xl font-semibold text-center text-gray-800">
+                  Create free account here
+                </h2>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-gray-700">Username or Email</Label>
+                  <Input
+                    id="email"
+                    type="text"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="border-gray-300 focus:border-red-500 focus:ring-red-500"
+                    data-testid="email-input"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-gray-700">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="border-gray-300 focus:border-red-500 focus:ring-red-500"
+                    data-testid="password-input"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between text-sm">
+                  <button 
+                    className="text-red-600 hover:text-red-700 underline"
+                    onClick={() => window.location.href = "/auth/reset-password"}
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="remember"
+                    checked={rememberMe}
+                    onCheckedChange={setRememberMe}
+                    className="border-gray-300 data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600"
+                  />
+                  <Label htmlFor="remember" className="text-sm text-gray-700">
+                    Remember me
+                  </Label>
+                </div>
+
+                <Button
+                  onClick={handleLogin}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-md"
+                  data-testid="login-button"
+                >
+                  Login
+                </Button>
+
+                <div className="text-center pt-4">
+                  <p className="text-sm text-gray-600">
+                    Don't have an account?{" "}
+                    <button
+                      onClick={handleSignup}
+                      className="text-red-600 hover:text-red-700 underline font-semibold"
+                      data-testid="signup-link"
+                    >
+                      Sign up here
+                    </button>
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-white/95 backdrop-blur-sm border-t border-gray-200 py-8">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="space-y-2">
+              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Terms & Conditions</a>
+              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">About Us</a>
+              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Cookies Policy</a>
+              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Complaint Policy</a>
+            </div>
+            <div className="space-y-2">
+              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Privacy & Age Verification</a>
+              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Content Management Policy</a>
+              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Legal Library & Ethics Policy</a>
+              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Cancellation Policy</a>
+            </div>
+            <div className="space-y-2">
+              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Adult Star Model Release: 2257</a>
+              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Transaction/Chargeback Policy</a>
+              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Want to Request a New Feature?</a>
+              <a href="/contact" className="block text-sm text-gray-600 hover:text-gray-800">Contact us</a>
+            </div>
+            <div className="space-y-2">
+              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Adult Co-Star Model Release: 2257</a>
+              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Tech Support</a>
+              <a href="#" className="block text-sm text-gray-600 hover:text-gray-800">Become a VIP</a>
+              <a href="/blog" className="block text-sm text-gray-600 hover:text-gray-800">Blog</a>
+            </div>
+          </div>
+
+          <div className="text-center mb-4">
+            <p className="text-xs text-gray-500">
+              © 2025 BoyFanz. All rights reserved. Fanz Unlimited Network (FUN) L.L.C. - Address: 30 N Gould St #45302 Sheridan, Wyoming United States
             </p>
-            <Button 
-              onClick={handleLogin} 
-              size="lg" 
-              className="glow-effect font-semibold text-lg px-8 py-4"
-              data-testid="login-button"
-            >
-              Get Started
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Features Section */}
-      <div className="py-24 bg-card/30 club-glow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold font-heading mb-4 tracking-tight neon-crimson-heading neon-heartbeat">
-              Everything You Need to Succeed
-            </h2>
-            <p className="text-2xl font-body neon-white-body">
-              Powerful tools for the modern creator economy
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <i className="fas fa-cloud-upload-alt text-primary text-xl"></i>
-                </div>
-                <CardTitle className="neon-crimson-heading neon-flicker">Secure Media Upload</CardTitle>
-                <CardDescription className="neon-white-body">
-                  Upload and store your content securely with enterprise-grade encryption and compliance features.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <div className="h-12 w-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
-                  <i className="fas fa-shield-alt text-secondary text-xl"></i>
-                </div>
-                <CardTitle className="neon-crimson-heading neon-buzz">KYC Compliance</CardTitle>
-                <CardDescription className="neon-white-body">
-                  Built-in identity verification and compliance tools to meet regulatory requirements.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <div className="h-12 w-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
-                  <i className="fas fa-dollar-sign text-accent text-xl"></i>
-                </div>
-                <CardTitle className="neon-crimson-heading neon-heartbeat">Instant Payouts</CardTitle>
-                <CardDescription className="neon-white-body">
-                  Get paid quickly with our streamlined payout system and multiple payment options.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <i className="fas fa-users text-primary text-xl"></i>
-                </div>
-                <CardTitle className="neon-crimson-heading neon-breathe">Fan Management</CardTitle>
-                <CardDescription className="neon-white-body">
-                  Connect with your audience and build lasting relationships with powerful fan management tools.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <div className="h-12 w-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
-                  <i className="fas fa-chart-line text-secondary text-xl"></i>
-                </div>
-                <CardTitle className="neon-crimson-heading neon-dying">Analytics & Insights</CardTitle>
-                <CardDescription className="neon-white-body">
-                  Track your performance with detailed analytics and insights to grow your business.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <div className="h-12 w-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
-                  <i className="fas fa-bolt text-accent text-xl"></i>
-                </div>
-                <CardTitle className="neon-crimson-heading neon-strobe">Real-time Updates</CardTitle>
-                <CardDescription className="neon-white-body">
-                  Stay connected with real-time notifications and live updates on your content and earnings.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+          <div className="flex justify-center items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-gray-600">PROTECTED BY:</span>
+              <div className="flex items-center space-x-1">
+                <div className="bg-green-500 text-white px-2 py-1 text-xs font-bold rounded">DMCA</div>
+                <span className="text-xs text-gray-600">DMCA.com COMPLIANT</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="py-24">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-5xl font-bold font-heading mb-6 tracking-tight neon-crimson-heading neon-breathe">
-            Ready to Start Your Journey?
-          </h2>
-          <p className="text-2xl mb-8 font-body neon-white-body">
-            Join thousands of creators who are already building their empire on <span className="font-display font-black neon-sign tracking-wide">BoyFanz</span>.
-          </p>
-          <Button 
-            onClick={handleLogin} 
-            size="lg" 
-            className="glow-effect font-semibold text-lg px-8 py-4"
-            data-testid="cta-login-button"
-          >
-            Start Creating Today
-          </Button>
-        </div>
-      </div>
+      </footer>
     </div>
   );
 }
