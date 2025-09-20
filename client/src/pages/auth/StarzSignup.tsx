@@ -93,7 +93,7 @@ export default function StarzSignup() {
                   placeholder="@yourcreatorname"
                   value={formData.username}
                   onChange={(e) => handleChange("username", e.target.value)}
-                  className="bg-background/50 border-primary/30"
+                  className="bg-background/80 border-primary/30 text-foreground"
                   data-testid="input-starz-username"
                   required
                 />
@@ -107,7 +107,7 @@ export default function StarzSignup() {
                   placeholder="Your stage name"
                   value={formData.displayName}
                   onChange={(e) => handleChange("displayName", e.target.value)}
-                  className="bg-background/50 border-primary/30"
+                  className="bg-background/80 border-primary/30 text-foreground"
                   data-testid="input-starz-display-name"
                   required
                 />
@@ -121,7 +121,7 @@ export default function StarzSignup() {
                   placeholder="your@email.com"
                   value={formData.email}
                   onChange={(e) => handleChange("email", e.target.value)}
-                  className="bg-background/50 border-primary/30"
+                  className="bg-background/80 border-primary/30 text-foreground"
                   data-testid="input-starz-email"
                   required
                 />
@@ -135,7 +135,7 @@ export default function StarzSignup() {
                   placeholder="Create a strong password"
                   value={formData.password}
                   onChange={(e) => handleChange("password", e.target.value)}
-                  className="bg-background/50 border-primary/30"
+                  className="bg-background/80 border-primary/30 text-foreground"
                   data-testid="input-starz-password"
                   required
                 />
@@ -149,7 +149,7 @@ export default function StarzSignup() {
                   placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={(e) => handleChange("confirmPassword", e.target.value)}
-                  className="bg-background/50 border-primary/30"
+                  className="bg-background/80 border-primary/30 text-foreground"
                   data-testid="input-starz-confirm-password"
                   required
                 />

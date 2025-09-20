@@ -23,8 +23,9 @@ export function setupCSRFTokenEndpoint(app: any) {
     res.cookie(CSRF_COOKIE_NAME, token, {
       httpOnly: false, // Frontend needs to read this
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 3600000 // 1 hour
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      maxAge: 3600000, // 1 hour
+      path: '/' // Ensure cookie is available site-wide
     });
     
     res.json({ csrfToken: token });

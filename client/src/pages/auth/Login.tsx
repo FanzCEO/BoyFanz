@@ -84,7 +84,7 @@ export default function Login() {
                   placeholder="@username or email@example.com"
                   value={formData.username}
                   onChange={(e) => handleChange("username", e.target.value)}
-                  className="bg-background/50 border-accent/30"
+                  className="bg-background/80 border-accent/30 text-foreground"
                   data-testid="input-login-username"
                   required
                 />
@@ -98,7 +98,7 @@ export default function Login() {
                   placeholder="Enter your password"
                   value={formData.password}
                   onChange={(e) => handleChange("password", e.target.value)}
-                  className="bg-background/50 border-accent/30"
+                  className="bg-background/80 border-accent/30 text-foreground"
                   data-testid="input-login-password"
                   required
                 />

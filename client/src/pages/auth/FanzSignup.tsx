@@ -93,7 +93,7 @@ export default function FanzSignup() {
                   placeholder="@yourusername"
                   value={formData.username}
                   onChange={(e) => handleChange("username", e.target.value)}
-                  className="bg-background/50 border-secondary/30"
+                  className="bg-background/80 border-secondary/30 text-foreground"
                   data-testid="input-fanz-username"
                   required
                 />
@@ -107,7 +107,7 @@ export default function FanzSignup() {
                   placeholder="Your name"
                   value={formData.displayName}
                   onChange={(e) => handleChange("displayName", e.target.value)}
-                  className="bg-background/50 border-secondary/30"
+                  className="bg-background/80 border-secondary/30 text-foreground"
                   data-testid="input-fanz-display-name"
                   required
                 />
@@ -121,7 +121,7 @@ export default function FanzSignup() {
                   placeholder="your@email.com"
                   value={formData.email}
                   onChange={(e) => handleChange("email", e.target.value)}
-                  className="bg-background/50 border-secondary/30"
+                  className="bg-background/80 border-secondary/30 text-foreground"
                   data-testid="input-fanz-email"
                   required
                 />
@@ -135,7 +135,7 @@ export default function FanzSignup() {
                   placeholder="Create a strong password"
                   value={formData.password}
                   onChange={(e) => handleChange("password", e.target.value)}
-                  className="bg-background/50 border-secondary/30"
+                  className="bg-background/80 border-secondary/30 text-foreground"
                   data-testid="input-fanz-password"
                   required
                 />
@@ -149,7 +149,7 @@ export default function FanzSignup() {
                   placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={(e) => handleChange("confirmPassword", e.target.value)}
-                  className="bg-background/50 border-secondary/30"
+                  className="bg-background/80 border-secondary/30 text-foreground"
                   data-testid="input-fanz-confirm-password"
                   required
                 />
