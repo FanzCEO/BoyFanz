@@ -12,6 +12,9 @@ export default function Sidebar({ user }: SidebarProps) {
   
   const navItems = [
     { path: "/", icon: "fas fa-tachometer-alt", label: "Dashboard" },
+    { path: "/feed", icon: "fas fa-home", label: "Feed" },
+    { path: "/search", icon: "fas fa-search", label: "Discover" },
+    { path: "/messages", icon: "fas fa-comments", label: "Messages", dot: true },
     { path: "/media", icon: "fas fa-photo-video", label: "Media Assets", badge: "3" },
     { path: "/compliance", icon: "fas fa-shield-alt", label: "Compliance", badge: "KYC" },
     { path: "/payouts", icon: "fas fa-dollar-sign", label: "Payouts" },
@@ -75,6 +78,65 @@ export default function Sidebar({ user }: SidebarProps) {
                 )}
               </Link>
             ))}
+          </div>
+
+          {/* Creator Section */}
+          {(user?.role === 'creator' || user?.role === 'admin') && (
+            <div className="mt-8">
+              <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Creator
+              </h3>
+              <div className="mt-2 space-y-1">
+                <Link 
+                  href="/earnings"
+                  className={cn(
+                    "sidebar-link flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all",
+                    isActive("/earnings")
+                      ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  data-testid="nav-earnings"
+                >
+                  <i className="fas fa-chart-line w-4"></i>
+                  Earnings
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Support Section */}
+          <div className="mt-8">
+            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Support
+            </h3>
+            <div className="mt-2 space-y-1">
+              <Link 
+                href="/blog"
+                className={cn(
+                  "sidebar-link flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all",
+                  isActive("/blog")
+                    ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+                data-testid="nav-blog"
+              >
+                <i className="fas fa-blog w-4"></i>
+                Blog
+              </Link>
+              <Link 
+                href="/contact"
+                className={cn(
+                  "sidebar-link flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all",
+                  isActive("/contact")
+                    ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+                data-testid="nav-contact"
+              >
+                <i className="fas fa-envelope w-4"></i>
+                Contact
+              </Link>
+            </div>
           </div>
 
           {user?.role === 'admin' && (
