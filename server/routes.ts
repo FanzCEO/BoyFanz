@@ -909,6 +909,186 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
 
+  // Messages routes
+  app.get('/api/messages/conversations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims?.sub || req.user.id;
+      const conversations = await storage.getUserConversations(userId);
+      res.json(conversations);
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+      res.status(500).json({ message: "Failed to fetch conversations" });
+    }
+  });
+
+  app.get('/api/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims?.sub || req.user.id;
+      const otherUserId = req.query.userId as string;
+      const limit = parseInt(req.query.limit as string) || 50;
+      
+      if (!otherUserId) {
+        return res.status(400).json({ message: "Missing userId parameter" });
+      }
+      
+      const messages = await storage.getConversation(userId, otherUserId, limit);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  app.post('/api/messages', isAuthenticated, csrfProtection, async (req: any, res) => {
+    try {
+      const senderId = req.user.claims.sub;
+      const { receiverId, type = 'text', content, mediaUrl, priceCents = 0 } = req.body;
+      
+      if (!receiverId) {
+        return res.status(400).json({ message: "Missing receiverId" });
+      }
+      
+      if (!content && !mediaUrl) {
+        return res.status(400).json({ message: "Message must have content or media" });
+      }
+      
+      const message = await storage.createMessage({
+        senderId,
+        receiverId,
+        type,
+        content,
+        mediaUrl,
+        priceCents,
+        isPaid: priceCents > 0,
+        isMassMessage: false,
+        readAt: null,
+      });
+      
+      res.status(201).json(message);
+    } catch (error) {
+      console.error("Error creating message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  app.put('/api/messages/:id/read', isAuthenticated, csrfProtection, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const messageId = req.params.id;
+      
+      // Get all conversations to find the message and verify authorization
+      const conversations = await storage.getUserConversations(userId);
+      let foundMessage = null;
+      
+      // Check if this user has any conversations with messages matching the ID
+      for (const conversation of conversations) {
+        if (conversation.lastMessage.id === messageId) {
+          foundMessage = conversation.lastMessage;
+          break;
+        }
+      }
+      
+      if (!foundMessage) {
+        // Also check recent messages in conversations
+        for (const conversation of conversations) {
+          const messages = await storage.getConversation(userId, conversation.otherUser.id, 100);
+          const message = messages.find(m => m.id === messageId);
+          if (message) {
+            foundMessage = message;
+            break;
+          }
+        }
+      }
+      
+      if (!foundMessage) {
+        return res.status(404).json({ message: "Message not found or access denied" });
+      }
+      
+      // Only the receiver can mark a message as read
+      if (foundMessage.receiverId !== userId) {
+        return res.status(403).json({ message: "Only the recipient can mark a message as read" });
+      }
+      
+      // Check if already read
+      if (foundMessage.readAt) {
+        return res.json({ message: "Message already read" });
+      }
+      
+      await storage.markMessageRead(messageId);
+      res.json({ message: "Message marked as read" });
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+      res.status(500).json({ message: "Failed to mark message as read" });
+    }
+  });
+
+  // Comments routes
+  app.get('/api/posts/:postId/comments', isAuthenticated, async (req: any, res) => {
+    try {
+      const postId = req.params.postId;
+      const comments = await storage.getPostComments(postId);
+      res.json(comments);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      res.status(500).json({ message: "Failed to fetch comments" });
+    }
+  });
+
+  app.post('/api/comments', isAuthenticated, csrfProtection, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { postId, content, parentId } = req.body;
+      
+      if (!postId || !content) {
+        return res.status(400).json({ message: "Missing postId or content" });
+      }
+      
+      const comment = await storage.createComment({
+        postId,
+        userId,
+        content,
+        parentId: parentId || null,
+        likesCount: 0,
+      });
+      
+      res.status(201).json(comment);
+    } catch (error) {
+      console.error("Error creating comment:", error);
+      res.status(500).json({ message: "Failed to create comment" });
+    }
+  });
+
+  // Likes routes
+  app.post('/api/posts/like', isAuthenticated, csrfProtection, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { postId } = req.body;
+      
+      if (!postId) {
+        return res.status(400).json({ message: "Missing postId" });
+      }
+      
+      await storage.likePost(userId, postId);
+      res.json({ message: "Post liked successfully" });
+    } catch (error) {
+      console.error("Error liking post:", error);
+      res.status(500).json({ message: "Failed to like post" });
+    }
+  });
+
+  app.delete('/api/posts/:postId/like', isAuthenticated, csrfProtection, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const postId = req.params.postId;
+      
+      await storage.unlikePost(userId, postId);
+      res.json({ message: "Post unliked successfully" });
+    } catch (error) {
+      console.error("Error unliking post:", error);
+      res.status(500).json({ message: "Failed to unlike post" });
+    }
+  });
+
   // WebSocket setup for real-time notifications
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
   
