@@ -807,6 +807,51 @@ export class DatabaseStorage implements IStorage {
   async updateStreamStatus(streamId: string, status: string): Promise<void> {
     throw new Error("Not implemented yet");
   }
+
+  // Admin delegation operations
+  async grantPermission(permission: InsertDelegatedPermission): Promise<DelegatedPermission> {
+    const [granted] = await db
+      .insert(delegatedPermissions)
+      .values(permission)
+      .onConflictDoUpdate({
+        target: [delegatedPermissions.userId, delegatedPermissions.permission],
+        set: { granted: permission.granted, grantedBy: permission.grantedBy, expiresAt: permission.expiresAt }
+      })
+      .returning();
+    return granted;
+  }
+
+  async revokePermission(userId: string, permission: string): Promise<void> {
+    await db
+      .update(delegatedPermissions)
+      .set({ granted: false })
+      .where(and(
+        eq(delegatedPermissions.userId, userId),
+        eq(delegatedPermissions.permission, permission as any)
+      ));
+  }
+
+  async getUserPermissions(userId: string): Promise<DelegatedPermission[]> {
+    return await db
+      .select()
+      .from(delegatedPermissions)
+      .where(and(
+        eq(delegatedPermissions.userId, userId),
+        eq(delegatedPermissions.granted, true)
+      ));
+  }
+
+  async hasPermission(userId: string, permission: string): Promise<boolean> {
+    const [result] = await db
+      .select()
+      .from(delegatedPermissions)
+      .where(and(
+        eq(delegatedPermissions.userId, userId),
+        eq(delegatedPermissions.permission, permission as any),
+        eq(delegatedPermissions.granted, true)
+      ));
+    return !!result;
+  }
 }
 
 export const storage = new DatabaseStorage();

@@ -42,6 +42,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Rate limiting
   app.use('/api/', rateLimit);
 
+  // Helper function to check admin/moderator access and delegated permissions
+  async function hasAdminAccess(userId: string, requiredPermission?: string): Promise<boolean> {
+    const user = await storage.getUser(userId);
+    
+    // Full admin always has access
+    if (user?.role === 'admin') {
+      return true;
+    }
+    
+    // Moderators have access to moderation functions
+    if (user?.role === 'moderator') {
+      return true;
+    }
+    
+    // Check delegated permissions if specified
+    if (requiredPermission) {
+      return await storage.hasPermission(userId, requiredPermission);
+    }
+    
+    return false;
+  }
+
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
@@ -157,8 +179,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Moderation routes (admin only)
   app.get('/api/moderation/queue', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'admin') {
+      const userId = req.user.claims.sub;
+      if (!(await hasAdminAccess(userId, 'moderation_queue'))) {
         return res.status(403).json({ message: "Access denied" });
       }
 
@@ -173,12 +195,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/moderation/:id/approve', isAuthenticated, csrfProtection, validateRequest(moderationDecisionSchema), async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'admin') {
+      const userId = req.user.claims.sub;
+      if (!(await hasAdminAccess(userId, 'content_approval'))) {
         return res.status(403).json({ message: "Access denied" });
       }
 
-      await moderationService.approve(req.params.id, req.user.claims.sub, req.body.notes);
+      await moderationService.approve(req.params.id, userId, req.body.notes);
       res.json({ message: "Content approved" });
     } catch (error) {
       console.error("Error approving content:", error);
@@ -188,12 +210,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/moderation/:id/reject', isAuthenticated, csrfProtection, validateRequest(moderationDecisionSchema), async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'admin') {
+      const userId = req.user.claims.sub;
+      if (!(await hasAdminAccess(userId, 'content_approval'))) {
         return res.status(403).json({ message: "Access denied" });
       }
 
-      await moderationService.reject(req.params.id, req.user.claims.sub, req.body.notes);
+      await moderationService.reject(req.params.id, userId, req.body.notes);
       res.json({ message: "Content rejected" });
     } catch (error) {
       console.error("Error rejecting content:", error);
@@ -258,8 +280,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/themes', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'admin') {
+      const userId = req.user.claims.sub;
+      if (!(await hasAdminAccess(userId, 'theme_management'))) {
         return res.status(403).json({ message: "Access denied" });
       }
 
@@ -273,8 +295,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/themes/:id', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'admin') {
+      const userId = req.user.claims.sub;
+      if (!(await hasAdminAccess(userId, 'theme_management'))) {
         return res.status(403).json({ message: "Access denied" });
       }
 
@@ -288,8 +310,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/themes/:id/activate', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'admin') {
+      const userId = req.user.claims.sub;
+      if (!(await hasAdminAccess(userId, 'theme_management'))) {
         return res.status(403).json({ message: "Access denied" });
       }
 
@@ -303,8 +325,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/themes/:id', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'admin') {
+      const userId = req.user.claims.sub;
+      if (!(await hasAdminAccess(userId, 'theme_management'))) {
         return res.status(403).json({ message: "Access denied" });
       }
 
@@ -390,8 +412,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/earnings/top', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'admin') {
+      const userId = req.user.claims.sub;
+      if (!(await hasAdminAccess(userId, 'analytics_access'))) {
         return res.status(403).json({ message: "Access denied" });
       }
       const limit = parseInt(req.query.limit as string) || 10;
