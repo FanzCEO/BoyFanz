@@ -122,3 +122,43 @@
   
   /* Neon text effect - no white background */
   .neon-text {
+    color: hsl(0, 85%, 60%);
+    animation: subtle-flicker 6s ease-in-out infinite;
+    filter: brightness(1.05);
+  }
+
+  /* Soft golden neon for "Every Man's Playground" - muted and elegant */
+  .neon-sign-golden {
+    color: hsl(45, 60%, 50%);
+    text-shadow: 
+      0 0 3px hsl(45, 55%, 45%),
+      0 0 6px hsl(45, 50%, 40%),
+      0 0 9px hsl(40, 45%, 35%);
+    animation: subtle-flicker 12s ease-in-out infinite;
+    filter: brightness(0.85) contrast(1.0);
+  }
+}
+
+/* Subtle flicker animation for muted effects */
+@keyframes subtle-flicker {
+  0% { 
+    opacity: 1;
+    filter: brightness(0.85) contrast(1.0);
+  }
+  25% { 
+    opacity: 0.95;
+    filter: brightness(0.9) contrast(1.05);
+  }
+  50% { 
+    opacity: 0.92;
+    filter: brightness(0.82) contrast(0.98);
+  }
+  75% { 
+    opacity: 0.97;
+    filter: brightness(0.88) contrast(1.02);
+  }
+  100% { 
+    opacity: 1;
+    filter: brightness(0.85) contrast(1.0);
+  }
+}
