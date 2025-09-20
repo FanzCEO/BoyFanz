@@ -56,7 +56,7 @@ export class WatermarkService {
       });
 
       await storage.createAuditLog({
-        actorId: 'system',
+        actorId: null, // system action - no user actor
         action: 'watermark_applied',
         targetType: 'media_asset',
         targetId: mediaId,

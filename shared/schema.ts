@@ -106,6 +106,10 @@ export const mediaAssets = pgTable("media_assets", {
   aiAnalysisJson: jsonb("ai_analysis_json").default({}),
   riskScore: integer("risk_score").default(0),
   contentTags: text("content_tags").array(),
+  // Forensic watermarking fields
+  forensicSignature: text("forensic_signature"),
+  watermarked: boolean("watermarked").default(false),
+  watermarkedAt: timestamp("watermarked_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -131,7 +135,7 @@ export const moderationQueue = pgTable("moderation_queue", {
 // Audit logs
 export const auditLogs = pgTable("audit_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  actorId: varchar("actor_id").references(() => users.id),
+  actorId: varchar("actor_id").references(() => users.id), // nullable for system actions
   action: varchar("action").notNull(),
   targetType: varchar("target_type").notNull(),
   targetId: varchar("target_id").notNull(),
