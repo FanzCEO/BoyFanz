@@ -47,6 +47,10 @@ import {
   categories,
   liveStreams,
   reports,
+  // Admin delegation
+  delegatedPermissions,
+  type DelegatedPermission,
+  type InsertDelegatedPermission,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, count, sql } from "drizzle-orm";
@@ -168,6 +172,12 @@ export interface IStorage {
     contentViews: number;
     pendingReviews: number;
   }>;
+
+  // Admin delegation operations
+  grantPermission(permission: InsertDelegatedPermission): Promise<DelegatedPermission>;
+  revokePermission(userId: string, permission: string): Promise<void>;
+  getUserPermissions(userId: string): Promise<DelegatedPermission[]>;
+  hasPermission(userId: string, permission: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {

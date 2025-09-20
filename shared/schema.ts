@@ -29,7 +29,7 @@ export const sessions = pgTable(
 );
 
 // User roles enum
-export const userRoleEnum = pgEnum("user_role", ["fan", "creator", "admin"]);
+export const userRoleEnum = pgEnum("user_role", ["fan", "creator", "moderator", "admin"]);
 export const userStatusEnum = pgEnum("user_status", ["active", "suspended", "pending"]);
 
 // Users table for both Replit Auth and local username/password auth
@@ -886,6 +886,33 @@ export type InsertCmsPageSection = z.infer<typeof insertCmsPageSectionSchema>;
 export type InsertCmsMenu = z.infer<typeof insertCmsMenuSchema>;
 export type InsertCmsMenuItem = z.infer<typeof insertCmsMenuItemSchema>;
 
+// Admin delegation system
+export const adminPermissionEnum = pgEnum("admin_permission", [
+  "moderation_queue",
+  "user_management", 
+  "theme_management",
+  "analytics_access",
+  "content_approval",
+  "system_settings"
+]);
+
+export const delegatedPermissions = pgTable("delegated_permissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  grantedBy: varchar("granted_by").notNull().references(() => users.id, { onDelete: "cascade" }),
+  permission: adminPermissionEnum("permission").notNull(),
+  granted: boolean("granted").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  expiresAt: timestamp("expires_at"),
+}, (table) => [
+  unique("unique_user_permission").on(table.userId, table.permission)
+]);
+
+export const insertDelegatedPermissionSchema = createInsertSchema(delegatedPermissions).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Creator Economy Types
 export type CreatorProfile = typeof creatorProfiles.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
@@ -909,3 +936,7 @@ export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type InsertLiveStream = z.infer<typeof insertLiveStreamSchema>;
 export type InsertReport = z.infer<typeof insertReportSchema>;
+
+// Admin delegation types
+export type DelegatedPermission = typeof delegatedPermissions.$inferSelect;
+export type InsertDelegatedPermission = z.infer<typeof insertDelegatedPermissionSchema>;
