@@ -90,7 +90,9 @@ export const paymentRateLimit = rateLimit({
       ip: req.ip,
       userId: (req as any).user?.id,
       path: req.path,
-      body: req.body // Log transaction attempt for security analysis
+      // SECURITY: NEVER log req.body - contains sensitive payment/PII data
+      method: req.method,
+      timestamp: new Date().toISOString()
     }, 'SECURITY: Payment rate limit exceeded');
     
     res.status(429).json({

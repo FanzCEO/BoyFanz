@@ -137,7 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/media/upload', isAuthenticated, uploadRateLimit, async (req: any, res) => {
+  app.post('/api/media/upload', isAuthenticated, csrfProtection, uploadRateLimit, async (req: any, res) => {
     try {
       const objectStorageService = new ObjectStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
@@ -339,7 +339,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/themes/:id/activate', isAuthenticated, csrfProtection, async (req: any, res) => {
+  app.put('/api/themes/:id/activate', isAuthenticated, csrfProtection, sensitiveOperationRateLimit, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       if (!(await hasAdminAccess(userId, 'theme_management'))) {
@@ -354,7 +354,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/themes/:id', isAuthenticated, csrfProtection, async (req: any, res) => {
+  app.delete('/api/themes/:id', isAuthenticated, csrfProtection, sensitiveOperationRateLimit, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       if (!(await hasAdminAccess(userId, 'theme_management'))) {
@@ -423,7 +423,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/delegations/grant', isAuthenticated, csrfProtection, validateRequest(delegationPermissionSchema), async (req: any, res) => {
+  app.post('/api/admin/delegations/grant', isAuthenticated, csrfProtection, sensitiveOperationRateLimit, validateRequest(delegationPermissionSchema), async (req: any, res) => {
     try {
       const adminUserId = req.user.claims.sub;
       if (!(await isAdmin(adminUserId))) {
@@ -452,7 +452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/delegations/revoke', isAuthenticated, csrfProtection, validateRequest(delegationPermissionSchema), async (req: any, res) => {
+  app.post('/api/admin/delegations/revoke', isAuthenticated, csrfProtection, sensitiveOperationRateLimit, validateRequest(delegationPermissionSchema), async (req: any, res) => {
     try {
       const adminUserId = req.user.claims.sub;
       if (!(await isAdmin(adminUserId))) {
