@@ -72,6 +72,19 @@ import {
   lovenseAccounts,
   lovenseMappings,
   lovenseSessions,
+  // Enhanced Subscription System
+  type SubscriptionPlan,
+  type InsertSubscriptionPlan,
+  type PromoCode,
+  type InsertPromoCode,
+  type PromoCodeUsage,
+  type InsertPromoCodeUsage,
+  type SubscriptionEnhanced,
+  type InsertSubscriptionEnhanced,
+  subscriptionPlans,
+  promoCodes,
+  promoCodeUsages,
+  subscriptionsEnhanced,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, count, sql, or, lt, isNull } from "drizzle-orm";
@@ -896,10 +909,10 @@ export class DatabaseStorage implements IStorage {
       type: liveStreams.type,
       status: liveStreams.status,
       priceCents: liveStreams.priceCents,
-
+      streamKey: liveStreams.streamKey,
+      streamUrl: liveStreams.streamUrl,
       thumbnailUrl: liveStreams.thumbnailUrl,
       getstreamCallId: liveStreams.getstreamCallId,
-
       recordingUrl: liveStreams.recordingUrl,
       playbackUrl: liveStreams.playbackUrl,
       hlsPlaylistUrl: liveStreams.hlsPlaylistUrl,
@@ -916,10 +929,9 @@ export class DatabaseStorage implements IStorage {
         id: users.id,
         username: users.username,
         email: users.email,
-        displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        firstName: users.firstName,
+        lastName: users.lastName,
         role: users.role,
-        isVerified: users.isVerified,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
       },
@@ -955,14 +967,14 @@ export class DatabaseStorage implements IStorage {
       endedAt: liveStreams.endedAt,
       createdAt: liveStreams.createdAt,
       updatedAt: liveStreams.updatedAt,
+      // SECURITY: streamKey and streamUrl are secrets - never expose in public APIs
       creator: {
         id: users.id,
         username: users.username,
         email: users.email,
-        displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        firstName: users.firstName,
+        lastName: users.lastName,
         role: users.role,
-        isVerified: users.isVerified,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
       },
@@ -972,15 +984,11 @@ export class DatabaseStorage implements IStorage {
     .where(and(eq(liveStreams.status, 'live'), eq(liveStreams.type, 'public')))
     .orderBy(desc(liveStreams.viewersCount), desc(liveStreams.startedAt));
     
-    if (options?.limit) {
-      query = query.limit(options.limit);
-    }
+    // Enforce safe pagination limits
+    const limit = options?.limit !== undefined ? Math.min(options.limit, 100) : 20;
+    const offset = options?.offset !== undefined ? options.offset : 0;
     
-    if (options?.offset) {
-      query = query.offset(options.offset);
-    }
-    
-    return await query;
+    return await query.limit(limit).offset(offset);
   }
 
   async updateStreamStatus(streamId: string, status: string): Promise<void> {
@@ -1496,6 +1504,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(subscriptionsEnhanced.creatorId, creatorId))
       .orderBy(desc(subscriptionsEnhanced.createdAt));
   }
+
 }
 
 export const storage = new DatabaseStorage();
