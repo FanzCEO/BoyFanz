@@ -611,12 +611,21 @@ export const liveStreams = pgTable("live_streams", {
   streamKey: varchar("stream_key"),
   streamUrl: varchar("stream_url"),
   thumbnailUrl: varchar("thumbnail_url"),
+  // GetStream integration fields
+  getstreamCallId: varchar("getstream_call_id"),
+  getstreamToken: text("getstream_token"),
+  recordingUrl: varchar("recording_url"),
+  playbackUrl: varchar("playback_url"),
+  hlsPlaylistUrl: varchar("hls_playlist_url"),
+  rtmpIngestUrl: varchar("rtmp_ingest_url"),
   viewersCount: integer("viewers_count").default(0),
   maxViewers: integer("max_viewers").default(0),
+  totalTipsCents: integer("total_tips_cents").default(0),
   scheduledFor: timestamp("scheduled_for"),
   startedAt: timestamp("started_at"),
   endedAt: timestamp("ended_at"),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Stream Viewers
@@ -680,6 +689,94 @@ export const lovenseIntegrationSettings = pgTable("lovense_integration_settings"
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// Enhanced Lovense OAuth Integration
+export const lovenseAccounts = pgTable("lovense_accounts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  authType: varchar("auth_type").notNull().default("qr_code"), // "qr_code", "oauth", "manual"
+  accessToken: text("access_token"), // Encrypted OAuth token
+  refreshToken: text("refresh_token"), // Encrypted refresh token
+  tokenExpiry: timestamp("token_expiry"),
+  qrCodeData: jsonb("qr_code_data").default({}), // QR code connection data
+  connectionStatus: varchar("connection_status").default("disconnected").notNull(), // "connected", "disconnected", "error"
+  lastConnectedAt: timestamp("last_connected_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  userIdx: unique("idx_lovense_accounts_user").on(table.userId),
+}));
+
+// Lovense Pattern Mappings
+export const lovenseMappings = pgTable("lovense_mappings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  eventType: varchar("event_type").notNull(), // "tip", "follow", "subscription", "custom"
+  triggerValue: integer("trigger_value"), // Tip amount, etc.
+  pattern: varchar("pattern").notNull(), // "vibrate", "rotate", "custom_pattern_name"
+  intensity: integer("intensity").notNull().default(5), // 1-20
+  duration: integer("duration").notNull().default(3), // seconds
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  userEventIdx: index("idx_lovense_mappings_user_event").on(table.userId, table.eventType),
+}));
+
+// Co-star Verification System
+export const costarVerificationStatusEnum = pgEnum("costar_verification_status", ["pending", "approved", "rejected", "expired"]);
+
+export const costarVerifications = pgTable("costar_verifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  mediaId: varchar("media_id").references(() => mediaAssets.id, { onDelete: "cascade" }),
+  liveStreamId: varchar("live_stream_id").references(() => liveStreams.id, { onDelete: "cascade" }),
+  primaryCreatorId: varchar("primary_creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  coStarUserId: varchar("co_star_user_id").references(() => users.id, { onDelete: "set null" }),
+  coStarEmail: varchar("co_star_email"), // If co-star doesn't have account yet
+  status: costarVerificationStatusEnum("status").default("pending").notNull(),
+  inviteToken: varchar("invite_token").unique(),
+  consentDocument2257Id: varchar("consent_document_2257_id").references(() => records2257.id, { onDelete: "set null" }),
+  signedAt: timestamp("signed_at"),
+  kycVerificationId: varchar("kyc_verification_id").references(() => kycVerifications.id, { onDelete: "set null" }),
+  notes: text("notes"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  mediaCreatorIdx: index("idx_costar_media_creator").on(table.mediaId, table.primaryCreatorId),
+  streamCreatorIdx: index("idx_costar_stream_creator").on(table.liveStreamId, table.primaryCreatorId),
+  statusIdx: index("idx_costar_status").on(table.status),
+  inviteTokenIdx: index("idx_costar_invite_token").on(table.inviteToken),
+}));
+
+// Media to 2257 Record Links
+export const media2257Links = pgTable("media_2257_links", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  mediaId: varchar("media_id").notNull().references(() => mediaAssets.id, { onDelete: "cascade" }),
+  record2257Id: varchar("record_2257_id").notNull().references(() => records2257.id, { onDelete: "cascade" }),
+  role: varchar("role").notNull().default("primary"), // "primary", "co_star"
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  mediaRecordIdx: unique("idx_media_2257_media_record").on(table.mediaId, table.record2257Id),
+  mediaUserRoleIdx: index("idx_media_2257_media_user_role").on(table.mediaId, table.userId, table.role),
+}));
+
+// Custodian of Records (2257 Compliance)
+export const custodianOfRecords = pgTable("custodian_of_records", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  title: varchar("title").notNull(),
+  businessName: varchar("business_name").notNull(),
+  address: text("address").notNull(),
+  phone: varchar("phone").notNull(),
+  email: varchar("email").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  activeIdx: index("idx_custodian_active").on(table.isActive),
+}));
 
 // Reports
 export const reportTypeEnum = pgEnum("report_type", ["spam", "harassment", "inappropriate_content", "copyright", "fake_account", "other"]);
@@ -1005,6 +1102,36 @@ export const insertLovenseIntegrationSettingsSchema = createInsertSchema(lovense
   customPatterns: true,
 });
 
+// Enhanced Lovense and Co-star Schemas
+export const insertLovenseAccountSchema = createInsertSchema(lovenseAccounts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertLovenseMappingSchema = createInsertSchema(lovenseMappings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCostarVerificationSchema = createInsertSchema(costarVerifications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMedia2257LinkSchema = createInsertSchema(media2257Links).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCustodianOfRecordsSchema = createInsertSchema(custodianOfRecords).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const updateLovenseIntegrationSettingsSchema = createInsertSchema(lovenseIntegrationSettings).pick({
   isEnabled: true,
   connectAppToken: true,
@@ -1213,6 +1340,18 @@ export type InsertLovenseIntegrationSettings = z.infer<typeof insertLovenseInteg
 export type UpdateLovenseIntegrationSettings = z.infer<typeof updateLovenseIntegrationSettingsSchema>;
 export type LovenseDeviceControl = z.infer<typeof lovenseDeviceControlSchema>;
 export type LovenseTestDevice = z.infer<typeof lovenseTestDeviceSchema>;
+
+// Enhanced Integration Types
+export type LovenseAccount = typeof lovenseAccounts.$inferSelect;
+export type LovenseMapping = typeof lovenseMappings.$inferSelect;
+export type CostarVerification = typeof costarVerifications.$inferSelect;
+export type Media2257Link = typeof media2257Links.$inferSelect;
+export type CustodianOfRecords = typeof custodianOfRecords.$inferSelect;
+export type InsertLovenseAccount = z.infer<typeof insertLovenseAccountSchema>;
+export type InsertLovenseMapping = z.infer<typeof insertLovenseMappingSchema>;
+export type InsertCostarVerification = z.infer<typeof insertCostarVerificationSchema>;
+export type InsertMedia2257Link = z.infer<typeof insertMedia2257LinkSchema>;
+export type InsertCustodianOfRecords = z.infer<typeof insertCustodianOfRecordsSchema>;
 
 // Admin delegation types
 export type DelegatedPermission = typeof delegatedPermissions.$inferSelect;
