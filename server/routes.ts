@@ -13,7 +13,13 @@ import { notificationService } from "./services/notificationService";
 import { earningsService } from "./services/earningsService";
 import { watermarkService } from "./services/watermarkService";
 import { rateLimit } from "./middleware/rateLimit";
-import { uploadRateLimit } from "./middleware/authRateLimit";
+import { 
+  uploadRateLimit, 
+  paymentRateLimit,
+  contentRateLimit,
+  sensitiveOperationRateLimit,
+  verificationRateLimit 
+} from "./middleware/authRateLimit";
 import { csrfProtection } from "./middleware/csrf";
 import { validateRequest } from "./middleware/validation";
 import { 
@@ -260,7 +266,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/kyc/verify', isAuthenticated, csrfProtection, async (req: any, res) => {
+  app.post('/api/kyc/verify', isAuthenticated, csrfProtection, verificationRateLimit, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const verification = await kycService.initiateVerification(userId);
@@ -303,7 +309,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/themes', isAuthenticated, csrfProtection, async (req: any, res) => {
+  app.post('/api/themes', isAuthenticated, csrfProtection, sensitiveOperationRateLimit, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       if (!(await hasAdminAccess(userId, 'theme_management'))) {
@@ -318,7 +324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/themes/:id', isAuthenticated, csrfProtection, async (req: any, res) => {
+  app.put('/api/themes/:id', isAuthenticated, csrfProtection, sensitiveOperationRateLimit, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       if (!(await hasAdminAccess(userId, 'theme_management'))) {
@@ -492,7 +498,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/earnings/subscription', isAuthenticated, csrfProtection, validateRequest(subscriptionPaymentSchema), async (req: any, res) => {
+  app.post('/api/earnings/subscription', isAuthenticated, csrfProtection, paymentRateLimit, validateRequest(subscriptionPaymentSchema), async (req: any, res) => {
     try {
       const fanUserId = req.user.claims.sub;
       const { creatorUserId, amount } = req.body;
@@ -504,7 +510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/earnings/ppv', isAuthenticated, csrfProtection, validateRequest(ppvPurchaseSchema), async (req: any, res) => {
+  app.post('/api/earnings/ppv', isAuthenticated, csrfProtection, paymentRateLimit, validateRequest(ppvPurchaseSchema), async (req: any, res) => {
     try {
       const fanUserId = req.user.claims.sub;
       const { creatorUserId, mediaId, amount } = req.body;
@@ -516,7 +522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/earnings/tip', isAuthenticated, csrfProtection, validateRequest(tipSchema), async (req: any, res) => {
+  app.post('/api/earnings/tip', isAuthenticated, csrfProtection, paymentRateLimit, validateRequest(tipSchema), async (req: any, res) => {
     try {
       const fanUserId = req.user.claims.sub;
       const { creatorUserId, amount, message } = req.body;
@@ -539,7 +545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/earnings/tokens', isAuthenticated, csrfProtection, validateRequest(liveStreamTokensSchema), async (req: any, res) => {
+  app.post('/api/earnings/tokens', isAuthenticated, csrfProtection, paymentRateLimit, validateRequest(liveStreamTokensSchema), async (req: any, res) => {
     try {
       const fanUserId = req.user.claims.sub;
       const { creatorUserId, tokenCount, tokenValue } = req.body;
@@ -1008,7 +1014,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Posts routes
-  app.post('/api/posts', isAuthenticated, csrfProtection, validateRequest(insertPostSchema), async (req: any, res) => {
+  app.post('/api/posts', isAuthenticated, csrfProtection, contentRateLimit, validateRequest(insertPostSchema), async (req: any, res) => {
     try {
       const creatorId = req.user.claims.sub;
       const post = await storage.createPost({
@@ -1194,7 +1200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/payouts', isAuthenticated, csrfProtection, validateRequest(insertPayoutRequestSchema), async (req: any, res) => {
+  app.post('/api/payouts', isAuthenticated, csrfProtection, paymentRateLimit, validateRequest(insertPayoutRequestSchema), async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const payout = await payoutService.createPayoutRequest(userId, req.body);
@@ -1240,7 +1246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/webhooks', isAuthenticated, validateRequest(insertWebhookSchema), async (req: any, res) => {
+  app.post('/api/webhooks', isAuthenticated, csrfProtection, sensitiveOperationRateLimit, validateRequest(insertWebhookSchema), async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const webhook = await storage.createWebhook({
@@ -1267,7 +1273,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/api-keys', isAuthenticated, csrfProtection, async (req: any, res) => {
+  app.post('/api/api-keys', isAuthenticated, csrfProtection, sensitiveOperationRateLimit, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const keyValue = crypto.randomUUID();
@@ -1689,7 +1695,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/comments', isAuthenticated, csrfProtection, validateRequest(insertCommentSchema), async (req: any, res) => {
+  app.post('/api/comments', isAuthenticated, csrfProtection, contentRateLimit, validateRequest(insertCommentSchema), async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const commentData = req.body;
