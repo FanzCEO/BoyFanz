@@ -1120,6 +1120,59 @@ export class PaymentProcessingService {
       return { success: false, message: 'Webhook processing failed' };
     }
   }
+
+  // Payout webhook processing with idempotent status updates
+  async processPayoutWebhook(provider: string, webhookData: any): Promise<{ success: boolean, message: string }> {
+    try {
+      const { payoutId, status, providerPayoutId, errorMessage } = webhookData;
+      
+      if (!payoutId) {
+        return { success: false, message: 'Missing payout ID' };
+      }
+
+      // Prevent duplicate webhook processing
+      const webhookKey = `payout_webhook_${provider}_${payoutId}_${status}`;
+      if (this.payoutIdempotencyCache.has(webhookKey)) {
+        return { success: true, message: 'Payout webhook already processed' };
+      }
+
+      // Update payout status
+      const updateData: any = {
+        status,
+        providerPayoutId,
+        webhookReceivedAt: new Date(),
+        webhookProvider: provider
+      };
+
+      if (status === 'completed') {
+        updateData.completedAt = new Date();
+      } else if (status === 'failed') {
+        updateData.failedAt = new Date();
+        updateData.error = errorMessage || 'Payout failed';
+      }
+
+      await this.updatePayoutStatus(payoutId, updateData);
+
+      // Cache to prevent reprocessing
+      this.payoutIdempotencyCache.set(webhookKey, { success: true });
+      setTimeout(() => this.payoutIdempotencyCache.delete(webhookKey), 24 * 60 * 60 * 1000);
+
+      // Log payout status change
+      await storage.createAuditLog({
+        actorId: 'system',
+        action: 'payout_webhook_processed',
+        targetType: 'payout_transaction',
+        targetId: payoutId,
+        diffJson: { provider, status, providerPayoutId, webhookData }
+      });
+
+      console.log(`✅ Processed ${provider} payout webhook for ${payoutId}: ${status}`);
+      return { success: true, message: 'Payout webhook processed successfully' };
+    } catch (error) {
+      console.error('Payout webhook processing failed:', error);
+      return { success: false, message: 'Payout webhook processing failed' };
+    }
+  }
 }
 
 // Type definitions

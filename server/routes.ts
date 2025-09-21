@@ -1471,24 +1471,206 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ===== SECURE WEBHOOK ENDPOINTS =====
+  // ===== SECURE WEBHOOK ENDPOINTS WITH HMAC VERIFICATION =====
   
-  // Payment provider webhooks with signature verification
-  app.post('/api/webhooks/payments/:provider', async (req, res) => {
+  // Raw body parser for webhook signature verification
+  app.use('/api/webhooks', express.raw({ type: 'application/json' }));
+  
+  // CCBill payment webhooks with MD5 verification
+  app.post('/api/webhooks/ccbill', async (req, res) => {
+    try {
+      const webhookSecret = process.env.CCBILL_WEBHOOK_SECRET;
+      if (!webhookSecret && process.env.NODE_ENV === 'production') {
+        return res.status(500).json({ error: 'Webhook secret not configured' });
+      }
+
+      const payload = req.body.toString();
+      const signature = req.headers['x-ccbill-signature'] as string;
+      
+      // Verify CCBill MD5 signature
+      const isValid = await paymentProcessingService.verifyWebhookSignature('ccbill', payload, signature, webhookSecret || 'test_secret');
+      
+      if (!isValid && process.env.NODE_ENV === 'production') {
+        console.warn(`❌ Invalid CCBill webhook signature`);
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+      
+      const webhookData = JSON.parse(payload);
+      const result = await paymentProcessingService.processWebhook('ccbill', webhookData);
+      
+      res.json({ status: result.success ? 'success' : 'error', message: result.message });
+    } catch (error) {
+      console.error('CCBill webhook error:', error);
+      res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // Segpay payment webhooks with HMAC-SHA256 verification
+  app.post('/api/webhooks/segpay', async (req, res) => {
+    try {
+      const webhookSecret = process.env.SEGPAY_WEBHOOK_SECRET;
+      if (!webhookSecret && process.env.NODE_ENV === 'production') {
+        return res.status(500).json({ error: 'Webhook secret not configured' });
+      }
+
+      const payload = req.body.toString();
+      const signature = req.headers['x-segpay-signature'] as string;
+      
+      // Verify Segpay HMAC-SHA256 signature
+      const isValid = await paymentProcessingService.verifyWebhookSignature('segpay', payload, signature, webhookSecret || 'test_secret');
+      
+      if (!isValid && process.env.NODE_ENV === 'production') {
+        console.warn(`❌ Invalid Segpay webhook signature`);
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+      
+      const webhookData = JSON.parse(payload);
+      const result = await paymentProcessingService.processWebhook('segpay', webhookData);
+      
+      res.json({ status: result.success ? 'success' : 'error', message: result.message });
+    } catch (error) {
+      console.error('Segpay webhook error:', error);
+      res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // NOWPayments crypto webhooks with HMAC-SHA512 verification
+  app.post('/api/webhooks/nowpayments', async (req, res) => {
+    try {
+      const webhookSecret = process.env.NOWPAYMENTS_WEBHOOK_SECRET;
+      if (!webhookSecret && process.env.NODE_ENV === 'production') {
+        return res.status(500).json({ error: 'Webhook secret not configured' });
+      }
+
+      const payload = req.body.toString();
+      const signature = req.headers['x-nowpayments-sig'] as string;
+      
+      // Verify NOWPayments HMAC-SHA512 signature
+      const isValid = await paymentProcessingService.verifyWebhookSignature('nowpayments', payload, signature, webhookSecret || 'test_secret');
+      
+      if (!isValid && process.env.NODE_ENV === 'production') {
+        console.warn(`❌ Invalid NOWPayments webhook signature`);
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+      
+      const webhookData = JSON.parse(payload);
+      const result = await paymentProcessingService.processWebhook('nowpayments', webhookData);
+      
+      res.json({ status: result.success ? 'success' : 'error', message: result.message });
+    } catch (error) {
+      console.error('NOWPayments webhook error:', error);
+      res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // CoinsPaid crypto webhooks with HMAC-SHA512 verification
+  app.post('/api/webhooks/coinspaid', async (req, res) => {
+    try {
+      const webhookSecret = process.env.COINSPAID_WEBHOOK_SECRET;
+      if (!webhookSecret && process.env.NODE_ENV === 'production') {
+        return res.status(500).json({ error: 'Webhook secret not configured' });
+      }
+
+      const payload = req.body.toString();
+      const signature = req.headers['x-coinspaid-signature'] as string;
+      
+      // Verify CoinsPaid HMAC-SHA512 signature
+      const isValid = await paymentProcessingService.verifyWebhookSignature('coinspaid', payload, signature, webhookSecret || 'test_secret');
+      
+      if (!isValid && process.env.NODE_ENV === 'production') {
+        console.warn(`❌ Invalid CoinsPaid webhook signature`);
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+      
+      const webhookData = JSON.parse(payload);
+      const result = await paymentProcessingService.processWebhook('coinspaid', webhookData);
+      
+      res.json({ status: result.success ? 'success' : 'error', message: result.message });
+    } catch (error) {
+      console.error('CoinsPaid webhook error:', error);
+      res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // Paxum payout webhooks with custom verification
+  app.post('/api/webhooks/paxum', async (req, res) => {
+    try {
+      const webhookSecret = process.env.PAXUM_WEBHOOK_SECRET;
+      if (!webhookSecret && process.env.NODE_ENV === 'production') {
+        return res.status(500).json({ error: 'Webhook secret not configured' });
+      }
+
+      const payload = req.body.toString();
+      const signature = req.headers['x-paxum-signature'] as string;
+      
+      // Verify Paxum signature
+      const isValid = await paymentProcessingService.verifyWebhookSignature('paxum', payload, signature, webhookSecret || 'test_secret');
+      
+      if (!isValid && process.env.NODE_ENV === 'production') {
+        console.warn(`❌ Invalid Paxum webhook signature`);
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+      
+      const webhookData = JSON.parse(payload);
+      const result = await paymentProcessingService.processPayoutWebhook('paxum', webhookData);
+      
+      res.json({ status: result.success ? 'success' : 'error', message: result.message });
+    } catch (error) {
+      console.error('Paxum webhook error:', error);
+      res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // KYC verification webhooks from VerifyMy
+  app.post('/api/webhooks/verifyme', async (req, res) => {
+    try {
+      const webhookSecret = process.env.VERIFYME_WEBHOOK_SECRET;
+      if (!webhookSecret && process.env.NODE_ENV === 'production') {
+        return res.status(500).json({ error: 'Webhook secret not configured' });
+      }
+
+      const payload = req.body.toString();
+      const signature = req.headers['x-verifyme-signature'] as string;
+      
+      // Verify VerifyMy HMAC signature
+      const crypto = await import('crypto');
+      const expectedSignature = crypto.createHmac('sha256', webhookSecret || 'test_secret').update(payload).digest('hex');
+      const isValid = signature === expectedSignature;
+      
+      if (!isValid && process.env.NODE_ENV === 'production') {
+        console.warn(`❌ Invalid VerifyMy webhook signature`);
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+      
+      const webhookData = JSON.parse(payload);
+      const result = await kycService.processKYCWebhook(webhookData);
+      
+      res.json({ status: result.success ? 'success' : 'error', message: result.message });
+    } catch (error) {
+      console.error('VerifyMy webhook error:', error);
+      res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // Generic webhook endpoint with provider-specific routing
+  app.post('/api/webhooks/:provider', async (req, res) => {
     try {
       const provider = req.params.provider;
-      const signature = req.headers['x-signature'] || req.headers['signature'] || '';
-      const payload = JSON.stringify(req.body);
+      const webhookSecret = process.env[`${provider.toUpperCase()}_WEBHOOK_SECRET`];
       
-      // Get provider webhook secret
-      const webhookSecret = process.env[`${provider.toUpperCase()}_WEBHOOK_SECRET`] || 'test_secret';
+      if (!webhookSecret && process.env.NODE_ENV === 'production') {
+        return res.status(500).json({ error: 'Webhook secret not configured' });
+      }
+
+      const payload = req.body.toString();
+      const signature = req.headers['x-signature'] || req.headers['signature'] || '';
       
       // Verify webhook signature
       const isValid = await paymentProcessingService.verifyWebhookSignature(
         provider, 
         payload, 
         signature as string, 
-        webhookSecret
+        webhookSecret || 'test_secret'
       );
       
       if (!isValid && process.env.NODE_ENV === 'production') {
@@ -1496,16 +1678,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'Invalid signature' });
       }
       
-      // Process webhook
-      const result = await paymentProcessingService.processWebhook(provider, req.body);
+      // Process webhook with idempotency
+      const webhookData = JSON.parse(payload);
+      const result = await paymentProcessingService.processWebhook(provider, webhookData);
       
-      if (result.success) {
-        res.json({ status: 'success', message: result.message });
-      } else {
-        res.status(400).json({ status: 'error', message: result.message });
-      }
+      res.json({ status: result.success ? 'success' : 'error', message: result.message });
     } catch (error) {
-      console.error('Webhook processing error:', error);
+      console.error(`${req.params.provider} webhook error:`, error);
       res.status(500).json({ error: 'Webhook processing failed' });
     }
   });
