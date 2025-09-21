@@ -51,6 +51,16 @@ import {
   delegatedPermissions,
   type DelegatedPermission,
   type InsertDelegatedPermission,
+  // DMCA compliance
+  dmcaRequests,
+  repeatInfringers,
+  contentHashes,
+  type DmcaRequest,
+  type InsertDmcaRequest,
+  type RepeatInfringer,
+  type InsertRepeatInfringer,
+  type ContentHash,
+  type InsertContentHash,
   // Lovense integration
   type InsertLovenseDevice,
   type LovenseDevice,
@@ -248,6 +258,28 @@ export interface IStorage {
   updateLovenseSession(sessionId: string, updates: Partial<LovenseSession>): Promise<LovenseSession>;
   disconnectLovenseSession(sessionId: string): Promise<boolean>;
   cleanupInactiveLovenseSessions(): Promise<number>;
+  
+  // DMCA compliance operations
+  createDmcaRequest(request: InsertDmcaRequest): Promise<DmcaRequest>;
+  getDmcaRequest(id: string): Promise<DmcaRequest | undefined>;
+  updateDmcaRequest(id: string, updates: Partial<DmcaRequest>): Promise<void>;
+  getDmcaRequestsByUser(userId: string): Promise<DmcaRequest[]>;
+  getDmcaRequestsCount(status?: string): Promise<number>;
+  getKycByExternalId(externalId: string): Promise<KycVerification | undefined>;
+  
+  // Content hash operations
+  saveContentHash(hash: InsertContentHash): Promise<ContentHash>;
+  checkBlockedHash(hashes: string[]): Promise<ContentHash | undefined>;
+  getBlockedHashesCount(): Promise<number>;
+  
+  // Repeat infringer operations
+  getRepeatInfringer(userId: string): Promise<RepeatInfringer | undefined>;
+  saveRepeatInfringer(infringer: InsertRepeatInfringer): Promise<RepeatInfringer>;
+  getRepeatInfringersCount(): Promise<number>;
+  
+  // Enhanced user operations
+  updateUser(userId: string, updates: Partial<User>): Promise<void>;
+  getMediaAssetsByOwner(ownerId: string): Promise<MediaAsset[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1515,6 +1547,104 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(subscriptionsEnhanced.createdAt));
   }
 
+  // DMCA compliance operations
+  async createDmcaRequest(request: InsertDmcaRequest): Promise<DmcaRequest> {
+    const [dmcaRequest] = await db.insert(dmcaRequests).values(request).returning();
+    return dmcaRequest;
+  }
+
+  async getDmcaRequest(id: string): Promise<DmcaRequest | undefined> {
+    const [dmcaRequest] = await db.select().from(dmcaRequests).where(eq(dmcaRequests.id, id));
+    return dmcaRequest;
+  }
+
+  async updateDmcaRequest(id: string, updates: Partial<DmcaRequest>): Promise<void> {
+    await db
+      .update(dmcaRequests)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(dmcaRequests.id, id));
+  }
+
+  async getDmcaRequestsByUser(userId: string): Promise<DmcaRequest[]> {
+    return await db.select().from(dmcaRequests)
+      .where(eq(dmcaRequests.userId, userId))
+      .orderBy(desc(dmcaRequests.submittedAt));
+  }
+
+  async getDmcaRequestsCount(status?: string): Promise<number> {
+    const query = db.select({ count: sql<number>`count(*)::int` }).from(dmcaRequests);
+    
+    if (status) {
+      query.where(eq(dmcaRequests.status, status as any));
+    }
+    
+    const [result] = await query;
+    return result.count;
+  }
+
+  async getKycByExternalId(externalId: string): Promise<KycVerification | undefined> {
+    const [kyc] = await db.select().from(kycVerifications)
+      .where(eq(kycVerifications.externalId, externalId));
+    return kyc;
+  }
+
+  // Content hash operations
+  async saveContentHash(hash: InsertContentHash): Promise<ContentHash> {
+    const [contentHash] = await db.insert(contentHashes).values(hash).returning();
+    return contentHash;
+  }
+
+  async checkBlockedHash(hashes: string[]): Promise<ContentHash | undefined> {
+    const [blockedHash] = await db.select().from(contentHashes)
+      .where(sql`${contentHashes.hash} = ANY(${hashes})`);
+    return blockedHash;
+  }
+
+  async getBlockedHashesCount(): Promise<number> {
+    const [result] = await db.select({ count: sql<number>`count(*)::int` }).from(contentHashes);
+    return result.count;
+  }
+
+  // Repeat infringer operations
+  async getRepeatInfringer(userId: string): Promise<RepeatInfringer | undefined> {
+    const [infringer] = await db.select().from(repeatInfringers)
+      .where(eq(repeatInfringers.userId, userId));
+    return infringer;
+  }
+
+  async saveRepeatInfringer(infringer: InsertRepeatInfringer): Promise<RepeatInfringer> {
+    const [savedInfringer] = await db
+      .insert(repeatInfringers)
+      .values(infringer)
+      .onConflictDoUpdate({
+        target: repeatInfringers.userId,
+        set: {
+          ...infringer,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return savedInfringer;
+  }
+
+  async getRepeatInfringersCount(): Promise<number> {
+    const [result] = await db.select({ count: sql<number>`count(*)::int` }).from(repeatInfringers);
+    return result.count;
+  }
+
+  // Enhanced user operations
+  async updateUser(userId: string, updates: Partial<User>): Promise<void> {
+    await db
+      .update(users)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+  }
+
+  async getMediaAssetsByOwner(ownerId: string): Promise<MediaAsset[]> {
+    return await db.select().from(mediaAssets)
+      .where(eq(mediaAssets.ownerId, ownerId))
+      .orderBy(desc(mediaAssets.createdAt));
+  }
 }
 
 export const storage = new DatabaseStorage();

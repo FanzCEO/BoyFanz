@@ -814,7 +814,7 @@ export const reports = pgTable("reports", {
 });
 
 // Notifications
-export const notificationKindEnum = pgEnum("notification_kind", ["payout", "moderation", "kyc", "system", "fan_activity"]);
+export const notificationKindEnum = pgEnum("notification_kind", ["payout", "moderation", "kyc", "system", "fan_activity", "dmca"]);
 
 export const notifications = pgTable("notifications", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -1377,6 +1377,73 @@ export type InsertCostarVerification = z.infer<typeof insertCostarVerificationSc
 export type InsertMedia2257Link = z.infer<typeof insertMedia2257LinkSchema>;
 export type InsertCustodianOfRecords = z.infer<typeof insertCustodianOfRecordsSchema>;
 
+// DMCA Compliance Tables
+export const dmcaStatusEnum = pgEnum("dmca_status", ["pending", "processed", "rejected", "counter_claimed"]);
+export const repeatInfringerStatusEnum = pgEnum("repeat_infringer_status", ["warning", "probation", "suspended", "terminated"]);
+export const contentHashAlgorithmEnum = pgEnum("content_hash_algorithm", ["md5", "sha256", "perceptual"]);
+
+export const dmcaRequests = pgTable("dmca_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  complaintId: varchar("complaint_id").notNull().unique(),
+  complainantName: varchar("complainant_name").notNull(),
+  complainantEmail: varchar("complainant_email").notNull(),
+  complainantAddress: text("complainant_address").notNull(),
+  copyrightOwner: varchar("copyright_owner").notNull(),
+  workDescription: text("work_description").notNull(),
+  infringementUrls: text("infringement_urls").array().notNull(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  mediaAssetId: varchar("media_asset_id").references(() => mediaAssets.id, { onDelete: "set null" }),
+  status: dmcaStatusEnum("status").default("pending").notNull(),
+  submittedAt: timestamp("submitted_at").defaultNow(),
+  processedAt: timestamp("processed_at"),
+  processorId: varchar("processor_id").references(() => users.id, { onDelete: "set null" }),
+  legalHoldApplied: boolean("legal_hold_applied").default(false),
+  contentHash: varchar("content_hash"),
+  counterNotification: jsonb("counter_notification"),
+  counterSubmittedAt: timestamp("counter_submitted_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const repeatInfringers = pgTable("repeat_infringers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  infringementCount: integer("infringement_count").default(0),
+  firstInfringement: timestamp("first_infringement").defaultNow(),
+  lastInfringement: timestamp("last_infringement").defaultNow(),
+  status: repeatInfringerStatusEnum("status").default("warning").notNull(),
+  strikeHistory: text("strike_history").array().default([]),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const contentHashes = pgTable("content_hashes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  hash: varchar("hash").notNull(),
+  algorithm: contentHashAlgorithmEnum("algorithm").notNull(),
+  mediaAssetId: varchar("media_asset_id").notNull().references(() => mediaAssets.id, { onDelete: "cascade" }),
+  dmcaRequestId: varchar("dmca_request_id").references(() => dmcaRequests.id, { onDelete: "cascade" }),
+  blockedAt: timestamp("blocked_at").defaultNow(),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_content_hash").on(table.hash),
+  index("idx_content_hash_algorithm").on(table.algorithm),
+]);
+
+// DMCA Insert/Select schemas
+export const insertDmcaRequestSchema = createInsertSchema(dmcaRequests).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertRepeatInfringerSchema = createInsertSchema(repeatInfringers).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertContentHashSchema = createInsertSchema(contentHashes).omit({ id: true, createdAt: true });
+
 // Admin delegation types
 export type DelegatedPermission = typeof delegatedPermissions.$inferSelect;
 export type InsertDelegatedPermission = z.infer<typeof insertDelegatedPermissionSchema>;
+
+// DMCA types
+export type DmcaRequest = typeof dmcaRequests.$inferSelect;
+export type InsertDmcaRequest = z.infer<typeof insertDmcaRequestSchema>;
+export type RepeatInfringer = typeof repeatInfringers.$inferSelect;
+export type InsertRepeatInfringer = z.infer<typeof insertRepeatInfringerSchema>;
+export type ContentHash = typeof contentHashes.$inferSelect;
+export type InsertContentHash = z.infer<typeof insertContentHashSchema>;

@@ -1627,11 +1627,143 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isMassMessage: false,
         readAt: null,
       });
+
+      // Send real-time notification to receiver
+      notificationService.sendNotification(messageData.receiverId, {
+        kind: 'fan_activity',
+        payloadJson: {
+          message: `New message from ${req.user.claims.username || 'someone'}`,
+          messageId: message.id,
+          senderId: senderId,
+          type: messageData.type || 'text'
+        }
+      });
       
       res.status(201).json(message);
     } catch (error) {
       console.error("Error creating message:", error);
       res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  // Mass messaging endpoints
+  app.post('/api/messages/mass', isAuthenticated, csrfProtection, async (req: any, res) => {
+    try {
+      const senderId = req.user.claims.sub;
+      const userRole = req.user.claims.role;
+      
+      // Only creators can send mass messages
+      if (userRole !== 'creator') {
+        return res.status(403).json({ message: "Only creators can send mass messages" });
+      }
+      
+      const { content, type, mediaUrl, priceCents, targetSegment, customRecipientIds, scheduledAt } = req.body;
+      
+      if (!content || !targetSegment) {
+        return res.status(400).json({ message: "Content and target segment are required" });
+      }
+      
+      const { massMessagingService } = await import('./services/massMessagingService');
+      
+      const result = await massMessagingService.sendMassMessage({
+        senderId,
+        content,
+        type: type || 'text',
+        mediaUrl,
+        priceCents: priceCents || 0,
+        targetSegment,
+        customRecipientIds,
+        scheduledAt: scheduledAt ? new Date(scheduledAt) : undefined
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error sending mass message:", error);
+      res.status(500).json({ 
+        message: "Failed to send mass message", 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
+  app.get('/api/messages/mass/jobs/:jobId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { jobId } = req.params;
+      const senderId = req.user.claims.sub;
+      
+      const { massMessagingService } = await import('./services/massMessagingService');
+      const job = await massMessagingService.getJobStatus(jobId);
+      
+      if (!job || job.senderId !== senderId) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+      
+      res.json(job);
+    } catch (error) {
+      console.error("Error getting job status:", error);
+      res.status(500).json({ message: "Failed to get job status" });
+    }
+  });
+
+  app.get('/api/messages/mass/jobs', isAuthenticated, async (req: any, res) => {
+    try {
+      const senderId = req.user.claims.sub;
+      const userRole = req.user.claims.role;
+      
+      if (userRole !== 'creator') {
+        return res.status(403).json({ message: "Only creators can view mass message jobs" });
+      }
+      
+      const { massMessagingService } = await import('./services/massMessagingService');
+      const jobs = massMessagingService.getCreatorJobs(senderId);
+      
+      res.json(jobs);
+    } catch (error) {
+      console.error("Error getting creator jobs:", error);
+      res.status(500).json({ message: "Failed to get jobs" });
+    }
+  });
+
+  app.delete('/api/messages/mass/jobs/:jobId', isAuthenticated, csrfProtection, async (req: any, res) => {
+    try {
+      const { jobId } = req.params;
+      const senderId = req.user.claims.sub;
+      
+      const { massMessagingService } = await import('./services/massMessagingService');
+      const cancelled = await massMessagingService.cancelJob(jobId, senderId);
+      
+      if (!cancelled) {
+        return res.status(400).json({ message: "Job could not be cancelled" });
+      }
+      
+      res.json({ message: "Job cancelled successfully" });
+    } catch (error) {
+      console.error("Error cancelling job:", error);
+      res.status(500).json({ 
+        message: "Failed to cancel job",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.get('/api/messages/mass/analytics', isAuthenticated, async (req: any, res) => {
+    try {
+      const senderId = req.user.claims.sub;
+      const userRole = req.user.claims.role;
+      
+      if (userRole !== 'creator') {
+        return res.status(403).json({ message: "Only creators can view mass message analytics" });
+      }
+      
+      const days = parseInt(req.query.days as string) || 30;
+      
+      const { massMessagingService } = await import('./services/massMessagingService');
+      const analytics = await massMessagingService.getMassMessageAnalytics(senderId, days);
+      
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error getting mass message analytics:", error);
+      res.status(500).json({ message: "Failed to get analytics" });
     }
   });
 

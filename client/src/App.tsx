@@ -37,6 +37,7 @@ import CreatorProfile from "@/pages/CreatorProfile";
 import PostsFeed from "@/pages/PostsFeed";
 import SearchCreators from "@/pages/SearchCreators";
 import Messages from "@/pages/Messages";
+import MassMessaging from "@/pages/MassMessaging";
 import PostView from "@/pages/PostView";
 import EarningsPage from "@/pages/Creator/EarningsPage";
 import Blog from "@/pages/Blog";
@@ -54,7 +55,7 @@ function Router() {
   useTheme(); // Apply active theme
 
   // Protected routes that require authentication
-  const protectedRoutes = ['/feed', '/messages', '/post', '/earnings', '/media', '/compliance', '/payouts', '/notifications', '/settings', '/admin', '/purchased', '/subscriptions', '/release-forms', '/nearby', '/streams'];
+  const protectedRoutes = ['/feed', '/messages', '/mass-messaging', '/post', '/earnings', '/media', '/compliance', '/payouts', '/notifications', '/settings', '/admin', '/purchased', '/subscriptions', '/release-forms', '/nearby', '/streams'];
   
   // Check if current route is protected
   const isProtectedRoute = protectedRoutes.some(route => location.startsWith(route));
@@ -125,6 +126,7 @@ function Router() {
             <Route path="/feed" component={PostsFeed} />
             <Route path="/search" component={SearchCreators} />
             <Route path="/messages" component={Messages} />
+            <Route path="/mass-messaging" component={MassMessaging} />
             <Route path="/post/:postId" component={PostView} />
             <Route path="/earnings" component={EarningsPage} />
             <Route path="/streams" component={StreamsHome} />
