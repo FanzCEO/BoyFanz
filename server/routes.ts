@@ -14,6 +14,7 @@ import { notificationService } from "./services/notificationService";
 import { earningsService } from "./services/earningsService";
 import { watermarkService } from "./services/watermarkService";
 import { createGetstreamService } from "./services/getstreamService";
+import { paymentProcessingService } from "./services/paymentProcessingService";
 import { rateLimit } from "./middleware/rateLimit";
 import { 
   uploadRateLimit, 
@@ -1293,6 +1294,234 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating API key:", error);
       res.status(500).json({ message: "Failed to create API key" });
+    }
+  });
+
+  // ===== COMPREHENSIVE PAYMENT PROCESSING ROUTES =====
+  
+  // Get available payment methods for a region/currency
+  app.get('/api/payments/methods', isAuthenticated, async (req: any, res) => {
+    try {
+      const { currency = 'USD', country } = req.query;
+      const methods = paymentProcessingService.getAvailablePaymentMethods(currency, country);
+      res.json({
+        methods: methods.map(method => ({
+          name: method.name,
+          type: method.type,
+          isAdultFriendly: method.isAdultFriendly,
+          supportedCurrencies: method.supportedCurrencies,
+          processingFeeBps: method.processingFeeBps
+        }))
+      });
+    } catch (error) {
+      console.error("Error fetching payment methods:", error);
+      res.status(500).json({ message: "Failed to fetch payment methods" });
+    }
+  });
+
+  // Process payment with automatic failover
+  app.post('/api/payments/process', isAuthenticated, csrfProtection, paymentRateLimit, async (req: any, res) => {
+    try {
+      const userId = req.user.claims?.sub || req.user.id;
+      const { amountCents, currency, description, preferredProvider, paymentMethod, billingAddress } = req.body;
+
+      if (!amountCents || !currency || !paymentMethod) {
+        return res.status(400).json({ message: "Missing required payment fields" });
+      }
+
+      const result = await paymentProcessingService.processPayment({
+        userId,
+        amountCents: parseInt(amountCents),
+        currency: currency.toUpperCase(),
+        description: description || 'BoyFanz purchase',
+        paymentMethod,
+        billingAddress
+      }, preferredProvider);
+
+      res.json(result);
+    } catch (error) {
+      console.error("Error processing payment:", error);
+      res.status(500).json({ message: "Payment processing failed" });
+    }
+  });
+
+  // Get available payout methods for creators
+  app.get('/api/payouts/methods', isAuthenticated, async (req: any, res) => {
+    try {
+      const { currency = 'USD', country } = req.query;
+      const methods = paymentProcessingService.getAvailablePayoutMethods(currency, country);
+      res.json({
+        methods: methods.map(method => ({
+          name: method.name,
+          type: method.type,
+          supportedCurrencies: method.supportedCurrencies,
+          supportedCountries: method.supportedCountries,
+          minimumPayoutCents: method.minimumPayoutCents,
+          processingFeeBps: method.processingFeeBps
+        }))
+      });
+    } catch (error) {
+      console.error("Error fetching payout methods:", error);
+      res.status(500).json({ message: "Failed to fetch payout methods" });
+    }
+  });
+
+  // Process creator payout with automatic routing
+  app.post('/api/payouts/process', isAuthenticated, csrfProtection, paymentRateLimit, async (req: any, res) => {
+    try {
+      const userId = req.user.claims?.sub || req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'creator') {
+        return res.status(403).json({ message: "Only creators can request payouts" });
+      }
+
+      const { amountCents, currency, method, destination, preferredProvider } = req.body;
+
+      if (!amountCents || !currency || !method || !destination) {
+        return res.status(400).json({ message: "Missing required payout fields" });
+      }
+
+      const result = await paymentProcessingService.processPayout({
+        creatorId: userId,
+        amountCents: parseInt(amountCents),
+        currency: currency.toUpperCase(),
+        method,
+        destination
+      }, preferredProvider);
+
+      res.json(result);
+    } catch (error) {
+      console.error("Error processing payout:", error);
+      res.status(500).json({ message: "Payout processing failed" });
+    }
+  });
+
+  // ===== MASS MESSAGING ROUTES =====
+  
+  // Send mass message to fan segments
+  app.post('/api/messages/mass', isAuthenticated, csrfProtection, contentRateLimit, async (req: any, res) => {
+    try {
+      const userId = req.user.claims?.sub || req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'creator') {
+        return res.status(403).json({ message: "Only creators can send mass messages" });
+      }
+
+      const { content, type = 'text', targetSegment, priceCents = 0 } = req.body;
+
+      if (!content || !targetSegment) {
+        return res.status(400).json({ message: "Content and target segment are required" });
+      }
+
+      const job = await massMessagingService.createMassMessageJob({
+        senderId: userId,
+        content,
+        type,
+        targetSegment,
+        priceCents: parseInt(priceCents) || 0
+      });
+
+      res.json({
+        success: true,
+        jobId: job.id,
+        estimatedRecipients: job.totalRecipients,
+        message: "Mass message queued for delivery"
+      });
+    } catch (error) {
+      console.error("Error creating mass message:", error);
+      res.status(500).json({ message: "Failed to send mass message" });
+    }
+  });
+
+  // Get mass message jobs for creator
+  app.get('/api/messages/mass/jobs', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims?.sub || req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'creator') {
+        return res.status(403).json({ message: "Only creators can view mass message jobs" });
+      }
+
+      const jobs = await massMessagingService.getJobsByCreator(userId);
+      res.json(jobs);
+    } catch (error) {
+      console.error("Error fetching mass message jobs:", error);
+      res.status(500).json({ message: "Failed to fetch jobs" });
+    }
+  });
+
+  // Get mass messaging analytics for creator
+  app.get('/api/messages/mass/analytics', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims?.sub || req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'creator') {
+        return res.status(403).json({ message: "Only creators can view analytics" });
+      }
+
+      const analytics = await massMessagingService.getAnalytics(userId);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // ===== SECURE WEBHOOK ENDPOINTS =====
+  
+  // Payment provider webhooks with signature verification
+  app.post('/api/webhooks/payments/:provider', async (req, res) => {
+    try {
+      const provider = req.params.provider;
+      const signature = req.headers['x-signature'] || req.headers['signature'] || '';
+      const payload = JSON.stringify(req.body);
+      
+      // Get provider webhook secret
+      const webhookSecret = process.env[`${provider.toUpperCase()}_WEBHOOK_SECRET`] || 'test_secret';
+      
+      // Verify webhook signature
+      const isValid = await paymentProcessingService.verifyWebhookSignature(
+        provider, 
+        payload, 
+        signature as string, 
+        webhookSecret
+      );
+      
+      if (!isValid && process.env.NODE_ENV === 'production') {
+        console.warn(`❌ Invalid webhook signature from ${provider}`);
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+      
+      // Process webhook
+      const result = await paymentProcessingService.processWebhook(provider, req.body);
+      
+      if (result.success) {
+        res.json({ status: 'success', message: result.message });
+      } else {
+        res.status(400).json({ status: 'error', message: result.message });
+      }
+    } catch (error) {
+      console.error('Webhook processing error:', error);
+      res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // Test webhook endpoint for development
+  app.post('/api/webhooks/test', async (req, res) => {
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(404).json({ error: 'Not found' });
+    }
+    
+    try {
+      console.log('📥 Test webhook received:', req.body);
+      res.json({ status: 'success', message: 'Test webhook processed' });
+    } catch (error) {
+      console.error('Test webhook error:', error);
+      res.status(500).json({ error: 'Test webhook failed' });
     }
   });
 

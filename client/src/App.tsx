@@ -131,9 +131,15 @@ function Router() {
             <Route path="/earnings" component={EarningsPage} />
             <Route path="/streams" component={StreamsHome} />
             <Route path="/streams/create" component={StreamCreation} />
-            <Route path="/streams/:id/dashboard" component={StreamDashboard} />
-            <Route path="/streams/:id/watch" component={LiveViewer} />
-            <Route path="/streams/:id/analytics" component={StreamAnalytics} />
+            <Route path="/streams/:id/dashboard">
+              {(params) => <StreamDashboard streamId={params.id} />}
+            </Route>
+            <Route path="/streams/:id/watch">
+              {(params) => <LiveViewer streamId={params.id} />}
+            </Route>
+            <Route path="/streams/:id/analytics">
+              {(params) => <StreamAnalytics streamId={params.id} />}
+            </Route>
             <Route path="/blog" component={Blog} />
             <Route path="/contact" component={Contact} />
             <Route component={NotFound} />
