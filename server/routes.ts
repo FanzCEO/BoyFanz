@@ -290,6 +290,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
   // Theme management routes (admin only)
   app.get('/api/themes', async (req, res) => {
     try {

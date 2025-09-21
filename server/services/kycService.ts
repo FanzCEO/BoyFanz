@@ -121,10 +121,35 @@ class KycService {
 
   async handleWebhook(payload: any, signature: string) {
     try {
-      // Verify webhook signature (simplified)
+      // CRITICAL SECURITY: Verify webhook signature 
       if (!signature) {
         throw new Error('No signature provided');
       }
+
+      // Verify signature using HMAC-SHA256 (similar to GetStream implementation)
+      const webhookSecret = process.env.VERIFYMY_WEBHOOK_SECRET;
+      if (!webhookSecret) {
+        console.error('⚠️ VerifyMy webhook secret not configured - cannot verify signature');
+        throw new Error('Webhook secret not configured');
+      }
+
+      const crypto = await import('crypto');
+      const expectedSignature = crypto
+        .createHmac('sha256', webhookSecret)
+        .update(JSON.stringify(payload), 'utf8')
+        .digest('hex');
+
+      // Secure comparison to prevent timing attacks
+      const providedSignature = signature.replace(/^sha256=/, ''); // Handle potential prefix
+      if (!crypto.timingSafeEqual(
+        Buffer.from(providedSignature, 'hex'),
+        Buffer.from(expectedSignature, 'hex')
+      )) {
+        console.error('❌ VerifyMy webhook: Invalid signature');
+        throw new Error('Invalid webhook signature');
+      }
+
+      console.log('✅ VerifyMy webhook signature verified successfully');
 
       // Process the webhook payload
       const { external_id, status, user_data, verification_data } = payload;
