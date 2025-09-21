@@ -290,6 +290,58 @@
   }
 }
 
+/* Underground loading animations */
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -5%); }
+  30% { transform: translate(3%, -1%); }
+  50% { transform: translate(-1%, 2%); }
+  70% { transform: translate(1%, 1%); }
+  90% { transform: translate(-1%, 0%); }
+}
+
+@keyframes scanlines {
+  0% { background-position: 0 0px; }
+  100% { background-position: 0 4px; }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(-50%, -50%) translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translate(-50%, -50%) translateY(-10px) rotate(1deg);
+  }
+  66% {
+    transform: translate(-50%, -50%) translateY(5px) rotate(-1deg);
+  }
+}
+
+@keyframes audioBar {
+  0% { transform: scaleY(0.2); }
+  100% { transform: scaleY(1); }
+}
+
+@keyframes flicker {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% {
+    opacity: 1;
+    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+  }
+  20%, 24%, 55% {
+    opacity: 0.8;
+    text-shadow: 0 0 5px currentColor;
+  }
+}
+
+/* Underground club atmosphere */
+.animate-flicker {
+  animation: flicker 2s infinite linear;
+}
+
+.animate-spin-slow {
+  animation: vinyl-spin 8s linear infinite;
+}
+
 /* High contrast mode */
 @media (prefers-contrast: high) {
   .neon-sign {
