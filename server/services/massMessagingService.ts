@@ -355,6 +355,25 @@ export class MassMessagingService {
       averageRecipientsPerMessage: Math.round(averageRecipients)
     };
   }
+
+  // Method aliases for API routes compatibility
+  async createMassMessageJob(request: MassMessageRequest): Promise<{ jobId: string; estimatedRecipients: number }> {
+    return this.sendMassMessage(request);
+  }
+
+  async getJobsByCreator(creatorId: string): Promise<MassMessageJob[]> {
+    return this.getCreatorJobs(creatorId);
+  }
+
+  async getAnalytics(creatorId: string, days?: number): Promise<{
+    totalSent: number;
+    totalRevenue: number;
+    openRate: number;
+    responseRate: number;
+    averageRecipientsPerMessage: number;
+  }> {
+    return this.getMassMessageAnalytics(creatorId, days);
+  }
 }
 
 export const massMessagingService = new MassMessagingService();

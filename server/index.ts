@@ -93,7 +93,11 @@ setupHealthEndpoints(app);
 setupCSRFTokenEndpoint(app);
 
 (async () => {
-  const server = await registerRoutes(app);
+  await registerRoutes(app);
+  
+  // Create server from the Express app
+  const { createServer } = await import('http');
+  const server = createServer(app);
 
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

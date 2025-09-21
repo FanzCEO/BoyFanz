@@ -554,6 +554,25 @@ class KycService {
       }
     });
   }
+
+  // Process KYC verification webhooks from VerifyMy (bridge method for webhook routes)
+  async processKYCWebhook(webhookData: any): Promise<{ success: boolean, message: string }> {
+    try {
+      // Extract signature if provided in webhook data
+      const signature = webhookData.signature || webhookData._signature || '';
+      
+      // Remove signature from data before processing
+      const { signature: _, _signature: __, ...cleanData } = webhookData;
+      
+      // Use existing handleWebhook method
+      await this.handleWebhook(cleanData, signature);
+      
+      return { success: true, message: 'KYC webhook processed successfully' };
+    } catch (error) {
+      console.error('KYC webhook processing failed:', error);
+      return { success: false, message: 'KYC webhook processing failed' };
+    }
+  }
 }
 
 export const kycService = new KycService();
