@@ -1879,7 +1879,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error joining live stream:", error);
       
       // Provide specific error messages for access control
-      if (error.message.includes('access denied') || error.message.includes('subscribers only') || error.message.includes('private stream')) {
+      if (error instanceof Error && (error.message.includes('access denied') || error.message.includes('subscribers only') || error.message.includes('private stream'))) {
         res.status(403).json({ message: error.message });
       } else {
         res.status(500).json({ message: "Failed to join live stream" });
