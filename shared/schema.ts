@@ -613,7 +613,6 @@ export const liveStreams = pgTable("live_streams", {
   thumbnailUrl: varchar("thumbnail_url"),
   // GetStream integration fields
   getstreamCallId: varchar("getstream_call_id"),
-  getstreamToken: text("getstream_token"),
   recordingUrl: varchar("recording_url"),
   playbackUrl: varchar("playback_url"),
   hlsPlaylistUrl: varchar("hls_playlist_url"),

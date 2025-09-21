@@ -41,7 +41,9 @@ import {
   createSubscriptionEnhancedSchema,
   // Lovense Integration Schemas
   updateLovenseIntegrationSettingsSchema,
-  lovenseDeviceControlSchema
+  lovenseDeviceControlSchema,
+  // Live Streaming Schemas
+  insertLiveStreamSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -1724,7 +1726,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     postId: z.string().uuid("Invalid post ID format")
   });
 
-  app.delete('/api/posts/:postId/like', isAuthenticated, csrfProtection, validateRequest(unlikePostSchema, 'params'), async (req: any, res) => {
+  app.delete('/api/posts/:postId/like', isAuthenticated, csrfProtection, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const postId = req.params.postId;
@@ -1734,6 +1736,213 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error unliking post:", error);
       res.status(500).json({ message: "Failed to unlike post" });
+    }
+  });
+
+  // Live Streaming Routes
+  
+  // Create a new live stream
+  app.post('/api/streams', isAuthenticated, csrfProtection, validateRequest(insertLiveStreamSchema), async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims?.sub || req.user.id;
+      const { createGetstreamService } = await import('./services/getstreamService');
+      const getstreamService = createGetstreamService(storage);
+      
+      const streamData = {
+        ...req.body,
+        creatorId,
+      };
+      
+      const stream = await getstreamService.createLiveStream(streamData);
+      res.status(201).json(stream);
+    } catch (error) {
+      console.error("Error creating live stream:", error);
+      res.status(500).json({ message: "Failed to create live stream" });
+    }
+  });
+
+  // Get live streams (for creator dashboard)
+  app.get('/api/streams', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims?.sub || req.user.id;
+      const status = req.query.status as string;
+      const limit = parseInt(req.query.limit as string) || 20;
+      
+      const streams = await storage.getLiveStreams(userId, { status, limit });
+      res.json(streams);
+    } catch (error) {
+      console.error("Error fetching live streams:", error);
+      res.status(500).json({ message: "Failed to fetch live streams" });
+    }
+  });
+
+  // Get public live streams (no auth required)
+  app.get('/api/streams/public', async (req: any, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const offset = parseInt(req.query.offset as string) || 0;
+      
+      const streams = await storage.getPublicLiveStreams({ limit, offset });
+      res.json(streams);
+    } catch (error) {
+      console.error("Error fetching public live streams:", error);
+      res.status(500).json({ message: "Failed to fetch public live streams" });
+    }
+  });
+
+  // Get specific live stream details with proper authorization and field redaction
+  app.get('/api/streams/:streamId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { streamId } = req.params;
+      const userId = req.user.claims?.sub || req.user.id;
+      const stream = await storage.getLiveStream(streamId);
+      
+      if (!stream) {
+        return res.status(404).json({ message: "Stream not found" });
+      }
+
+      // Check if user is the creator to determine what data to return
+      if (stream.creatorId === userId) {
+        // Creator gets full access to their stream including sensitive fields
+        res.json(stream);
+      } else {
+        // Non-creators must pass access control and get redacted data
+        const { createGetstreamService } = await import('./services/getstreamService');
+        const getstreamService = createGetstreamService(storage);
+        
+        // Check access permissions before returning any data
+        try {
+          await getstreamService.checkStreamAccess(stream, userId);
+          
+          // Return redacted stream data without sensitive fields
+          const {
+            streamKey,
+            rtmpIngestUrl,
+            streamUrl,
+            ...safeStreamData
+          } = stream;
+          
+          res.json(safeStreamData);
+        } catch (accessError) {
+          return res.status(403).json({ message: "Access denied to this stream" });
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching live stream:", error);
+      res.status(500).json({ message: "Failed to fetch live stream" });
+    }
+  });
+
+  // Start a live stream
+  app.post('/api/streams/:streamId/start', isAuthenticated, csrfProtection, async (req: any, res) => {
+    try {
+      const { streamId } = req.params;
+      const creatorId = req.user.claims?.sub || req.user.id;
+      const { createGetstreamService } = await import('./services/getstreamService');
+      const getstreamService = createGetstreamService(storage);
+      
+      await getstreamService.startLiveStream(streamId, creatorId);
+      res.json({ message: "Stream started successfully" });
+    } catch (error) {
+      console.error("Error starting live stream:", error);
+      res.status(500).json({ message: "Failed to start live stream" });
+    }
+  });
+
+  // End a live stream
+  app.post('/api/streams/:streamId/end', isAuthenticated, csrfProtection, async (req: any, res) => {
+    try {
+      const { streamId } = req.params;
+      const creatorId = req.user.claims?.sub || req.user.id;
+      const { createGetstreamService } = await import('./services/getstreamService');
+      const getstreamService = createGetstreamService(storage);
+      
+      await getstreamService.endLiveStream(streamId, creatorId);
+      res.json({ message: "Stream ended successfully" });
+    } catch (error) {
+      console.error("Error ending live stream:", error);
+      res.status(500).json({ message: "Failed to end live stream" });
+    }
+  });
+
+  // Join a live stream as viewer - returns access token
+  app.post('/api/streams/:streamId/join', isAuthenticated, csrfProtection, async (req: any, res) => {
+    try {
+      const { streamId } = req.params;
+      const userId = req.user.claims?.sub || req.user.id;
+      const { createGetstreamService } = await import('./services/getstreamService');
+      const getstreamService = createGetstreamService(storage);
+      
+      const result = await getstreamService.joinStream(streamId, userId);
+      res.json(result);
+    } catch (error) {
+      console.error("Error joining live stream:", error);
+      
+      // Provide specific error messages for access control
+      if (error.message.includes('access denied') || error.message.includes('subscribers only') || error.message.includes('private stream')) {
+        res.status(403).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to join live stream" });
+      }
+    }
+  });
+
+  // Leave a live stream
+  app.post('/api/streams/:streamId/leave', isAuthenticated, async (req: any, res) => {
+    try {
+      const { streamId } = req.params;
+      const userId = req.user.claims?.sub || req.user.id;
+      const { createGetstreamService } = await import('./services/getstreamService');
+      const getstreamService = createGetstreamService(storage);
+      
+      await getstreamService.leaveStream(streamId, userId);
+      res.json({ message: "Left stream successfully" });
+    } catch (error) {
+      console.error("Error leaving live stream:", error);
+      res.status(500).json({ message: "Failed to leave live stream" });
+    }
+  });
+
+  // Get live stream analytics (creator only)
+  app.get('/api/streams/:streamId/analytics', isAuthenticated, async (req: any, res) => {
+    try {
+      const { streamId } = req.params;
+      const creatorId = req.user.claims?.sub || req.user.id;
+      const { createGetstreamService } = await import('./services/getstreamService');
+      const getstreamService = createGetstreamService(storage);
+      
+      const analytics = await getstreamService.getStreamAnalytics(streamId, creatorId);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching stream analytics:", error);
+      res.status(500).json({ message: "Failed to fetch stream analytics" });
+    }
+  });
+
+  // Get public live streams (for discovery)
+  app.get('/api/streams/public/live', async (req: any, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const offset = parseInt(req.query.offset as string) || 0;
+      
+      const streams = await storage.getPublicLiveStreams({ limit, offset });
+      res.json(streams);
+    } catch (error) {
+      console.error("Error fetching public live streams:", error);
+      res.status(500).json({ message: "Failed to fetch public live streams" });
+    }
+  });
+
+  // GetStream webhook handler
+  app.post('/api/webhooks/getstream', async (req: any, res) => {
+    try {
+      const { createGetstreamService } = await import('./services/getstreamService');
+      const getstreamService = createGetstreamService(storage);
+      await getstreamService.handleWebhook(req.body);
+      res.json({ message: "Webhook processed successfully" });
+    } catch (error) {
+      console.error("Error processing GetStream webhook:", error);
+      res.status(500).json({ message: "Failed to process webhook" });
     }
   });
 

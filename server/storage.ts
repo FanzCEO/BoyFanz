@@ -174,8 +174,10 @@ export interface IStorage {
   // Live Streams
   createLiveStream(stream: Omit<LiveStream, 'id' | 'createdAt'>): Promise<LiveStream>;
   getLiveStream(streamId: string): Promise<LiveStream | undefined>;
+  getLiveStreams(userId: string, options?: { status?: string; limit?: number }): Promise<LiveStream[]>;
   getCreatorStreams(creatorId: string): Promise<LiveStream[]>;
   getActiveStreams(): Promise<(LiveStream & { creator: User })[]>;
+  getPublicLiveStreams(options?: { limit?: number; offset?: number }): Promise<(LiveStream & { creator: User })[]>;
   updateStreamStatus(streamId: string, status: string): Promise<void>;
 
   // Stats operations
@@ -825,24 +827,138 @@ export class DatabaseStorage implements IStorage {
     return [];
   }
 
-  async createLiveStream(stream: any): Promise<LiveStream> {
-    throw new Error("Not implemented yet");
+  async createLiveStream(stream: Omit<LiveStream, 'id' | 'createdAt'>): Promise<LiveStream> {
+    const [created] = await db.insert(liveStreams).values(stream).returning();
+    return created;
   }
 
   async getLiveStream(streamId: string): Promise<LiveStream | undefined> {
-    return undefined;
+    const [stream] = await db.select().from(liveStreams).where(eq(liveStreams.id, streamId));
+    return stream;
+  }
+
+  async getLiveStreams(userId: string, options?: { status?: string; limit?: number }): Promise<LiveStream[]> {
+    const conditions = [eq(liveStreams.creatorId, userId)];
+    
+    if (options?.status) {
+      conditions.push(eq(liveStreams.status, options.status as any));
+    }
+    
+    let query = db.select().from(liveStreams).where(and(...conditions)).orderBy(desc(liveStreams.createdAt));
+    
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+    
+    return await query;
   }
 
   async getCreatorStreams(creatorId: string): Promise<LiveStream[]> {
-    return [];
+    return await db.select().from(liveStreams)
+      .where(eq(liveStreams.creatorId, creatorId))
+      .orderBy(desc(liveStreams.createdAt));
   }
 
-  async getActiveStreams(): Promise<any[]> {
-    return [];
+  async getActiveStreams(): Promise<(LiveStream & { creator: User })[]> {
+    return await db.select({
+      id: liveStreams.id,
+      creatorId: liveStreams.creatorId,
+      title: liveStreams.title,
+      description: liveStreams.description,
+      type: liveStreams.type,
+      status: liveStreams.status,
+      priceCents: liveStreams.priceCents,
+
+      thumbnailUrl: liveStreams.thumbnailUrl,
+      getstreamCallId: liveStreams.getstreamCallId,
+
+      recordingUrl: liveStreams.recordingUrl,
+      playbackUrl: liveStreams.playbackUrl,
+      hlsPlaylistUrl: liveStreams.hlsPlaylistUrl,
+      rtmpIngestUrl: liveStreams.rtmpIngestUrl,
+      viewersCount: liveStreams.viewersCount,
+      maxViewers: liveStreams.maxViewers,
+      totalTipsCents: liveStreams.totalTipsCents,
+      scheduledFor: liveStreams.scheduledFor,
+      startedAt: liveStreams.startedAt,
+      endedAt: liveStreams.endedAt,
+      createdAt: liveStreams.createdAt,
+      updatedAt: liveStreams.updatedAt,
+      creator: {
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
+        role: users.role,
+        isVerified: users.isVerified,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      },
+    })
+    .from(liveStreams)
+    .innerJoin(users, eq(liveStreams.creatorId, users.id))
+    .where(eq(liveStreams.status, 'live'))
+    .orderBy(desc(liveStreams.startedAt));
+  }
+
+  async getPublicLiveStreams(options?: { limit?: number; offset?: number }): Promise<(LiveStream & { creator: User })[]> {
+    let query = db.select({
+      id: liveStreams.id,
+      creatorId: liveStreams.creatorId,
+      title: liveStreams.title,
+      description: liveStreams.description,
+      type: liveStreams.type,
+      status: liveStreams.status,
+      priceCents: liveStreams.priceCents,
+
+      thumbnailUrl: liveStreams.thumbnailUrl,
+      getstreamCallId: liveStreams.getstreamCallId,
+
+      recordingUrl: liveStreams.recordingUrl,
+      playbackUrl: liveStreams.playbackUrl,
+      hlsPlaylistUrl: liveStreams.hlsPlaylistUrl,
+      rtmpIngestUrl: liveStreams.rtmpIngestUrl,
+      viewersCount: liveStreams.viewersCount,
+      maxViewers: liveStreams.maxViewers,
+      totalTipsCents: liveStreams.totalTipsCents,
+      scheduledFor: liveStreams.scheduledFor,
+      startedAt: liveStreams.startedAt,
+      endedAt: liveStreams.endedAt,
+      createdAt: liveStreams.createdAt,
+      updatedAt: liveStreams.updatedAt,
+      creator: {
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
+        role: users.role,
+        isVerified: users.isVerified,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      },
+    })
+    .from(liveStreams)
+    .innerJoin(users, eq(liveStreams.creatorId, users.id))
+    .where(and(eq(liveStreams.status, 'live'), eq(liveStreams.type, 'public')))
+    .orderBy(desc(liveStreams.viewersCount), desc(liveStreams.startedAt));
+    
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+    
+    if (options?.offset) {
+      query = query.offset(options.offset);
+    }
+    
+    return await query;
   }
 
   async updateStreamStatus(streamId: string, status: string): Promise<void> {
-    throw new Error("Not implemented yet");
+    await db.update(liveStreams)
+      .set({ status: status as any, updatedAt: new Date() })
+      .where(eq(liveStreams.id, streamId));
   }
 
   // Admin delegation operations
