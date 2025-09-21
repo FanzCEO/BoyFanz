@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
@@ -12,6 +13,7 @@ import { moderationService } from "./services/moderationService";
 import { notificationService } from "./services/notificationService";
 import { earningsService } from "./services/earningsService";
 import { watermarkService } from "./services/watermarkService";
+import { createGetstreamService } from "./services/getstreamService";
 import { rateLimit } from "./middleware/rateLimit";
 import { 
   uploadRateLimit, 
@@ -1939,18 +1941,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // GetStream webhook handler
-  app.post('/api/webhooks/getstream', async (req: any, res) => {
-    try {
-      const { createGetstreamService } = await import('./services/getstreamService');
-      const getstreamService = createGetstreamService(storage);
-      await getstreamService.handleWebhook(req.body);
-      res.json({ message: "Webhook processed successfully" });
-    } catch (error) {
-      console.error("Error processing GetStream webhook:", error);
-      res.status(500).json({ message: "Failed to process webhook" });
-    }
-  });
 
   // WebSocket setup for real-time notifications
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });

@@ -202,6 +202,7 @@ export interface IStorage {
   getActiveStreams(): Promise<(LiveStream & { creator: User })[]>;
   getPublicLiveStreams(options?: { limit?: number; offset?: number }): Promise<(LiveStream & { creator: User })[]>;
   updateStreamStatus(streamId: string, status: string): Promise<void>;
+  updateStreamField(streamId: string, field: string, value: any): Promise<void>;
 
   // Stats operations
   getDashboardStats(userId: string): Promise<{
@@ -994,6 +995,15 @@ export class DatabaseStorage implements IStorage {
   async updateStreamStatus(streamId: string, status: string): Promise<void> {
     await db.update(liveStreams)
       .set({ status: status as any, updatedAt: new Date() })
+      .where(eq(liveStreams.id, streamId));
+  }
+
+  async updateStreamField(streamId: string, field: string, value: any): Promise<void> {
+    const updateData: any = { updatedAt: new Date() };
+    updateData[field] = value;
+    
+    await db.update(liveStreams)
+      .set(updateData)
       .where(eq(liveStreams.id, streamId));
   }
 

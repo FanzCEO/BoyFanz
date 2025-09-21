@@ -38,6 +38,51 @@ app.use(requestLoggingMiddleware);
 app.use(cookieParser());
 
 // Body parsing
+// Register GetStream webhook BEFORE global JSON parser to preserve raw body
+app.post('/api/webhooks/getstream', express.raw({ type: 'application/json' }), async (req: any, res) => {
+  try {
+    // Ensure we have raw body buffer for signature verification
+    if (!Buffer.isBuffer(req.body)) {
+      console.error('❌ GetStream webhook: Expected raw body buffer but got:', typeof req.body);
+      return res.status(400).json({ message: "Invalid request body format" });
+    }
+
+    const rawBody = req.body as Buffer;
+    const signature = req.headers['x-stream-signature'] || req.headers['x-signature'] || '';
+    
+    if (!signature) {
+      console.error('❌ GetStream webhook: Missing signature header');
+      return res.status(401).json({ message: "Missing signature" });
+    }
+
+    // Import and initialize GetStream service
+    const { createGetstreamService } = await import('./services/getstreamService');
+    const { storage } = await import('./storage');
+    const getstreamService = createGetstreamService(storage);
+    
+    // Extract signature value (handle "sha256=..." prefix if present)
+    const signatureValue = signature.toString().replace(/^sha256=/, '');
+    
+    // Verify signature using raw bytes FIRST
+    if (!getstreamService.verifyWebhookSignature(rawBody.toString('utf8'), signatureValue)) {
+      console.error('❌ GetStream webhook: Invalid signature');
+      return res.status(401).json({ message: "Invalid signature" });
+    }
+
+    // Only AFTER verification, parse the JSON payload
+    const event = JSON.parse(rawBody.toString('utf8'));
+    
+    // Process the verified webhook event
+    await getstreamService.handleWebhookEvent(event);
+    
+    console.log('✅ GetStream webhook processed successfully');
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("❌ Error processing GetStream webhook:", error);
+    res.status(500).json({ message: "Failed to process webhook" });
+  }
+});
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 

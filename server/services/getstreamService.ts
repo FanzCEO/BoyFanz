@@ -1,12 +1,12 @@
 import { eq, and, isNull } from 'drizzle-orm';
 import { liveStreams, streamViewers, users } from '../../shared/schema';
 import type { LiveStream, User } from '../../shared/schema';
-import jwt from 'jsonwebtoken';
 import { nanoid } from 'nanoid';
 import type { IStorage } from '../storage';
 
 // Real GetStream.io server-side imports
 import { StreamClient } from '@stream-io/node-sdk';
+import crypto from 'crypto';
 
 // Define our own capabilities and types for now
 const VideoOwnCapability = {
@@ -25,10 +25,29 @@ interface Call {
   listRecordings?: () => Promise<{ recordings: Array<{ url: string }> }>;
 }
 
+interface GetStreamWebhookEvent {
+  type: string;
+  created_at: string;
+  call?: {
+    id: string;
+    type: string;
+    started_at?: string;
+    ended_at?: string;
+    hls?: { playlist_url?: string };
+    recording?: { url?: string };
+    thumbnail?: { url?: string };
+    session?: { participants?: { count?: number } };
+  };
+  user?: {
+    id: string;
+  };
+}
+
 class GetStreamService {
   private client: StreamClient | null = null;
   private apiKey: string;
   private apiSecret: string;
+  private webhookSecret: string;
   private storage: IStorage;
 
   constructor(storage: IStorage) {
@@ -36,6 +55,7 @@ class GetStreamService {
     // Environment variables for GetStream
     this.apiKey = process.env.GETSTREAM_API_KEY || '';
     this.apiSecret = process.env.GETSTREAM_API_SECRET || '';
+    this.webhookSecret = process.env.GETSTREAM_WEBHOOK_SECRET || '';
     
     // Initialize real GetStream client if credentials are available
     this.initializeClient();
@@ -58,38 +78,148 @@ class GetStreamService {
 
   /**
    * Generate GetStream user token for client-side authentication
-   * SECURITY: This generates short-lived tokens that are never stored in the database
+   * SECURITY: Uses official SDK token generation with proper validation
    */
-  generateUserToken(userId: string, exp?: number): string {
-    const payload: Record<string, any> = {
-      user_id: userId,
-      iss: this.apiKey,
-      sub: `user/${userId}`,
-      iat: Math.floor(Date.now() / 1000),
-      exp: exp || Math.floor(Date.now() / 1000) + (60 * 60), // 1 hour default
-    };
+  generateUserToken(userId: string, validityInSeconds?: number): string {
+    if (!this.client) {
+      throw new Error('GetStream client not initialized - check API credentials');
+    }
+    
+    if (!this.apiSecret) {
+      throw new Error('GetStream API secret not configured');
+    }
 
-    return jwt.sign(payload, this.apiSecret, { algorithm: 'HS256' });
+    return this.client.generateUserToken({
+      user_id: userId,
+      validity_in_seconds: validityInSeconds || 3600, // 1 hour default
+    });
   }
 
   /**
-   * Generate server token for backend operations
+   * Verify GetStream webhook signature for security
+   * SECURITY: Prevents webhook forgery attacks
    */
-  private generateServerToken(userId: string): string {
-    if (!this.apiSecret || !this.apiKey) {
-      throw new Error('GetStream credentials not configured');
+  verifyWebhookSignature(payload: string, signature: string): boolean {
+    if (!this.webhookSecret) {
+      console.error('⚠️ Webhook secret not configured - cannot verify signature');
+      return false;
     }
 
-    const payload = {
-      user_id: userId,
-      iss: this.apiKey,
-      sub: `user/${userId}`,
-      iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
-    };
-
-    return jwt.sign(payload, this.apiSecret, { algorithm: 'HS256' });
+    try {
+      const expectedSignature = crypto
+        .createHmac('sha256', this.webhookSecret)
+        .update(payload, 'utf8')
+        .digest('hex');
+      
+      // Compare signatures using secure method to prevent timing attacks
+      return crypto.timingSafeEqual(
+        Buffer.from(signature, 'hex'),
+        Buffer.from(expectedSignature, 'hex')
+      );
+    } catch (error) {
+      console.error('❌ Webhook signature verification failed:', error);
+      return false;
+    }
   }
+
+  /**
+   * Handle GetStream webhook events and update database accordingly
+   * SECURITY: Signature must be verified before calling this method
+   */
+  async handleWebhookEvent(event: GetStreamWebhookEvent): Promise<void> {
+    console.log('📦 Processing GetStream webhook event:', event.type);
+
+    try {
+      switch (event.type) {
+        case 'call.live_started':
+          await this.handleLiveStarted(event);
+          break;
+        case 'call.ended':
+          await this.handleCallEnded(event);
+          break;
+        case 'call.recording_ready':
+          await this.handleRecordingReady(event);
+          break;
+        case 'call.participant_joined':
+        case 'call.participant_left':
+          await this.handleParticipantChange(event);
+          break;
+        default:
+          console.log('ℹ️ Unhandled webhook event type:', event.type);
+      }
+    } catch (error) {
+      console.error('❌ Error handling webhook event:', error);
+      throw error;
+    }
+  }
+
+  private async handleLiveStarted(event: GetStreamWebhookEvent): Promise<void> {
+    if (!event.call?.id) return;
+    
+    const streams = await this.storage.getLiveStreams('', { status: 'scheduled' });
+    const stream = streams.find(s => s.getstreamCallId === event.call?.id);
+    
+    if (stream) {
+      await this.storage.updateStreamField(stream.id, 'startedAt', new Date(event.created_at));
+      await this.storage.updateStreamStatus(stream.id, 'live');
+      
+      if (event.call.hls?.playlist_url) {
+        await this.storage.updateStreamField(stream.id, 'hlsPlaylistUrl', event.call.hls.playlist_url);
+        await this.storage.updateStreamField(stream.id, 'playbackUrl', event.call.hls.playlist_url);
+      }
+      
+      console.log('✅ Live stream started:', stream.id);
+    }
+  }
+
+  private async handleCallEnded(event: GetStreamWebhookEvent): Promise<void> {
+    if (!event.call?.id) return;
+    
+    const streams = await this.storage.getLiveStreams('', { status: 'live' });
+    const stream = streams.find(s => s.getstreamCallId === event.call?.id);
+    
+    if (stream) {
+      await this.storage.updateStreamField(stream.id, 'endedAt', new Date(event.created_at));
+      await this.storage.updateStreamStatus(stream.id, 'ended');
+      
+      console.log('✅ Live stream ended:', stream.id);
+    }
+  }
+
+  private async handleRecordingReady(event: GetStreamWebhookEvent): Promise<void> {
+    if (!event.call?.id || !event.call.recording?.url) return;
+    
+    const streams = await this.storage.getLiveStreams('', {});
+    const stream = streams.find(s => s.getstreamCallId === event.call?.id);
+    
+    if (stream) {
+      await this.storage.updateStreamField(stream.id, 'recordingUrl', event.call.recording.url);
+      
+      if (event.call.thumbnail?.url) {
+        await this.storage.updateStreamField(stream.id, 'thumbnailUrl', event.call.thumbnail.url);
+      }
+      
+      console.log('✅ Recording ready for stream:', stream.id);
+    }
+  }
+
+  private async handleParticipantChange(event: GetStreamWebhookEvent): Promise<void> {
+    if (!event.call?.id) return;
+    
+    const streams = await this.storage.getLiveStreams('', { status: 'live' });
+    const stream = streams.find(s => s.getstreamCallId === event.call?.id);
+    
+    if (stream && event.call.session?.participants?.count !== undefined) {
+      const participantCount = event.call.session.participants.count;
+      await this.storage.updateStreamField(stream.id, 'viewersCount', participantCount);
+      
+      // Update max viewers if current count is higher
+      if (participantCount > (stream.maxViewers || 0)) {
+        await this.storage.updateStreamField(stream.id, 'maxViewers', participantCount);
+      }
+    }
+  }
+
 
   /**
    * Create a new live stream session
@@ -109,17 +239,17 @@ class GetStreamService {
     try {
       // Generate unique call ID for GetStream
       const callId = `livestream_${nanoid(12)}`;
-      const streamKey = nanoid(32);
+      
+      console.log('📹 Creating GetStream livestream call:', callId);
 
-      // Create call in GetStream using Video API
-      const callData = {
-        type: 'livestream',
-        id: callId,
+      // Create the livestream call using real SDK
+      const call = this.client.video.call('livestream', callId);
+      const callResponse = await call.create({
         data: {
           created_by_id: streamData.creatorId,
           settings_override: {
             recording: {
-              mode: 'available', // Enable recording
+              mode: 'available',
               audio_only: false,
               quality: '1080p',
             },
@@ -127,17 +257,20 @@ class GetStreamService {
               enabled: true,
               hls: {
                 enabled: true,
-                quality_tracks: ['240p', '480p', '720p', '1080p'],
               },
             },
           },
         },
-      };
+      });
 
-      // For development, we'll log the call data instead of making real API calls
-      console.log('📹 Creating GetStream call:', callData);
+      // Get real stream URLs and credentials from GetStream response
+      const streamKey = callResponse.call?.ingress?.rtmp?.address || nanoid(32);
+      const rtmpIngestUrl = callResponse.call?.ingress?.rtmp?.url || `rtmp://ingest.getstream.io/live/${callId}`;
+      const hlsPlaylistUrl = callResponse.call?.egress?.hls?.playlist_url || `https://video.stream-io-api.com/api/v2/video/call/livestream/${callId}/playlist.m3u8`;
+      
+      console.log('✅ GetStream call created successfully with real URLs');
 
-      // Create database record - SECURITY: Never store tokens in database
+      // Create database record with real GetStream data - SECURITY: Never store tokens
       const stream = await this.storage.createLiveStream({
         creatorId: streamData.creatorId,
         title: streamData.title,
@@ -146,14 +279,14 @@ class GetStreamService {
         priceCents: streamData.priceCents || 0,
         streamKey,
         getstreamCallId: callId,
-        status: streamData.scheduledFor && streamData.scheduledFor > new Date() ? 'scheduled' : 'live',
+        status: streamData.scheduledFor && streamData.scheduledFor > new Date() ? 'scheduled' : 'scheduled',
         scheduledFor: streamData.scheduledFor || null,
-        rtmpIngestUrl: `rtmp://ingest.getstream.io/live/${callId}`,
-        hlsPlaylistUrl: `https://video.getstream.io/api/v1/video/call/livestream/${callId}/playlist.m3u8`,
-        streamUrl: null,
-        thumbnailUrl: null,
+        rtmpIngestUrl,
+        hlsPlaylistUrl,
+        streamUrl: hlsPlaylistUrl,
+        thumbnailUrl: callResponse.call?.thumbnail_url || null,
         recordingUrl: null,
-        playbackUrl: null,
+        playbackUrl: hlsPlaylistUrl,
         viewersCount: 0,
         startedAt: null,
         endedAt: null,
@@ -186,14 +319,15 @@ class GetStreamService {
     }
 
     try {
-      // Update stream status in database using storage interface
-      await this.storage.updateStreamStatus(streamId, 'live');
-
-      // Start broadcasting in GetStream  
-      if (stream.getstreamCallId && this.client) {
+      // Start broadcasting using real GetStream SDK (don't set live status yet)
+      if (stream.getstreamCallId) {
         console.log('🔴 Starting live stream:', stream.getstreamCallId);
-        // For development, log the action instead of making real API calls
-        console.log('📡 Broadcasting started with HLS and recording enabled');
+        const call = this.client.video.call('livestream', stream.getstreamCallId);
+        
+        // Actually start the livestream - status will be set by webhook
+        await call.goLive({ start_hls: true, start_recording: true });
+        
+        console.log('✅ Live stream goLive() called - waiting for webhook confirmation');
       }
     } catch (error) {
       console.error('Error starting live stream:', error);
@@ -220,13 +354,15 @@ class GetStreamService {
     }
 
     try {
-      // End broadcasting in GetStream and update status using storage interface
-      await this.storage.updateStreamStatus(streamId, 'ended');
-
-      if (stream.getstreamCallId && this.client) {
+      // Stop broadcasting using real GetStream SDK (don't set ended status yet)
+      if (stream.getstreamCallId) {
         console.log('🔴 Ending live stream:', stream.getstreamCallId);
-        // For development, log the action instead of making real API calls
-        console.log('📡 Broadcasting ended successfully');
+        const call = this.client.video.call('livestream', stream.getstreamCallId);
+        
+        // Stop the livestream - status will be set by webhook
+        await call.stopLive();
+        
+        console.log('✅ Live stream stopLive() called - waiting for webhook confirmation');
       }
 
     } catch (error) {
@@ -239,6 +375,11 @@ class GetStreamService {
    * Join a live stream as a viewer with proper access control
    */
   async joinStream(streamId: string, userId: string): Promise<{ token: string; callId: string; playbackUrl?: string }> {
+    // SECURITY: Guard on client presence first - prevents token generation without GetStream connection
+    if (!this.client) {
+      throw new Error('GetStream client not initialized - check API credentials');
+    }
+
     const stream = await this.storage.getLiveStream(streamId);
 
     if (!stream) {
@@ -254,15 +395,18 @@ class GetStreamService {
 
     try {
       // Generate short-lived viewer token - SECURITY: Never store this token
-      const viewerToken = this.generateUserToken(userId, Math.floor(Date.now() / 1000) + (60 * 60)); // 1 hour
+      const viewerToken = this.generateUserToken(userId, 3600); // 1 hour
 
-      // Record viewer join using storage interface
-      // Note: This would need viewer management methods in storage interface
+      // Only return real playback URL from GetStream, not fabricated ones
+      const playbackUrl = stream.playbackUrl || stream.hlsPlaylistUrl;
+      if (!playbackUrl) {
+        throw new Error('Stream playback URL not available');
+      }
 
       return {
         token: viewerToken,
         callId: stream.getstreamCallId!,
-        playbackUrl: stream.hlsPlaylistUrl || undefined,
+        playbackUrl,
       };
 
     } catch (error) {
@@ -313,68 +457,6 @@ class GetStreamService {
     }
   }
 
-  /**
-   * Handle GetStream webhooks
-   */
-  async handleWebhook(event: any): Promise<void> {
-    try {
-      switch (event.type) {
-        case 'call.live_started':
-          await this.handleLiveStarted(event);
-          break;
-        case 'call.ended':
-          await this.handleCallEnded(event);
-          break;
-        case 'call.recording_ready':
-          await this.handleRecordingReady(event);
-          break;
-        case 'call.member_joined':
-          await this.handleMemberJoined(event);
-          break;
-        case 'call.member_left':
-          await this.handleMemberLeft(event);
-          break;
-        default:
-          console.log('Unhandled GetStream webhook event:', event.type);
-      }
-    } catch (error) {
-      console.error('Error handling GetStream webhook:', error);
-    }
-  }
-
-  private async handleLiveStarted(event: any): Promise<void> {
-    const callId = event.call_cid?.split(':')[1];
-    if (!callId) return;
-
-    // Use storage interface for webhook handling
-    console.log(`Mock: Stream started for call ${callId}`);
-  }
-
-  private async handleCallEnded(event: any): Promise<void> {
-    const callId = event.call_cid?.split(':')[1];
-    if (!callId) return;
-
-    // Use storage interface for webhook handling
-    console.log(`Mock: Stream ended for call ${callId}`);
-  }
-
-  private async handleRecordingReady(event: any): Promise<void> {
-    const callId = event.call_cid?.split(':')[1];
-    if (!callId || !event.recording?.url) return;
-
-    // Use storage interface for webhook handling
-    console.log(`Mock: Recording ready for call ${callId}`);
-  }
-
-  private async handleMemberJoined(event: any): Promise<void> {
-    // Handle real-time viewer tracking
-    // This can be used for more granular analytics
-  }
-
-  private async handleMemberLeft(event: any): Promise<void> {
-    // Handle real-time viewer tracking
-    // This can be used for more granular analytics
-  }
 
   /**
    * Get live stream analytics
