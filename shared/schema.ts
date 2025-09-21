@@ -722,6 +722,24 @@ export const lovenseMappings = pgTable("lovense_mappings", {
   userEventIdx: index("idx_lovense_mappings_user_event").on(table.userId, table.eventType),
 }));
 
+// Lovense WebSocket Sessions
+export const lovenseSessions = pgTable("lovense_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  sessionId: varchar("session_id").notNull().unique(), // WebSocket session identifier
+  streamId: varchar("stream_id").references(() => liveStreams.id, { onDelete: "cascade" }),
+  connectionStatus: varchar("connection_status").default("connecting").notNull(), // "connecting", "connected", "disconnected", "error"
+  clientInfo: jsonb("client_info").default({}), // Browser/device info
+  lastPingAt: timestamp("last_ping_at"),
+  connectedAt: timestamp("connected_at"),
+  disconnectedAt: timestamp("disconnected_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userSessionIdx: index("idx_lovense_sessions_user_session").on(table.userId, table.sessionId),
+  streamSessionIdx: index("idx_lovense_sessions_stream").on(table.streamId, table.connectedAt.desc()),
+  statusIdx: index("idx_lovense_sessions_status").on(table.connectionStatus),
+}));
+
 // Co-star Verification System
 export const costarVerificationStatusEnum = pgEnum("costar_verification_status", ["pending", "approved", "rejected", "expired"]);
 
@@ -1114,6 +1132,11 @@ export const insertLovenseMappingSchema = createInsertSchema(lovenseMappings).om
   updatedAt: true,
 });
 
+export const insertLovenseSessionSchema = createInsertSchema(lovenseSessions).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertCostarVerificationSchema = createInsertSchema(costarVerifications).omit({
   id: true,
   createdAt: true,
@@ -1343,11 +1366,13 @@ export type LovenseTestDevice = z.infer<typeof lovenseTestDeviceSchema>;
 // Enhanced Integration Types
 export type LovenseAccount = typeof lovenseAccounts.$inferSelect;
 export type LovenseMapping = typeof lovenseMappings.$inferSelect;
+export type LovenseSession = typeof lovenseSessions.$inferSelect;
 export type CostarVerification = typeof costarVerifications.$inferSelect;
 export type Media2257Link = typeof media2257Links.$inferSelect;
 export type CustodianOfRecords = typeof custodianOfRecords.$inferSelect;
 export type InsertLovenseAccount = z.infer<typeof insertLovenseAccountSchema>;
 export type InsertLovenseMapping = z.infer<typeof insertLovenseMappingSchema>;
+export type InsertLovenseSession = z.infer<typeof insertLovenseSessionSchema>;
 export type InsertCostarVerification = z.infer<typeof insertCostarVerificationSchema>;
 export type InsertMedia2257Link = z.infer<typeof insertMedia2257LinkSchema>;
 export type InsertCustodianOfRecords = z.infer<typeof insertCustodianOfRecordsSchema>;

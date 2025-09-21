@@ -59,12 +59,22 @@ import {
   type InsertLovenseIntegrationSettings,
   type LovenseIntegrationSettings,
   type UpdateLovenseIntegrationSettings,
+  // Enhanced Lovense integration
+  type LovenseAccount,
+  type InsertLovenseAccount,
+  type LovenseMapping,
+  type InsertLovenseMapping,
+  type LovenseSession,
+  type InsertLovenseSession,
   lovenseDevices,
   lovenseDeviceActions,
   lovenseIntegrationSettings,
+  lovenseAccounts,
+  lovenseMappings,
+  lovenseSessions,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, count, sql } from "drizzle-orm";
+import { eq, desc, and, count, sql, or, lt, isNull } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -206,6 +216,24 @@ export interface IStorage {
   getActiveLovenseDevices(creatorId: string): Promise<LovenseDevice[]>;
   createLovenseDeviceAction(action: InsertLovenseDeviceAction): Promise<LovenseDeviceAction>;
   getLovenseDeviceActions(deviceId: string, limit?: number): Promise<LovenseDeviceAction[]>;
+  
+  // Enhanced Lovense integration operations
+  getLovenseAccount(userId: string): Promise<LovenseAccount | undefined>;
+  createLovenseAccount(account: InsertLovenseAccount): Promise<LovenseAccount>;
+  updateLovenseAccount(userId: string, updates: Partial<LovenseAccount>): Promise<LovenseAccount>;
+  deleteLovenseAccount(userId: string): Promise<boolean>;
+  getLovenseMappings(userId: string): Promise<LovenseMapping[]>;
+  getLovenseMappingsByEvent(userId: string, eventType: string): Promise<LovenseMapping[]>;
+  createLovenseMapping(mapping: InsertLovenseMapping): Promise<LovenseMapping>;
+  updateLovenseMapping(mappingId: string, updates: Partial<LovenseMapping>): Promise<LovenseMapping>;
+  deleteLovenseMapping(mappingId: string): Promise<boolean>;
+  getLovenseSession(sessionId: string): Promise<LovenseSession | undefined>;
+  getUserLovenseSessions(userId: string): Promise<LovenseSession[]>;
+  getActiveLovenseSessions(userId: string): Promise<LovenseSession[]>;
+  createLovenseSession(session: InsertLovenseSession): Promise<LovenseSession>;
+  updateLovenseSession(sessionId: string, updates: Partial<LovenseSession>): Promise<LovenseSession>;
+  disconnectLovenseSession(sessionId: string): Promise<boolean>;
+  cleanupInactiveLovenseSessions(): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1107,6 +1135,141 @@ export class DatabaseStorage implements IStorage {
       .where(eq(lovenseDeviceActions.deviceId, deviceId))
       .orderBy(desc(lovenseDeviceActions.createdAt))
       .limit(limit);
+  }
+
+  // Enhanced Lovense Integration Operations
+  async getLovenseAccount(userId: string): Promise<LovenseAccount | undefined> {
+    const result = await db.select().from(lovenseAccounts)
+      .where(eq(lovenseAccounts.userId, userId))
+      .limit(1);
+    return result[0];
+  }
+
+  async createLovenseAccount(account: InsertLovenseAccount): Promise<LovenseAccount> {
+    const result = await db.insert(lovenseAccounts)
+      .values(account)
+      .returning();
+    return result[0];
+  }
+
+  async updateLovenseAccount(userId: string, updates: Partial<LovenseAccount>): Promise<LovenseAccount> {
+    const result = await db.update(lovenseAccounts)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(lovenseAccounts.userId, userId))
+      .returning();
+    return result[0];
+  }
+
+  async deleteLovenseAccount(userId: string): Promise<boolean> {
+    await db.delete(lovenseAccounts)
+      .where(eq(lovenseAccounts.userId, userId));
+    return true;
+  }
+
+  async getLovenseMappings(userId: string): Promise<LovenseMapping[]> {
+    return await db.select().from(lovenseMappings)
+      .where(and(
+        eq(lovenseMappings.userId, userId),
+        eq(lovenseMappings.isActive, true)
+      ))
+      .orderBy(lovenseMappings.eventType, lovenseMappings.triggerValue);
+  }
+
+  async getLovenseMappingsByEvent(userId: string, eventType: string): Promise<LovenseMapping[]> {
+    return await db.select().from(lovenseMappings)
+      .where(and(
+        eq(lovenseMappings.userId, userId),
+        eq(lovenseMappings.eventType, eventType),
+        eq(lovenseMappings.isActive, true)
+      ))
+      .orderBy(lovenseMappings.triggerValue);
+  }
+
+  async createLovenseMapping(mapping: InsertLovenseMapping): Promise<LovenseMapping> {
+    const result = await db.insert(lovenseMappings)
+      .values(mapping)
+      .returning();
+    return result[0];
+  }
+
+  async updateLovenseMapping(mappingId: string, updates: Partial<LovenseMapping>): Promise<LovenseMapping> {
+    const result = await db.update(lovenseMappings)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(lovenseMappings.id, mappingId))
+      .returning();
+    return result[0];
+  }
+
+  async deleteLovenseMapping(mappingId: string): Promise<boolean> {
+    await db.update(lovenseMappings)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(lovenseMappings.id, mappingId));
+    return true;
+  }
+
+  async getLovenseSession(sessionId: string): Promise<LovenseSession | undefined> {
+    const result = await db.select().from(lovenseSessions)
+      .where(eq(lovenseSessions.sessionId, sessionId))
+      .limit(1);
+    return result[0];
+  }
+
+  async getUserLovenseSessions(userId: string): Promise<LovenseSession[]> {
+    return await db.select().from(lovenseSessions)
+      .where(eq(lovenseSessions.userId, userId))
+      .orderBy(desc(lovenseSessions.createdAt));
+  }
+
+  async getActiveLovenseSessions(userId: string): Promise<LovenseSession[]> {
+    return await db.select().from(lovenseSessions)
+      .where(and(
+        eq(lovenseSessions.userId, userId),
+        eq(lovenseSessions.connectionStatus, 'connected')
+      ))
+      .orderBy(desc(lovenseSessions.connectedAt));
+  }
+
+  async createLovenseSession(session: InsertLovenseSession): Promise<LovenseSession> {
+    const result = await db.insert(lovenseSessions)
+      .values(session)
+      .returning();
+    return result[0];
+  }
+
+  async updateLovenseSession(sessionId: string, updates: Partial<LovenseSession>): Promise<LovenseSession> {
+    const result = await db.update(lovenseSessions)
+      .set(updates)
+      .where(eq(lovenseSessions.sessionId, sessionId))
+      .returning();
+    return result[0];
+  }
+
+  async disconnectLovenseSession(sessionId: string): Promise<boolean> {
+    await db.update(lovenseSessions)
+      .set({ 
+        connectionStatus: 'disconnected',
+        disconnectedAt: new Date()
+      })
+      .where(eq(lovenseSessions.sessionId, sessionId));
+    return true;
+  }
+
+  async cleanupInactiveLovenseSessions(): Promise<number> {
+    const cutoffTime = new Date(Date.now() - 30 * 60 * 1000); // 30 minutes ago
+    const result = await db.update(lovenseSessions)
+      .set({ 
+        connectionStatus: 'disconnected',
+        disconnectedAt: new Date()
+      })
+      .where(and(
+        eq(lovenseSessions.connectionStatus, 'connected'),
+        or(
+          lt(lovenseSessions.lastPingAt, cutoffTime),
+          isNull(lovenseSessions.lastPingAt)
+        )
+      ))
+      .returning();
+    return result.length;
   }
 
   // Enhanced Subscription System Operations
