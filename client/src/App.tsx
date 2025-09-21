@@ -45,6 +45,7 @@ import StreamCreation from "@/pages/StreamCreation";
 import StreamDashboard from "@/pages/StreamDashboard";
 import LiveViewer from "@/pages/LiveViewer";
 import StreamAnalytics from "@/pages/StreamAnalytics";
+import StreamsHome from "@/pages/StreamsHome";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -126,6 +127,7 @@ function Router() {
             <Route path="/messages" component={Messages} />
             <Route path="/post/:postId" component={PostView} />
             <Route path="/earnings" component={EarningsPage} />
+            <Route path="/streams" component={StreamsHome} />
             <Route path="/streams/create" component={StreamCreation} />
             <Route path="/streams/:id/dashboard" component={StreamDashboard} />
             <Route path="/streams/:id/watch" component={LiveViewer} />

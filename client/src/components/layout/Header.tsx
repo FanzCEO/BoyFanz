@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Bell, Search, Settings, Menu, X } from "lucide-react";
+import { Bell, Search, Settings, Menu, X, Video } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { Link } from "wouter";
 
 interface HeaderProps {
   user: any;
@@ -39,6 +40,21 @@ export default function Header({ user }: HeaderProps) {
         </div>
         
         <div className="flex items-center gap-2 md:gap-4">
+          {/* Go Live Button for Creators */}
+          {(user?.role === 'creator' || user?.role === 'admin' || user?.role === 'moderator') && (
+            <Link href="/streams/create">
+              <Button 
+                variant="default" 
+                size="sm"
+                className="bg-red-600 hover:bg-red-700 text-white hidden md:flex items-center gap-2"
+                data-testid="go-live-button"
+              >
+                <Video className="h-4 w-4" />
+                Go Live
+              </Button>
+            </Link>
+          )}
+
           {/* Search - Hidden on mobile, expandable on tablet+ */}
           <div className="relative hidden md:block">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />

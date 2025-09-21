@@ -33,6 +33,11 @@ export default function Sidebar({ user }: SidebarProps) {
     { path: "/nearby", icon: "fas fa-map-marker-alt", label: "Near by me" },
   ] as Array<{ path: string; icon: string; label: string; dot?: boolean; badge?: string }>;
 
+  // Add streaming item to main nav for easy access
+  if (user?.role === 'creator' || user?.role === 'admin' || user?.role === 'moderator') {
+    navItems.splice(2, 0, { path: "/streams", icon: "fas fa-broadcast-tower", label: "Live Streams" });
+  }
+
   const adminItems = [
     { path: "/admin/moderation", icon: "fas fa-tasks", label: "Moderation Queue", badge: "7" },
     { path: "/admin/users", icon: "fas fa-users", label: "User Management" },
@@ -100,6 +105,20 @@ export default function Sidebar({ user }: SidebarProps) {
               Creator
             </h3>
             <div className="mt-2 space-y-1">
+              <Link 
+                href="/streams/create"
+                onClick={isMobile ? handleMobileLinkClick : undefined}
+                className={cn(
+                  "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                  isActive("/streams/create")
+                    ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+                data-testid="nav-create-stream"
+              >
+                <i className="fas fa-video w-5 h-5 md:w-4 md:h-4"></i>
+                Create Stream
+              </Link>
               <Link 
                 href="/earnings"
                 onClick={isMobile ? handleMobileLinkClick : undefined}
