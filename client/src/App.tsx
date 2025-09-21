@@ -42,6 +42,9 @@ import EarningsPage from "@/pages/Creator/EarningsPage";
 import Blog from "@/pages/Blog";
 import Contact from "@/pages/Contact";
 import StreamCreation from "@/pages/StreamCreation";
+import StreamDashboard from "@/pages/StreamDashboard";
+import LiveViewer from "@/pages/LiveViewer";
+import StreamAnalytics from "@/pages/StreamAnalytics";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -124,6 +127,9 @@ function Router() {
             <Route path="/post/:postId" component={PostView} />
             <Route path="/earnings" component={EarningsPage} />
             <Route path="/streams/create" component={StreamCreation} />
+            <Route path="/streams/:id/dashboard" component={StreamDashboard} />
+            <Route path="/streams/:id/watch" component={LiveViewer} />
+            <Route path="/streams/:id/analytics" component={StreamAnalytics} />
             <Route path="/blog" component={Blog} />
             <Route path="/contact" component={Contact} />
             <Route component={NotFound} />
