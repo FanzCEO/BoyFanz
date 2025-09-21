@@ -41,6 +41,7 @@ import PostView from "@/pages/PostView";
 import EarningsPage from "@/pages/Creator/EarningsPage";
 import Blog from "@/pages/Blog";
 import Contact from "@/pages/Contact";
+import StreamCreation from "@/pages/StreamCreation";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -49,7 +50,7 @@ function Router() {
   useTheme(); // Apply active theme
 
   // Protected routes that require authentication
-  const protectedRoutes = ['/feed', '/messages', '/post', '/earnings', '/media', '/compliance', '/payouts', '/notifications', '/settings', '/admin', '/purchased', '/subscriptions', '/release-forms', '/nearby'];
+  const protectedRoutes = ['/feed', '/messages', '/post', '/earnings', '/media', '/compliance', '/payouts', '/notifications', '/settings', '/admin', '/purchased', '/subscriptions', '/release-forms', '/nearby', '/streams'];
   
   // Check if current route is protected
   const isProtectedRoute = protectedRoutes.some(route => location.startsWith(route));
@@ -122,6 +123,7 @@ function Router() {
             <Route path="/messages" component={Messages} />
             <Route path="/post/:postId" component={PostView} />
             <Route path="/earnings" component={EarningsPage} />
+            <Route path="/streams/create" component={StreamCreation} />
             <Route path="/blog" component={Blog} />
             <Route path="/contact" component={Contact} />
             <Route component={NotFound} />
