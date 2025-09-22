@@ -41,8 +41,8 @@ export function registerRoutes(app: Express) {
             foreground: 'hsl(0, 0%, 98%)'
           },
           typography: {
-            fontDisplay: 'Oxanium',
-            fontHeading: 'Montserrat',
+            fontDisplay: 'Orbitron',
+            fontHeading: 'Rajdhani',
             fontBody: 'Inter'
           },
           effects: {
