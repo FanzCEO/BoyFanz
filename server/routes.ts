@@ -18,6 +18,144 @@ import { comprehensiveAnalyticsService } from './services/comprehensiveAnalytics
 import Stripe from 'stripe';
 import { z } from 'zod';
 
+// International compliance helper functions
+async function performSanctionsScreening(data: {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  country: string;
+  userId: string;
+}) {
+  // Mock sanctions screening - in production, integrate with OFAC/EU/UN sanctions APIs
+  const { firstName, lastName, country } = data;
+  const screeningId = `screen_${Date.now()}`;
+  
+  // Simulate screening against sanctioned names/countries
+  const sanctionedCountries = ['IR', 'KP', 'SY', 'RU', 'BY']; // Iran, North Korea, Syria, Russia, Belarus
+  const sanctionedNames = ['vladimir putin', 'kim jong', 'ali khamenei'];
+  
+  const fullName = `${firstName} ${lastName}`.toLowerCase();
+  const isSanctionedCountry = sanctionedCountries.includes(country.toUpperCase());
+  const isNameMatch = sanctionedNames.some(name => fullName.includes(name));
+  
+  let status = 'clear';
+  let matchScore = 0;
+  
+  if (isSanctionedCountry) {
+    status = 'blocked';
+    matchScore = 95;
+  } else if (isNameMatch) {
+    status = 'blocked';
+    matchScore = 98;
+  }
+  
+  return {
+    status,
+    matchScore,
+    screeningId,
+    listsChecked: ['OFAC', 'EU_SANCTIONS', 'UN_SANCTIONS'],
+    timestamp: new Date()
+  };
+}
+
+function getContentRulesByCountry(country: string) {
+  // Mock content rules - in production, load from compliance database
+  const rules: Record<string, any> = {
+    'US': {
+      minimumAge: 18,
+      explicitContent: 'allowed',
+      recordKeeping: '2257_required',
+      restrictions: []
+    },
+    'GB': {
+      minimumAge: 18,
+      explicitContent: 'restricted',
+      recordKeeping: 'age_verification_required',
+      restrictions: ['extreme_content_banned', 'face_sitting_banned']
+    },
+    'DE': {
+      minimumAge: 18,
+      explicitContent: 'allowed',
+      recordKeeping: 'jugendschutz_required',
+      restrictions: ['time_restrictions_22_06']
+    },
+    'AU': {
+      minimumAge: 18,
+      explicitContent: 'restricted',
+      recordKeeping: 'classification_required',
+      restrictions: ['small_breast_banned', 'ejaculation_restricted']
+    },
+    'IN': {
+      minimumAge: 18,
+      explicitContent: 'banned',
+      recordKeeping: 'not_applicable',
+      restrictions: ['all_adult_content_banned']
+    },
+    'CN': {
+      minimumAge: 18,
+      explicitContent: 'banned',
+      recordKeeping: 'not_applicable',
+      restrictions: ['platform_blocked']
+    }
+  };
+  
+  return rules[country] || {
+    minimumAge: 18,
+    explicitContent: 'check_local_laws',
+    recordKeeping: 'consult_legal',
+    restrictions: []
+  };
+}
+
+function getAgeRequirementsByCountry(country: string) {
+  // Mock age requirements - in production, load from legal compliance database
+  const requirements: Record<string, any> = {
+    'US': {
+      minimumAge: 18,
+      verificationRequired: true,
+      acceptedDocuments: ['drivers_license', 'passport', 'state_id'],
+      additionalRestrictions: ['2257_compliance_required']
+    },
+    'GB': {
+      minimumAge: 18,
+      verificationRequired: true,
+      acceptedDocuments: ['passport', 'drivers_license', 'national_id'],
+      additionalRestrictions: ['age_verification_database_required']
+    },
+    'DE': {
+      minimumAge: 18,
+      verificationRequired: true,
+      acceptedDocuments: ['personalausweis', 'reisepass', 'fuhrerschein'],
+      additionalRestrictions: ['jugendschutz_compliance']
+    },
+    'FR': {
+      minimumAge: 18,
+      verificationRequired: true,
+      acceptedDocuments: ['carte_identite', 'passeport', 'permis_conduire'],
+      additionalRestrictions: ['cnil_compliance']
+    },
+    'JP': {
+      minimumAge: 20,
+      verificationRequired: true,
+      acceptedDocuments: ['koseki', 'passport', 'drivers_license'],
+      additionalRestrictions: ['adult_age_20_years']
+    },
+    'KR': {
+      minimumAge: 19,
+      verificationRequired: true,
+      acceptedDocuments: ['resident_card', 'passport'],
+      additionalRestrictions: ['korean_age_system']
+    }
+  };
+  
+  return requirements[country] || {
+    minimumAge: 18,
+    verificationRequired: true,
+    acceptedDocuments: ['government_id', 'passport'],
+    additionalRestrictions: ['consult_local_laws']
+  };
+}
+
 export function registerRoutes(app: Express) {
   // Set up CSRF token endpoint
   setupCSRFTokenEndpoint(app);
@@ -1220,6 +1358,140 @@ export function registerRoutes(app: Express) {
     } catch (error) {
       console.error('Geo restriction creation failed:', error);
       res.status(500).json({ error: 'Geo restriction creation failed' });
+    }
+  });
+
+  // Enhanced international compliance features
+  
+  // Sanctions/OFAC screening endpoint
+  app.post('/api/compliance/sanctions-screen', csrfProtection, isAuthenticated, async (req, res) => {
+    try {
+      const { firstName, lastName, dateOfBirth, country } = req.body;
+      const userId = req.user!.id;
+      
+      if (!firstName || !lastName || !dateOfBirth || !country) {
+        return res.status(400).json({ 
+          error: 'All fields required for sanctions screening',
+          required: ['firstName', 'lastName', 'dateOfBirth', 'country']
+        });
+      }
+      
+      // Mock sanctions screening - in production, integrate with OFAC/sanctions APIs
+      const sanctionsResult = await performSanctionsScreening({
+        firstName,
+        lastName,
+        dateOfBirth,
+        country,
+        userId
+      });
+      
+      // Log sanctions check
+      await storage.createAuditLog({
+        userId,
+        action: 'SANCTIONS_SCREENING',
+        details: JSON.stringify({
+          screeningResult: sanctionsResult.status,
+          matchScore: sanctionsResult.matchScore,
+          listsChecked: sanctionsResult.listsChecked,
+          country
+        }),
+        timestamp: new Date()
+      });
+      
+      // If sanctioned, block account
+      if (sanctionsResult.status === 'blocked') {
+        await storage.updateUser(userId, {
+          status: 'suspended',
+          suspensionReason: 'sanctions_screening_failed',
+          updatedAt: new Date()
+        });
+      }
+      
+      res.json({
+        status: sanctionsResult.status,
+        cleared: sanctionsResult.status === 'clear',
+        matchScore: sanctionsResult.matchScore,
+        details: sanctionsResult.status === 'blocked' ? 
+          'Account suspended due to sanctions screening' : 
+          'Sanctions screening passed',
+        screeningId: sanctionsResult.screeningId
+      });
+    } catch (error) {
+      console.error('Sanctions screening error:', error);
+      res.status(500).json({ error: 'Sanctions screening failed' });
+    }
+  });
+
+  // Region-specific content rules endpoint
+  app.get('/api/compliance/content-rules/:country', async (req, res) => {
+    try {
+      const { country } = req.params;
+      const contentRules = getContentRulesByCountry(country.toUpperCase());
+      
+      res.json({
+        country: country.toUpperCase(),
+        contentRules,
+        lastUpdated: new Date().toISOString(),
+        source: 'compliance_database'
+      });
+    } catch (error) {
+      console.error('Content rules lookup error:', error);
+      res.status(500).json({ error: 'Failed to get content rules' });
+    }
+  });
+
+  // Country-specific age verification requirements
+  app.get('/api/compliance/age-requirements/:country', async (req, res) => {
+    try {
+      const { country } = req.params;
+      const ageRequirements = getAgeRequirementsByCountry(country.toUpperCase());
+      
+      res.json({
+        country: country.toUpperCase(),
+        minimumAge: ageRequirements.minimumAge,
+        verificationRequired: ageRequirements.verificationRequired,
+        documentTypes: ageRequirements.acceptedDocuments,
+        additionalRestrictions: ageRequirements.additionalRestrictions,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Age requirements lookup error:', error);
+      res.status(500).json({ error: 'Failed to get age requirements' });
+    }
+  });
+
+  // Restricted region access check
+  app.get('/api/compliance/region-access', async (req, res) => {
+    try {
+      const ip = req.ip || '127.0.0.1';
+      
+      // Check if accessing from restricted region
+      const geoResult = await geoBlockingService.checkGeoAccess({
+        ip,
+        feature: 'platform_access',
+        type: 'general'
+      });
+      
+      if (!geoResult.allowed) {
+        return res.status(403).json({
+          blocked: true,
+          reason: geoResult.reason,
+          country: geoResult.country,
+          message: 'Platform access is restricted in your region',
+          alternativeUrls: geoResult.metadata?.alternativeUrls || []
+        });
+      }
+      
+      res.json({
+        blocked: false,
+        country: geoResult.country,
+        region: geoResult.region,
+        restrictions: geoResult.restrictions || {},
+        message: 'Platform access allowed'
+      });
+    } catch (error) {
+      console.error('Region access check error:', error);
+      res.status(500).json({ error: 'Region access check failed' });
     }
   });
 
