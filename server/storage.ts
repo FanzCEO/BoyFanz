@@ -1942,6 +1942,7 @@ export class DatabaseStorage implements IStorage {
     await this.createAuditLog({
       userId: consent.userId,
       action: 'CONSENT_RECORDED',
+      targetType: 'consent',
       details: JSON.stringify({
         sessionId: consent.sessionId,
         consents: consent.consents,
@@ -1959,7 +1960,7 @@ export class DatabaseStorage implements IStorage {
     const logs = await db.select().from(auditLogs)
       .where(and(
         eq(auditLogs.action, 'CONSENT_RECORDED'),
-        sql`${auditLogs.details}::jsonb ->> 'sessionId' = ${sessionId}`
+        sql`${auditLogs.details}->>'sessionId' = ${sessionId}`
       ))
       .orderBy(desc(auditLogs.createdAt))
       .limit(1);
