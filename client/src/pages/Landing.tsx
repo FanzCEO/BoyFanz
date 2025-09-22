@@ -23,8 +23,8 @@ export default function Landing() {
               />
             </div>
             <p className="text-2xl mb-8 max-w-2xl mx-auto">
-              <span className="text-5xl font-display font-black text-yellow-400 block mb-3 tracking-wide uppercase">Every Man's Playground</span>
-              <span className="font-body neon-white-body">The ultimate creator economy platform. Upload, monetize, and connect with your fans 
+              <span className="text-5xl font-display font-black seedy-neon-golden block mb-3 tracking-wide uppercase">Every Man's Playground</span>
+              <span className="font-body seedy-neon-white">The ultimate creator economy platform. Upload, monetize, and connect with your fans 
               while maintaining full compliance and security.</span>
             </p>
             <Button 
@@ -43,10 +43,10 @@ export default function Landing() {
       <div className="py-24 bg-card/30 club-glow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold font-heading mb-4 tracking-tight neon-crimson-heading neon-heartbeat">
+            <h2 className="text-5xl font-bold font-heading mb-4 tracking-tight seedy-neon-red">
               Everything You Need to Succeed
             </h2>
-            <p className="text-2xl font-body neon-white-body">
+            <p className="text-2xl font-body seedy-neon-white">
               Powerful tools for the modern creator economy
             </p>
           </div>
@@ -57,8 +57,8 @@ export default function Landing() {
                 <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                   <i className="fas fa-cloud-upload-alt text-primary text-xl"></i>
                 </div>
-                <CardTitle className="neon-crimson-heading neon-flicker">Secure Media Upload</CardTitle>
-                <CardDescription className="neon-white-body">
+                <CardTitle className="seedy-neon-red">Secure Media Upload</CardTitle>
+                <CardDescription className="seedy-neon-white">
                   Upload and store your content securely with enterprise-grade encryption and compliance features.
                 </CardDescription>
               </CardHeader>
@@ -69,8 +69,8 @@ export default function Landing() {
                 <div className="h-12 w-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
                   <i className="fas fa-shield-alt text-secondary text-xl"></i>
                 </div>
-                <CardTitle className="neon-crimson-heading neon-buzz">KYC Compliance</CardTitle>
-                <CardDescription className="neon-white-body">
+                <CardTitle className="seedy-neon-blue">KYC Compliance</CardTitle>
+                <CardDescription className="seedy-neon-white">
                   Built-in identity verification and compliance tools to meet regulatory requirements.
                 </CardDescription>
               </CardHeader>
@@ -81,8 +81,8 @@ export default function Landing() {
                 <div className="h-12 w-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
                   <i className="fas fa-dollar-sign text-accent text-xl"></i>
                 </div>
-                <CardTitle className="neon-crimson-heading neon-heartbeat">Instant Payouts</CardTitle>
-                <CardDescription className="neon-white-body">
+                <CardTitle className="seedy-neon-golden">Instant Payouts</CardTitle>
+                <CardDescription className="seedy-neon-white">
                   Get paid quickly with our streamlined payout system and multiple payment options.
                 </CardDescription>
               </CardHeader>
@@ -93,8 +93,8 @@ export default function Landing() {
                 <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                   <i className="fas fa-users text-primary text-xl"></i>
                 </div>
-                <CardTitle className="neon-crimson-heading neon-breathe">Fan Management</CardTitle>
-                <CardDescription className="neon-white-body">
+                <CardTitle className="seedy-neon-red">Fan Management</CardTitle>
+                <CardDescription className="seedy-neon-white">
                   Connect with your audience and build lasting relationships with powerful fan management tools.
                 </CardDescription>
               </CardHeader>
@@ -105,8 +105,8 @@ export default function Landing() {
                 <div className="h-12 w-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
                   <i className="fas fa-chart-line text-secondary text-xl"></i>
                 </div>
-                <CardTitle className="neon-crimson-heading neon-dying">Analytics & Insights</CardTitle>
-                <CardDescription className="neon-white-body">
+                <CardTitle className="seedy-neon-blue">Analytics & Insights</CardTitle>
+                <CardDescription className="seedy-neon-white">
                   Track your performance with detailed analytics and insights to grow your business.
                 </CardDescription>
               </CardHeader>
@@ -117,8 +117,8 @@ export default function Landing() {
                 <div className="h-12 w-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
                   <i className="fas fa-bolt text-accent text-xl"></i>
                 </div>
-                <CardTitle className="neon-crimson-heading neon-strobe">Real-time Updates</CardTitle>
-                <CardDescription className="neon-white-body">
+                <CardTitle className="seedy-neon-golden">Real-time Updates</CardTitle>
+                <CardDescription className="seedy-neon-white">
                   Stay connected with real-time notifications and live updates on your content and earnings.
                 </CardDescription>
               </CardHeader>
@@ -130,11 +130,11 @@ export default function Landing() {
       {/* CTA Section */}
       <div className="py-24">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-5xl font-bold font-heading mb-6 tracking-tight neon-crimson-heading neon-breathe">
+          <h2 className="text-5xl font-bold font-heading mb-6 tracking-tight seedy-neon-red">
             Ready to Start Your Journey?
           </h2>
-          <p className="text-2xl mb-8 font-body neon-white-body">
-            Join thousands of creators who are already building their empire on <span className="font-display font-black neon-sign tracking-wide">BoyFanz</span>.
+          <p className="text-2xl mb-8 font-body seedy-neon-white">
+            Join thousands of creators who are already building their empire on <span className="font-display font-black seedy-neon-golden tracking-wide">BoyFanz</span>.
           </p>
           <Button 
             onClick={handleLogin} 

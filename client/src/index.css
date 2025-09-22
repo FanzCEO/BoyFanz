@@ -184,6 +184,43 @@
       0 0 4px hsl(0, 70%, 45%),
       0 0 6px hsl(0, 60%, 40%);
   }
+
+  /* SEEDY BAR NEON EFFECTS - Very low brightness, erratic flickering */
+  .seedy-neon-red {
+    color: hsl(0, 40%, 25%);
+    text-shadow: 
+      0 0 1px hsl(0, 60%, 30%),
+      0 0 2px hsl(0, 50%, 25%);
+    animation: seedy-bar-flicker 4s ease-in-out infinite;
+    filter: brightness(0.3) contrast(0.8);
+  }
+
+  .seedy-neon-golden {
+    color: hsl(45, 30%, 25%);
+    text-shadow: 
+      0 0 1px hsl(45, 40%, 30%),
+      0 0 2px hsl(45, 35%, 25%);
+    animation: seedy-bar-flicker 5s ease-in-out infinite;
+    filter: brightness(0.3) contrast(0.8);
+  }
+
+  .seedy-neon-white {
+    color: hsl(0, 0%, 40%);
+    text-shadow: 
+      0 0 1px hsl(0, 0%, 50%),
+      0 0 2px hsl(0, 0%, 45%);
+    animation: seedy-bar-flicker 6s ease-in-out infinite;
+    filter: brightness(0.4) contrast(0.7);
+  }
+
+  .seedy-neon-blue {
+    color: hsl(200, 30%, 25%);
+    text-shadow: 
+      0 0 1px hsl(200, 40%, 30%),
+      0 0 2px hsl(200, 35%, 25%);
+    animation: seedy-bar-flicker 4.5s ease-in-out infinite;
+    filter: brightness(0.3) contrast(0.8);
+  }
 }
 
 /* Subtle flicker animation for muted effects */
@@ -430,6 +467,54 @@
   background-position: center;
   background-attachment: fixed;
   background-repeat: no-repeat;
+}
+
+/* Seedy bar neon flicker - erratic, worn-out, low brightness */
+@keyframes seedy-bar-flicker {
+  0% { 
+    opacity: 0.3;
+    filter: brightness(0.3) contrast(0.8);
+  }
+  5% { 
+    opacity: 0.1;
+    filter: brightness(0.1) contrast(0.6);
+  }
+  10% { 
+    opacity: 0.4;
+    filter: brightness(0.4) contrast(0.9);
+  }
+  20% { 
+    opacity: 0.2;
+    filter: brightness(0.2) contrast(0.7);
+  }
+  35% { 
+    opacity: 0.3;
+    filter: brightness(0.3) contrast(0.8);
+  }
+  45% { 
+    opacity: 0.1;
+    filter: brightness(0.1) contrast(0.5);
+  }
+  55% { 
+    opacity: 0.4;
+    filter: brightness(0.4) contrast(0.9);
+  }
+  65% { 
+    opacity: 0.2;
+    filter: brightness(0.2) contrast(0.7);
+  }
+  80% { 
+    opacity: 0.3;
+    filter: brightness(0.3) contrast(0.8);
+  }
+  90% { 
+    opacity: 0.1;
+    filter: brightness(0.1) contrast(0.6);
+  }
+  100% { 
+    opacity: 0.3;
+    filter: brightness(0.3) contrast(0.8);
+  }
 }
 
 /* Ensure text remains readable over the background */
