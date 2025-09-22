@@ -23,7 +23,7 @@ export default function Landing() {
               />
             </div>
             <p className="text-2xl mb-8 max-w-2xl mx-auto">
-              <span className="text-5xl font-display font-black block mb-3 tracking-wide uppercase">Every Man's Playground</span>
+              <span className="text-5xl font-display font-black text-yellow-400 block mb-3 tracking-wide uppercase">Every Man's Playground</span>
               <span className="font-body neon-white-body">The ultimate creator economy platform. Upload, monetize, and connect with your fans 
               while maintaining full compliance and security.</span>
             </p>
