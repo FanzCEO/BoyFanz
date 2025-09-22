@@ -517,6 +517,59 @@
   }
 }
 
+/* ACCESSIBILITY: Respect user's motion preferences - CRITICAL for seizure prevention */
+@media (prefers-reduced-motion: reduce) {
+  .seedy-neon-red,
+  .seedy-neon-golden,
+  .seedy-neon-white,
+  .seedy-neon-blue,
+  .neon-text,
+  .neon-sign-golden,
+  .neon-crimson,
+  .neon-white-body,
+  .text-accent {
+    animation: none;
+    filter: none;
+    opacity: 1;
+  }
+  
+  /* Remove all transitions and transforms for users who need reduced motion */
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ACCESSIBILITY: Ensure focus is always visible - WCAG requirement */
+:focus {
+  outline: 2px solid hsl(45, 100%, 60%);
+  outline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid hsl(45, 100%, 60%);
+  outline-offset: 2px;
+}
+
+/* ACCESSIBILITY: Skip link for keyboard users */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: hsl(0, 0%, 0%);
+  color: hsl(45, 100%, 60%);
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 9999;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
 /* Ensure text remains readable over the background */
 .homepage-bg .relative {
   position: relative;

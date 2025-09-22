@@ -9,8 +9,10 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-background text-foreground homepage-bg" data-testid="landing-page">
+      {/* ACCESSIBILITY: Skip link for keyboard users */}
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
+      <main id="main-content" className="relative overflow-hidden" role="main" aria-label="BoyFanz platform introduction">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/10"></div>
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
@@ -18,8 +20,9 @@ export default function Landing() {
             <div className="flex justify-center mb-8">
               <img 
                 src="/boyfanz-logo.png" 
-                alt="BoyFanz Logo" 
+                alt="BoyFanz - Every Man's Playground logo" 
                 className="h-32 w-auto glow-effect rounded-lg"
+                role="img"
               />
             </div>
             <p className="text-2xl mb-8 max-w-2xl mx-auto">
@@ -37,10 +40,10 @@ export default function Landing() {
             </Button>
           </div>
         </div>
-      </div>
+      </main>
 
       {/* Features Section */}
-      <div className="py-24 bg-card/30 club-glow">
+      <section className="py-24 bg-card/30 club-glow" aria-label="Platform features" role="region">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-5xl font-bold font-heading mb-4 tracking-tight seedy-neon-red">
@@ -128,7 +131,7 @@ export default function Landing() {
       </div>
 
       {/* CTA Section */}
-      <div className="py-24">
+      <section className="py-24" aria-label="Call to action" role="region">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-5xl font-bold font-heading mb-6 tracking-tight seedy-neon-red">
             Ready to Start Your Journey?
@@ -145,10 +148,10 @@ export default function Landing() {
             Start Creating Today
           </Button>
         </div>
-      </div>
+      </section>
 
       {/* Footer */}
-      <footer className="bg-white/95 backdrop-blur-sm border-t border-gray-200 py-8">
+      <footer className="bg-white/95 backdrop-blur-sm border-t border-gray-200 py-8" role="contentinfo" aria-label="Site footer with legal information">
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="space-y-2">
