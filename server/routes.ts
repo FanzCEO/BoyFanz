@@ -200,6 +200,238 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // ===== ADULT CONTENT COMPLIANCE ROUTES =====
+
+  // Age verification gate
+  app.post('/api/compliance/age-verify', csrfProtection, async (req, res) => {
+    try {
+      const { dateOfBirth, country, consentToAdultContent } = req.body;
+      const sessionId = req.sessionID;
+      const ip = req.ip || '127.0.0.1';
+      
+      if (!dateOfBirth || !country || !consentToAdultContent) {
+        return res.status(400).json({ error: 'All fields are required for age verification' });
+      }
+      
+      // Calculate age
+      const birthDate = new Date(dateOfBirth);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      
+      // Check geo-specific age requirements
+      const geoResult = await geoBlockingService.checkGeoAccess({
+        ip,
+        userId: req.user?.id,
+        feature: 'adult_content',
+        type: 'age_verification'
+      });
+      
+      if (!geoResult.allowed) {
+        return res.status(403).json({ 
+          error: 'Adult content not available in your region',
+          details: geoResult.reason 
+        });
+      }
+      
+      const minimumAge = geoResult.metadata?.minimumAge || 18;
+      
+      if (age < minimumAge) {
+        return res.status(403).json({ 
+          error: `You must be at least ${minimumAge} years old to access this content`,
+          minimumAge 
+        });
+      }
+      
+      // Record age verification in audit log
+      await storage.createAuditLog({
+        userId: req.user?.id,
+        action: 'AGE_VERIFICATION_PASSED',
+        details: JSON.stringify({
+          sessionId,
+          age,
+          country,
+          ip,
+          minimumAge,
+          userAgent: req.headers['user-agent']
+        }),
+        timestamp: new Date()
+      });
+      
+      res.json({ 
+        verified: true, 
+        age,
+        minimumAge,
+        sessionId
+      });
+    } catch (error) {
+      console.error('Age verification error:', error);
+      res.status(500).json({ error: 'Age verification failed' });
+    }
+  });
+
+  // 2257 compliance check for content creation
+  app.post('/api/compliance/2257-check', csrfProtection, isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const { mediaId, performerIds } = req.body;
+      
+      // Check if user has valid KYC
+      const kycRecord = await storage.getKycVerification(userId);
+      if (!kycRecord || kycRecord.status !== 'verified') {
+        return res.status(403).json({
+          error: '2257 compliance check failed',
+          reason: 'Creator must complete KYC verification before publishing content',
+          requiresKyc: true
+        });
+      }
+      
+      // Check if all performers have 2257 records
+      const missingRecords = [];
+      for (const performerId of performerIds || []) {
+        const performerKyc = await storage.getKycVerification(performerId);
+        if (!performerKyc || performerKyc.status !== 'verified') {
+          missingRecords.push(performerId);
+        }
+      }
+      
+      if (missingRecords.length > 0) {
+        return res.status(403).json({
+          error: '2257 compliance check failed',
+          reason: 'All performers must have verified 2257 records',
+          missingRecords,
+          requiresPerformerVerification: true
+        });
+      }
+      
+      // Log compliance check
+      await storage.createAuditLog({
+        userId,
+        action: '2257_COMPLIANCE_VERIFIED',
+        details: JSON.stringify({
+          mediaId,
+          performerIds,
+          kycRecordId: kycRecord.id
+        }),
+        timestamp: new Date()
+      });
+      
+      res.json({ 
+        compliant: true,
+        kycRecordId: kycRecord.id,
+        verifiedPerformers: performerIds || []
+      });
+    } catch (error) {
+      console.error('2257 compliance check error:', error);
+      res.status(500).json({ error: '2257 compliance check failed' });
+    }
+  });
+
+  // Custodian of Records notice endpoint
+  app.get('/api/compliance/custodian-notice', async (req, res) => {
+    try {
+      const custodianInfo = {
+        title: 'Custodian of Records Notice',
+        notice: `Pursuant to 18 U.S.C. Section 2257, the following individual has been designated as the custodian of records for BoyFanz platform:`,
+        custodian: {
+          name: 'BoyFanz Legal Compliance Officer',
+          company: 'BoyFanz LLC',
+          address: {
+            street: '123 Compliance Street',
+            city: 'Legal City',
+            state: 'CA',
+            zipCode: '90210',
+            country: 'United States'
+          },
+          businessHours: 'Monday through Friday, 9:00 AM to 5:00 PM PST'
+        },
+        statement: `All records required to be maintained by 18 U.S.C. Section 2257 and 2257A are kept by the custodian of records at the above address. All performers appearing in any visual depictions of sexually explicit conduct were 18 years of age or older at the time of creation.`,
+        lastUpdated: new Date().toISOString(),
+        contactInfo: {
+          email: 'records@boyfanz.com',
+          phone: '+1 (555) 123-4567'
+        }
+      };
+      
+      res.json(custodianInfo);
+    } catch (error) {
+      console.error('Custodian notice error:', error);
+      res.status(500).json({ error: 'Failed to get custodian notice' });
+    }
+  });
+
+  // Content publishing gate
+  app.post('/api/compliance/content-publish-gate', csrfProtection, isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const { contentId, contentType, performerIds } = req.body;
+      
+      // Check 2257 compliance
+      const complianceCheck = await fetch(`${req.protocol}://${req.get('host')}/api/compliance/2257-check`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': req.headers.cookie || ''
+        },
+        body: JSON.stringify({
+          mediaId: contentId,
+          performerIds
+        })
+      });
+      
+      const complianceResult = await complianceCheck.json();
+      
+      if (!complianceResult.compliant) {
+        return res.status(403).json({
+          error: 'Content cannot be published due to compliance issues',
+          complianceError: complianceResult
+        });
+      }
+      
+      // Check geo restrictions for content type
+      const geoCheck = await geoBlockingService.checkGeoAccess({
+        ip: req.ip || '127.0.0.1',
+        userId,
+        contentId,
+        feature: 'content_publishing',
+        type: contentType
+      });
+      
+      if (!geoCheck.allowed) {
+        return res.status(403).json({
+          error: 'Content publishing not allowed in your region',
+          geoRestriction: geoCheck
+        });
+      }
+      
+      // Log successful publish gate check
+      await storage.createAuditLog({
+        userId,
+        action: 'CONTENT_PUBLISH_GATE_PASSED',
+        details: JSON.stringify({
+          contentId,
+          contentType,
+          performerIds,
+          complianceRecordId: complianceResult.kycRecordId
+        }),
+        timestamp: new Date()
+      });
+      
+      res.json({
+        approved: true,
+        contentId,
+        complianceRecordId: complianceResult.kycRecordId,
+        message: 'Content approved for publishing'
+      });
+    } catch (error) {
+      console.error('Content publish gate error:', error);
+      res.status(500).json({ error: 'Content publish gate check failed' });
+    }
+  });
+
   // ===== ENHANCED PAYMENT ROUTES WITH SECURITY FIXES =====
 
   // Apple Pay merchant validation
