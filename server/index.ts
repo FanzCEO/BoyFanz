@@ -12,23 +12,49 @@ const app = express();
 // Trust proxy for correct IP handling behind load balancers/CDN
 app.set('trust proxy', true);
 
-// Production-ready security headers
+// CRITICAL SECURITY: Comprehensive security headers for compliance
 app.use(helmet({
-  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? {
+  contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'"], // Remove unsafe-inline for production security
-      styleSrc: ["'self'", "data:"], // Allow data URIs for styles, remove unsafe-inline
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "wss:", "https:"],
-      fontSrc: ["'self'"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'none'"],
+      scriptSrc: process.env.NODE_ENV === 'production' 
+        ? ["'self'", "https://js.stripe.com"] // Production: only trusted scripts
+        : ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://js.stripe.com"], // Development: allow Vite HMR
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"], // Google Fonts
+      fontSrc: ["'self'", "https://fonts.gstatic.com"], // Google Fonts
+      imgSrc: ["'self'", "data:", "https:", "blob:"], // Support for media uploads
+      connectSrc: process.env.NODE_ENV === 'production'
+        ? ["'self'", "wss:", "https://api.stripe.com"] // Production: specific endpoints
+        : ["'self'", "wss:", "ws:", "https://api.stripe.com", "ws://localhost:*", "http://localhost:*"], // Development: local HMR
+      mediaSrc: ["'self'", "blob:"], // Media playback
+      objectSrc: ["'none'"], // Prevent object/embed attacks
+      frameSrc: ["'none'"], // Prevent clickjacking
+      baseUri: ["'self'"], // Restrict base tag
+      formAction: ["'self'"], // Restrict form submissions
+      frameAncestors: ["'none'"], // Additional clickjacking protection
     },
-  } : false, // Disable CSP in development for ease of use
-  crossOriginEmbedderPolicy: process.env.NODE_ENV === 'production'
+  },
+  hsts: process.env.NODE_ENV === 'production' ? {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true
+  } : false, // Only enable HSTS in production (HTTPS required)
+  crossOriginEmbedderPolicy: process.env.NODE_ENV === 'production',
+  // Additional security headers
+  xssFilter: true, // X-XSS-Protection
+  noSniff: true, // X-Content-Type-Options: nosniff  
+  frameguard: { action: 'deny' }, // X-Frame-Options: DENY
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' }, // Referrer-Policy
+  // Note: Permissions-Policy headers will be added separately as custom headers
 }));
+
+// CRITICAL SECURITY: Additional security headers for compliance
+app.use((req, res, next) => {
+  // Permissions-Policy header (controls browser features)
+  res.setHeader('Permissions-Policy', 
+    'geolocation=(), microphone=(), camera=(), payment=(self), usb=(), bluetooth=(), midi=()');
+  next();
+});
 
 // Request tracing and logging
 app.use(requestIdMiddleware);
