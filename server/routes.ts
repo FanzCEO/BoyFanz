@@ -60,6 +60,146 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // ===== GDPR PRIVACY API ROUTES =====
+  
+  // Data export (DSAR)
+  app.get('/api/privacy/export', csrfProtection, isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      
+      // Collect all user data
+      const profile = await storage.getUserProfile(userId);
+      const posts = await storage.getUserPosts(userId);
+      const messages = await storage.getUserMessages(userId); 
+      const transactions = await storage.getUserTransactions(userId);
+      const kycRecords = await storage.getUserKYCRecords(userId);
+      
+      const exportData = {
+        user: req.user,
+        profile: profile || {},
+        posts: posts || [],
+        messages: messages || [],
+        transactions: transactions || [],
+        kyc: kycRecords || [],
+        exportedAt: new Date().toISOString(),
+        dataRetentionInfo: "Data is retained according to our retention policy. Contact support for details."
+      };
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename=boyfanz-data-export-${userId}.json`);
+      res.json(exportData);
+    } catch (error) {
+      console.error('Privacy export error:', error);
+      res.status(500).json({ error: 'Failed to export user data' });
+    }
+  });
+
+  // Data deletion request (DSAR)
+  app.delete('/api/privacy/delete', csrfProtection, isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      
+      // Soft delete approach - mark for deletion but keep for legal retention period
+      await storage.markUserForDeletion(userId);
+      
+      // Immediately anonymize PII while preserving transaction records for compliance
+      await storage.anonymizeUserData(userId);
+      
+      // Log deletion request for audit trail
+      await storage.createAuditLog({
+        userId,
+        action: 'DATA_DELETION_REQUESTED',
+        details: 'User requested full account and data deletion',
+        timestamp: new Date()
+      });
+      
+      res.json({ 
+        message: 'Account deletion requested. Data will be permanently deleted within 30 days as per our retention policy.',
+        deletionRequestId: `DEL_${userId}_${Date.now()}`
+      });
+    } catch (error) {
+      console.error('Privacy deletion error:', error);
+      res.status(500).json({ error: 'Failed to process deletion request' });
+    }
+  });
+
+  // Privacy preferences
+  app.post('/api/privacy/preferences', csrfProtection, isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const { marketing, analytics, functional, performance } = req.body;
+      
+      const preferences = {
+        userId,
+        marketing: !!marketing,
+        analytics: !!analytics,
+        functional: !!functional,
+        performance: !!performance,
+        updatedAt: new Date()
+      };
+      
+      await storage.updateUserPrivacyPreferences(preferences);
+      
+      res.json({ message: 'Privacy preferences updated successfully', preferences });
+    } catch (error) {
+      console.error('Privacy preferences error:', error);
+      res.status(500).json({ error: 'Failed to update privacy preferences' });
+    }
+  });
+
+  app.get('/api/privacy/preferences', csrfProtection, isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const preferences = await storage.getUserPrivacyPreferences(userId);
+      
+      res.json(preferences || {
+        marketing: false,
+        analytics: false,
+        functional: true,
+        performance: false
+      });
+    } catch (error) {
+      console.error('Get privacy preferences error:', error);
+      res.status(500).json({ error: 'Failed to get privacy preferences' });
+    }
+  });
+
+  // Consent management endpoints
+  app.post('/api/consent', csrfProtection, async (req, res) => {
+    try {
+      const { sessionId, consents } = req.body;
+      const userId = req.user?.id || null;
+      
+      const consentRecord = {
+        userId,
+        sessionId,
+        consents,
+        timestamp: new Date(),
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent']
+      };
+      
+      await storage.recordConsent(consentRecord);
+      
+      res.json({ message: 'Consent recorded successfully' });
+    } catch (error) {
+      console.error('Consent recording error:', error);
+      res.status(500).json({ error: 'Failed to record consent' });
+    }
+  });
+
+  app.get('/api/consent/:sessionId', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const consent = await storage.getConsent(sessionId);
+      
+      res.json(consent || { consents: {} });
+    } catch (error) {
+      console.error('Get consent error:', error);
+      res.status(500).json({ error: 'Failed to get consent' });
+    }
+  });
+
   // ===== ENHANCED PAYMENT ROUTES WITH SECURITY FIXES =====
 
   // Apple Pay merchant validation

@@ -128,7 +128,7 @@ export default function Landing() {
             </Card>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* CTA Section */}
       <section className="py-24" aria-label="Call to action" role="region">

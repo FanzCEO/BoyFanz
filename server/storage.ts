@@ -222,6 +222,40 @@ export interface IStorage {
     pendingReviews: number;
   }>;
 
+  // GDPR Privacy operations
+  getUserProfile(userId: string): Promise<Profile | undefined>;
+  getUserPosts(userId: string): Promise<Post[]>;
+  getUserMessages(userId: string): Promise<Message[]>;
+  getUserTransactions(userId: string): Promise<Transaction[]>;
+  getUserKYCRecords(userId: string): Promise<KycVerification[]>;
+  markUserForDeletion(userId: string): Promise<void>;
+  anonymizeUserData(userId: string): Promise<void>;
+  updateUserPrivacyPreferences(preferences: {
+    userId: string;
+    marketing: boolean;
+    analytics: boolean;
+    functional: boolean;
+    performance: boolean;
+    updatedAt: Date;
+  }): Promise<void>;
+  getUserPrivacyPreferences(userId: string): Promise<{
+    marketing: boolean;
+    analytics: boolean;
+    functional: boolean;
+    performance: boolean;
+  } | undefined>;
+  recordConsent(consent: {
+    userId?: string | null;
+    sessionId: string;
+    consents: Record<string, boolean>;
+    timestamp: Date;
+    ipAddress?: string;
+    userAgent?: string;
+  }): Promise<void>;
+  getConsent(sessionId: string): Promise<{
+    consents: Record<string, boolean>;
+  } | undefined>;
+
   // Admin delegation operations
   grantPermission(permission: InsertDelegatedPermission): Promise<DelegatedPermission>;
   revokePermission(userId: string, permission: string): Promise<void>;
@@ -1798,6 +1832,145 @@ export class DatabaseStorage implements IStorage {
   async createMeetupTemplate(template: any): Promise<any> { return { id: `template_${Date.now()}`, ...template }; }
   async createAchievementCelebration(celebration: any): Promise<void> {}
   async scheduleSharePublication(share: any): Promise<void> {}
+
+  // GDPR Privacy method implementations
+  async getUserProfile(userId: string): Promise<Profile | undefined> {
+    return this.getProfile(userId);
+  }
+
+  async getUserPosts(userId: string): Promise<Post[]> {
+    return this.getCreatorPosts(userId);
+  }
+
+  async getUserMessages(userId: string): Promise<Message[]> {
+    const messages = await db.select().from(messages)
+      .where(or(eq(messages.senderId, userId), eq(messages.receiverId, userId)))
+      .orderBy(desc(messages.createdAt));
+    return messages;
+  }
+
+  async getUserTransactions(userId: string): Promise<Transaction[]> {
+    return await db.select().from(transactions)
+      .where(or(eq(transactions.creatorId, userId), eq(transactions.fanId, userId)))
+      .orderBy(desc(transactions.createdAt));
+  }
+
+  async getUserKYCRecords(userId: string): Promise<KycVerification[]> {
+    return await db.select().from(kycVerifications)
+      .where(eq(kycVerifications.userId, userId))
+      .orderBy(desc(kycVerifications.createdAt));
+  }
+
+  async markUserForDeletion(userId: string): Promise<void> {
+    await db.update(users)
+      .set({ 
+        markedForDeletion: true,
+        deletionRequestedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async anonymizeUserData(userId: string): Promise<void> {
+    // Anonymize user PII while preserving transaction records for compliance
+    await db.update(users)
+      .set({
+        email: `deleted_user_${userId}@boyfanz.com`,
+        username: `deleted_user_${userId}`,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+    
+    // Anonymize profile data
+    await db.update(profiles)
+      .set({
+        displayName: 'Deleted User',
+        bio: null,
+        updatedAt: new Date()
+      })
+      .where(eq(profiles.userId, userId));
+  }
+
+  async updateUserPrivacyPreferences(preferences: {
+    userId: string;
+    marketing: boolean;
+    analytics: boolean;
+    functional: boolean;
+    performance: boolean;
+    updatedAt: Date;
+  }): Promise<void> {
+    // Store in user profile or create separate privacy preferences table
+    await db.update(profiles)
+      .set({
+        privacyPreferences: JSON.stringify(preferences),
+        updatedAt: new Date()
+      })
+      .where(eq(profiles.userId, preferences.userId));
+  }
+
+  async getUserPrivacyPreferences(userId: string): Promise<{
+    marketing: boolean;
+    analytics: boolean;
+    functional: boolean;
+    performance: boolean;
+  } | undefined> {
+    const [profile] = await db.select().from(profiles)
+      .where(eq(profiles.userId, userId));
+    
+    if (profile?.privacyPreferences) {
+      const prefs = JSON.parse(profile.privacyPreferences as string);
+      return {
+        marketing: prefs.marketing || false,
+        analytics: prefs.analytics || false,
+        functional: prefs.functional || true,
+        performance: prefs.performance || false
+      };
+    }
+    
+    return undefined;
+  }
+
+  async recordConsent(consent: {
+    userId?: string | null;
+    sessionId: string;
+    consents: Record<string, boolean>;
+    timestamp: Date;
+    ipAddress?: string;
+    userAgent?: string;
+  }): Promise<void> {
+    // Create audit log for consent
+    await this.createAuditLog({
+      userId: consent.userId,
+      action: 'CONSENT_RECORDED',
+      details: JSON.stringify({
+        sessionId: consent.sessionId,
+        consents: consent.consents,
+        ipAddress: consent.ipAddress,
+        userAgent: consent.userAgent
+      }),
+      timestamp: consent.timestamp
+    });
+  }
+
+  async getConsent(sessionId: string): Promise<{
+    consents: Record<string, boolean>;
+  } | undefined> {
+    // Look up consent in audit logs
+    const logs = await db.select().from(auditLogs)
+      .where(and(
+        eq(auditLogs.action, 'CONSENT_RECORDED'),
+        sql`${auditLogs.details}::jsonb ->> 'sessionId' = ${sessionId}`
+      ))
+      .orderBy(desc(auditLogs.createdAt))
+      .limit(1);
+    
+    if (logs.length > 0) {
+      const details = JSON.parse(logs[0].details);
+      return { consents: details.consents };
+    }
+    
+    return undefined;
+  }
 }
 
 export const storage = new DatabaseStorage();
