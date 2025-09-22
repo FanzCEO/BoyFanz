@@ -6,11 +6,18 @@ export function useTheme() {
     queryKey: ['/api/themes/active'],
     refetchOnMount: true,
     refetchOnWindowFocus: true,
+    retry: false,
+    staleTime: 60000, // Cache for 1 minute
   });
 
   useEffect(() => {
     if (activeTheme) {
-      applyTheme(activeTheme);
+      try {
+        applyTheme(activeTheme);
+      } catch (error) {
+        console.warn('Failed to apply theme:', error);
+        // Continue anyway - don't block app loading
+      }
     }
   }, [activeTheme]);
 
