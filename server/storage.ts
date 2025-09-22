@@ -1940,34 +1940,34 @@ export class DatabaseStorage implements IStorage {
   }): Promise<void> {
     // Create audit log for consent
     await this.createAuditLog({
-      userId: consent.userId,
+      actorId: consent.userId,
       action: 'CONSENT_RECORDED',
       targetType: 'consent',
-      details: JSON.stringify({
+      targetId: consent.sessionId,
+      diffJson: {
         sessionId: consent.sessionId,
         consents: consent.consents,
         ipAddress: consent.ipAddress,
         userAgent: consent.userAgent
-      }),
-      timestamp: consent.timestamp
+      }
     });
   }
 
   async getConsent(sessionId: string): Promise<{
     consents: Record<string, boolean>;
   } | undefined> {
-    // Look up consent in audit logs
+    // Look up consent in audit logs  
     const logs = await db.select().from(auditLogs)
       .where(and(
         eq(auditLogs.action, 'CONSENT_RECORDED'),
-        sql`${auditLogs.details}->>'sessionId' = ${sessionId}`
+        eq(auditLogs.targetId, sessionId)
       ))
       .orderBy(desc(auditLogs.createdAt))
       .limit(1);
     
     if (logs.length > 0) {
-      const details = JSON.parse(logs[0].details);
-      return { consents: details.consents };
+      const diffJson = logs[0].diffJson as any;
+      return { consents: diffJson.consents };
     }
     
     return undefined;
