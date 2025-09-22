@@ -20,6 +20,44 @@ export function registerRoutes(app: Express) {
   // Set up CSRF token endpoint
   setupCSRFTokenEndpoint(app);
 
+  // ===== THEME ROUTES =====
+  
+  // Get active theme
+  app.get('/api/themes/active', async (req, res) => {
+    try {
+      const activeTheme = await storage.getActiveTheme();
+      if (!activeTheme) {
+        // Return a default theme if none is active
+        return res.json({
+          id: 'default',
+          name: 'BoyFanz Dark',
+          isActive: true,
+          colors: {
+            primary: 'hsl(0, 72%, 51%)',
+            secondary: 'hsl(45, 93%, 47%)',
+            background: 'hsl(0, 0%, 7%)',
+            foreground: 'hsl(0, 0%, 98%)'
+          },
+          typography: {
+            fontDisplay: 'Oxanium',
+            fontHeading: 'Montserrat',
+            fontBody: 'Inter'
+          },
+          effects: {
+            neonIntensity: 0.8,
+            glowEnabled: true,
+            smokyBackground: true,
+            flickerEnabled: true
+          }
+        });
+      }
+      res.json(activeTheme);
+    } catch (error) {
+      console.error('Failed to get active theme:', error);
+      res.status(500).json({ error: 'Failed to get active theme' });
+    }
+  });
+
   // ===== ENHANCED PAYMENT ROUTES WITH SECURITY FIXES =====
 
   // Apple Pay merchant validation
