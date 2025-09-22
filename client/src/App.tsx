@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
 import SocialHome from "@/pages/SocialHome";
@@ -53,6 +53,20 @@ function Router() {
   const [location, navigate] = useLocation();
   const isMobile = useIsMobile();
   useTheme(); // Apply active theme
+  
+  // Prevent infinite loading
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
+  
+  useEffect(() => {
+    if (isLoading) {
+      const timer = setTimeout(() => {
+        setLoadingTimeout(true);
+        console.warn('Auth loading timeout - showing app anyway');
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
 
   // Protected routes that require authentication
   const protectedRoutes = ['/feed', '/messages', '/mass-messaging', '/post', '/earnings', '/media', '/compliance', '/payouts', '/notifications', '/settings', '/admin', '/purchased', '/subscriptions', '/release-forms', '/nearby', '/streams'];
@@ -67,12 +81,13 @@ function Router() {
     }
   }, [isLoading, isAuthenticated, isProtectedRoute, navigate]);
 
-  if (isLoading) {
+  // Show simplified loading, but don't block forever
+  if (isLoading && !loadingTimeout) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">Loading BoyFanz...</p>
         </div>
       </div>
     );

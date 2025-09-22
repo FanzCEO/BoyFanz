@@ -23,20 +23,26 @@ export function useAuth() {
   const { data: user, isLoading, error } = useQuery({
     queryKey: ["/api/auth/user"],
     queryFn: async () => {
-      const res = await fetch("/api/auth/user", {
-        credentials: "include",
-      });
-      
-      // Return null for 401/403 (not authenticated) instead of throwing
-      if (res.status === 401 || res.status === 403) {
-        return null;
+      try {
+        const res = await fetch("/api/auth/user", {
+          credentials: "include",
+        });
+        
+        // Return null for 401/403 (not authenticated) instead of throwing
+        if (res.status === 401 || res.status === 403) {
+          return null;
+        }
+        
+        if (!res.ok) {
+          console.warn(`Auth check failed: ${res.status} ${res.statusText}`);
+          return null; // Don't throw, just return null
+        }
+        
+        return await res.json();
+      } catch (error) {
+        console.warn('Auth check error:', error);
+        return null; // Don't throw, just return null
       }
-      
-      if (!res.ok) {
-        throw new Error(`${res.status}: ${res.statusText}`);
-      }
-      
-      return await res.json();
     },
     retry: false,
     refetchOnWindowFocus: false,
