@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { GDPRConsentBanner } from "@/components/GDPRConsentBanner";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -171,6 +172,7 @@ function App() {
       <TooltipProvider>
         <div className="dark">
           <Toaster />
+          <GDPRConsentBanner />
           <Router />
         </div>
       </TooltipProvider>

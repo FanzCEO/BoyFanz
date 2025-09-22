@@ -247,12 +247,13 @@ export function registerRoutes(app: Express) {
     try {
       const userId = req.user!.id;
       
-      // Collect all user data
+      // Collect all user data using existing storage methods
+      const user = await storage.getUser(userId);
       const profile = await storage.getUserProfile(userId);
       const posts = await storage.getUserPosts(userId);
-      const messages = await storage.getUserMessages(userId); 
-      const transactions = await storage.getUserTransactions(userId);
-      const kycRecords = await storage.getUserKYCRecords(userId);
+      const messages = await storage.getMessageHistory(userId); 
+      const auditLogs = await storage.getAuditLogsByUser(userId);
+      const sessions = await storage.getUserSessions?.(userId) || [];
       
       const exportData = {
         user: req.user,
