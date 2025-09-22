@@ -15,6 +15,7 @@ import { aiCreatorToolsService } from './services/aiCreatorToolsService';
 import { identityVerificationService } from './services/identityVerificationService';
 import { geoBlockingService } from './services/geoBlockingService';
 import { comprehensiveAnalyticsService } from './services/comprehensiveAnalyticsService';
+import { requireAgeVerification, require2257Compliance } from './middleware/auth';
 import Stripe from 'stripe';
 import { z } from 'zod';
 
@@ -545,7 +546,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Content publishing gate
-  app.post('/api/compliance/content-publish-gate', csrfProtection, isAuthenticated, async (req, res) => {
+  app.post('/api/compliance/content-publish-gate', csrfProtection, isAuthenticated, require2257Compliance, async (req, res) => {
     try {
       const userId = req.user!.id;
       const { contentId, contentType, performerIds } = req.body;
@@ -1367,7 +1368,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Create content bundle
-  app.post('/api/content/bundles', isAuthenticated, csrfProtection, async (req, res) => {
+  app.post('/api/content/bundles', isAuthenticated, require2257Compliance, csrfProtection, async (req, res) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -1388,7 +1389,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Get content bundles
-  app.get('/api/content/bundles', async (req, res) => {
+  app.get('/api/content/bundles', requireAgeVerification, async (req, res) => {
     try {
       const { creatorId, limit = 20 } = req.query;
       const bundles = await contentManagementService.getContentBundles(
