@@ -47,7 +47,8 @@ export function UndergroundLoader({
           setAtmosphereIntensity(0.9);
         } else if (newProgress >= 100 && loadingPhase === 'reveal') {
           setLoadingPhase('complete');
-          setTimeout(() => setLoadingPhase('entering'), 500);
+          // Don't reset - let parent component handle completion
+          clearInterval(progressInterval);
         }
         
         return newProgress;
@@ -56,12 +57,14 @@ export function UndergroundLoader({
 
     // Animate smoke particles
     const animationInterval = setInterval(() => {
-      setSmokeParticles(prev => prev.map(particle => ({
-        ...particle,
-        y: particle.y - particle.speed,
-        opacity: particle.y > -10 ? particle.opacity * 0.99 : Math.random() * 0.6 + 0.1,
-        y: particle.y > -10 ? particle.y - particle.speed : 110
-      })));
+      setSmokeParticles(prev => prev.map(particle => {
+        const newY = particle.y > -10 ? particle.y - particle.speed : 110;
+        return {
+          ...particle,
+          y: newY,
+          opacity: particle.y > -10 ? particle.opacity * 0.99 : Math.random() * 0.6 + 0.1,
+        };
+      }));
     }, 100);
 
     return () => {
