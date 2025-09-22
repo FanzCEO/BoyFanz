@@ -519,18 +519,24 @@
 
 /* ACCESSIBILITY: Respect user's motion preferences - CRITICAL for seizure prevention */
 @media (prefers-reduced-motion: reduce) {
+  /* Disable ALL animations and flickering effects to prevent seizures/vestibular issues */
   .seedy-neon-red,
   .seedy-neon-golden,
   .seedy-neon-white,
   .seedy-neon-blue,
   .neon-text,
+  .neon-gold,
+  .neon-red,
   .neon-sign-golden,
   .neon-crimson,
   .neon-white-body,
-  .text-accent {
-    animation: none;
-    filter: none;
-    opacity: 1;
+  .text-accent,
+  .glow-effect {
+    animation: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
   }
   
   /* Remove all transitions and transforms for users who need reduced motion */
@@ -538,8 +544,19 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transform: none !important;
     scroll-behavior: auto !important;
   }
+  
+  /* Ensure high-contrast, static text colors for accessibility */
+  .neon-text { color: hsl(0, 85%, 65%) !important; }
+  .neon-gold { color: hsl(45, 85%, 65%) !important; }
+  .neon-red { color: hsl(0, 85%, 65%) !important; }
+  .neon-crimson { color: hsl(0, 85%, 65%) !important; }
+  .seedy-neon-red { color: hsl(0, 85%, 65%) !important; }
+  .seedy-neon-golden { color: hsl(45, 85%, 65%) !important; }
+  .seedy-neon-white { color: hsl(0, 0%, 95%) !important; }
+  .seedy-neon-blue { color: hsl(200, 85%, 65%) !important; }
 }
 
 /* ACCESSIBILITY: Ensure focus is always visible - WCAG requirement */
