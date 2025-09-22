@@ -1090,14 +1090,54 @@ export function registerRoutes(app: Express) {
     }
   });
 
-  // SECURITY: Stripe webhook validation for payment confirmations
+  // SECURITY: Enhanced Stripe webhook validation for payment confirmations
   app.post('/api/webhooks/stripe', express.raw({type: 'application/json'}), async (req, res) => {
     try {
       const sig = req.headers['stripe-signature'];
       const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      const clientIP = req.ip || req.connection.remoteAddress;
+      
+      // Enhanced security logging (non-blocking)
+      const logWebhookAttempt = async () => {
+        try {
+          await storage.createAuditLog({
+            actorId: 'system',
+            action: 'stripe_webhook_received',
+            targetType: 'webhook_endpoint',
+            targetId: '/api/webhooks/stripe',
+            diffJson: {
+              ip: clientIP,
+              userAgent: req.headers['user-agent'],
+              timestamp: new Date().toISOString()
+            }
+          });
+        } catch (err) {
+          console.error('Failed to log webhook attempt:', err);
+        }
+      };
+      // Fire and forget - don't await
+      logWebhookAttempt();
       
       if (!webhookSecret || !sig) {
         console.error('Missing Stripe webhook secret or signature');
+        // Log security violation (non-blocking)
+        setImmediate(async () => {
+          try {
+            await storage.createAuditLog({
+              actorId: 'system',
+              action: 'stripe_webhook_security_violation',
+              targetType: 'webhook_endpoint',
+              targetId: '/api/webhooks/stripe',
+              diffJson: {
+                violation: 'missing_signature_or_secret',
+                ip: clientIP,
+                timestamp: new Date().toISOString()
+              }
+            });
+          } catch (err) {
+            console.error('Failed to log security violation:', err);
+          }
+        });
         return res.status(400).send('Webhook signature verification failed');
       }
 
@@ -1108,12 +1148,46 @@ export function registerRoutes(app: Express) {
           apiVersion: '2023-10-16'
         });
         event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+        
+        // CRITICAL: Idempotency check - prevent duplicate processing
+        const existingEvent = await storage.getProcessedWebhookEvent?.(event.id);
+        if (existingEvent) {
+          console.log(`🔄 Webhook event already processed: ${event.id}`);
+          return res.json({ received: true, duplicate: true });
+        }
+        
+        // Record event as being processed
+        await storage.recordProcessedWebhookEvent?.({
+          eventId: event.id,
+          eventType: event.type,
+          processedAt: new Date(),
+          source: 'stripe'
+        }).catch(() => {}); // Fail silently if storage doesn't support this
+        
       } catch (err) {
         console.error('Webhook signature verification failed:', err);
+        // Log signature failure (non-blocking)
+        setImmediate(async () => {
+          try {
+            await storage.createAuditLog({
+              actorId: 'system', 
+              action: 'stripe_webhook_signature_failed',
+              targetType: 'webhook_endpoint',
+              targetId: '/api/webhooks/stripe',
+              diffJson: {
+                error: err.message,
+                ip: clientIP,
+                timestamp: new Date().toISOString()
+              }
+            });
+          } catch (err) {
+            console.error('Failed to log signature failure:', err);
+          }
+        });
         return res.status(400).send('Webhook signature verification failed');
       }
 
-      // Handle payment events
+      // Handle payment events with enhanced security logging
       switch (event.type) {
         case 'payment_intent.succeeded':
           const paymentIntent = event.data.object;
@@ -1122,6 +1196,27 @@ export function registerRoutes(app: Express) {
             'completed',
             paymentIntent.id
           );
+          
+          // Enhanced audit logging for successful payments (non-blocking)
+          setImmediate(async () => {
+            try {
+              await storage.createAuditLog({
+                actorId: paymentIntent.metadata.user_id || 'system',
+                action: 'payment_confirmed_webhook',
+                targetType: 'payment_intent',
+                targetId: paymentIntent.id,
+                diffJson: {
+                  amount: paymentIntent.amount / 100,
+                  currency: paymentIntent.currency.toUpperCase(),
+                  threeDSResult: paymentIntent.charges?.data[0]?.payment_method_details?.card?.three_d_secure?.result || 'not_applicable',
+                  ip: clientIP,
+                  timestamp: new Date().toISOString()
+                }
+              });
+            } catch (err) {
+              console.error('Failed to log payment success:', err);
+            }
+          });
           console.log(`💰 Payment confirmed via webhook: ${paymentIntent.id}`);
           break;
 
@@ -1133,16 +1228,73 @@ export function registerRoutes(app: Express) {
             failedIntent.id,
             { failure_reason: failedIntent.last_payment_error?.message }
           );
+          
+          // Enhanced audit logging for failed payments (non-blocking)
+          setImmediate(async () => {
+            try {
+              await storage.createAuditLog({
+                actorId: failedIntent.metadata.user_id || 'system',
+                action: 'payment_failed_webhook',
+                targetType: 'payment_intent', 
+                targetId: failedIntent.id,
+                diffJson: {
+                  failureReason: failedIntent.last_payment_error?.message || 'Unknown',
+                  errorCode: failedIntent.last_payment_error?.code || 'None',
+                  ip: clientIP,
+                  timestamp: new Date().toISOString()
+                }
+              });
+            } catch (err) {
+              console.error('Failed to log payment failure:', err);
+            }
+          });
           console.log(`❌ Payment failed via webhook: ${failedIntent.id}`);
           break;
 
         default:
           console.log(`Unhandled Stripe event type: ${event.type}`);
+          // Log unhandled webhook events for monitoring (non-blocking)
+          setImmediate(async () => {
+            try {
+              await storage.createAuditLog({
+                actorId: 'system',
+                action: 'stripe_webhook_unhandled',
+                targetType: 'webhook_event',
+                targetId: event.id,
+                diffJson: {
+                  eventType: event.type,
+                  ip: clientIP,
+                  timestamp: new Date().toISOString()
+                }
+              });
+            } catch (err) {
+              console.error('Failed to log unhandled event:', err);
+            }
+          });
       }
 
       res.json({received: true});
     } catch (error) {
       console.error('Stripe webhook processing failed:', error);
+      // Log webhook processing errors (non-blocking)
+      setImmediate(async () => {
+        try {
+          await storage.createAuditLog({
+            actorId: 'system',
+            action: 'stripe_webhook_error',
+            targetType: 'webhook_endpoint',
+            targetId: '/api/webhooks/stripe',
+            diffJson: {
+              error: error.message,
+              ip: req.ip || req.connection.remoteAddress,
+              timestamp: new Date().toISOString()
+            }
+          });
+        } catch (err) {
+          console.error('Failed to log webhook error:', err);
+        }
+      });
+      
       res.status(500).json({ error: 'Webhook processing failed' });
     }
   });
