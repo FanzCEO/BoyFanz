@@ -15,7 +15,7 @@ import { aiCreatorToolsService } from './services/aiCreatorToolsService';
 import { identityVerificationService } from './services/identityVerificationService';
 import { geoBlockingService } from './services/geoBlockingService';
 import { comprehensiveAnalyticsService } from './services/comprehensiveAnalyticsService';
-import { requireAgeVerification, require2257Compliance } from './middleware/auth';
+import { requireAgeVerification, require2257Compliance, enforceGeoBlocking } from './middleware/auth';
 import Stripe from 'stripe';
 import { z } from 'zod';
 
@@ -713,7 +713,7 @@ export function registerRoutes(app: Express) {
   };
 
   // Enhanced payment processing with 3DS
-  app.post('/api/payments/process-payment', csrfProtection, isAuthenticated, require3DSForEEA, async (req, res) => {
+  app.post('/api/payments/process-payment', csrfProtection, isAuthenticated, enforceGeoBlocking('payment'), require3DSForEEA, async (req, res) => {
     try {
       const { amount, currency, paymentMethodId, creatorId } = req.body;
       const userId = req.user!.id;
@@ -768,7 +768,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Secure payout request with KYC enforcement
-  app.post('/api/payments/request-payout', csrfProtection, isAuthenticated, requireKycForPayout, async (req, res) => {
+  app.post('/api/payments/request-payout', csrfProtection, isAuthenticated, enforceGeoBlocking('payout'), requireKycForPayout, async (req, res) => {
     try {
       const userId = req.user!.id;
       const { amount, currency, bankAccountId, taxInfo } = req.body;
@@ -1389,7 +1389,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Get content bundles
-  app.get('/api/content/bundles', requireAgeVerification, async (req, res) => {
+  app.get('/api/content/bundles', enforceGeoBlocking('content_access'), requireAgeVerification, async (req, res) => {
     try {
       const { creatorId, limit = 20 } = req.query;
       const bundles = await contentManagementService.getContentBundles(
@@ -1406,7 +1406,7 @@ export function registerRoutes(app: Express) {
   // ===== AI CREATOR TOOLS ROUTES =====
 
   // Generate auto-captions for video
-  app.post('/api/ai/captions', isAuthenticated, async (req, res) => {
+  app.post('/api/ai/captions', isAuthenticated, requireAgeVerification, async (req, res) => {
     try {
       const { videoUrl, language = 'en' } = req.body;
       const result = await aiCreatorToolsService.generateAutoCaptions(videoUrl, language);
@@ -1418,7 +1418,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Analyze thumbnail effectiveness
-  app.post('/api/ai/thumbnails/analyze', isAuthenticated, async (req, res) => {
+  app.post('/api/ai/thumbnails/analyze', isAuthenticated, require2257Compliance, async (req, res) => {
     try {
       const { thumbnailUrl, contentMetadata } = req.body;
       const analysis = await aiCreatorToolsService.analyzeThumbnail(thumbnailUrl, contentMetadata);
@@ -1430,7 +1430,7 @@ export function registerRoutes(app: Express) {
   });
 
   // Generate content optimization suggestions
-  app.post('/api/ai/content/optimize', isAuthenticated, async (req, res) => {
+  app.post('/api/ai/content/optimize', isAuthenticated, require2257Compliance, async (req, res) => {
     try {
       const { contentId } = req.body;
       const optimization = await aiCreatorToolsService.optimizeContent(contentId);

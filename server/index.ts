@@ -28,7 +28,7 @@ app.use(helmet({
         : ["'self'", "wss:", "ws:", "https://api.stripe.com", "ws://localhost:*", "http://localhost:*"], // Development: local HMR
       mediaSrc: ["'self'", "blob:"], // Media playback
       objectSrc: ["'none'"], // Prevent object/embed attacks
-      frameSrc: ["'none'"], // Prevent clickjacking
+      frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"], // Allow Stripe payment iframes
       baseUri: ["'self'"], // Restrict base tag
       formAction: ["'self'"], // Restrict form submissions
       frameAncestors: ["'none'"], // Additional clickjacking protection
@@ -108,6 +108,9 @@ app.post('/api/webhooks/getstream', express.raw({ type: 'application/json' }), a
     res.status(500).json({ message: "Failed to process webhook" });
   }
 });
+
+// CRITICAL: Order matters! Stripe webhook must be registered BEFORE global JSON parser
+// or signature verification will fail. Stripe webhook is registered in routes.ts
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
