@@ -130,22 +130,23 @@
     box-shadow: 0 0 12px var(--chrome-red);
   }
   
-  /* SHARP CLEAR NEON TEXT EFFECT */
+  /* CHROME METALLIC TEXT - EXACTLY LIKE YOUR IMAGES */
   .neon-text {
-    color: var(--neon-red);
+    color: #ff1f3d;
+    font-family: 'Orbitron', monospace;
     font-weight: 900;
-    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
     text-shadow: 
-      /* Sharp inner outline for crystal clarity */
-      0 0 2px var(--neon-red),
-      0 0 4px var(--neon-red),
-      /* Crisp main glow - minimal blur */
-      0 0 6px var(--neon-red),
-      /* Sharp black outline for definition */
-      1px 1px 0px rgba(0, 0, 0, 0.9),
-      2px 2px 0px rgba(0, 0, 0, 0.8);
-    animation: subtle-flicker 6s ease-in-out infinite;
-    filter: contrast(1.2) brightness(1.1);
+      /* Inner white stroke */
+      0 0 1px rgba(255, 255, 255, 0.8),
+      1px 1px 0px rgba(255, 255, 255, 0.3),
+      /* Dark metallic outer stroke */
+      2px 2px 0px rgba(0, 0, 0, 0.9),
+      3px 3px 1px rgba(0, 0, 0, 0.8),
+      /* Minimal inner red glow */
+      0 0 3px #ff1f3d;
+    filter: contrast(1.3) brightness(1.1);
   }
 
   /* Metallic silver neon for "Every Man's Playground" - industrial and elegant */
@@ -159,22 +160,23 @@
     filter: brightness(0.85) contrast(1.0);
   }
   
-  /* SHARP GOLDEN NEON SIGNS - Crystal Clear */
+  /* CHROME GOLDEN METALLIC SIGNS - LIKE YOUR IMAGES */
   .neon-sign-golden {
-    color: var(--neon-gold);
+    color: #ffcc00;
+    font-family: 'Orbitron', monospace;
     font-weight: 900;
-    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
     text-shadow: 
-      /* Sharp inner core for crystal clarity */
-      0 0 2px var(--neon-gold),
-      0 0 4px var(--neon-gold),
-      /* Minimal crisp glow */
-      0 0 8px var(--neon-gold),
-      /* Sharp black outline for definition */
-      1px 1px 0px rgba(0, 0, 0, 0.9),
-      2px 2px 0px rgba(0, 0, 0, 0.8);
-    animation: subtle-flicker 8s ease-in-out infinite;
-    filter: contrast(1.3) brightness(1.15);
+      /* Inner white chrome highlight */
+      0 0 1px rgba(255, 255, 255, 0.9),
+      1px 1px 0px rgba(255, 255, 255, 0.4),
+      /* Dark metallic outer stroke */
+      2px 2px 0px rgba(0, 0, 0, 0.9),
+      3px 3px 1px rgba(0, 0, 0, 0.8),
+      /* Minimal inner golden glow */
+      0 0 4px #ffcc00;
+    filter: contrast(1.4) brightness(1.2);
   }
   
   /* Glass morphism backgrounds */
@@ -716,46 +718,70 @@
   top: 6px;
 }
 
-/* SHARP NEON INPUT STYLING - Crystal Clear Like Your Images */
+/* MATTE BLACK INPUTS WITH RED NEON BORDERS - EXACTLY LIKE YOUR IMAGES */
 input[type="text"],
 input[type="email"], 
 input[type="password"],
 input[type="search"],
 textarea,
 select {
-  background: hsl(0, 0%, 96%) !important;
-  border: 2px solid hsl(0, 0%, 85%) !important;
-  color: hsl(0, 0%, 0%) !important;
+  background: #050505 !important;
+  border: 2px solid #333333 !important;
+  color: #ffffff !important;
   border-radius: 6px;
   padding: 12px 16px;
   transition: all 0.2s ease;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
 }
 
-/* CRYSTAL SHARP RED NEON BORDER ON FOCUS - Exactly Like Your Images */
+/* BRIGHT RED NEON BORDER ON FOCUS/FILLED - EXACTLY LIKE YOUR IMAGES */
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus,
 input[type="search"]:focus,
 textarea:focus,
-select:focus {
-  background: hsl(0, 0%, 98%) !important;
-  border: 2px solid var(--neon-red) !important;
+select:focus,
+input:not(:placeholder-shown) {
+  background: #050505 !important;
+  border: 2px solid #ff1f3d !important;
   box-shadow: 
-    0 0 0 1px var(--neon-red),
-    0 0 4px var(--neon-red) !important;
+    0 0 3px #ff1f3d !important;
   outline: none !important;
 }
 
-/* SHARP RED BORDER FOR FILLED/ACTIVE INPUTS */
+/* RED BORDER FOR FILLED INPUTS */
 input.border-red-500,
-input.neon-border-active,
-input:not(:placeholder-shown) {
-  border: 2px solid var(--neon-red) !important;
+input.neon-border-active {
+  border: 2px solid #ff1f3d !important;
   box-shadow: 
-    0 0 0 1px var(--neon-red),
-    0 0 4px var(--neon-red) !important;
+    0 0 3px #ff1f3d !important;
+}
+
+/* PURE BLACK BACKGROUND - EXACTLY LIKE YOUR IMAGES */
+body {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* CHROME PANELS FOR CARDS - EXACTLY LIKE YOUR IMAGES */
+.card,
+.chrome-panel,
+[data-role="card"] {
+  background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%) !important;
+  border: 1px solid #333333 !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.8) !important;
+  color: #ffffff !important;
+}
+
+/* CHROME METALLIC HEADINGS - UPPERCASE ORBITRON */
+h1, h2, h3, .text-2xl, .text-3xl, .font-heading {
+  font-family: 'Orbitron', monospace !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.15em !important;
 }
 
 /* Ensure text remains readable over the background */
