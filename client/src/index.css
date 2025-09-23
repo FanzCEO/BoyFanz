@@ -6,38 +6,37 @@
 @tailwind utilities;
 
 :root {
-  /* Dark theme colors matching metallic chrome underground aesthetic */
+  /* STUNNING NEON UNDERGROUND AESTHETIC */
   --background: hsl(0, 0%, 1%);
   --foreground: hsl(0, 0%, 98%);
   --card: hsl(15, 15%, 4%);
   --card-foreground: hsl(0, 0%, 98%);
   --popover: hsl(0, 0%, 7%);
   --popover-foreground: hsl(0, 0%, 98%);
-  --primary: hsl(352, 72%, 40%);
+  --primary: var(--neon-red);
   --primary-foreground: hsl(0, 0%, 98%);
-  --secondary: hsl(0, 0%, 78%);
+  --secondary: var(--neon-cyan);
   --secondary-foreground: hsl(0, 0%, 9%);
   --muted: hsl(0, 0%, 15%);
   --muted-foreground: hsl(0, 0%, 75%);
-  --accent: hsl(210, 6%, 58%);
+  --accent: var(--neon-gold);
   --accent-foreground: hsl(0, 0%, 98%);
-  --destructive: hsl(352, 72%, 40%);
+  --destructive: var(--neon-red);
   --destructive-foreground: hsl(0, 0%, 98%);
-  --border: hsl(15, 15%, 15%);
+  --border: hsl(352, 80%, 35%);
   --input: hsl(15, 15%, 18%);
-  --ring: hsl(0, 0%, 85%);
+  --ring: hsl(352, 100%, 70%);
   --radius: 0.5rem;
   
-  /* Metal color palette */
-  --metal-silver-hl: hsl(0, 0%, 92%);
-  --metal-silver: hsl(0, 0%, 78%);
-  --metal-steel: hsl(210, 6%, 58%);
-  --metal-gun: hsl(210, 7%, 32%);
-  --chrome-red: hsl(352, 72%, 40%);
-  --chrome-red-d: hsl(352, 74%, 24%);
-  --chrome-red-hl: hsl(0, 0%, 96%);
-  --rust-brown: hsl(12, 38%, 36%);
-  --oxide-orange: hsl(20, 55%, 40%);
+  /* VIBRANT NEON COLOR PALETTE */
+  --neon-red: hsl(352, 90%, 58%);
+  --neon-gold: hsl(45, 100%, 55%);
+  --neon-cyan: hsl(188, 100%, 54%);
+  --neon-purple: hsl(300, 100%, 66%);
+  --neon-blue: hsl(200, 100%, 55%);
+  --neon-green: hsl(120, 100%, 50%);
+  --neon-pink: hsl(330, 100%, 60%);
+  --neon-orange: hsl(30, 100%, 55%);
   
   /* Chart colors */
   --chart-1: hsl(352, 72%, 40%);
@@ -131,11 +130,15 @@
     box-shadow: 0 0 12px var(--chrome-red);
   }
   
-  /* Chrome red neon text effect */
+  /* BRILLIANT NEON TEXT EFFECT */
   .neon-text {
-    color: var(--chrome-red);
+    color: var(--neon-red);
+    text-shadow: 
+      0 0 6px var(--neon-red),
+      0 0 14px hsl(352, 90%, 65%),
+      0 0 28px hsl(352, 90%, 58%);
     animation: subtle-flicker 6s ease-in-out infinite;
-    filter: brightness(1.05);
+    filter: none;
   }
 
   /* Metallic silver neon for "Every Man's Playground" - industrial and elegant */
@@ -149,15 +152,16 @@
     filter: brightness(0.85) contrast(1.0);
   }
   
-  /* Keep old class name for compatibility */
+  /* STUNNING GOLDEN NEON SIGNS - The gorgeous look you loved! */
   .neon-sign-golden {
-    color: var(--metal-silver);
+    color: var(--neon-gold);
     text-shadow: 
-      0 0 3px var(--metal-silver-hl),
-      0 0 6px hsl(210, 20%, 70%),
-      0 0 9px var(--metal-steel);
-    animation: subtle-flicker 12s ease-in-out infinite;
-    filter: brightness(0.85) contrast(1.0);
+      0 0 6px var(--neon-gold),
+      0 0 14px hsl(45,100%,65%),
+      0 0 28px hsl(45,100%,55%),
+      0 0 48px hsl(45,100%,50%);
+    animation: subtle-flicker 8s ease-in-out infinite;
+    filter: none;
   }
   
   /* Glass morphism backgrounds */
@@ -168,25 +172,27 @@
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
   }
 
-  /* Underground club chrome red effects */
+  /* VIBRANT RED NEON - Bright and stunning */
   .neon-red {
-    color: var(--chrome-red);
+    color: var(--neon-red);
     text-shadow: 
-      0 0 2px var(--chrome-red),
-      0 0 4px var(--chrome-red-d),
-      0 0 8px hsl(352, 80%, 20%),
-      0 0 1px var(--chrome-red-hl);
+      0 0 8px var(--neon-red),
+      0 0 18px hsl(352, 90%, 65%),
+      0 0 36px hsl(352, 90%, 58%),
+      0 0 56px hsl(352, 90%, 50%);
     animation: subtle-flicker 6s ease-in-out infinite;
+    filter: none;
   }
 
   .neon-crimson {
-    color: var(--chrome-red);
+    color: var(--neon-red);
     text-shadow: 
-      0 0 3px var(--chrome-red),
-      0 0 6px var(--chrome-red-d),
-      0 0 12px hsl(352, 80%, 20%),
-      0 0 1px var(--chrome-red-hl);
+      0 0 8px var(--neon-red),
+      0 0 18px hsl(352, 90%, 65%),
+      0 0 36px hsl(352, 90%, 58%),
+      0 0 56px hsl(352, 90%, 50%);
     animation: crimson-flicker 8s ease-in-out infinite;
+    filter: none;
   }
 
   .neon-outline {
@@ -229,14 +235,15 @@
     filter: brightness(0.8) contrast(1.0);
   }
   
-  /* Keep old class name for compatibility */
+  /* GOLDEN SEEDY NEON - Beautiful flickering gold */
   .seedy-neon-golden {
-    color: var(--metal-silver);
+    color: var(--neon-gold);
     text-shadow: 
-      0 0 3px var(--metal-silver-hl),
-      0 0 6px var(--metal-steel);
+      0 0 8px var(--neon-gold),
+      0 0 18px hsl(45,100%,60%),
+      0 0 36px hsl(45,100%,50%);
     animation: seedy-bar-flicker 5s ease-in-out infinite;
-    filter: brightness(0.8) contrast(1.0);
+    filter: none;
   }
 
   .seedy-neon-white {
@@ -249,12 +256,57 @@
   }
 
   .seedy-neon-blue {
-    color: hsl(200, 60%, 45%);
+    color: var(--neon-blue);
     text-shadow: 
-      0 0 3px hsl(200, 70%, 50%),
-      0 0 6px hsl(200, 60%, 40%);
+      0 0 8px var(--neon-blue),
+      0 0 18px hsl(200, 100%, 60%),
+      0 0 36px hsl(200, 100%, 55%);
     animation: seedy-bar-flicker 4.5s ease-in-out infinite;
-    filter: brightness(0.7) contrast(1.1);
+    filter: none;
+  }
+
+  /* STUNNING NEON GLOW UTILITY - Makes everything glow beautifully */
+  .neon-glow {
+    box-shadow: 
+      0 0 12px currentColor, 
+      0 0 28px currentColor, 
+      0 0 42px currentColor;
+  }
+
+  /* NEON BUTTON EFFECTS - Gorgeous glowing buttons */
+  .neon-button {
+    background: transparent;
+    border: 2px solid var(--neon-gold);
+    color: var(--neon-gold);
+    text-shadow: 
+      0 0 6px var(--neon-gold),
+      0 0 14px hsl(45,100%,65%);
+    box-shadow: 
+      0 0 12px var(--neon-gold), 
+      0 0 28px hsl(45,100%,60%),
+      inset 0 0 12px rgba(255, 215, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .neon-button:hover {
+    text-shadow: 
+      0 0 8px var(--neon-gold),
+      0 0 18px hsl(45,100%,65%),
+      0 0 32px hsl(45,100%,55%);
+    box-shadow: 
+      0 0 16px var(--neon-gold), 
+      0 0 36px hsl(45,100%,60%),
+      0 0 56px hsl(45,100%,50%),
+      inset 0 0 16px rgba(255, 215, 0, 0.2);
+    transform: scale(1.05);
+  }
+
+  /* NEON BORDER UTILITY */
+  .neon-border {
+    border: 1px solid var(--neon-red);
+    box-shadow: 
+      0 0 6px var(--neon-red), 
+      inset 0 0 6px rgba(255, 0, 50, 0.1);
   }
 }
 
@@ -552,9 +604,9 @@
   }
 }
 
-/* ACCESSIBILITY: Respect user's motion preferences - CRITICAL for seizure prevention */
+/* ACCESSIBILITY: Respect user's motion preferences - Preserves beautiful static glows! */
 @media (prefers-reduced-motion: reduce) {
-  /* Disable ALL animations and flickering effects to prevent seizures/vestibular issues */
+  /* Disable ONLY animations while preserving stunning static neon glows */
   .seedy-neon-red,
   .seedy-neon-golden,
   .seedy-neon-silver,
@@ -569,10 +621,8 @@
   .text-accent,
   .glow-effect {
     animation: none !important;
-    filter: none !important;
     opacity: 1 !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
+    /* Keep the beautiful glows - just stop the motion! */
   }
   
   /* Remove all transitions and transforms for users who need reduced motion */
@@ -584,17 +634,35 @@
     scroll-behavior: auto !important;
   }
   
-  /* Ensure high-contrast, static text colors for accessibility */
-  .neon-text { color: var(--chrome-red) !important; }
-  .neon-red { color: var(--chrome-red) !important; }
-  .neon-crimson { color: var(--chrome-red) !important; }
-  .seedy-neon-red { color: var(--chrome-red) !important; }
-  .neon-sign-golden { color: var(--metal-silver) !important; }
-  .neon-sign-silver { color: var(--metal-silver) !important; }
-  .seedy-neon-golden { color: var(--metal-silver) !important; }
-  .seedy-neon-silver { color: var(--metal-silver) !important; }
-  .seedy-neon-white { color: hsl(0, 0%, 95%) !important; }
-  .seedy-neon-blue { color: hsl(200, 85%, 65%) !important; }
+  /* Ensure beautiful static neon colors with stunning glows still visible! */
+  .neon-text { 
+    color: var(--neon-red) !important; 
+    text-shadow: 0 0 6px var(--neon-red), 0 0 14px hsl(352, 90%, 65%) !important;
+  }
+  .neon-red { 
+    color: var(--neon-red) !important; 
+    text-shadow: 0 0 8px var(--neon-red), 0 0 18px hsl(352, 90%, 65%) !important;
+  }
+  .neon-crimson { 
+    color: var(--neon-red) !important; 
+    text-shadow: 0 0 8px var(--neon-red), 0 0 18px hsl(352, 90%, 65%) !important;
+  }
+  .seedy-neon-red { 
+    color: var(--neon-red) !important; 
+    text-shadow: 0 0 8px var(--neon-red) !important;
+  }
+  .neon-sign-golden { 
+    color: var(--neon-gold) !important; 
+    text-shadow: 0 0 6px var(--neon-gold), 0 0 14px hsl(45,100%,65%) !important;
+  }
+  .seedy-neon-golden { 
+    color: var(--neon-gold) !important; 
+    text-shadow: 0 0 8px var(--neon-gold) !important;
+  }
+  .seedy-neon-blue { 
+    color: var(--neon-blue) !important; 
+    text-shadow: 0 0 8px var(--neon-blue) !important;
+  }
 }
 
 /* ACCESSIBILITY: Ensure focus is always visible - WCAG requirement */
