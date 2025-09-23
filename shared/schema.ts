@@ -1436,6 +1436,147 @@ export const insertDmcaRequestSchema = createInsertSchema(dmcaRequests).omit({ i
 export const insertRepeatInfringerSchema = createInsertSchema(repeatInfringers).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertContentHashSchema = createInsertSchema(contentHashes).omit({ id: true, createdAt: true });
 
+// NFT & WEB3 Tables
+export const blockchainEnum = pgEnum("blockchain", ["ethereum", "polygon", "base", "arbitrum", "solana"]);
+export const nftStatusEnum = pgEnum("nft_status", ["minting", "minted", "transferred", "burned", "failed"]);
+
+export const nftAssets = pgTable("nft_assets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  mediaAssetId: varchar("media_asset_id").notNull().references(() => mediaAssets.id, { onDelete: "cascade" }),
+  ownerId: varchar("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  tokenId: varchar("token_id"),
+  contractAddress: varchar("contract_address"),
+  blockchain: blockchainEnum("blockchain").notNull(),
+  metadataUri: text("metadata_uri"),
+  ipfsHash: varchar("ipfs_hash"),
+  status: nftStatusEnum("status").default("minting").notNull(),
+  royaltyPercentage: integer("royalty_percentage").default(1000), // 10% = 1000 basis points
+  transactionHash: varchar("transaction_hash"),
+  forensicSignature: text("forensic_signature"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Analytics Events for Real-time Dashboards
+export const analyticsEventTypeEnum = pgEnum("analytics_event_type", [
+  "page_view", "media_view", "purchase", "tip", "subscription", "message", 
+  "like", "comment", "share", "upload", "stream_start", "stream_end", 
+  "nft_mint", "nft_purchase", "profile_view", "search"
+]);
+
+export const analyticsEvents = pgTable("analytics_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventType: analyticsEventTypeEnum("event_type").notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "set null" }),
+  sessionId: varchar("session_id"),
+  targetId: varchar("target_id"), // media_id, user_id, etc
+  targetType: varchar("target_type"), // "media", "user", "post", etc
+  properties: jsonb("properties").default({}),
+  revenue: decimal("revenue", { precision: 10, scale: 2 }),
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  referrer: text("referrer"),
+  timestamp: timestamp("timestamp").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_analytics_events_timestamp").on(table.timestamp),
+  index("idx_analytics_events_user_id").on(table.userId),
+  index("idx_analytics_events_type").on(table.eventType),
+]);
+
+// Alert Rules for Real-time Monitoring
+export const alertSeverityEnum = pgEnum("alert_severity", ["low", "medium", "high", "critical"]);
+export const alertStatusEnum = pgEnum("alert_status", ["active", "resolved", "suppressed"]);
+
+export const alertRules = pgTable("alert_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  metric: varchar("metric").notNull(), // "revenue", "uploads", "errors", etc
+  threshold: decimal("threshold", { precision: 15, scale: 2 }).notNull(),
+  comparison: varchar("comparison").notNull(), // ">", "<", "==", ">=", "<="
+  timeWindow: integer("time_window").default(300), // seconds
+  severity: alertSeverityEnum("severity").default("medium").notNull(),
+  isEnabled: boolean("is_enabled").default(true),
+  notificationChannels: text("notification_channels").array().default(["email"]),
+  createdBy: varchar("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const alerts = pgTable("alerts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ruleId: varchar("rule_id").notNull().references(() => alertRules.id, { onDelete: "cascade" }),
+  message: text("message").notNull(),
+  severity: alertSeverityEnum("severity").notNull(),
+  status: alertStatusEnum("status").default("active").notNull(),
+  value: decimal("value", { precision: 15, scale: 2 }),
+  threshold: decimal("threshold", { precision: 15, scale: 2 }),
+  metadata: jsonb("metadata").default({}),
+  triggeredAt: timestamp("triggered_at").defaultNow(),
+  resolvedAt: timestamp("resolved_at"),
+  acknowledgedBy: varchar("acknowledged_by").references(() => users.id, { onDelete: "set null" }),
+  acknowledgedAt: timestamp("acknowledged_at"),
+});
+
+// AI Content Feed Preferences
+export const feedPreferences = pgTable("feed_preferences", {
+  userId: varchar("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  personalizedEnabled: boolean("personalized_enabled").default(true),
+  aiRecommendations: boolean("ai_recommendations").default(true),
+  contentTags: text("content_tags").array().default([]),
+  excludedTags: text("excluded_tags").array().default([]),
+  followedCreators: text("followed_creators").array().default([]),
+  blockedUsers: text("blocked_users").array().default([]),
+  ageVerificationStatus: boolean("age_verification_status").default(false),
+  showBlurredContent: boolean("show_blurred_content").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Custom Dashboard Charts
+export const dashboardCharts = pgTable("dashboard_charts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  chartType: varchar("chart_type").notNull(), // "line", "bar", "pie", "area", "scatter"
+  vegaLiteSpec: jsonb("vega_lite_spec").notNull(), // Vega-Lite JSON specification
+  dataSource: varchar("data_source").notNull(), // "analytics_events", "revenue", "custom"
+  filters: jsonb("filters").default({}),
+  refreshInterval: integer("refresh_interval").default(60), // seconds
+  isPublic: boolean("is_public").default(false),
+  position: integer("position").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Age Verification Enhanced
+export const ageVerificationMethodEnum = pgEnum("age_verification_method", ["id_document", "credit_card", "phone_verification", "third_party"]);
+
+export const ageVerifications = pgTable("age_verifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  method: ageVerificationMethodEnum("method").notNull(),
+  verificationData: jsonb("verification_data").default({}),
+  isVerified: boolean("is_verified").default(false),
+  verifiedAt: timestamp("verified_at"),
+  expiresAt: timestamp("expires_at"),
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Insert schemas for new tables
+export const insertNftAssetSchema = createInsertSchema(nftAssets).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertAnalyticsEventSchema = createInsertSchema(analyticsEvents).omit({ id: true, createdAt: true });
+export const insertAlertRuleSchema = createInsertSchema(alertRules).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertAlertSchema = createInsertSchema(alerts).omit({ id: true, triggeredAt: true });
+export const insertFeedPreferencesSchema = createInsertSchema(feedPreferences).omit({ createdAt: true, updatedAt: true });
+export const insertDashboardChartSchema = createInsertSchema(dashboardCharts).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertAgeVerificationSchema = createInsertSchema(ageVerifications).omit({ id: true, createdAt: true, updatedAt: true });
+
 // Admin delegation types
 export type DelegatedPermission = typeof delegatedPermissions.$inferSelect;
 export type InsertDelegatedPermission = z.infer<typeof insertDelegatedPermissionSchema>;
@@ -1447,3 +1588,19 @@ export type RepeatInfringer = typeof repeatInfringers.$inferSelect;
 export type InsertRepeatInfringer = z.infer<typeof insertRepeatInfringerSchema>;
 export type ContentHash = typeof contentHashes.$inferSelect;
 export type InsertContentHash = z.infer<typeof insertContentHashSchema>;
+
+// New feature types
+export type NftAsset = typeof nftAssets.$inferSelect;
+export type InsertNftAsset = z.infer<typeof insertNftAssetSchema>;
+export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
+export type InsertAnalyticsEvent = z.infer<typeof insertAnalyticsEventSchema>;
+export type AlertRule = typeof alertRules.$inferSelect;
+export type InsertAlertRule = z.infer<typeof insertAlertRuleSchema>;
+export type Alert = typeof alerts.$inferSelect;
+export type InsertAlert = z.infer<typeof insertAlertSchema>;
+export type FeedPreferences = typeof feedPreferences.$inferSelect;
+export type InsertFeedPreferences = z.infer<typeof insertFeedPreferencesSchema>;
+export type DashboardChart = typeof dashboardCharts.$inferSelect;
+export type InsertDashboardChart = z.infer<typeof insertDashboardChartSchema>;
+export type AgeVerification = typeof ageVerifications.$inferSelect;
+export type InsertAgeVerification = z.infer<typeof insertAgeVerificationSchema>;

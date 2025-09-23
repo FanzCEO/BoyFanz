@@ -2101,3 +2101,22 @@ export function registerRoutes(app: Express) {
 
   console.log('🛡️ Enhanced routes registered with comprehensive security features');
 }
+
+// Import and register advanced features
+import { 
+  setupNFTRoutes, 
+  setupAIFeedRoutes, 
+  setupAgeVerificationRoutes, 
+  setupAnalyticsDashboardRoutes, 
+  setupAIAnalysisRoutes 
+} from './routes/advancedFeatures';
+
+export function setupAdvancedRoutes(app: Express) {
+  setupNFTRoutes(app);
+  setupAIFeedRoutes(app);
+  setupAgeVerificationRoutes(app);
+  setupAnalyticsDashboardRoutes(app);
+  setupAIAnalysisRoutes(app);
+  
+  console.log('🚀 Advanced features registered: NFT, AI Feeds, Analytics, Age Verification');
+}

@@ -124,6 +124,10 @@ setupCSRFTokenEndpoint(app);
 (async () => {
   await registerRoutes(app);
   
+  // Import and register advanced features
+  const { setupAdvancedRoutes } = await import('./routes');
+  setupAdvancedRoutes(app);
+  
   // Create server from the Express app
   const { createServer } = await import('http');
   const server = createServer(app);

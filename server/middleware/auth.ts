@@ -31,6 +31,19 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+// Middleware to check if user is creator only
+export function requireCreator(req: Request, res: Response, next: NextFunction) {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  
+  if (req.user?.role !== 'creator') {
+    return res.status(403).json({ error: 'Creator access required' });
+  }
+  
+  next();
+}
+
 // Middleware to check if user is creator or admin
 export function requireCreatorOrAdmin(req: Request, res: Response, next: NextFunction) {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
