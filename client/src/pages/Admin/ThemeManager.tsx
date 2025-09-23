@@ -12,8 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Palette, Eye, Trash2, Plus, Wand2, Download, Upload } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Palette, Eye, Trash2, Plus, Wand2, Download, Upload, Settings, Zap } from "lucide-react";
 import type { ThemeSettings } from "@shared/schema";
+import NeonThemeCustomizer from "@/components/NeonThemeCustomizer";
 
 export default function ThemeManager() {
   const { user } = useAuth();
@@ -189,7 +191,31 @@ export default function ThemeManager() {
           <h1 className="text-3xl font-heading font-bold neon-sign">Theme Manager</h1>
           <p className="text-muted-foreground mt-1">Customize the platform's visual appearance and branding</p>
         </div>
-        <Dialog open={createDialog} onOpenChange={setCreateDialog}>
+      </div>
+
+      <Tabs defaultValue="live-customizer" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="live-customizer" className="flex items-center gap-2">
+            <Zap className="h-4 w-4" />
+            Live Neon Customizer
+          </TabsTrigger>
+          <TabsTrigger value="saved-themes" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Saved Themes
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="live-customizer" className="mt-6">
+          <NeonThemeCustomizer />
+        </TabsContent>
+
+        <TabsContent value="saved-themes" className="mt-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold neon-sign-golden">Saved Themes</h2>
+              <p className="text-muted-foreground">Manage and activate saved theme presets</p>
+            </div>
+            <Dialog open={createDialog} onOpenChange={setCreateDialog}>
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary/90 neon-sign">
               <Plus className="mr-2 h-4 w-4" />
@@ -445,6 +471,8 @@ export default function ThemeManager() {
           ))}
         </div>
       )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
