@@ -133,12 +133,22 @@
   /* BRILLIANT NEON TEXT EFFECT */
   .neon-text {
     color: var(--neon-red);
+    font-weight: 900;
+    letter-spacing: 0.05em;
     text-shadow: 
-      0 0 6px var(--neon-red),
-      0 0 14px hsl(352, 90%, 65%),
-      0 0 28px hsl(352, 90%, 58%);
+      /* Inner clarity glow for better readability */
+      0 0 2px var(--neon-red),
+      0 0 4px var(--neon-red),
+      /* Main neon glow layers */
+      0 0 8px var(--neon-red),
+      0 0 16px hsl(352, 90%, 65%),
+      0 0 32px hsl(352, 90%, 58%),
+      /* Weathered depth shadows for aged look */
+      2px 2px 0px rgba(0, 0, 0, 0.9),
+      3px 3px 2px rgba(0, 0, 0, 0.7),
+      1px 1px 0px rgba(255, 255, 255, 0.1);
     animation: subtle-flicker 6s ease-in-out infinite;
-    filter: none;
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.8)) contrast(1.1);
   }
 
   /* Metallic silver neon for "Every Man's Playground" - industrial and elegant */
@@ -155,13 +165,23 @@
   /* STUNNING GOLDEN NEON SIGNS - The gorgeous look you loved! */
   .neon-sign-golden {
     color: var(--neon-gold);
+    font-weight: 900;
+    letter-spacing: 0.04em;
     text-shadow: 
-      0 0 6px var(--neon-gold),
-      0 0 14px hsl(45,100%,65%),
-      0 0 28px hsl(45,100%,55%),
-      0 0 48px hsl(45,100%,50%);
+      /* Inner clarity layers for better readability */
+      0 0 2px var(--neon-gold),
+      0 0 4px var(--neon-gold),
+      /* Main golden glow layers */
+      0 0 8px var(--neon-gold),
+      0 0 16px hsl(45,100%,65%),
+      0 0 32px hsl(45,100%,55%),
+      0 0 56px hsl(45,100%,50%),
+      /* Weathered depth shadows for aged underground look */
+      2px 2px 0px rgba(0, 0, 0, 0.9),
+      3px 3px 2px rgba(0, 0, 0, 0.8),
+      1px 1px 0px rgba(255, 255, 255, 0.15);
     animation: subtle-flicker 8s ease-in-out infinite;
-    filter: none;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.9)) contrast(1.15);
   }
   
   /* Glass morphism backgrounds */
@@ -238,12 +258,22 @@
   /* GOLDEN SEEDY NEON - Beautiful flickering gold */
   .seedy-neon-golden {
     color: var(--neon-gold);
+    font-weight: 800;
+    letter-spacing: 0.03em;
     text-shadow: 
-      0 0 8px var(--neon-gold),
-      0 0 18px hsl(45,100%,60%),
-      0 0 36px hsl(45,100%,50%);
+      /* Inner clarity for weathered underground readability */
+      0 0 3px var(--neon-gold),
+      0 0 6px var(--neon-gold),
+      /* Main seedy golden glow */
+      0 0 12px var(--neon-gold),
+      0 0 22px hsl(45,100%,60%),
+      0 0 42px hsl(45,100%,50%),
+      /* Aged weathered depth shadows */
+      2px 2px 0px rgba(0, 0, 0, 0.95),
+      3px 3px 1px rgba(0, 0, 0, 0.85),
+      1px 1px 0px rgba(255, 255, 255, 0.12);
     animation: seedy-bar-flicker 5s ease-in-out infinite;
-    filter: none;
+    filter: drop-shadow(1px 2px 4px rgba(0, 0, 0, 0.9)) contrast(1.2);
   }
 
   .seedy-neon-white {
