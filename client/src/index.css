@@ -6,44 +6,55 @@
 @tailwind utilities;
 
 :root {
-  /* Dark theme colors matching neon/varsity aesthetic */
+  /* Dark theme colors matching metallic chrome underground aesthetic */
   --background: hsl(0, 0%, 1%);
   --foreground: hsl(0, 0%, 98%);
   --card: hsl(15, 15%, 4%);
   --card-foreground: hsl(0, 0%, 98%);
   --popover: hsl(0, 0%, 7%);
   --popover-foreground: hsl(0, 0%, 98%);
-  --primary: hsl(0, 100%, 50%);
-  --primary-foreground: hsl(0, 0%, 9%);
-  --secondary: hsl(45, 65%, 50%);
-  --secondary-foreground: hsl(0, 0%, 98%);
+  --primary: hsl(352, 72%, 40%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(0, 0%, 78%);
+  --secondary-foreground: hsl(0, 0%, 9%);
   --muted: hsl(0, 0%, 15%);
   --muted-foreground: hsl(0, 0%, 75%);
-  --accent: hsl(45, 70%, 45%);
-  --accent-foreground: hsl(0, 0%, 9%);
-  --destructive: hsl(0, 84%, 60%);
+  --accent: hsl(210, 6%, 58%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(352, 72%, 40%);
   --destructive-foreground: hsl(0, 0%, 98%);
   --border: hsl(15, 15%, 15%);
   --input: hsl(15, 15%, 18%);
-  --ring: hsl(0, 100%, 50%);
+  --ring: hsl(0, 0%, 85%);
   --radius: 0.5rem;
   
+  /* Metal color palette */
+  --metal-silver-hl: hsl(0, 0%, 92%);
+  --metal-silver: hsl(0, 0%, 78%);
+  --metal-steel: hsl(210, 6%, 58%);
+  --metal-gun: hsl(210, 7%, 32%);
+  --chrome-red: hsl(352, 72%, 40%);
+  --chrome-red-d: hsl(352, 74%, 24%);
+  --chrome-red-hl: hsl(0, 0%, 96%);
+  --rust-brown: hsl(12, 38%, 36%);
+  --oxide-orange: hsl(20, 55%, 40%);
+  
   /* Chart colors */
-  --chart-1: hsl(0, 100%, 50%);
-  --chart-2: hsl(45, 65%, 50%);
+  --chart-1: hsl(352, 72%, 40%);
+  --chart-2: hsl(0, 0%, 78%);
   --chart-3: hsl(142, 71%, 45%);
-  --chart-4: hsl(25, 95%, 53%);
+  --chart-4: hsl(20, 55%, 40%);
   --chart-5: hsl(340, 75%, 55%);
   
   /* Sidebar colors */
   --sidebar: hsl(0, 0%, 2%);
   --sidebar-foreground: hsl(0, 0%, 98%);
-  --sidebar-primary: hsl(0, 100%, 50%);
-  --sidebar-primary-foreground: hsl(0, 0%, 9%);
+  --sidebar-primary: hsl(352, 72%, 40%);
+  --sidebar-primary-foreground: hsl(0, 0%, 98%);
   --sidebar-accent: hsl(0, 0%, 15%);
-  --sidebar-accent-foreground: hsl(45, 65%, 50%);
+  --sidebar-accent-foreground: hsl(0, 0%, 78%);
   --sidebar-border: hsl(0, 0%, 20%);
-  --sidebar-ring: hsl(0, 100%, 50%);
+  --sidebar-ring: hsl(0, 0%, 85%);
   
   /* Typography */
   --font-sans: "Rajdhani", "Inter", sans-serif;
@@ -110,30 +121,41 @@
 }
 
 @layer components {
-  /* Subtle glow effects */
+  /* Chrome red glow effects */
   .glow-effect {
-    box-shadow: 0 0 8px rgba(255, 0, 0, 0.2);
+    box-shadow: 0 0 8px var(--chrome-red-d);
     transition: box-shadow 0.3s ease;
   }
   
   .glow-effect:hover {
-    box-shadow: 0 0 12px rgba(255, 0, 0, 0.3);
+    box-shadow: 0 0 12px var(--chrome-red);
   }
   
-  /* Neon text effect - no white background */
+  /* Chrome red neon text effect */
   .neon-text {
-    color: hsl(0, 85%, 60%);
+    color: var(--chrome-red);
     animation: subtle-flicker 6s ease-in-out infinite;
     filter: brightness(1.05);
   }
 
-  /* Soft golden neon for "Every Man's Playground" - muted and elegant */
-  .neon-sign-golden {
-    color: hsl(45, 60%, 50%);
+  /* Metallic silver neon for "Every Man's Playground" - industrial and elegant */
+  .neon-sign-silver {
+    color: var(--metal-silver);
     text-shadow: 
-      0 0 3px hsl(45, 55%, 45%),
-      0 0 6px hsl(45, 50%, 40%),
-      0 0 9px hsl(40, 45%, 35%);
+      0 0 3px var(--metal-silver-hl),
+      0 0 6px hsl(210, 20%, 70%),
+      0 0 9px var(--metal-steel);
+    animation: subtle-flicker 12s ease-in-out infinite;
+    filter: brightness(0.85) contrast(1.0);
+  }
+  
+  /* Keep old class name for compatibility */
+  .neon-sign-golden {
+    color: var(--metal-silver);
+    text-shadow: 
+      0 0 3px var(--metal-silver-hl),
+      0 0 6px hsl(210, 20%, 70%),
+      0 0 9px var(--metal-steel);
     animation: subtle-flicker 12s ease-in-out infinite;
     filter: brightness(0.85) contrast(1.0);
   }
@@ -146,27 +168,29 @@
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
   }
 
-  /* Underground club neon effects */
+  /* Underground club chrome red effects */
   .neon-red {
-    color: hsl(0, 85%, 60%);
+    color: var(--chrome-red);
     text-shadow: 
-      0 0 2px hsl(0, 80%, 50%),
-      0 0 4px hsl(0, 70%, 45%),
-      0 0 6px hsl(0, 60%, 40%);
+      0 0 2px var(--chrome-red),
+      0 0 4px var(--chrome-red-d),
+      0 0 8px hsl(352, 80%, 20%),
+      0 0 1px var(--chrome-red-hl);
     animation: subtle-flicker 6s ease-in-out infinite;
   }
 
   .neon-crimson {
-    color: hsl(0, 90%, 58%);
+    color: var(--chrome-red);
     text-shadow: 
-      0 0 3px hsl(0, 85%, 55%),
-      0 0 6px hsl(0, 80%, 50%),
-      0 0 12px hsl(0, 75%, 45%);
+      0 0 3px var(--chrome-red),
+      0 0 6px var(--chrome-red-d),
+      0 0 12px hsl(352, 80%, 20%),
+      0 0 1px var(--chrome-red-hl);
     animation: crimson-flicker 8s ease-in-out infinite;
   }
 
   .neon-outline {
-    border: 1px solid rgba(255, 0, 0, 0.3);
+    border: 1px solid var(--chrome-red);
   }
 
   /* Clean white neon for body text - no glow, subtle flicker */
@@ -176,30 +200,41 @@
     filter: brightness(1.05);
   }
 
-  /* Underground gritty red accents for contrast */
+  /* Underground gritty chrome red accents for contrast */
   .text-accent {
-    color: hsl(0, 80%, 65%);
+    color: var(--chrome-red);
     text-shadow: 
-      0 0 2px hsl(0, 80%, 50%),
-      0 0 4px hsl(0, 70%, 45%),
-      0 0 6px hsl(0, 60%, 40%);
+      0 0 2px var(--chrome-red),
+      0 0 4px var(--chrome-red-d),
+      0 0 6px hsl(352, 80%, 20%),
+      0 0 1px var(--chrome-red-hl);
   }
 
   /* SEEDY BAR NEON EFFECTS - Visible but flickering like old neon */
   .seedy-neon-red {
-    color: hsl(0, 60%, 45%);
+    color: var(--chrome-red);
     text-shadow: 
-      0 0 3px hsl(0, 80%, 50%),
-      0 0 6px hsl(0, 70%, 40%);
+      0 0 3px var(--chrome-red),
+      0 0 6px var(--chrome-red-d);
     animation: seedy-bar-flicker 4s ease-in-out infinite;
     filter: brightness(0.7) contrast(1.1);
   }
 
-  .seedy-neon-golden {
-    color: hsl(45, 70%, 50%);
+  .seedy-neon-silver {
+    color: var(--metal-silver);
     text-shadow: 
-      0 0 3px hsl(45, 80%, 55%),
-      0 0 6px hsl(45, 70%, 45%);
+      0 0 3px var(--metal-silver-hl),
+      0 0 6px var(--metal-steel);
+    animation: seedy-bar-flicker 5s ease-in-out infinite;
+    filter: brightness(0.8) contrast(1.0);
+  }
+  
+  /* Keep old class name for compatibility */
+  .seedy-neon-golden {
+    color: var(--metal-silver);
+    text-shadow: 
+      0 0 3px var(--metal-silver-hl),
+      0 0 6px var(--metal-steel);
     animation: seedy-bar-flicker 5s ease-in-out infinite;
     filter: brightness(0.8) contrast(1.0);
   }
@@ -342,21 +377,21 @@
 /* Underground club atmosphere effects - Raw & Gritty */
 .smoky-bg {
   background: 
-    radial-gradient(circle at 25% 25%, rgba(255, 0, 0, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, rgba(255, 0, 0, 0.05) 0%, transparent 50%),
-    linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(20, 0, 0, 0.95) 100%);
+    radial-gradient(circle at 25% 25%, rgba(194, 31, 48, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(194, 31, 48, 0.05) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(20, 10, 10, 0.95) 100%);
 }
 
 .retro-border {
   border: 2px solid;
   border-image: linear-gradient(45deg, 
-    rgba(255, 0, 0, 0.8), 
-    rgba(255, 50, 50, 0.4), 
-    rgba(255, 0, 0, 0.8)
+    rgba(194, 31, 48, 0.8), 
+    rgba(192, 192, 192, 0.4), 
+    rgba(194, 31, 48, 0.8)
   ) 1;
   box-shadow: 
-    inset 0 0 20px rgba(255, 0, 0, 0.1),
-    0 0 20px rgba(255, 0, 0, 0.1);
+    inset 0 0 20px rgba(194, 31, 48, 0.1),
+    0 0 20px rgba(192, 192, 192, 0.1);
 }
 
 .gritty-texture {
@@ -365,45 +400,45 @@
       90deg,
       transparent,
       transparent 98px,
-      rgba(255, 0, 0, 0.03) 100px
+      rgba(194, 31, 48, 0.03) 100px
     ),
     repeating-linear-gradient(
       0deg,
       transparent,
       transparent 98px,
-      rgba(0, 0, 0, 0.1) 100px
+      rgba(192, 192, 192, 0.05) 100px
     );
 }
 
 /* Underground club buttons and interactive elements */
 .club-button {
   background: linear-gradient(135deg, 
-    rgba(255, 0, 0, 0.2) 0%, 
-    rgba(100, 0, 0, 0.4) 100%
+    rgba(194, 31, 48, 0.28) 0%, 
+    rgba(106, 15, 22, 0.55) 100%
   );
-  border: 1px solid rgba(255, 0, 0, 0.3);
-  text-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
+  border: 1px solid rgba(192, 192, 192, 0.28);
+  text-shadow: 0 0 8px rgba(194, 31, 48, 0.5);
   box-shadow: 
-    0 4px 15px rgba(255, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 4px 15px rgba(194, 31, 48, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
   transition: all 0.3s ease;
 }
 
 .club-button:hover {
   background: linear-gradient(135deg, 
-    rgba(255, 0, 0, 0.3) 0%, 
-    rgba(120, 0, 0, 0.5) 100%
+    rgba(194, 31, 48, 0.4) 0%, 
+    rgba(106, 15, 22, 0.7) 100%
   );
   box-shadow: 
-    0 6px 20px rgba(255, 0, 0, 0.3),
+    0 6px 20px rgba(194, 31, 48, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
 }
 
-/* Seductive scrollbar for underground feel */
+/* Industrial scrollbar for underground feel */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 0, 0, 0.5) transparent;
+  scrollbar-color: rgba(194, 31, 48, 0.5) transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -417,39 +452,39 @@
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, 
-    rgba(255, 0, 0, 0.7) 0%, 
-    rgba(150, 0, 0, 0.5) 100%
+    rgba(194, 31, 48, 0.7) 0%, 
+    rgba(106, 15, 22, 0.5) 100%
   );
   border-radius: 4px;
-  border: 1px solid rgba(255, 0, 0, 0.2);
+  border: 1px solid rgba(192, 192, 192, 0.2);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, 
-    rgba(255, 0, 0, 0.9) 0%, 
-    rgba(180, 0, 0, 0.7) 100%
+    rgba(194, 31, 48, 0.9) 0%, 
+    rgba(106, 15, 22, 0.7) 100%
   );
 }
 
 /* Underground club form styling */
 .club-input {
   background: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 0, 0, 0.3);
+  border: 1px solid rgba(194, 31, 48, 0.3);
   color: hsl(0, 0%, 95%);
   border-radius: 4px;
   transition: all 0.3s ease;
 }
 
 .club-input:focus {
-  border-color: rgba(255, 0, 0, 0.6);
+  border-color: rgba(194, 31, 48, 0.6);
   box-shadow: 
-    0 0 0 2px rgba(255, 0, 0, 0.1),
-    0 0 8px rgba(255, 0, 0, 0.2);
+    0 0 0 2px rgba(194, 31, 48, 0.1),
+    0 0 8px rgba(192, 192, 192, 0.2);
   background: rgba(0, 0, 0, 0.8);
 }
 
 .club-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(192, 192, 192, 0.4);
 }
 
 /* Homepage background with authentic underground club image */
@@ -522,12 +557,13 @@
   /* Disable ALL animations and flickering effects to prevent seizures/vestibular issues */
   .seedy-neon-red,
   .seedy-neon-golden,
+  .seedy-neon-silver,
   .seedy-neon-white,
   .seedy-neon-blue,
   .neon-text,
-  .neon-gold,
   .neon-red,
   .neon-sign-golden,
+  .neon-sign-silver,
   .neon-crimson,
   .neon-white-body,
   .text-accent,
@@ -549,24 +585,26 @@
   }
   
   /* Ensure high-contrast, static text colors for accessibility */
-  .neon-text { color: hsl(0, 85%, 65%) !important; }
-  .neon-gold { color: hsl(45, 85%, 65%) !important; }
-  .neon-red { color: hsl(0, 85%, 65%) !important; }
-  .neon-crimson { color: hsl(0, 85%, 65%) !important; }
-  .seedy-neon-red { color: hsl(0, 85%, 65%) !important; }
-  .seedy-neon-golden { color: hsl(45, 85%, 65%) !important; }
+  .neon-text { color: var(--chrome-red) !important; }
+  .neon-red { color: var(--chrome-red) !important; }
+  .neon-crimson { color: var(--chrome-red) !important; }
+  .seedy-neon-red { color: var(--chrome-red) !important; }
+  .neon-sign-golden { color: var(--metal-silver) !important; }
+  .neon-sign-silver { color: var(--metal-silver) !important; }
+  .seedy-neon-golden { color: var(--metal-silver) !important; }
+  .seedy-neon-silver { color: var(--metal-silver) !important; }
   .seedy-neon-white { color: hsl(0, 0%, 95%) !important; }
   .seedy-neon-blue { color: hsl(200, 85%, 65%) !important; }
 }
 
 /* ACCESSIBILITY: Ensure focus is always visible - WCAG requirement */
 :focus {
-  outline: 2px solid hsl(45, 100%, 60%);
+  outline: 2px solid hsl(0, 0%, 85%);
   outline-offset: 2px;
 }
 
 :focus-visible {
-  outline: 2px solid hsl(45, 100%, 60%);
+  outline: 2px solid hsl(0, 0%, 85%);
   outline-offset: 2px;
 }
 
@@ -576,7 +614,7 @@
   top: -40px;
   left: 6px;
   background: hsl(0, 0%, 0%);
-  color: hsl(45, 100%, 60%);
+  color: hsl(0, 0%, 85%);
   padding: 8px;
   text-decoration: none;
   border-radius: 4px;
