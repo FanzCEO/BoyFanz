@@ -505,7 +505,7 @@ export const postMedia = pgTable("post_media", {
 });
 
 // Comments  
-export const comments: any = pgTable("comments", {
+export const comments = pgTable("comments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   postId: varchar("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),

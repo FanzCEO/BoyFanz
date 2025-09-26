@@ -975,8 +975,8 @@ export class DatabaseStorage implements IStorage {
 
   // Essential Social Methods
   async createComment(comment: Omit<Comment, 'id' | 'createdAt' | 'updatedAt'>): Promise<Comment> {
-    const results = await db.insert(comments).values(comment).returning();
-    return results[0];
+    const result = await db.insert(comments).values(comment).returning() as Comment[];
+    return result[0];
   }
 
   async getPostComments(postId: string): Promise<(Comment & { user: User })[]> {
