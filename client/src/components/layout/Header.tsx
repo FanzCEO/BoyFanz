@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -6,6 +6,8 @@ import { Bell, Search, Settings, Menu, X, Video } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
+import { useWebSocket } from "@/hooks/useWebSocket";
+import { Badge } from "@/components/ui/badge";
 
 interface HeaderProps {
   user: any;
@@ -14,7 +16,17 @@ interface HeaderProps {
 export default function Header({ user }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const isMobile = useIsMobile();
+  
+  // WebSocket connection for real-time notifications
+  const { isConnected, connectionState } = useWebSocket({
+    onMessage: (message) => {
+      if (message.type === 'new_notification' || message.type === 'tip_received') {
+        setUnreadNotifications(prev => prev + 1);
+      }
+    },
+  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,8 +46,13 @@ export default function Header({ user }: HeaderProps) {
         <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
           <h1 className="text-lg md:text-2xl font-bold font-display truncate" data-testid="page-title">Dashboard</h1>
           <div className="hidden lg:flex items-center gap-2 text-sm text-muted-foreground">
-            <i className="fas fa-circle text-accent text-xs"></i>
-            <span data-testid="system-status">System Online</span>
+            <div className={cn(
+              "h-2 w-2 rounded-full",
+              isConnected ? "bg-green-500" : connectionState === 'reconnecting' ? "bg-yellow-500 animate-pulse" : "bg-red-500"
+            )} />
+            <span data-testid="system-status">
+              {isConnected ? "Connected" : connectionState === 'reconnecting' ? "Reconnecting..." : "Disconnected"}
+            </span>
           </div>
         </div>
         
@@ -115,15 +132,25 @@ export default function Header({ user }: HeaderProps) {
           </Sheet>
           
           {/* Notifications */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="relative touch-target" 
-            data-testid="notifications-button"
-          >
-            <Bell className="h-4 w-4 md:h-4 md:w-4" />
-            <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full notification-dot"></span>
-          </Button>
+          <Link href="/notifications">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative touch-target" 
+              data-testid="notifications-button"
+              onClick={() => setUnreadNotifications(0)}
+            >
+              <Bell className="h-4 w-4 md:h-4 md:w-4" />
+              {unreadNotifications > 0 && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+                >
+                  {unreadNotifications > 99 ? '99+' : unreadNotifications}
+                </Badge>
+              )}
+            </Button>
+          </Link>
           
           {/* Profile Menu */}
           <Button 

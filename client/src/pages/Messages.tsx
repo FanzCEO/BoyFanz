@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRealtimeMessages, usePresence } from '@/hooks/useWebSocket';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -269,15 +270,70 @@ export default function Messages() {
   const [showPaymentDialog, setShowPaymentDialog] = useState<Message | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const currentUserId = 'current-user'; // This would come from auth context
+  
+  // Real-time messaging hooks
+  const { messages: realtimeMessages, isTyping, handleTyping, markAsRead } = useRealtimeMessages(selectedUserId || undefined);
+  const presenceStatus = usePresence(selectedUserId ? [selectedUserId] : []);
 
   const { data: conversations = [] } = useQuery<Conversation[]>({
     queryKey: ['/api/messages/conversations'],
   });
 
-  const { data: messages = [] } = useQuery<Message[]>({
+  // Combine API messages with real-time messages
+  const { data: apiMessages = [] } = useQuery<Message[]>({
     queryKey: ['/api/messages', selectedUserId],
     enabled: !!selectedUserId,
   });
+  
+  // Merge API and real-time messages, removing duplicates
+  const messages = [...apiMessages, ...realtimeMessages]
+    .filter((msg, index, self) => 
+      index === self.findIndex(m => m.id === msg.id)
+    )
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+  
+  // Handle typing indicator
+  const handleInputChange = useCallback((value: string) => {
+    setNewMessage(value);
+    
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
+    // Send typing indicator
+    if (value && selectedUserId) {
+      handleTyping(true);
+      
+      // Stop typing after 2 seconds of inactivity
+      typingTimeoutRef.current = setTimeout(() => {
+        handleTyping(false);
+      }, 2000);
+    } else if (!value && selectedUserId) {
+      handleTyping(false);
+    }
+  }, [selectedUserId, handleTyping]);
+  
+  // Mark messages as read when conversation is opened
+  useEffect(() => {
+    if (selectedUserId && messages.length > 0) {
+      const unreadMessageIds = messages
+        .filter(msg => msg.receiverId === currentUserId && !msg.readAt)
+        .map(msg => msg.id);
+      
+      if (unreadMessageIds.length > 0) {
+        markAsRead(unreadMessageIds);
+      }
+    }
+  }, [selectedUserId, messages, markAsRead, currentUserId]);
 
   const { data: currentUser } = useQuery<{ id: string; role: string }>({
     queryKey: ['/api/auth/me'],
@@ -286,6 +342,20 @@ export default function Messages() {
   // Send Message Mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (messageData: any) => {
+      // First send via WebSocket for instant delivery
+      const { default: websocketService } = await import('@/services/websocketService');
+      
+      if (selectedUserId) {
+        websocketService.sendMessage(
+          selectedUserId,
+          messageData.content,
+          messageData.type,
+          messageData.mediaUrl,
+          messageData.priceCents
+        );
+      }
+      
+      // Then save to database via API
       const response = await fetch('/api/messages', {
         method: 'POST',
         headers: { 
@@ -366,8 +436,6 @@ export default function Messages() {
   };
 
   const isCreator = currentUser?.role === 'creator';
-
-  const currentUserId = 'current-user'; // This would come from auth context
 
   return (
     <div className="h-[calc(100vh-2rem)] max-h-[800px] border rounded-lg overflow-hidden bg-background" data-testid="messages-page">

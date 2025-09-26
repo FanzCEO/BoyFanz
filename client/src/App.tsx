@@ -7,6 +7,7 @@ import { GDPRConsentBanner } from "@/components/GDPRConsentBanner";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useWebSocketInit } from "@/hooks/useWebSocketInit";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import Landing from "@/pages/Landing";
@@ -54,6 +55,7 @@ function Router() {
   const [location, navigate] = useLocation();
   const isMobile = useIsMobile();
   useTheme(); // Apply active theme
+  useWebSocketInit(); // Initialize WebSocket connection
   
   // Prevent infinite loading
   const [loadingTimeout, setLoadingTimeout] = useState(false);

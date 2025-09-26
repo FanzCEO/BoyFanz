@@ -131,6 +131,10 @@ setupCSRFTokenEndpoint(app);
   // Create server from the Express app
   const { createServer } = await import('http');
   const server = createServer(app);
+  
+  // Initialize WebSocket server
+  const { wsManager } = await import('./websocket');
+  logger.info('WebSocket server initialized on port 3001');
 
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

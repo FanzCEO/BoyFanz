@@ -44,6 +44,8 @@ export const users = pgTable("users", {
   role: userRoleEnum("role").default("fan").notNull(),
   status: userStatusEnum("status").default("active").notNull(),
   authProvider: varchar("auth_provider").default("replit").notNull(), // "replit" or "local"
+  onlineStatus: boolean("online_status").default(false),
+  lastSeenAt: timestamp("last_seen_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -549,6 +551,7 @@ export const messages = pgTable("messages", {
   isPaid: boolean("is_paid").default(false),
   isMassMessage: boolean("is_mass_message").default(false),
   readAt: timestamp("read_at"),
+  deliveredAt: timestamp("delivered_at"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   // Critical indexes for inbox and conversation queries
@@ -820,8 +823,12 @@ export const notifications = pgTable("notifications", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   kind: notificationKindEnum("kind").notNull(),
+  type: varchar("type"), // tip, subscription, message, content, stream, moderation
+  title: varchar("title"),
+  message: text("message"),
   payloadJson: jsonb("payload_json").default({}),
   readAt: timestamp("read_at"),
+  deliveredAt: timestamp("delivered_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
