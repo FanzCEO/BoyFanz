@@ -103,11 +103,10 @@
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    opacity: 0.06; /* Very low opacity for ghost effect */
+    opacity: 0.25; /* More visible but still letting black show through */
     z-index: 1;
     pointer-events: none;
-    filter: brightness(0.3) contrast(1.1) saturate(0.8); /* Make it much darker */
-    mix-blend-mode: screen; /* Blend with black background */
+    filter: brightness(0.5) contrast(1.1); /* Less dark filtering */
   }
   
   /* VIGNETTE EFFECT */
