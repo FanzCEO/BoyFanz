@@ -1,10 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Users, Star, LogIn, GraduationCap, MessageSquare, Zap } from "lucide-react";
+import AIChatBot from "@/components/AIChatBot";
 
 export default function Landing() {
   const handleLogin = () => {
-    // Redirect to unified login page instead of direct Replit auth
     window.location.href = "/auth/login";
+  };
+
+  const handleFanzSignup = () => {
+    window.location.href = "/auth/fanz-signup";
+  };
+
+  const handleStarzSignup = () => {
+    window.location.href = "/auth/starz-signup";
   };
 
   return (
@@ -17,12 +27,17 @@ export default function Landing() {
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
-            <div className="flex justify-center mb-8">
+            <div className="flex justify-center mb-12">
               <img 
                 src="/boyfanz-logo.png" 
                 alt="BoyFanz - Every Man's Playground logo" 
-                className="h-32 w-auto glow-effect rounded-lg"
+                className="h-48 md:h-64 w-auto glow-effect rounded-lg transform hover:scale-105 transition-all duration-300"
+                style={{
+                  filter: 'drop-shadow(0 0 20px rgba(255, 0, 0, 0.4)) drop-shadow(0 0 40px rgba(255, 0, 0, 0.2))',
+                  boxShadow: '0 0 30px rgba(255, 0, 0, 0.3), 0 0 60px rgba(255, 0, 0, 0.1)'
+                }}
                 role="img"
+                data-testid="boyfanz-logo-enhanced"
               />
             </div>
             <p className="text-2xl mb-8 max-w-2xl mx-auto">
@@ -30,14 +45,58 @@ export default function Landing() {
               <span className="font-body seedy-neon-white">The ultimate creator economy platform. Upload, monetize, and connect with your fans 
               while maintaining full compliance and security.</span>
             </p>
-            <Button 
-              onClick={handleLogin} 
-              size="lg" 
-              className="glow-effect font-semibold text-lg px-8 py-4"
-              data-testid="login-button"
-            >
-              Get Started
-            </Button>
+            {/* Dual Sign-Up Sections */}
+            <div className="flex flex-col md:flex-row gap-6 justify-center items-center mb-8">
+              {/* Fan Sign Up - Blood Red */}
+              <div className="text-center p-6 rounded-lg bg-card/40 border border-red-500/30 glow-effect hover:bg-card/60 transition-all duration-300">
+                <Users className="h-8 w-8 text-red-500 mx-auto mb-3" />
+                <h3 className="text-xl font-display seedy-neon-red mb-2">JOIN AS A FAN</h3>
+                <p className="text-sm seedy-neon-white mb-4 max-w-xs">
+                  Discover and support your favorite creators. Access exclusive content and connect with the community.
+                </p>
+                <Button 
+                  onClick={handleFanzSignup}
+                  size="lg"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold neon-button"
+                  data-testid="fan-signup-button"
+                >
+                  Fan Sign Up
+                </Button>
+              </div>
+
+              {/* Star Sign Up - Gold */}
+              <div className="text-center p-6 rounded-lg bg-card/40 border border-yellow-500/30 hover:bg-card/60 transition-all duration-300" style={{
+                boxShadow: '0 0 15px rgba(212, 175, 55, 0.2)'
+              }}>
+                <Star className="h-8 w-8 text-yellow-500 mx-auto mb-3" />
+                <h3 className="text-xl font-display seedy-neon-golden mb-2">BECOME A STAR</h3>
+                <p className="text-sm seedy-neon-white mb-4 max-w-xs">
+                  Monetize your content and build your empire. Professional tools for serious creators.
+                </p>
+                <Button 
+                  onClick={handleStarzSignup}
+                  size="lg"
+                  className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-black font-semibold gold-button"
+                  data-testid="star-signup-button"
+                >
+                  Star Sign Up
+                </Button>
+              </div>
+            </div>
+
+            {/* Dedicated Login Area */}
+            <div className="flex justify-center">
+              <Button 
+                onClick={handleLogin}
+                variant="outline"
+                size="lg"
+                className="border-red-500/50 hover:bg-red-500/10 text-red-400 hover:text-red-300 font-semibold px-8 py-3 transition-all duration-300"
+                data-testid="login-button"
+              >
+                <LogIn className="h-5 w-5 mr-2" />
+                Already Have An Account? Login
+              </Button>
+            </div>
           </div>
         </div>
       </main>
@@ -130,6 +189,84 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* AI Assisted Tutorials Section */}
+      <section className="py-24 bg-gradient-to-br from-red-900/10 via-black/50 to-yellow-900/10" aria-label="AI tutorials and help" role="region">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-bold font-display mb-4 tracking-tight seedy-neon-red">
+              AI ASSISTED TUTORIALS
+            </h2>
+            <p className="text-2xl font-body seedy-neon-white mb-8">
+              Get instant help and guidance powered by advanced AI
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="bg-card/40 border-red-500/30 hover:bg-card/60 transition-all duration-300 glow-effect">
+              <CardHeader className="text-center">
+                <div className="h-16 w-16 bg-red-500/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <MessageSquare className="h-8 w-8 text-red-500" />
+                </div>
+                <CardTitle className="seedy-neon-red text-lg">AI CHAT SUPPORT</CardTitle>
+                <CardDescription className="seedy-neon-white text-sm">
+                  Get instant answers to any platform questions with our intelligent AI assistant.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-card/40 border-yellow-500/30 hover:bg-card/60 transition-all duration-300" style={{
+              boxShadow: '0 0 10px rgba(212, 175, 55, 0.1)'
+            }}>
+              <CardHeader className="text-center">
+                <div className="h-16 w-16 bg-yellow-500/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <GraduationCap className="h-8 w-8 text-yellow-500" />
+                </div>
+                <CardTitle className="seedy-neon-golden text-lg">INTERACTIVE GUIDES</CardTitle>
+                <CardDescription className="seedy-neon-white text-sm">
+                  Step-by-step walkthroughs for content creation, monetization, and platform mastery.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-card/40 border-red-500/30 hover:bg-card/60 transition-all duration-300 glow-effect">
+              <CardHeader className="text-center">
+                <div className="h-16 w-16 bg-red-500/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <Zap className="h-8 w-8 text-red-500" />
+                </div>
+                <CardTitle className="seedy-neon-red text-lg">QUICK START</CardTitle>
+                <CardDescription className="seedy-neon-white text-sm">
+                  Rapid onboarding tutorials to get you earning and creating within minutes.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-card/40 border-yellow-500/30 hover:bg-card/60 transition-all duration-300" style={{
+              boxShadow: '0 0 10px rgba(212, 175, 55, 0.1)'
+            }}>
+              <CardHeader className="text-center">
+                <div className="h-16 w-16 bg-yellow-500/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <Users className="h-8 w-8 text-yellow-500" />
+                </div>
+                <CardTitle className="seedy-neon-golden text-lg">COMMUNITY WIKI</CardTitle>
+                <CardDescription className="seedy-neon-white text-sm">
+                  Access our comprehensive knowledge base with tips, tricks, and best practices.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+
+          <div className="text-center mt-12">
+            <p className="text-lg seedy-neon-white mb-6">
+              Need help right now? Our AI assistant is available 24/7 in the bottom-right corner!
+            </p>
+            <div className="flex justify-center items-center space-x-2">
+              <MessageSquare className="h-5 w-5 text-red-500 animate-pulse" />
+              <span className="text-sm seedy-neon-red font-display">CLICK THE AI BUBBLE FOR INSTANT HELP</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-24" aria-label="Call to action" role="region">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
@@ -197,6 +334,9 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+      
+      {/* AI Chatbot Component */}
+      <AIChatBot />
     </div>
   );
 }
