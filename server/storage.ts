@@ -637,7 +637,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // 2257 Compliance operations
-  async create2257Record(record: Omit<any, 'id' | 'createdAt'>): Promise<any> {
+  async create2257Record(record: Omit<typeof records2257.$inferInsert, 'id' | 'createdAt'>): Promise<typeof records2257.$inferSelect> {
     const [created] = await db.insert(records2257).values(record).returning();
     return created;
   }
@@ -646,21 +646,6 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(records2257).where(eq(records2257.userId, userId));
   }
 
-  async getKycByExternalId(externalId: string): Promise<any | undefined> {
-    const [kyc] = await db.select().from(kycVerifications).where(eq(kycVerifications.externalId, externalId));
-    return kyc;
-  }
-
-  async updateUser(id: string, updates: Partial<any>): Promise<void> {
-    await db
-      .update(users)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(users.id, id));
-  }
-
-  async getMediaAssetsByOwner(ownerId: string): Promise<any[]> {
-    return db.select().from(mediaAssets).where(eq(mediaAssets.ownerId, ownerId));
-  }
 
   async getAuditLogs(limit = 100): Promise<AuditLog[]> {
     return db.select()
@@ -784,17 +769,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCreators(limit = 50, categoryFilter?: string): Promise<(CreatorProfile & { user: User })[]> {
-    let query = db
+    const conditions = [];
+    
+    // Apply category filter if provided
+    if (categoryFilter) {
+      conditions.push(sql`${creatorProfiles.categories} @> ARRAY[${categoryFilter}]`);
+    }
+
+    const query = db
       .select()
       .from(creatorProfiles)
       .innerJoin(users, eq(creatorProfiles.userId, users.id))
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(desc(creatorProfiles.totalSubscribers))
       .limit(limit);
-
-    // Apply category filter if provided
-    if (categoryFilter) {
-      query = query.where(sql`${creatorProfiles.categories} @> ARRAY[${categoryFilter}]`);
-    }
 
     const results = await query;
     return results.map(row => ({
@@ -987,8 +975,8 @@ export class DatabaseStorage implements IStorage {
 
   // Essential Social Methods
   async createComment(comment: Omit<Comment, 'id' | 'createdAt' | 'updatedAt'>): Promise<Comment> {
-    const [createdComment] = await db.insert(comments).values(comment).returning();
-    return createdComment;
+    const results = await db.insert(comments).values(comment).returning();
+    return results[0];
   }
 
   async getPostComments(postId: string): Promise<(Comment & { user: User })[]> {
@@ -1050,7 +1038,7 @@ export class DatabaseStorage implements IStorage {
   async getStripeCustomerId(userId: string): Promise<string | undefined> {
     try {
       const [user] = await db.select({ stripeCustomerId: profiles.stripeCustomerId }).from(profiles).where(eq(profiles.userId, userId));
-      return user?.stripeCustomerId || undefined;
+      return user?.stripeCustomerId ?? undefined;
     } catch (error) {
       console.error('Failed to get Stripe customer ID:', error);
       return undefined;
@@ -1086,11 +1074,10 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(liveStreams.status, options.status as any));
     }
     
-    let query = db.select().from(liveStreams).where(and(...conditions)).orderBy(desc(liveStreams.createdAt));
-    
-    if (options?.limit) {
-      query = query.limit(options.limit);
-    }
+    const query = db.select().from(liveStreams)
+      .where(and(...conditions))
+      .orderBy(desc(liveStreams.createdAt))
+      .limit(options?.limit || 100);
     
     return await query;
   }
@@ -1103,6 +1090,32 @@ export class DatabaseStorage implements IStorage {
 
   async getActiveStreams(): Promise<(LiveStream & { creator: User })[]> {
     return await db.select({
+      ...getTableColumns(liveStreams),
+      creator: {
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        password: users.password,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        role: users.role,
+        status: users.status,
+        authProvider: users.authProvider,
+        onlineStatus: users.onlineStatus,
+        lastSeenAt: users.lastSeenAt,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      },
+    })
+    .from(liveStreams)
+    .innerJoin(users, eq(liveStreams.creatorId, users.id))
+    .where(eq(liveStreams.status, 'live'))
+    .orderBy(desc(liveStreams.startedAt));
+  }
+
+  async getPublicLiveStreams(options?: { limit?: number; offset?: number }): Promise<(LiveStream & { creator: User })[]> {
+    let query = db.select({
       id: liveStreams.id,
       creatorId: liveStreams.creatorId,
       title: liveStreams.title,
@@ -1126,56 +1139,20 @@ export class DatabaseStorage implements IStorage {
       endedAt: liveStreams.endedAt,
       createdAt: liveStreams.createdAt,
       updatedAt: liveStreams.updatedAt,
-      creator: {
-        id: users.id,
-        username: users.username,
-        email: users.email,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        role: users.role,
-        createdAt: users.createdAt,
-        updatedAt: users.updatedAt,
-      },
-    })
-    .from(liveStreams)
-    .innerJoin(users, eq(liveStreams.creatorId, users.id))
-    .where(eq(liveStreams.status, 'live'))
-    .orderBy(desc(liveStreams.startedAt));
-  }
-
-  async getPublicLiveStreams(options?: { limit?: number; offset?: number }): Promise<(LiveStream & { creator: User })[]> {
-    let query = db.select({
-      id: liveStreams.id,
-      creatorId: liveStreams.creatorId,
-      title: liveStreams.title,
-      description: liveStreams.description,
-      type: liveStreams.type,
-      status: liveStreams.status,
-      priceCents: liveStreams.priceCents,
-
-      thumbnailUrl: liveStreams.thumbnailUrl,
-      getstreamCallId: liveStreams.getstreamCallId,
-
-      recordingUrl: liveStreams.recordingUrl,
-      playbackUrl: liveStreams.playbackUrl,
-      hlsPlaylistUrl: liveStreams.hlsPlaylistUrl,
-      rtmpIngestUrl: liveStreams.rtmpIngestUrl,
-      viewersCount: liveStreams.viewersCount,
-      maxViewers: liveStreams.maxViewers,
-      totalTipsCents: liveStreams.totalTipsCents,
-      scheduledFor: liveStreams.scheduledFor,
-      startedAt: liveStreams.startedAt,
-      endedAt: liveStreams.endedAt,
-      createdAt: liveStreams.createdAt,
-      updatedAt: liveStreams.updatedAt,
       // SECURITY: streamKey and streamUrl are secrets - never expose in public APIs
       creator: {
         id: users.id,
         username: users.username,
         email: users.email,
+        password: users.password,
         firstName: users.firstName,
         lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
         role: users.role,
+        status: users.status,
+        authProvider: users.authProvider,
+        onlineStatus: users.onlineStatus,
+        lastSeenAt: users.lastSeenAt,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
       },
@@ -1271,14 +1248,14 @@ export class DatabaseStorage implements IStorage {
   async updateLovenseIntegrationSettings(creatorId: string, settings: UpdateLovenseIntegrationSettings): Promise<LovenseIntegrationSettings> {
     const updatedSettings = { 
       ...settings, 
-      updatedAt: new Date().toISOString() 
+      updatedAt: new Date() 
     };
     
     const result = await db.insert(lovenseIntegrationSettings)
       .values({
         creatorId,
         ...settings,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date()
       })
       .onConflictDoUpdate({
         target: lovenseIntegrationSettings.creatorId,
@@ -1318,7 +1295,7 @@ export class DatabaseStorage implements IStorage {
         ...device,
         creatorId,
         status: 'disconnected',
-        lastConnected: new Date().toISOString()
+        lastConnected: new Date()
       })
       .returning();
     return result[0];
@@ -1591,7 +1568,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Check usage limits
-    if (promoCode.maxUsageCount && promoCode.currentUsageCount >= promoCode.maxUsageCount) {
+    if (promoCode.maxUsageCount && (promoCode.currentUsageCount ?? 0) >= promoCode.maxUsageCount) {
       await db.update(promoCodes)
         .set({ status: 'exhausted', updatedAt: new Date() })
         .where(eq(promoCodes.id, promoCode.id));
@@ -1613,7 +1590,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Check if code applies to this plan
-    if (promoCode.applicablePlans.length > 0 && !promoCode.applicablePlans.includes(planId)) {
+    if ((promoCode.applicablePlans?.length ?? 0) > 0 && !(promoCode.applicablePlans ?? []).includes(planId)) {
       return { valid: false, error: 'This promo code is not valid for the selected plan' };
     }
 
@@ -1624,7 +1601,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Check minimum purchase requirement
-    if (plan.priceCents < promoCode.minPurchaseCents) {
+    if (promoCode.minPurchaseCents && plan.priceCents < promoCode.minPurchaseCents) {
       return { valid: false, error: `Minimum purchase of $${promoCode.minPurchaseCents / 100} required` };
     }
 
@@ -1855,7 +1832,6 @@ export class DatabaseStorage implements IStorage {
   async createQuantumEncryption(encryption: any): Promise<any> { return { id: `quantum_${Date.now()}`, ...encryption }; }
   async createVoiceSynthesis(synthesis: any): Promise<any> { return { id: `voice_${Date.now()}`, ...synthesis }; }
   async createVoiceCharacter(character: any): Promise<any> { return { id: `character_${Date.now()}`, ...character }; }
-  async createAlertRule(rule: any): Promise<any> { return { id: `alert_${Date.now()}`, ...rule }; }
   async createLiveDashboard(dashboard: any): Promise<any> { return { id: `dashboard_${Date.now()}`, ...dashboard }; }
   async getLiveDashboard(userId: string): Promise<any> { return null; }
   async getCurrentUserMetrics(userId: string): Promise<any> {
@@ -1893,15 +1869,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserMessages(userId: string): Promise<Message[]> {
-    const messages = await db.select().from(messages)
+    const results = await db.select().from(messages)
       .where(or(eq(messages.senderId, userId), eq(messages.receiverId, userId)))
       .orderBy(desc(messages.createdAt));
-    return messages;
+    return results;
   }
 
   async getUserTransactions(userId: string): Promise<Transaction[]> {
     return await db.select().from(transactions)
-      .where(or(eq(transactions.creatorId, userId), eq(transactions.fanId, userId)))
+      .where(or(eq(transactions.fromUserId, userId), eq(transactions.toUserId, userId)))
       .orderBy(desc(transactions.createdAt));
   }
 
@@ -1912,10 +1888,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async markUserForDeletion(userId: string): Promise<void> {
+    // Mark user for deletion by updating status
     await db.update(users)
       .set({ 
-        markedForDeletion: true,
-        deletionRequestedAt: new Date(),
+        status: 'suspended',
         updatedAt: new Date()
       })
       .where(eq(users.id, userId));
@@ -1950,12 +1926,20 @@ export class DatabaseStorage implements IStorage {
     updatedAt: Date;
   }): Promise<void> {
     // Store in user profile or create separate privacy preferences table
-    await db.update(profiles)
-      .set({
-        privacyPreferences: JSON.stringify(preferences),
-        updatedAt: new Date()
-      })
-      .where(eq(profiles.userId, preferences.userId));
+    // Store privacy preferences in audit log since the field doesn't exist in profiles
+    await this.createAuditLog({
+      actorId: preferences.userId,
+      action: 'PRIVACY_PREFERENCES_UPDATED',
+      targetType: 'user',
+      targetId: preferences.userId,
+      diffJson: {
+        marketing: preferences.marketing,
+        analytics: preferences.analytics,
+        functional: preferences.functional,
+        performance: preferences.performance,
+        updatedAt: preferences.updatedAt
+      }
+    });
   }
 
   async getUserPrivacyPreferences(userId: string): Promise<{
@@ -1967,8 +1951,17 @@ export class DatabaseStorage implements IStorage {
     const [profile] = await db.select().from(profiles)
       .where(eq(profiles.userId, userId));
     
-    if (profile?.privacyPreferences) {
-      const prefs = JSON.parse(profile.privacyPreferences as string);
+    // Get privacy preferences from audit log since field doesn't exist in profiles
+    const privacyLogs = await db.select().from(auditLogs)
+      .where(and(
+        eq(auditLogs.actorId, userId),
+        eq(auditLogs.action, 'PRIVACY_PREFERENCES_UPDATED')
+      ))
+      .orderBy(desc(auditLogs.createdAt))
+      .limit(1);
+    
+    if (privacyLogs.length > 0) {
+      const prefs = privacyLogs[0].diffJson as any;
       return {
         marketing: prefs.marketing || false,
         analytics: prefs.analytics || false,
@@ -1990,7 +1983,7 @@ export class DatabaseStorage implements IStorage {
   }): Promise<void> {
     // Create audit log for consent
     await this.createAuditLog({
-      actorId: consent.userId,
+      actorId: consent.userId ?? null,
       action: 'CONSENT_RECORDED',
       targetType: 'consent',
       targetId: consent.sessionId,
@@ -2264,10 +2257,18 @@ export class DatabaseStorage implements IStorage {
       creator: {
         id: users.id,
         username: users.username,
+        email: users.email,
+        password: users.password,
         firstName: users.firstName,
         lastName: users.lastName,
         profileImageUrl: users.profileImageUrl,
         role: users.role,
+        status: users.status,
+        authProvider: users.authProvider,
+        onlineStatus: users.onlineStatus,
+        lastSeenAt: users.lastSeenAt,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
       },
     })
     .from(mediaAssets)
@@ -2289,7 +2290,7 @@ export class DatabaseStorage implements IStorage {
         watermarkedAt: null,
         shouldBlur: !isAgeVerified && (item.riskScore || 0) > 50 // Blur high-risk content for unverified users
       })),
-      nextCursor: hasMore ? items[items.length - 1].createdAt.toISOString() : undefined,
+      nextCursor: hasMore && items.length > 0 ? items[items.length - 1]?.createdAt?.toISOString() : undefined,
     };
   }
 }
