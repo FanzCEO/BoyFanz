@@ -6,7 +6,7 @@ import { isAuthenticated, requireAdmin } from './middleware/auth';
 import { ObjectStorageService } from './objectStorage';
 
 const objectStorageService = new ObjectStorageService();
-import { adultFriendlyPaymentService } from './services/adultFriendlyPaymentService';
+import { enhancedPaymentService } from './services/enhancedPaymentService';
 import { financialLedgerService } from './services/financialLedgerService';
 import { messageSecurityService } from './services/messageSecurityService';
 import { performanceOptimizationService } from './services/performanceOptimizationService';
@@ -16,6 +16,7 @@ import { identityVerificationService } from './services/identityVerificationServ
 import { geoBlockingService } from './services/geoBlockingService';
 import { comprehensiveAnalyticsService } from './services/comprehensiveAnalyticsService';
 import { requireAgeVerification, require2257Compliance, enforceGeoBlocking } from './middleware/auth';
+import Stripe from 'stripe';
 import { z } from 'zod';
 
 // International compliance helper functions
@@ -940,7 +941,7 @@ export function registerRoutes(app: Express) {
     try {
       const { validationURL, domainName } = req.body;
       
-      const session = await adultFriendlyPaymentService.validateApplePayMerchant(
+      const session = await enhancedPaymentService.validateApplePayMerchant(
         validationURL, 
         domainName
       );
@@ -966,7 +967,7 @@ export function registerRoutes(app: Express) {
       const amount = 10.00; // Fixed amount for demo
       const currency = 'USD';
       
-      const result = await adultFriendlyPaymentService.processApplePayPayment(
+      const result = await enhancedPaymentService.processApplePayPayment(
         paymentToken, 
         amount, 
         currency, 
@@ -994,7 +995,7 @@ export function registerRoutes(app: Express) {
       const amount = 10.00; // Fixed amount for demo
       const currency = 'USD';
       
-      const result = await adultFriendlyPaymentService.processGooglePayPayment(
+      const result = await enhancedPaymentService.processGooglePayPayment(
         paymentMethodData, 
         amount, 
         currency, 
@@ -1030,13 +1031,13 @@ export function registerRoutes(app: Express) {
       
       let customerId;
       const user = await storage.getUser(userId);
-      customerId = await adultFriendlyPaymentService.getOrCreateStripeCustomer(
+      customerId = await enhancedPaymentService.getOrCreateStripeCustomer(
         userId, 
         user?.email, 
         user?.username
       );
 
-      const result = await adultFriendlyPaymentService.createPaymentIntent({
+      const result = await enhancedPaymentService.createPaymentIntent({
         amount,
         currency,
         customerId,
@@ -1064,7 +1065,7 @@ export function registerRoutes(app: Express) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      const paymentMethods = await adultFriendlyPaymentService.getSavedPaymentMethods(userId);
+      const paymentMethods = await enhancedPaymentService.getSavedPaymentMethods(userId);
       res.json(paymentMethods);
     } catch (error) {
       console.error('Failed to get payment methods:', error);
@@ -1082,7 +1083,7 @@ export function registerRoutes(app: Express) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      await adultFriendlyPaymentService.deleteSavedPaymentMethod(id, userId);
+      await enhancedPaymentService.deleteSavedPaymentMethod(id, userId);
       res.json({ success: true });
     } catch (error) {
       console.error('Failed to delete payment method:', error);
@@ -2109,11 +2110,6 @@ import {
   setupAnalyticsDashboardRoutes, 
   setupAIAnalysisRoutes 
 } from './routes/advancedFeatures';
-import infrastructureDashboardRoutes from './routes/infrastructureDashboard.js';
-import securityDashboardRoutes from './routes/securityDashboard.js';
-import mobileApiRoutes from './routes/mobileApi.js';
-import monitoringDashboardRoutes from './routes/monitoringDashboard.js';
-import apiGatewayRoutes from './routes/apiGatewayRoutes.js';
 
 export function setupAdvancedRoutes(app: Express) {
   setupNFTRoutes(app);
@@ -2122,20 +2118,5 @@ export function setupAdvancedRoutes(app: Express) {
   setupAnalyticsDashboardRoutes(app);
   setupAIAnalysisRoutes(app);
   
-  // API Gateway & Service Mesh Dashboard (must be first for routing control)
-  app.use('/api/gateway', apiGatewayRoutes);
-  
-  // Infrastructure Management Dashboard
-  app.use('/api/infrastructure', infrastructureDashboardRoutes);
-  
-  // Advanced Security & Compliance Dashboard
-  app.use('/api/security', securityDashboardRoutes);
-  
-  // Mobile App Backend (ClubCentral)
-  app.use('/api/mobile', mobileApiRoutes);
-  
-  // Real-Time Monitoring & Analytics Dashboard
-  app.use('/api/monitoring', monitoringDashboardRoutes);
-  
-  console.log('🚀 Advanced features registered: NFT, AI Feeds, Analytics, Age Verification, API Gateway & Service Mesh, Infrastructure Management, Security & Compliance, Mobile Backend (ClubCentral), Real-Time Monitoring');
+  console.log('🚀 Advanced features registered: NFT, AI Feeds, Analytics, Age Verification');
 }

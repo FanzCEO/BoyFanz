@@ -1,4 +1,5 @@
 import { storage } from '../storage';
+import Stripe from 'stripe';
 
 // Enhanced Payment Service with Apple Pay, Google Pay, and crypto support
 class EnhancedPaymentService {
