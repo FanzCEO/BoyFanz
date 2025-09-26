@@ -5,6 +5,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Shield, Cookie, Settings, Check } from 'lucide-react';
+import { useCSRF } from '@/hooks/useCSRF';
 
 interface ConsentPreferences {
   necessary: boolean; // Always true, cannot be disabled
@@ -18,6 +19,7 @@ export function GDPRConsentBanner() {
   const [showBanner, setShowBanner] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { csrfToken, addCSRFHeaders, isLoading: csrfLoading } = useCSRF();
   
   const [preferences, setPreferences] = useState<ConsentPreferences>({
     necessary: true,
@@ -68,16 +70,17 @@ export function GDPRConsentBanner() {
     try {
       const sessionId = getSessionId();
       
-      // Get CSRF token
-      const csrfResponse = await fetch('/api/csrf-token');
-      const { csrfToken } = await csrfResponse.json();
+      // Check if CSRF token is available
+      if (!csrfToken) {
+        console.error('CSRF token not available. Please refresh the page.');
+        return;
+      }
       
       const response = await fetch('/api/consent', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken
-        },
+        headers: addCSRFHeaders({
+          'Content-Type': 'application/json'
+        }),
         credentials: 'include',
         body: JSON.stringify({
           sessionId,
@@ -92,8 +95,10 @@ export function GDPRConsentBanner() {
         
         // Apply preferences to page (e.g., load analytics scripts if consented)
         applyConsentPreferences(consentData);
+        console.log('Consent preferences saved successfully');
       } else {
-        console.error('Failed to save consent preferences');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Failed to save consent preferences:', errorData.error || response.statusText);
       }
     } catch (error) {
       console.error('Error saving consent:', error);
@@ -191,7 +196,7 @@ export function GDPRConsentBanner() {
                 onClick={rejectAll}
                 variant="outline"
                 size="sm"
-                disabled={isLoading}
+                disabled={isLoading || csrfLoading || !csrfToken}
                 className="text-xs lg:text-sm"
                 data-testid="button-reject-cookies"
               >
@@ -200,7 +205,7 @@ export function GDPRConsentBanner() {
               <Button
                 onClick={acceptAll}
                 size="sm"
-                disabled={isLoading}
+                disabled={isLoading || csrfLoading || !csrfToken}
                 className="bg-primary hover:bg-primary/90 text-xs lg:text-sm"
                 data-testid="button-accept-cookies"
               >
@@ -337,7 +342,7 @@ export function GDPRConsentBanner() {
             <div className="flex gap-3 pt-4">
               <Button
                 onClick={acceptSelected}
-                disabled={isLoading}
+                disabled={isLoading || csrfLoading || !csrfToken}
                 className="flex-1"
                 data-testid="button-save-preferences"
               >
@@ -345,7 +350,7 @@ export function GDPRConsentBanner() {
               </Button>
               <Button
                 onClick={acceptAll}
-                disabled={isLoading}
+                disabled={isLoading || csrfLoading || !csrfToken}
                 variant="outline"
                 data-testid="button-accept-all-detailed"
               >
