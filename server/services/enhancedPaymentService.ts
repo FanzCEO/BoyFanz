@@ -11,7 +11,7 @@ class EnhancedPaymentService {
     if (stripeSecretKey && stripeSecretKey !== 'test_key') {
       try {
         this.stripe = new Stripe(stripeSecretKey, {
-          apiVersion: '2023-10-16'
+          apiVersion: '2025-08-27.basil'
         });
         this.isStripeEnabled = true;
         console.log('✅ Enhanced Payment Service initialized with Stripe');
@@ -74,16 +74,19 @@ class EnhancedPaymentService {
   async processApplePayPayment(paymentToken: any, amount: number, currency: string, userId?: string): Promise<any> {
     try {
       this.ensureStripeEnabled();
-      // Create payment intent with Stripe
+      // For Apple Pay, create payment method first then use it
+      const paymentMethod = await this.stripe!.paymentMethods.create({
+        type: 'card',
+        card: {
+          token: paymentToken.token
+        }
+      });
+
+      // Create payment intent with the payment method
       const paymentIntent = await this.stripe!.paymentIntents.create({
         amount: amount,
         currency: currency.toLowerCase(),
-        payment_method_data: {
-          type: 'card',
-          card: {
-            token: paymentToken.paymentData
-          }
-        },
+        payment_method: paymentMethod.id,
         confirmation_method: 'manual',
         confirm: true,
         metadata: {

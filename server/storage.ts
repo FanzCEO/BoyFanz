@@ -226,6 +226,10 @@ export interface IStorage {
   createTransaction(transaction: Omit<Transaction, 'id' | 'createdAt'>): Promise<Transaction>;
   getCreatorEarnings(creatorId: string, startDate?: Date, endDate?: Date): Promise<Transaction[]>;
   getFanPurchases(fanId: string, limit?: number): Promise<Transaction[]>;
+  
+  // Stripe customer operations
+  getStripeCustomerId(userId: string): Promise<string | undefined>;
+  storeStripeCustomerId(userId: string, stripeCustomerId: string): Promise<void>;
 
   // Live Streams
   createLiveStream(stream: Omit<LiveStream, 'id' | 'createdAt'>): Promise<LiveStream>;
@@ -1040,6 +1044,29 @@ export class DatabaseStorage implements IStorage {
 
   async getFanPurchases(fanId: string, limit?: number): Promise<Transaction[]> {
     return [];
+  }
+
+  // Stripe customer operations
+  async getStripeCustomerId(userId: string): Promise<string | undefined> {
+    try {
+      const [user] = await db.select({ stripeCustomerId: profiles.stripeCustomerId }).from(profiles).where(eq(profiles.userId, userId));
+      return user?.stripeCustomerId || undefined;
+    } catch (error) {
+      console.error('Failed to get Stripe customer ID:', error);
+      return undefined;
+    }
+  }
+
+  async storeStripeCustomerId(userId: string, stripeCustomerId: string): Promise<void> {
+    try {
+      await db
+        .update(profiles)
+        .set({ stripeCustomerId, updatedAt: new Date() })
+        .where(eq(profiles.userId, userId));
+    } catch (error) {
+      console.error('Failed to store Stripe customer ID:', error);
+      throw error;
+    }
   }
 
   async createLiveStream(stream: Omit<LiveStream, 'id' | 'createdAt'>): Promise<LiveStream> {

@@ -61,6 +61,7 @@ export const profiles = pgTable("profiles", {
   profileTheme: varchar("profile_theme").default("default"),
   engagementLevel: integer("engagement_level").default(0),
   totalPoints: integer("total_points").default(0),
+  stripeCustomerId: varchar("stripe_customer_id"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
