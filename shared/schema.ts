@@ -1607,6 +1607,224 @@ export type InsertRepeatInfringer = z.infer<typeof insertRepeatInfringerSchema>;
 export type ContentHash = typeof contentHashes.$inferSelect;
 export type InsertContentHash = z.infer<typeof insertContentHashSchema>;
 
+// ENHANCED EARNINGS SYSTEM TABLES
+
+// Performance Tiers System
+export const performanceTierEnum = pgEnum("performance_tier", ["bronze", "silver", "gold", "platinum", "diamond"]);
+export const bonusTypeEnum = pgEnum("bonus_type", ["milestone", "quality", "referral", "loyalty", "volume", "consistency"]);
+
+export const performanceTiers = pgTable("performance_tiers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  tier: performanceTierEnum("tier").default("bronze").notNull(),
+  monthlyEarnings: decimal("monthly_earnings", { precision: 10, scale: 2 }).default("0"),
+  totalVolume: decimal("total_volume", { precision: 12, scale: 2 }).default("0"),
+  transactionCount: integer("transaction_count").default(0),
+  consistencyScore: integer("consistency_score").default(0), // 0-100
+  qualityScore: integer("quality_score").default(0), // 0-100
+  referralCount: integer("referral_count").default(0),
+  feeReduction: decimal("fee_reduction", { precision: 5, scale: 4 }).default("0"), // As decimal (0.025 = 2.5%)
+  bonusEligible: boolean("bonus_eligible").default(true),
+  nextTierEarnings: decimal("next_tier_earnings", { precision: 10, scale: 2 }),
+  tierAchievedAt: timestamp("tier_achieved_at").defaultNow(),
+  periodStart: timestamp("period_start").defaultNow(),
+  periodEnd: timestamp("period_end"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_performance_tiers_user_period").on(table.userId, table.periodStart),
+  index("idx_performance_tiers_tier").on(table.tier),
+]);
+
+// Enhanced Transaction Records with Volume Tracking
+export const enhancedTransactionTypeEnum = pgEnum("enhanced_transaction_type", [
+  "subscription", "ppv", "tip", "live_token", "shop_sale", "nft_sale", "collaboration", "bonus", "referral_commission"
+]);
+
+export const enhancedTransactions = pgTable("enhanced_transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: enhancedTransactionTypeEnum("type").notNull(),
+  grossAmount: decimal("gross_amount", { precision: 10, scale: 2 }).notNull(),
+  platformFee: decimal("platform_fee", { precision: 10, scale: 2 }).default("0"),
+  processorFee: decimal("processor_fee", { precision: 10, scale: 2 }).notNull(),
+  feeReduction: decimal("fee_reduction", { precision: 10, scale: 2 }).default("0"),
+  netEarnings: decimal("net_earnings", { precision: 10, scale: 2 }).notNull(),
+  bonusAmount: decimal("bonus_amount", { precision: 10, scale: 2 }).default("0"),
+  taxWithholding: decimal("tax_withholding", { precision: 10, scale: 2 }).default("0"),
+  sourceId: varchar("source_id"), // fan user ID or source identifier
+  contentId: varchar("content_id"), // media ID for content-related transactions
+  collaborationId: varchar("collaboration_id"), // for collaboration splits
+  performanceTier: performanceTierEnum("performance_tier"),
+  volumeDiscount: decimal("volume_discount", { precision: 5, scale: 4 }).default("0"),
+  qualityMultiplier: decimal("quality_multiplier", { precision: 3, scale: 2 }).default("1.0"),
+  metadata: jsonb("metadata").default({}),
+  processedAt: timestamp("processed_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_enhanced_transactions_user_date").on(table.userId, table.createdAt),
+  index("idx_enhanced_transactions_type").on(table.type),
+  index("idx_enhanced_transactions_tier").on(table.performanceTier),
+]);
+
+// Advanced Collaboration System
+export const collaborationTypeEnum = pgEnum("collaboration_type", ["featured", "guest", "split", "crosspromo", "series", "custom"]);
+export const collaborationStatusEnum = pgEnum("collaboration_status", ["active", "expired", "pending", "cancelled"]);
+
+export const collaborations = pgTable("collaborations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  primaryCreatorId: varchar("primary_creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: collaborationTypeEnum("type").notNull(),
+  status: collaborationStatusEnum("status").default("active").notNull(),
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
+  totalEarnings: decimal("total_earnings", { precision: 12, scale: 2 }).default("0"),
+  crossPromoBonus: decimal("cross_promo_bonus", { precision: 5, scale: 4 }).default("0.1"), // 10% bonus for cross-promos
+  automaticSplit: boolean("automatic_split").default(true),
+  customRules: jsonb("custom_rules").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const collaborationParticipants = pgTable("collaboration_participants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  collaborationId: varchar("collaboration_id").notNull().references(() => collaborations.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  role: varchar("role").default("participant"), // "lead", "featured", "guest", "participant"
+  sharePercentage: decimal("share_percentage", { precision: 5, scale: 2 }).notNull(), // 25.50 = 25.5%
+  minimumPayout: decimal("minimum_payout", { precision: 10, scale: 2 }).default("0"),
+  bonusEligible: boolean("bonus_eligible").default(true),
+  totalEarned: decimal("total_earned", { precision: 10, scale: 2 }).default("0"),
+  joinedAt: timestamp("joined_at").defaultNow(),
+}, (table) => [
+  unique("collaboration_user_unique").on(table.collaborationId, table.userId),
+]);
+
+// Performance Bonuses and Milestones
+export const milestoneTypeEnum = pgEnum("milestone_type", ["earnings", "followers", "content", "engagement", "consistency", "referrals"]);
+export const bonusStatusEnum = pgEnum("bonus_status", ["pending", "awarded", "claimed", "expired"]);
+
+export const performanceMilestones = pgTable("performance_milestones", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  type: milestoneTypeEnum("type").notNull(),
+  targetValue: decimal("target_value", { precision: 15, scale: 2 }).notNull(),
+  bonusAmount: decimal("bonus_amount", { precision: 10, scale: 2 }).notNull(),
+  bonusPercentage: decimal("bonus_percentage", { precision: 5, scale: 4 }),
+  tierRequirement: performanceTierEnum("tier_requirement"),
+  isRepeatable: boolean("is_repeatable").default(false),
+  timeframe: varchar("timeframe"), // "daily", "weekly", "monthly", "yearly", "all_time"
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userMilestones = pgTable("user_milestones", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  milestoneId: varchar("milestone_id").notNull().references(() => performanceMilestones.id, { onDelete: "cascade" }),
+  currentValue: decimal("current_value", { precision: 15, scale: 2 }).default("0"),
+  targetValue: decimal("target_value", { precision: 15, scale: 2 }).notNull(),
+  progress: decimal("progress", { precision: 5, scale: 2 }).default("0"), // 0-100%
+  status: bonusStatusEnum("status").default("pending").notNull(),
+  bonusAmount: decimal("bonus_amount", { precision: 10, scale: 2 }),
+  achievedAt: timestamp("achieved_at"),
+  claimedAt: timestamp("claimed_at"),
+  expiresAt: timestamp("expires_at"),
+  periodStart: timestamp("period_start").defaultNow(),
+  periodEnd: timestamp("period_end"),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_user_milestones_user_status").on(table.userId, table.status),
+  index("idx_user_milestones_achievement").on(table.achievedAt),
+]);
+
+// Advanced Analytics and Forecasting
+export const earningsAnalytics = pgTable("earnings_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  period: varchar("period").notNull(), // "daily", "weekly", "monthly", "quarterly", "yearly"
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  grossRevenue: decimal("gross_revenue", { precision: 12, scale: 2 }).default("0"),
+  netEarnings: decimal("net_earnings", { precision: 12, scale: 2 }).default("0"),
+  platformFees: decimal("platform_fees", { precision: 10, scale: 2 }).default("0"),
+  processorFees: decimal("processor_fees", { precision: 10, scale: 2 }).default("0"),
+  bonusEarnings: decimal("bonus_earnings", { precision: 10, scale: 2 }).default("0"),
+  taxWithholdings: decimal("tax_withholdings", { precision: 10, scale: 2 }).default("0"),
+  transactionCount: integer("transaction_count").default(0),
+  uniqueCustomers: integer("unique_customers").default(0),
+  averageTransactionValue: decimal("average_transaction_value", { precision: 10, scale: 2 }).default("0"),
+  topContentEarnings: jsonb("top_content_earnings").default([]),
+  performanceTier: performanceTierEnum("performance_tier"),
+  growthRate: decimal("growth_rate", { precision: 7, scale: 4 }), // Growth vs previous period
+  projectedNextPeriod: decimal("projected_next_period", { precision: 12, scale: 2 }),
+  trendDirection: varchar("trend_direction"), // "up", "down", "stable"
+  seasonalityFactor: decimal("seasonality_factor", { precision: 5, scale: 4 }).default("1.0"),
+  metadata: jsonb("metadata").default({}),
+  calculatedAt: timestamp("calculated_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_earnings_analytics_user_period").on(table.userId, table.period, table.periodStart),
+  unique("earnings_analytics_user_period_unique").on(table.userId, table.period, table.periodStart),
+]);
+
+// Tax and Compliance Tracking
+export const taxJurisdictionEnum = pgEnum("tax_jurisdiction", ["us_federal", "us_state", "uk", "eu", "canada", "australia", "other"]);
+export const taxDocumentTypeEnum = pgEnum("tax_document_type", ["1099_nec", "1099_k", "w9", "w8ben", "annual_summary", "quarterly_report"]);
+
+export const taxRecords = pgTable("tax_records", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  taxYear: integer("tax_year").notNull(),
+  jurisdiction: taxJurisdictionEnum("jurisdiction").notNull(),
+  grossIncome: decimal("gross_income", { precision: 12, scale: 2 }).default("0"),
+  withheldAmount: decimal("withheld_amount", { precision: 10, scale: 2 }).default("0"),
+  deductibleExpenses: decimal("deductible_expenses", { precision: 10, scale: 2 }).default("0"),
+  netTaxableIncome: decimal("net_taxable_income", { precision: 12, scale: 2 }).default("0"),
+  estimatedTaxRate: decimal("estimated_tax_rate", { precision: 5, scale: 4 }).default("0"),
+  documentUrls: text("document_urls").array().default([]),
+  isFinalized: boolean("is_finalized").default(false),
+  submittedToAuthorities: boolean("submitted_to_authorities").default(false),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_tax_records_user_year").on(table.userId, table.taxYear),
+  unique("tax_records_user_year_jurisdiction_unique").on(table.userId, table.taxYear, table.jurisdiction),
+]);
+
+// Volume-Based Fee Schedules
+export const volumeTiers = pgTable("volume_tiers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tierName: varchar("tier_name").notNull(),
+  minimumVolume: decimal("minimum_volume", { precision: 12, scale: 2 }).notNull(),
+  maximumVolume: decimal("maximum_volume", { precision: 12, scale: 2 }),
+  feeReduction: decimal("fee_reduction", { precision: 5, scale: 4 }).notNull(), // 0.005 = 0.5% reduction
+  bonusPercentage: decimal("bonus_percentage", { precision: 5, scale: 4 }).default("0"),
+  isActive: boolean("is_active").default(true),
+  effectiveDate: timestamp("effective_date").defaultNow(),
+  expirationDate: timestamp("expiration_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_volume_tiers_range").on(table.minimumVolume, table.maximumVolume),
+]);
+
+// Insert schemas for new earnings tables
+export const insertPerformanceTierSchema = createInsertSchema(performanceTiers).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertEnhancedTransactionSchema = createInsertSchema(enhancedTransactions).omit({ id: true, createdAt: true });
+export const insertCollaborationSchema = createInsertSchema(collaborations).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCollaborationParticipantSchema = createInsertSchema(collaborationParticipants).omit({ id: true, joinedAt: true });
+export const insertPerformanceMilestoneSchema = createInsertSchema(performanceMilestones).omit({ id: true, createdAt: true });
+export const insertUserMilestoneSchema = createInsertSchema(userMilestones).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertEarningsAnalyticsSchema = createInsertSchema(earningsAnalytics).omit({ id: true, calculatedAt: true, createdAt: true });
+export const insertTaxRecordSchema = createInsertSchema(taxRecords).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertVolumeTierSchema = createInsertSchema(volumeTiers).omit({ id: true, createdAt: true });
+
 // New feature types
 export type NftAsset = typeof nftAssets.$inferSelect;
 export type InsertNftAsset = z.infer<typeof insertNftAssetSchema>;
@@ -1622,3 +1840,23 @@ export type DashboardChart = typeof dashboardCharts.$inferSelect;
 export type InsertDashboardChart = z.infer<typeof insertDashboardChartSchema>;
 export type AgeVerification = typeof ageVerifications.$inferSelect;
 export type InsertAgeVerification = z.infer<typeof insertAgeVerificationSchema>;
+
+// Enhanced Earnings System Types
+export type PerformanceTier = typeof performanceTiers.$inferSelect;
+export type InsertPerformanceTier = z.infer<typeof insertPerformanceTierSchema>;
+export type EnhancedTransaction = typeof enhancedTransactions.$inferSelect;
+export type InsertEnhancedTransaction = z.infer<typeof insertEnhancedTransactionSchema>;
+export type Collaboration = typeof collaborations.$inferSelect;
+export type InsertCollaboration = z.infer<typeof insertCollaborationSchema>;
+export type CollaborationParticipant = typeof collaborationParticipants.$inferSelect;
+export type InsertCollaborationParticipant = z.infer<typeof insertCollaborationParticipantSchema>;
+export type PerformanceMilestone = typeof performanceMilestones.$inferSelect;
+export type InsertPerformanceMilestone = z.infer<typeof insertPerformanceMilestoneSchema>;
+export type UserMilestone = typeof userMilestones.$inferSelect;
+export type InsertUserMilestone = z.infer<typeof insertUserMilestoneSchema>;
+export type EarningsAnalytics = typeof earningsAnalytics.$inferSelect;
+export type InsertEarningsAnalytics = z.infer<typeof insertEarningsAnalyticsSchema>;
+export type TaxRecord = typeof taxRecords.$inferSelect;
+export type InsertTaxRecord = z.infer<typeof insertTaxRecordSchema>;
+export type VolumeTier = typeof volumeTiers.$inferSelect;
+export type InsertVolumeTier = z.infer<typeof insertVolumeTierSchema>;

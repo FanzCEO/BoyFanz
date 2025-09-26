@@ -425,6 +425,62 @@ export interface IStorage {
   createMeetupTemplate(template: any): Promise<any>;
   createAchievementCelebration(celebration: any): Promise<void>;
   scheduleSharePublication(share: any): Promise<void>;
+
+  // Enhanced Earnings System Operations
+  
+  // Performance Tiers
+  createPerformanceTier(tier: any): Promise<any>;
+  getPerformanceTier(userId: string): Promise<any | undefined>;
+  updatePerformanceTier(userId: string, updates: any): Promise<any>;
+  getCurrentPerformanceTiers(): Promise<any[]>;
+  calculatePerformanceTier(userId: string, monthlyEarnings: number, transactionCount: number): Promise<string>;
+  
+  // Enhanced Transactions
+  createEnhancedTransaction(transaction: any): Promise<any>;
+  getEnhancedTransaction(transactionId: string): Promise<any | undefined>;
+  getUserEnhancedTransactions(userId: string, options?: any): Promise<any[]>;
+  getVolumeBasedFeeReduction(userId: string, amount: number): Promise<number>;
+  
+  // Collaborations
+  createCollaboration(collaboration: any): Promise<any>;
+  getCollaboration(collaborationId: string): Promise<any | undefined>;
+  addCollaborationParticipant(participant: any): Promise<any>;
+  getUserCollaborations(userId: string): Promise<any[]>;
+  updateCollaborationEarnings(collaborationId: string, earnings: number): Promise<void>;
+  
+  // Performance Milestones & Bonuses
+  createPerformanceMilestone(milestone: any): Promise<any>;
+  getActivePerformanceMilestones(): Promise<any[]>;
+  createUserMilestone(userMilestone: any): Promise<any>;
+  getUserMilestones(userId: string, status?: string): Promise<any[]>;
+  updateMilestoneProgress(userId: string, milestoneId: string, progress: number): Promise<void>;
+  awardMilestoneBonus(userId: string, milestoneId: string, bonusAmount: number): Promise<void>;
+  
+  // Analytics & Forecasting
+  createEarningsAnalytics(analytics: any): Promise<any>;
+  getEarningsAnalytics(userId: string, period: string, startDate: Date, endDate: Date): Promise<any[]>;
+  calculateEarningsProjection(userId: string, months: number): Promise<any>;
+  getPerformanceComparison(userId: string, compareUserId: string): Promise<any>;
+  getTrendAnalysis(userId: string, period: string): Promise<any>;
+  
+  // Tax & Compliance
+  createTaxRecord(taxRecord: any): Promise<any>;
+  getTaxRecords(userId: string, taxYear: number): Promise<any[]>;
+  updateTaxWithholding(userId: string, jurisdiction: string, rate: number): Promise<void>;
+  generateTaxDocument(userId: string, taxYear: number, documentType: string): Promise<string>;
+  
+  // Volume Tiers
+  createVolumeTier(tier: any): Promise<any>;
+  getActiveVolumeTiers(): Promise<any[]>;
+  calculateVolumeDiscount(volume: number): Promise<number>;
+  
+  // Financial operations
+  getTransaction(transactionId: string): Promise<any>;
+  updateTransaction(transactionId: string, updates: any): Promise<void>;
+  getUserTransactions(userId: string, options: any): Promise<any[]>;
+  getUserTransactionCount(userId: string, options: any): Promise<number>;
+  getTransactionsByDateRange(startDate: Date, endDate: Date, providerId?: string): Promise<any[]>;
+  getTransactionsByFilters(filters: any): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2292,6 +2348,319 @@ export class DatabaseStorage implements IStorage {
       })),
       nextCursor: hasMore && items.length > 0 ? items[items.length - 1]?.createdAt?.toISOString() : undefined,
     };
+  }
+
+  // Enhanced Earnings System Mock Implementations
+  
+  // Performance Tiers
+  async createPerformanceTier(tier: any): Promise<any> {
+    const mockTier = { id: crypto.randomUUID(), ...tier, createdAt: new Date() };
+    console.log('🏆 Created performance tier:', mockTier.tier, 'for user:', mockTier.userId);
+    return mockTier;
+  }
+
+  async getPerformanceTier(userId: string): Promise<any | undefined> {
+    // Mock implementation - would query database
+    return {
+      id: crypto.randomUUID(),
+      userId,
+      tier: 'silver',
+      monthlyEarnings: 5000,
+      totalVolume: 25000,
+      transactionCount: 150,
+      consistencyScore: 85,
+      qualityScore: 90,
+      referralCount: 5,
+      feeReduction: 0.005,
+      bonusEligible: true,
+      nextTierEarnings: 10000,
+      tierAchievedAt: new Date(),
+      periodStart: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  async updatePerformanceTier(userId: string, updates: any): Promise<any> {
+    console.log('🏆 Updated performance tier for user:', userId, updates);
+    return { userId, ...updates, updatedAt: new Date() };
+  }
+
+  async getCurrentPerformanceTiers(): Promise<any[]> {
+    return []; // Mock implementation
+  }
+
+  async calculatePerformanceTier(userId: string, monthlyEarnings: number, transactionCount: number): Promise<string> {
+    if (monthlyEarnings >= 50000) return 'diamond';
+    if (monthlyEarnings >= 25000) return 'platinum';
+    if (monthlyEarnings >= 10000) return 'gold';
+    if (monthlyEarnings >= 2500) return 'silver';
+    return 'bronze';
+  }
+
+  // Enhanced Transactions
+  async createEnhancedTransaction(transaction: any): Promise<any> {
+    const mockTransaction = {
+      id: crypto.randomUUID(),
+      ...transaction,
+      createdAt: new Date()
+    };
+    console.log('💰 Created enhanced transaction:', mockTransaction.id, mockTransaction.type, mockTransaction.grossAmount);
+    return mockTransaction;
+  }
+
+  async getEnhancedTransaction(transactionId: string): Promise<any | undefined> {
+    // Mock implementation
+    return {
+      id: transactionId,
+      userId: 'mock-user',
+      type: 'subscription',
+      grossAmount: 1000,
+      platformFee: 0,
+      processorFee: 29,
+      feeReduction: 5,
+      netEarnings: 976,
+      bonusAmount: 0,
+      performanceTier: 'silver',
+      createdAt: new Date()
+    };
+  }
+
+  async getUserEnhancedTransactions(userId: string, options: any = {}): Promise<any[]> {
+    // Mock implementation - return empty array
+    return [];
+  }
+
+  async getVolumeBasedFeeReduction(userId: string, amount: number): Promise<number> {
+    // Mock volume-based reduction calculation
+    if (amount > 100000) return 0.01; // 1% reduction for high volume
+    if (amount > 50000) return 0.005; // 0.5% reduction
+    if (amount > 10000) return 0.002; // 0.2% reduction
+    return 0;
+  }
+
+  // Collaborations
+  async createCollaboration(collaboration: any): Promise<any> {
+    const mockCollaboration = {
+      id: crypto.randomUUID(),
+      ...collaboration,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    console.log('🤝 Created collaboration:', mockCollaboration.name, mockCollaboration.type);
+    return mockCollaboration;
+  }
+
+  async getCollaboration(collaborationId: string): Promise<any | undefined> {
+    return {
+      id: collaborationId,
+      name: 'Mock Collaboration',
+      type: 'featured',
+      status: 'active',
+      primaryCreatorId: 'mock-creator',
+      totalEarnings: 0,
+      crossPromoBonus: 0.1,
+      automaticSplit: true,
+      createdAt: new Date()
+    };
+  }
+
+  async addCollaborationParticipant(participant: any): Promise<any> {
+    const mockParticipant = {
+      id: crypto.randomUUID(),
+      ...participant,
+      joinedAt: new Date()
+    };
+    console.log('👥 Added collaboration participant:', mockParticipant.userId, mockParticipant.sharePercentage);
+    return mockParticipant;
+  }
+
+  async getUserCollaborations(userId: string): Promise<any[]> {
+    return []; // Mock implementation
+  }
+
+  async updateCollaborationEarnings(collaborationId: string, earnings: number): Promise<void> {
+    console.log('💰 Updated collaboration earnings:', collaborationId, earnings);
+  }
+
+  // Performance Milestones & Bonuses
+  async createPerformanceMilestone(milestone: any): Promise<any> {
+    const mockMilestone = {
+      id: crypto.randomUUID(),
+      ...milestone,
+      createdAt: new Date()
+    };
+    console.log('🎯 Created performance milestone:', mockMilestone.name, mockMilestone.type);
+    return mockMilestone;
+  }
+
+  async getActivePerformanceMilestones(): Promise<any[]> {
+    return [
+      {
+        id: 'milestone-1',
+        name: 'First $1000',
+        type: 'earnings',
+        targetValue: 1000,
+        bonusAmount: 100,
+        tierRequirement: 'bronze',
+        isRepeatable: false,
+        timeframe: 'all_time',
+        isActive: true
+      }
+    ];
+  }
+
+  async createUserMilestone(userMilestone: any): Promise<any> {
+    const mockUserMilestone = {
+      id: crypto.randomUUID(),
+      ...userMilestone,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    console.log('🎯 Created user milestone:', mockUserMilestone.userId, mockUserMilestone.milestoneId);
+    return mockUserMilestone;
+  }
+
+  async getUserMilestones(userId: string, status?: string): Promise<any[]> {
+    return []; // Mock implementation
+  }
+
+  async updateMilestoneProgress(userId: string, milestoneId: string, progress: number): Promise<void> {
+    console.log('📈 Updated milestone progress:', userId, milestoneId, progress);
+  }
+
+  async awardMilestoneBonus(userId: string, milestoneId: string, bonusAmount: number): Promise<void> {
+    console.log('🎉 Awarded milestone bonus:', userId, milestoneId, bonusAmount);
+  }
+
+  // Analytics & Forecasting
+  async createEarningsAnalytics(analytics: any): Promise<any> {
+    const mockAnalytics = {
+      id: crypto.randomUUID(),
+      ...analytics,
+      calculatedAt: new Date(),
+      createdAt: new Date()
+    };
+    console.log('📊 Created earnings analytics:', mockAnalytics.userId, mockAnalytics.period);
+    return mockAnalytics;
+  }
+
+  async getEarningsAnalytics(userId: string, period: string, startDate: Date, endDate: Date): Promise<any[]> {
+    return []; // Mock implementation
+  }
+
+  async calculateEarningsProjection(userId: string, months: number): Promise<any> {
+    return {
+      projectedEarnings: 5000 * months,
+      confidenceLevel: 0.85,
+      trendDirection: 'up',
+      seasonalityFactor: 1.0
+    };
+  }
+
+  async getPerformanceComparison(userId: string, compareUserId: string): Promise<any> {
+    return {
+      userEarnings: 5000,
+      compareUserEarnings: 4500,
+      percentageDifference: 11.1,
+      betterThan: true
+    };
+  }
+
+  async getTrendAnalysis(userId: string, period: string): Promise<any> {
+    return {
+      trendDirection: 'up',
+      growthRate: 0.15,
+      volatility: 0.25,
+      seasonalPattern: 'moderate'
+    };
+  }
+
+  // Tax & Compliance
+  async createTaxRecord(taxRecord: any): Promise<any> {
+    const mockTaxRecord = {
+      id: crypto.randomUUID(),
+      ...taxRecord,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    console.log('📋 Created tax record:', mockTaxRecord.userId, mockTaxRecord.taxYear);
+    return mockTaxRecord;
+  }
+
+  async getTaxRecords(userId: string, taxYear: number): Promise<any[]> {
+    return []; // Mock implementation
+  }
+
+  async updateTaxWithholding(userId: string, jurisdiction: string, rate: number): Promise<void> {
+    console.log('📋 Updated tax withholding:', userId, jurisdiction, rate);
+  }
+
+  async generateTaxDocument(userId: string, taxYear: number, documentType: string): Promise<string> {
+    return `tax-document-${userId}-${taxYear}-${documentType}.pdf`;
+  }
+
+  // Volume Tiers
+  async createVolumeTier(tier: any): Promise<any> {
+    const mockVolumeTier = {
+      id: crypto.randomUUID(),
+      ...tier,
+      createdAt: new Date()
+    };
+    console.log('📊 Created volume tier:', mockVolumeTier.tierName);
+    return mockVolumeTier;
+  }
+
+  async getActiveVolumeTiers(): Promise<any[]> {
+    return [
+      { id: '1', tierName: 'Standard', minimumVolume: 0, maximumVolume: 10000, feeReduction: 0, bonusPercentage: 0, isActive: true },
+      { id: '2', tierName: 'Pro', minimumVolume: 10000, maximumVolume: 50000, feeReduction: 0.002, bonusPercentage: 0.01, isActive: true },
+      { id: '3', tierName: 'Elite', minimumVolume: 50000, maximumVolume: null, feeReduction: 0.005, bonusPercentage: 0.02, isActive: true }
+    ];
+  }
+
+  async calculateVolumeDiscount(volume: number): Promise<number> {
+    const tiers = await this.getActiveVolumeTiers();
+    for (const tier of tiers.reverse()) {
+      if (volume >= tier.minimumVolume && (!tier.maximumVolume || volume <= tier.maximumVolume)) {
+        return tier.feeReduction;
+      }
+    }
+    return 0;
+  }
+
+  // Financial operations
+  async getTransaction(transactionId: string): Promise<any> {
+    return {
+      id: transactionId,
+      userId: 'mock-user',
+      type: 'payment',
+      amount: 1000,
+      currency: 'USD',
+      status: 'completed',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  async updateTransaction(transactionId: string, updates: any): Promise<void> {
+    console.log('💳 Updated transaction:', transactionId, updates);
+  }
+
+  async getUserTransactions(userId: string, options: any): Promise<any[]> {
+    return []; // Mock implementation
+  }
+
+  async getUserTransactionCount(userId: string, options: any): Promise<number> {
+    return 0;
+  }
+
+  async getTransactionsByDateRange(startDate: Date, endDate: Date, providerId?: string): Promise<any[]> {
+    return [];
+  }
+
+  async getTransactionsByFilters(filters: any): Promise<any[]> {
+    return [];
   }
 }
 
