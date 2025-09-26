@@ -118,6 +118,35 @@ import {
   type InsertDashboardChart,
   type AgeVerification,
   type InsertAgeVerification,
+  // Enhanced Earnings System Types
+  type PerformanceTier,
+  type InsertPerformanceTier,
+  type EnhancedTransaction,
+  type InsertEnhancedTransaction,
+  type Collaboration,
+  type InsertCollaboration,
+  type CollaborationParticipant,
+  type InsertCollaborationParticipant,
+  type PerformanceMilestone,
+  type InsertPerformanceMilestone,
+  type UserMilestone,
+  type InsertUserMilestone,
+  type EarningsAnalytics,
+  type InsertEarningsAnalytics,
+  type TaxRecord,
+  type InsertTaxRecord,
+  type VolumeTier,
+  type InsertVolumeTier,
+  // Enhanced Earnings Tables
+  performanceTiers,
+  enhancedTransactions,
+  collaborations,
+  collaborationParticipants,
+  performanceMilestones,
+  userMilestones,
+  earningsAnalytics,
+  taxRecords,
+  volumeTiers,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, count, sql, or, lt, isNull, gte, lte, not, arrayContains, getTableColumns } from "drizzle-orm";
@@ -429,36 +458,36 @@ export interface IStorage {
   // Enhanced Earnings System Operations
   
   // Performance Tiers
-  createPerformanceTier(tier: any): Promise<any>;
-  getPerformanceTier(userId: string): Promise<any | undefined>;
-  updatePerformanceTier(userId: string, updates: any): Promise<any>;
-  getCurrentPerformanceTiers(): Promise<any[]>;
+  createPerformanceTier(tier: InsertPerformanceTier): Promise<PerformanceTier>;
+  getPerformanceTier(userId: string): Promise<PerformanceTier | undefined>;
+  updatePerformanceTier(userId: string, updates: Partial<PerformanceTier>): Promise<PerformanceTier>;
+  getCurrentPerformanceTiers(): Promise<PerformanceTier[]>;
   calculatePerformanceTier(userId: string, monthlyEarnings: number, transactionCount: number): Promise<string>;
   
   // Enhanced Transactions
-  createEnhancedTransaction(transaction: any): Promise<any>;
-  getEnhancedTransaction(transactionId: string): Promise<any | undefined>;
-  getUserEnhancedTransactions(userId: string, options?: any): Promise<any[]>;
+  createEnhancedTransaction(transaction: InsertEnhancedTransaction): Promise<EnhancedTransaction>;
+  getEnhancedTransaction(transactionId: string): Promise<EnhancedTransaction | undefined>;
+  getUserEnhancedTransactions(userId: string, options?: { limit?: number; offset?: number; startDate?: Date; endDate?: Date }): Promise<EnhancedTransaction[]>;
   getVolumeBasedFeeReduction(userId: string, amount: number): Promise<number>;
   
   // Collaborations
-  createCollaboration(collaboration: any): Promise<any>;
-  getCollaboration(collaborationId: string): Promise<any | undefined>;
-  addCollaborationParticipant(participant: any): Promise<any>;
-  getUserCollaborations(userId: string): Promise<any[]>;
+  createCollaboration(collaboration: InsertCollaboration): Promise<Collaboration>;
+  getCollaboration(collaborationId: string): Promise<Collaboration | undefined>;
+  addCollaborationParticipant(participant: InsertCollaborationParticipant): Promise<CollaborationParticipant>;
+  getUserCollaborations(userId: string): Promise<Collaboration[]>;
   updateCollaborationEarnings(collaborationId: string, earnings: number): Promise<void>;
   
   // Performance Milestones & Bonuses
   createPerformanceMilestone(milestone: any): Promise<any>;
   getActivePerformanceMilestones(): Promise<any[]>;
-  createUserMilestone(userMilestone: any): Promise<any>;
-  getUserMilestones(userId: string, status?: string): Promise<any[]>;
+  createUserMilestone(userMilestone: InsertUserMilestone): Promise<UserMilestone>;
+  getUserMilestones(userId: string, status?: string): Promise<UserMilestone[]>;
   updateMilestoneProgress(userId: string, milestoneId: string, progress: number): Promise<void>;
   awardMilestoneBonus(userId: string, milestoneId: string, bonusAmount: number): Promise<void>;
   
   // Analytics & Forecasting
-  createEarningsAnalytics(analytics: any): Promise<any>;
-  getEarningsAnalytics(userId: string, period: string, startDate: Date, endDate: Date): Promise<any[]>;
+  createEarningsAnalytics(analytics: InsertEarningsAnalytics): Promise<EarningsAnalytics>;
+  getEarningsAnalytics(userId: string, period: string, startDate: Date, endDate: Date): Promise<EarningsAnalytics[]>;
   calculateEarningsProjection(userId: string, months: number): Promise<any>;
   getPerformanceComparison(userId: string, compareUserId: string): Promise<any>;
   getTrendAnalysis(userId: string, period: string): Promise<any>;
@@ -470,7 +499,7 @@ export interface IStorage {
   generateTaxDocument(userId: string, taxYear: number, documentType: string): Promise<string>;
   
   // Volume Tiers
-  createVolumeTier(tier: any): Promise<any>;
+  createVolumeTier(tier: InsertVolumeTier): Promise<VolumeTier>;
   getActiveVolumeTiers(): Promise<any[]>;
   calculateVolumeDiscount(volume: number): Promise<number>;
   
@@ -2353,37 +2382,30 @@ export class DatabaseStorage implements IStorage {
   // Enhanced Earnings System Mock Implementations
   
   // Performance Tiers
-  async createPerformanceTier(tier: any): Promise<any> {
-    const mockTier = { id: crypto.randomUUID(), ...tier, createdAt: new Date() };
-    console.log('🏆 Created performance tier:', mockTier.tier, 'for user:', mockTier.userId);
-    return mockTier;
+  async createPerformanceTier(tier: InsertPerformanceTier): Promise<PerformanceTier> {
+    const [createdTier] = await db.insert(performanceTiers)
+      .values(tier)
+      .returning();
+    console.log('🏆 Created performance tier:', createdTier.tier, 'for user:', createdTier.userId);
+    return createdTier;
   }
 
-  async getPerformanceTier(userId: string): Promise<any | undefined> {
-    // Mock implementation - would query database
-    return {
-      id: crypto.randomUUID(),
-      userId,
-      tier: 'silver',
-      monthlyEarnings: 5000,
-      totalVolume: 25000,
-      transactionCount: 150,
-      consistencyScore: 85,
-      qualityScore: 90,
-      referralCount: 5,
-      feeReduction: 0.005,
-      bonusEligible: true,
-      nextTierEarnings: 10000,
-      tierAchievedAt: new Date(),
-      periodStart: new Date(),
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+  async getPerformanceTier(userId: string): Promise<PerformanceTier | undefined> {
+    const [tier] = await db.select()
+      .from(performanceTiers)
+      .where(eq(performanceTiers.userId, userId))
+      .orderBy(desc(performanceTiers.createdAt))
+      .limit(1);
+    return tier;
   }
 
-  async updatePerformanceTier(userId: string, updates: any): Promise<any> {
-    console.log('🏆 Updated performance tier for user:', userId, updates);
-    return { userId, ...updates, updatedAt: new Date() };
+  async updatePerformanceTier(userId: string, updates: Partial<PerformanceTier>): Promise<PerformanceTier> {
+    const [updatedTier] = await db.update(performanceTiers)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(performanceTiers.userId, userId))
+      .returning();
+    console.log('🏆 Updated performance tier for user:', userId);
+    return updatedTier;
   }
 
   async getCurrentPerformanceTiers(): Promise<any[]> {
