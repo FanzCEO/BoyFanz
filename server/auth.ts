@@ -119,6 +119,8 @@ export function setupLocalAuth(app: Express) {
         authProvider: "local" as const,
         status: "active" as const,
         profileImageUrl: null,
+        onlineStatus: false,
+        lastSeenAt: new Date(),
       };
 
       const user = await storage.createUser(userData);
