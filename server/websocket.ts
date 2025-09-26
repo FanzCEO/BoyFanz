@@ -19,7 +19,7 @@ interface WSMessage {
   type: 'auth' | 'message' | 'presence' | 'typing' | 'read_receipt' | 
         'tip' | 'stream_update' | 'content_published' | 'notification' |
         'moderation_alert' | 'purchase_complete' | 'ping' | 'pong' | 
-        'ack' | 'message_history' | 'online_users';
+        'ack' | 'message_history' | 'online_users' | 'connection' | 'error';
   data?: any;
   messageId?: string;
   targetUserId?: string;
@@ -50,7 +50,7 @@ class WebSocketManager {
     avgLatency: 0
   };
   private messageRateLimit: Map<string, number[]> = new Map();
-  private heartbeatInterval: NodeJS.Timeout;
+  private heartbeatInterval!: NodeJS.Timeout;
   
   constructor(port: number = 3001) {
     this.wss = new WebSocketServer({ 
@@ -102,7 +102,7 @@ class WebSocketManager {
           const message: WSMessage = JSON.parse(data.toString());
           await this.handleMessage(ws, message);
         } catch (error) {
-          logger.error('Error handling WebSocket message:', error);
+          logger.error({ error }, 'Error handling WebSocket message');
           this.sendError(ws, 'Invalid message format');
         }
       });
@@ -112,7 +112,7 @@ class WebSocketManager {
       });
       
       ws.on('error', (error) => {
-        logger.error('WebSocket error:', error);
+        logger.error({ error }, 'WebSocket error');
         this.handleDisconnect(ws);
       });
       
@@ -239,7 +239,7 @@ class WebSocketManager {
       logger.info(`User ${userId} authenticated on WebSocket`);
       
     } catch (error) {
-      logger.error('Authentication error:', error);
+      logger.error({ error }, 'Authentication error');
       this.sendError(ws, 'Authentication failed');
     }
   }
@@ -301,7 +301,7 @@ class WebSocketManager {
       }
       
     } catch (error) {
-      logger.error('Error handling direct message:', error);
+      logger.error({ error }, 'Error handling direct message');
       this.sendError(ws, 'Failed to send message');
     }
   }
@@ -515,11 +515,11 @@ class WebSocketManager {
         lastSeenAt: new Date()
       })
       .where(eq(users.id, ws.userId))
-      .catch(err => logger.error('Error updating offline status:', err));
+      .catch(err => logger.error({ error: err }, 'Error updating offline status'));
     
     // Notify others about offline status
     this.broadcastPresenceUpdate(ws.userId, 'offline')
-      .catch(err => logger.error('Error broadcasting offline status:', err));
+      .catch(err => logger.error({ error: err }, 'Error broadcasting offline status'));
     
     logger.info(`User ${ws.userId} disconnected`);
   }
@@ -715,11 +715,11 @@ class WebSocketManager {
       this.metrics.messagesPerMinute = messageCount;
       
       // Log metrics
-      logger.info('WebSocket Metrics:', {
-        ...this.metrics,
+      logger.info({ 
+        metrics: this.metrics,
         rooms: this.rooms.size,
         queuedMessages: this.messageQueue.size
-      });
+      }, 'WebSocket Metrics');
       
       // Clear old rate limit data
       this.messageRateLimit.clear();
