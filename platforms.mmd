@@ -1,0 +1,147 @@
+flowchart LR
+  %% HUB
+  FZ[FanzDash\n(Super Admin · BI · Routing)]:::hub
+  HMS[Host Merchant Services\nMIDs · Risk · Chargebacks]:::risk
+
+  %% PLATFORMS
+  subgraph Brands[Creator Platforms]
+    BF[BoyFanz]:::brand
+    GF[GirlFanz]:::brand
+    PF[PupFanz]:::brand
+  end
+
+  %% CORE
+  subgraph Core[Core Services]
+    AUTH[Identity · Age · KYC]:::risk
+    BILL[Billing Orchestrator]:::core
+    LED[Creator Ledger · Fees]:::core
+    REP[Reporting · Alerts]:::core
+  end
+
+  BF & GF & PF --> AUTH --> BILL
+  BILL --> LED
+  FZ <-- APIs/Webhooks --> BILL
+  FZ --> REP
+  BILL <--> HMS
+
+  %% REGIONAL ROUTING
+  subgraph Regions[Regional Routers]
+    US[US Router]:::router
+    EU[EU Router]:::router
+    LATAM[LatAm Router]:::router
+    APAC[APAC Router]:::router
+  end
+  BILL --> US & EU & LATAM & APAC
+  FZ --> US & EU & LATAM & APAC
+
+  %% GATEWAYS - US/EU
+  subgraph Card[Card Gateways]
+    CCBill
+    Segpay
+    Epoch
+    Vendo
+    Verotel
+    NetBilling
+    CommerceGate
+    RocketGate
+    CentroBill
+    Payze
+    Kolektiva
+    PayGarden[PayGarden (Gift Cards)]
+  end
+  US --> CCBill & Segpay & Epoch
+  EU --> CommerceGate & Verotel & Vendo & NetBilling
+  LATAM --> Vendo
+  APAC --> CommerceGate
+
+  %% BANK & DIRECT
+  subgraph Bank[Bank & Direct]
+    ACH[ACH (US)]
+    eCheck[eCheck/Check21]
+    SEPA[SEPA (EU)]
+    SWIFT[SWIFT Wires]
+    Trustly
+    Sofort
+    Giropay
+    iDEAL
+  end
+  US --> ACH & eCheck
+  EU --> SEPA & Trustly & Sofort & Giropay & iDEAL
+  ALLBANK((Global Wires)):::alt
+  BILL --> SWIFT
+
+  %% WALLETS
+  subgraph Wallets[Wallets & Mobile]
+    ApplePay
+    GooglePay
+    SamsungPay
+    Venmo
+    CashApp
+    AliPay
+    WeChatPay
+  end
+  US --> ApplePay & GooglePay & SamsungPay & Venmo & CashApp
+  APAC --> AliPay & WeChatPay
+
+  %% LOCAL/ALT
+  subgraph Local[Localized & Alt]
+    Paysafecard
+    Neosurf
+    AstroPay
+    Flexepin
+    EcoPayz
+    Interac
+    Pix
+    Boleto
+    UPI
+  end
+  EU --> Paysafecard & Neosurf & EcoPayz
+  LATAM --> AstroPay & Pix & Boleto
+  APAC --> UPI
+  US --> Interac:::ghost
+
+  %% CRYPTO
+  subgraph Crypto[Crypto Gateways]
+    BitPay
+    CoinbaseC[Coinbase Commerce]
+    NOWP[NOWPayments]
+    CoinGate
+    CoinsPaid
+    OpenNode
+    GoCoin
+    UpholdM[Uphold Merchant]
+  end
+  BILL --> BitPay & CoinbaseC & NOWP & CoinGate & CoinsPaid & OpenNode & GoCoin & UpholdM
+
+  %% PAYOUTS
+  subgraph Payouts[Creator Payouts]
+    Paxum
+    ePayService
+    Cosmo[Cosmo Payment]
+    Wise
+    Payoneer
+    Skrill
+    Neteller
+    Zelle
+    ACHout[ACH Direct]
+    SEPAout[SEPA Direct]
+    CryptoOut[Crypto: BTC/ETH/USDT/USDC]
+    Checks
+  end
+  FZ --> Paxum & ePayService & Cosmo & Wise & Payoneer & Skrill & Neteller & Zelle & ACHout & SEPAout & CryptoOut & Checks
+  LED --> FZ
+
+  %% FEEDBACK LOOPS
+  CCBill & Segpay & Epoch & Vendo --> |settlements/CBK| HMS
+  HMS --> |alerts & representment| FZ
+  BILL --> |txn events| FZ
+  FZ --> |routing rules| BILL
+
+  %% STYLES
+  classDef hub fill:#12131b,color:#fff,stroke:#5dd,stroke-width:2px;
+  classDef brand fill:#1b2230,color:#cfe,stroke:#58f,stroke-width:2px;
+  classDef core fill:#0e1624,color:#cbd,stroke:#39a,stroke-width:1.5px;
+  classDef risk fill:#241016,color:#fbd,stroke:#d55,stroke-width:1.5px;
+  classDef router fill:#141a22,color:#def,stroke:#888,stroke-width:1.2px;
+  classDef alt fill:#1a1f28,color:#ddd,stroke:#666,stroke-width:1px;
+  classDef ghost fill:#1a1f28,color:#777,stroke:#333,stroke-dasharray: 3 3;

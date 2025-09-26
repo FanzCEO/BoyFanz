@@ -203,6 +203,24 @@ export function registerRoutes(app: Express) {
   // Set up CSRF token endpoint
   setupCSRFTokenEndpoint(app);
 
+  // ===== FANZ DASH PAYMENT CONTROL CENTER =====
+  // Import payment dashboard routes
+  import('./routes/paymentDashboard').then(({ default: paymentDashboardRoutes }) => {
+    app.use('/api/admin/payments', paymentDashboardRoutes);
+    console.log('✅ Payment Dashboard API routes loaded');
+  }).catch(err => {
+    console.error('❌ Failed to load payment dashboard routes:', err);
+  });
+
+  // ===== FANZ DASH INFRASTRUCTURE CONTROL CENTER =====
+  // Import infrastructure dashboard routes
+  import('./routes/infrastructureDashboard').then(({ default: infrastructureDashboardRoutes }) => {
+    app.use('/api/admin/infrastructure', infrastructureDashboardRoutes);
+    console.log('✅ Infrastructure Dashboard API routes loaded');
+  }).catch(err => {
+    console.error('❌ Failed to load infrastructure dashboard routes:', err);
+  });
+
   // ===== THEME ROUTES =====
   
   // Get active theme

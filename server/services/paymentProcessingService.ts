@@ -1,5 +1,6 @@
 import { storage } from '../storage';
 import { notificationService } from './notificationService';
+import { hostMerchantServices } from './hostMerchantServices';
 import { 
   VerotelProvider, 
   VendoServicesProvider, 
@@ -12,6 +13,9 @@ import {
   MassPayProvider,
   WisePayoutProvider,
   PayoneerProvider,
+  PaxumPayoutProvider,
+  ePayServiceProvider,
+  CosmoPaymentProvider,
   BangoProvider,
   BokuProvider,
   ACHProvider,
@@ -541,7 +545,7 @@ export class PaymentProcessingService {
     console.log(`🔀 Configured fallback routing for ${Object.keys(this.fallbackRouting).length} scenarios`);
   }
 
-  // Process payment with automatic failover, idempotency, and persistence
+  // Process payment with automatic failover, idempotency, risk assessment, and HMS integration
   async processPayment(request: PaymentRequest, preferredProvider?: string, idempotencyKey?: string): Promise<PaymentResult> {
     // Generate idempotency key if not provided
     const iKey = idempotencyKey || `${request.userId}_${request.amountCents}_${Date.now()}`;
@@ -551,6 +555,33 @@ export class PaymentProcessingService {
     if (existingTransaction) {
       console.log(`🔄 Returning cached result for idempotency key: ${iKey}`);
       return existingTransaction;
+    }
+
+    // ENHANCED: Perform risk assessment with HMS
+    const riskAssessment = await hostMerchantServices.assessTransactionRisk({
+      amountCents: request.amountCents,
+      currency: request.currency,
+      userId: request.userId,
+      userAgeDays: 30, // TODO: Calculate actual user age
+      userTransactionCount: 1, // TODO: Get actual transaction count
+      ipAddress: request.metadata?.ipAddress || '127.0.0.1',
+      country: request.metadata?.country || 'US',
+      billingCountry: request.billingAddress?.country,
+      cardCountry: request.metadata?.cardCountry,
+      vpnDetected: request.metadata?.vpnDetected || false,
+      proxyDetected: request.metadata?.proxyDetected || false
+    });
+
+    // Block high-risk transactions
+    if (riskAssessment.action === 'decline' || riskAssessment.action === 'block') {
+      const failureResult = {
+        success: false,
+        transactionId: '',
+        providerTransactionId: '',
+        error: `Transaction declined due to risk assessment: ${riskAssessment.factors.join(', ')}`
+      };
+      await this.cacheIdempotencyResult(iKey, failureResult);
+      return failureResult;
     }
 
     // Create pending transaction record
@@ -566,12 +597,28 @@ export class PaymentProcessingService {
       createdAt: new Date()
     });
 
-    const routingKey = this.determineRoutingKey(request);
-    const providers = preferredProvider 
-      ? [preferredProvider, ...(this.fallbackRouting[routingKey] || [])]
-      : this.fallbackRouting[routingKey] || ['ccbill'];
+    // ENHANCED: Use HMS smart routing for optimal gateway selection
+    const optimalRoute = await hostMerchantServices.getOptimalPaymentRoute({
+      amountCents: request.amountCents,
+      currency: request.currency,
+      region: request.metadata?.region || request.billingAddress?.country || 'US',
+      riskScore: riskAssessment.riskScore,
+      preferredGateways: preferredProvider ? [preferredProvider] : undefined
+    });
 
-    console.log(`💳 Processing payment with routing: ${providers.join(' → ')}`);
+    // Fallback to traditional routing if HMS doesn't find optimal route
+    const routingKey = this.determineRoutingKey(request);
+    let providers: string[];
+    
+    if (optimalRoute && optimalRoute.confidence > 0.7) {
+      providers = [optimalRoute.gatewayId, ...(this.fallbackRouting[routingKey] || [])];
+      console.log(`🎯 Using HMS optimal routing: ${optimalRoute.gatewayId} (confidence: ${(optimalRoute.confidence * 100).toFixed(1)}%)`);
+    } else {
+      providers = preferredProvider 
+        ? [preferredProvider, ...(this.fallbackRouting[routingKey] || [])]
+        : this.fallbackRouting[routingKey] || ['ccbill'];
+      console.log(`💳 Using fallback routing: ${providers.join(' → ')}`);
+    }
 
     for (const providerName of providers) {
       const provider = this.paymentProviders.get(providerName);

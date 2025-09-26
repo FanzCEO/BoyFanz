@@ -584,11 +584,23 @@ export const transactions = pgTable("transactions", {
   amountCents: integer("amount_cents").notNull(),
   platformFeeCents: integer("platform_fee_cents").default(0),
   creatorEarningsCents: integer("creator_earnings_cents").notNull(),
+  // Multi-rail payment support
+  paymentProvider: varchar("payment_provider"), // ccbill, segpay, epoch, nowpayments, etc.
+  providerTransactionId: varchar("provider_transaction_id"),
+  paymentMethod: varchar("payment_method"), // card, crypto, bank, carrier, ewallet
+  currency: varchar("currency").default("USD").notNull(),
+  exchangeRate: decimal("exchange_rate", { precision: 10, scale: 4 }).default("1.0000"),
+  processingFeeCents: integer("processing_fee_cents").default(0),
+  // Legacy Stripe support (deprecated)
   stripePaymentIntentId: varchar("stripe_payment_intent_id"),
   status: transactionStatusEnum("status").default("pending").notNull(),
   referenceId: varchar("reference_id"), // ID of related post, message, etc.
   referenceType: varchar("reference_type"), // "post", "message", "subscription"
+  idempotencyKey: varchar("idempotency_key").unique(),
+  metadata: jsonb("metadata").default({}),
   createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  failedAt: timestamp("failed_at"),
 }, (table) => ({
   // Critical indexes for payouts, analytics, and earnings queries
   toUserCreatedAtIdx: index("idx_tx_to_created_at").on(table.toUserId, table.createdAt.desc()),
@@ -596,6 +608,245 @@ export const transactions = pgTable("transactions", {
   statusIdx: index("idx_tx_status").on(table.status),
   typeIdx: index("idx_tx_type").on(table.type),
   toUserStatusIdx: index("idx_tx_to_status").on(table.toUserId, table.status),
+  providerIdx: index("idx_tx_provider").on(table.paymentProvider),
+  idempotencyIdx: index("idx_tx_idempotency").on(table.idempotencyKey),
+}));
+
+// ===== MULTI-RAIL PAYMENT SYSTEM TABLES =====
+
+// Payment Gateway Configuration
+export const paymentGatewayTypeEnum = pgEnum("payment_gateway_type", ["card", "crypto", "bank", "carrier", "ewallet"]);
+export const paymentGatewayStatusEnum = pgEnum("payment_gateway_status", ["active", "inactive", "maintenance"]);
+
+export const paymentGateways = pgTable("payment_gateways", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull().unique(), // ccbill, segpay, epoch, nowpayments, etc.
+  displayName: varchar("display_name").notNull(),
+  type: paymentGatewayTypeEnum("type").notNull(),
+  isAdultFriendly: boolean("is_adult_friendly").default(false).notNull(),
+  supportedCurrencies: text("supported_currencies").array().default(["USD"]),
+  supportedCountries: text("supported_countries").array().default([]),
+  processingFeeBps: integer("processing_fee_bps").notNull(), // basis points
+  minimumAmountCents: integer("minimum_amount_cents").default(0),
+  maximumAmountCents: integer("maximum_amount_cents"),
+  status: paymentGatewayStatusEnum("status").default("active").notNull(),
+  priority: integer("priority").default(100), // Lower = higher priority
+  configuration: jsonb("configuration").default({}), // API keys, endpoints, etc.
+  healthStatus: jsonb("health_status").default({}), // Circuit breaker data
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  nameIdx: index("idx_gateways_name").on(table.name),
+  typeStatusIdx: index("idx_gateways_type_status").on(table.type, table.status),
+  priorityIdx: index("idx_gateways_priority").on(table.priority),
+}));
+
+// Merchant ID Management (for Host Merchant Services)
+export const merchantIdStatusEnum = pgEnum("merchant_id_status", ["active", "inactive", "suspended", "reviewing"]);
+
+export const merchantIds = pgTable("merchant_ids", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  gatewayId: varchar("gateway_id").notNull().references(() => paymentGateways.id, { onDelete: "cascade" }),
+  midIdentifier: varchar("mid_identifier").notNull(), // Gateway-specific MID
+  descriptor: varchar("descriptor").notNull(), // Billing descriptor
+  region: varchar("region").default("GLOBAL"),
+  currency: varchar("currency").default("USD").notNull(),
+  status: merchantIdStatusEnum("status").default("active").notNull(),
+  monthlyVolumeLimitCents: integer("monthly_volume_limit_cents"),
+  currentMonthVolumeCents: integer("current_month_volume_cents").default(0),
+  chargebackThresholdBps: integer("chargeback_threshold_bps").default(100), // 1%
+  currentChargebackRateBps: integer("current_chargeback_rate_bps").default(0),
+  lastChargebackAt: timestamp("last_chargeback_at"),
+  riskScore: integer("risk_score").default(0), // 0-100
+  configuration: jsonb("configuration").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  gatewayMidIdx: index("idx_mids_gateway_mid").on(table.gatewayId, table.midIdentifier),
+  statusRegionIdx: index("idx_mids_status_region").on(table.status, table.region),
+  riskScoreIdx: index("idx_mids_risk_score").on(table.riskScore),
+}));
+
+// Payment Routing Rules
+export const routingRuleStatusEnum = pgEnum("routing_rule_status", ["active", "inactive", "testing"]);
+
+export const paymentRoutingRules = pgTable("payment_routing_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  priority: integer("priority").notNull(), // Lower = higher priority
+  conditions: jsonb("conditions").notNull(), // Complex routing conditions
+  targetGatewayId: varchar("target_gateway_id").references(() => paymentGateways.id),
+  targetMidId: varchar("target_mid_id").references(() => merchantIds.id),
+  fallbackGatewayIds: text("fallback_gateway_ids").array().default([]),
+  status: routingRuleStatusEnum("status").default("active").notNull(),
+  successCount: integer("success_count").default(0),
+  failureCount: integer("failure_count").default(0),
+  lastUsedAt: timestamp("last_used_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  priorityStatusIdx: index("idx_routing_priority_status").on(table.priority, table.status),
+  targetGatewayIdx: index("idx_routing_target_gateway").on(table.targetGatewayId),
+}));
+
+// Enhanced Payout Accounts for Multi-Provider Support
+export const payoutProviderTypeEnum = pgEnum("payout_provider_type", ["bank", "ewallet", "crypto", "check"]);
+
+export const payoutProvidersConfig = pgTable("payout_providers_config", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull().unique(), // paxum, epayservice, wise, etc.
+  displayName: varchar("display_name").notNull(),
+  type: payoutProviderTypeEnum("type").notNull(),
+  supportedCurrencies: text("supported_currencies").array().default(["USD"]),
+  supportedCountries: text("supported_countries").array().default([]),
+  minimumPayoutCents: integer("minimum_payout_cents").default(1000), // $10 default
+  processingFeeBps: integer("processing_fee_bps").default(150), // 1.5% default
+  processingTimeHours: integer("processing_time_hours").default(24),
+  isActive: boolean("is_active").default(true),
+  priority: integer("priority").default(100),
+  configuration: jsonb("configuration").default({}),
+  healthStatus: jsonb("health_status").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  nameIdx: index("idx_payout_providers_name").on(table.name),
+  typeActiveIdx: index("idx_payout_providers_type_active").on(table.type, table.isActive),
+}));
+
+// Enhanced Creator Payout Accounts
+export const creatorPayoutAccounts = pgTable("creator_payout_accounts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  providerId: varchar("provider_id").notNull().references(() => payoutProvidersConfig.id, { onDelete: "cascade" }),
+  accountReference: varchar("account_reference").notNull(), // Provider-specific account ID
+  accountName: varchar("account_name").notNull(),
+  currency: varchar("currency").default("USD").notNull(),
+  isDefault: boolean("is_default").default(false),
+  isVerified: boolean("is_verified").default(false),
+  verifiedAt: timestamp("verified_at"),
+  status: payoutAccountStatusEnum("status").default("active").notNull(),
+  metadata: jsonb("metadata").default({}), // Bank details, crypto addresses, etc.
+  lastPayoutAt: timestamp("last_payout_at"),
+  totalPayoutsCents: integer("total_payouts_cents").default(0),
+  payoutCount: integer("payout_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  creatorProviderIdx: index("idx_creator_payouts_creator_provider").on(table.creatorId, table.providerId),
+  creatorDefaultIdx: index("idx_creator_payouts_creator_default").on(table.creatorId, table.isDefault),
+  statusIdx: index("idx_creator_payouts_status").on(table.status),
+}));
+
+// Enhanced Payout Requests
+export const enhancedPayoutRequests = pgTable("enhanced_payout_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  payoutAccountId: varchar("payout_account_id").notNull().references(() => creatorPayoutAccounts.id, { onDelete: "cascade" }),
+  providerId: varchar("provider_id").notNull().references(() => payoutProvidersConfig.id),
+  amountCents: integer("amount_cents").notNull(),
+  currency: varchar("currency").default("USD").notNull(),
+  processingFeeCents: integer("processing_fee_cents").default(0),
+  netAmountCents: integer("net_amount_cents").notNull(), // Amount after fees
+  status: payoutStatusEnum("status").default("pending").notNull(),
+  providerPayoutId: varchar("provider_payout_id"),
+  providerStatus: varchar("provider_status"),
+  estimatedArrival: timestamp("estimated_arrival"),
+  completedAt: timestamp("completed_at"),
+  failureReason: text("failure_reason"),
+  kycVerified: boolean("kyc_verified").default(false),
+  amlPassed: boolean("aml_passed").default(false),
+  taxWithholdingCents: integer("tax_withholding_cents").default(0),
+  idempotencyKey: varchar("idempotency_key").unique(),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  creatorStatusIdx: index("idx_enhanced_payouts_creator_status").on(table.creatorId, table.status),
+  statusIdx: index("idx_enhanced_payouts_status").on(table.status),
+  providerIdx: index("idx_enhanced_payouts_provider").on(table.providerId),
+  estimatedArrivalIdx: index("idx_enhanced_payouts_arrival").on(table.estimatedArrival),
+  idempotencyIdx: index("idx_enhanced_payouts_idempotency").on(table.idempotencyKey),
+}));
+
+// Payment Analytics and Reporting
+export const paymentAnalytics = pgTable("payment_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  date: varchar("date").notNull(), // YYYY-MM-DD format
+  gatewayId: varchar("gateway_id").references(() => paymentGateways.id),
+  midId: varchar("mid_id").references(() => merchantIds.id),
+  currency: varchar("currency").default("USD").notNull(),
+  totalTransactions: integer("total_transactions").default(0),
+  successfulTransactions: integer("successful_transactions").default(0),
+  failedTransactions: integer("failed_transactions").default(0),
+  chargebacks: integer("chargebacks").default(0),
+  refunds: integer("refunds").default(0),
+  totalVolumeCents: integer("total_volume_cents").default(0),
+  successfulVolumeCents: integer("successful_volume_cents").default(0),
+  totalFeesCents: integer("total_fees_cents").default(0),
+  approvalRateBps: integer("approval_rate_bps").default(0), // Success rate in basis points
+  chargebackRateBps: integer("chargeback_rate_bps").default(0),
+  avgProcessingTimeMs: integer("avg_processing_time_ms").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  dateIdx: index("idx_analytics_date").on(table.date),
+  gatewayDateIdx: index("idx_analytics_gateway_date").on(table.gatewayId, table.date),
+  midDateIdx: index("idx_analytics_mid_date").on(table.midId, table.date),
+}));
+
+// Chargeback and Risk Management
+export const chargebackStatusEnum = pgEnum("chargeback_status", ["pending", "won", "lost", "expired"]);
+export const chargebackReasonEnum = pgEnum("chargeback_reason", ["fraud", "authorization", "processing_error", "consumer_dispute"]);
+
+export const chargebacks = pgTable("chargebacks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  transactionId: varchar("transaction_id").notNull().references(() => transactions.id, { onDelete: "cascade" }),
+  gatewayId: varchar("gateway_id").references(() => paymentGateways.id),
+  midId: varchar("mid_id").references(() => merchantIds.id),
+  providerChargebackId: varchar("provider_chargeback_id"),
+  reason: chargebackReasonEnum("reason").notNull(),
+  status: chargebackStatusEnum("status").default("pending").notNull(),
+  amountCents: integer("amount_cents").notNull(),
+  currency: varchar("currency").default("USD").notNull(),
+  reasonCode: varchar("reason_code"),
+  reasonDescription: text("reason_description"),
+  liabilityShift: boolean("liability_shift").default(false),
+  evidence: jsonb("evidence").default({}),
+  dueDate: timestamp("due_date"),
+  resolvedAt: timestamp("resolved_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  transactionIdx: index("idx_chargebacks_transaction").on(table.transactionId),
+  statusIdx: index("idx_chargebacks_status").on(table.status),
+  gatewayStatusIdx: index("idx_chargebacks_gateway_status").on(table.gatewayId, table.status),
+  dueDateIdx: index("idx_chargebacks_due_date").on(table.dueDate),
+}));
+
+// Risk Management and Fraud Detection
+export const riskAssessments = pgTable("risk_assessments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  transactionId: varchar("transaction_id").references(() => transactions.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }),
+  riskScore: integer("risk_score").notNull(), // 0-100
+  riskLevel: varchar("risk_level").notNull(), // low, medium, high, critical
+  factors: jsonb("factors").default({}), // Risk factors detected
+  rules: jsonb("rules").default([]), // Rules that fired
+  action: varchar("action").notNull(), // approve, review, decline, block
+  reviewRequired: boolean("review_required").default(false),
+  reviewedAt: timestamp("reviewed_at"),
+  reviewerId: varchar("reviewer_id").references(() => users.id),
+  reviewNotes: text("review_notes"),
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  deviceFingerprint: varchar("device_fingerprint"),
+  geolocation: jsonb("geolocation").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  transactionIdx: index("idx_risk_transaction").on(table.transactionId),
+  userIdx: index("idx_risk_user").on(table.userId),
+  riskScoreIdx: index("idx_risk_score").on(table.riskScore),
+  actionIdx: index("idx_risk_action").on(table.action),
+  reviewRequiredIdx: index("idx_risk_review_required").on(table.reviewRequired),
 }));
 
 // Categories
