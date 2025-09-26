@@ -23,25 +23,88 @@ export function useAuth() {
   const { data: user, isLoading, error } = useQuery({
     queryKey: ["/api/auth/user"],
     queryFn: async () => {
+      let res: Response | undefined;
+      
       try {
-        const res = await fetch("/api/auth/user", {
+        res = await fetch("/api/auth/user", {
           credentials: "include",
         });
         
         // Return null for 401/403 (not authenticated) instead of throwing
         if (res.status === 401 || res.status === 403) {
+          console.info(`Auth check: User not authenticated (${res.status})`);
           return null;
         }
         
         if (!res.ok) {
-          console.warn(`Auth check failed: ${res.status} ${res.statusText}`);
-          return null; // Don't throw, just return null
+          // Get response text for detailed error logging
+          let responseText = '';
+          try {
+            responseText = await res.text();
+          } catch (textError) {
+            console.error('Failed to read error response text:', textError);
+          }
+          
+          console.error('Auth check failed:', {
+            status: res.status,
+            statusText: res.statusText,
+            url: res.url,
+            headers: Object.fromEntries(res.headers.entries()),
+            responseText: responseText.substring(0, 1000), // Limit to first 1000 chars
+          });
+          return null;
         }
         
-        return await res.json();
-      } catch (error) {
-        console.warn('Auth check error:', error);
-        return null; // Don't throw, just return null
+        // Check if response contains valid JSON before parsing
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const responseText = await res.text();
+          console.error('Auth check error: Invalid content type', {
+            contentType,
+            expectedContentType: 'application/json',
+            responseText: responseText.substring(0, 500),
+            status: res.status,
+            url: res.url
+          });
+          return null;
+        }
+        
+        // Parse JSON with error handling
+        try {
+          return await res.json();
+        } catch (jsonError) {
+          // Log JSON parsing error with response details
+          let responseText = '';
+          try {
+            // Try to get the response text by cloning the response (if possible)
+            const clonedRes = res.clone();
+            responseText = await clonedRes.text();
+          } catch (cloneError) {
+            responseText = 'Unable to read response text';
+          }
+          
+          console.error('Auth check JSON parsing error:', {
+            error: jsonError,
+            message: jsonError instanceof Error ? jsonError.message : 'Unknown JSON parsing error',
+            responseText: responseText.substring(0, 500),
+            contentType: res.headers.get('content-type'),
+            status: res.status,
+            url: res.url
+          });
+          return null;
+        }
+        
+      } catch (networkError) {
+        // Handle network and other fetch errors
+        console.error('Auth check network error:', {
+          error: networkError,
+          message: networkError instanceof Error ? networkError.message : 'Unknown network error',
+          stack: networkError instanceof Error ? networkError.stack : undefined,
+          name: networkError instanceof Error ? networkError.name : undefined,
+          url: res?.url || '/api/auth/user',
+          timestamp: new Date().toISOString()
+        });
+        return null;
       }
     },
     retry: false,

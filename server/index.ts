@@ -122,6 +122,15 @@ setupHealthEndpoints(app);
 setupCSRFTokenEndpoint(app);
 
 (async () => {
+  // CRITICAL: Setup authentication BEFORE registering routes
+  // Import and setup Replit OAuth authentication
+  const { setupAuth } = await import('./replitAuth');
+  await setupAuth(app);
+  
+  // Import and setup local authentication
+  const { setupLocalAuth } = await import('./auth');
+  setupLocalAuth(app);
+  
   await registerRoutes(app);
   
   // Import and register advanced features

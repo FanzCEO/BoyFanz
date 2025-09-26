@@ -181,4 +181,42 @@ export function setupLocalAuth(app: Express) {
       res.sendStatus(200);
     });
   });
+
+  // Get current authenticated user endpoint
+  app.get("/api/auth/user", (req, res) => {
+    try {
+      // Check if user is authenticated
+      if (!req.isAuthenticated || !req.isAuthenticated()) {
+        return res.status(401).json({ 
+          error: 'Not authenticated',
+          message: 'User is not logged in'
+        });
+      }
+
+      // User is authenticated, return user data
+      const user = req.user;
+      if (!user) {
+        return res.status(403).json({ 
+          error: 'User not found',
+          message: 'Authenticated but user data not available'
+        });
+      }
+
+      // Make sure we don't return password (extra safety)
+      const { password, ...userWithoutPassword } = user as any;
+      
+      res.status(200).json(userWithoutPassword);
+    } catch (error) {
+      logger.error('Error getting authenticated user:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: req.user?.id
+      });
+      
+      res.status(500).json({ 
+        error: 'Internal server error',
+        message: 'Failed to retrieve user information'
+      });
+    }
+  });
 }
