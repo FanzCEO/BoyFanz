@@ -2110,6 +2110,11 @@ import {
   setupAnalyticsDashboardRoutes, 
   setupAIAnalysisRoutes 
 } from './routes/advancedFeatures';
+import infrastructureDashboardRoutes from './routes/infrastructureDashboard.js';
+import securityDashboardRoutes from './routes/securityDashboard.js';
+import mobileApiRoutes from './routes/mobileApi.js';
+import monitoringDashboardRoutes from './routes/monitoringDashboard.js';
+import apiGatewayRoutes from './routes/apiGatewayRoutes.js';
 
 export function setupAdvancedRoutes(app: Express) {
   setupNFTRoutes(app);
@@ -2118,5 +2123,20 @@ export function setupAdvancedRoutes(app: Express) {
   setupAnalyticsDashboardRoutes(app);
   setupAIAnalysisRoutes(app);
   
-  console.log('🚀 Advanced features registered: NFT, AI Feeds, Analytics, Age Verification');
+  // API Gateway & Service Mesh Dashboard (must be first for routing control)
+  app.use('/api/gateway', apiGatewayRoutes);
+  
+  // Infrastructure Management Dashboard
+  app.use('/api/infrastructure', infrastructureDashboardRoutes);
+  
+  // Advanced Security & Compliance Dashboard
+  app.use('/api/security', securityDashboardRoutes);
+  
+  // Mobile App Backend (ClubCentral)
+  app.use('/api/mobile', mobileApiRoutes);
+  
+  // Real-Time Monitoring & Analytics Dashboard
+  app.use('/api/monitoring', monitoringDashboardRoutes);
+  
+  console.log('🚀 Advanced features registered: NFT, AI Feeds, Analytics, Age Verification, API Gateway & Service Mesh, Infrastructure Management, Security & Compliance, Mobile Backend (ClubCentral), Real-Time Monitoring');
 }

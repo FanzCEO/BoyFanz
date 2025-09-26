@@ -128,6 +128,10 @@ setupCSRFTokenEndpoint(app);
   const { setupAdvancedRoutes } = await import('./routes');
   setupAdvancedRoutes(app);
   
+  // Setup API Gateway middleware (after routes are registered)
+  const { setupGatewayMiddleware } = await import('./middleware/gatewayMiddleware.js');
+  setupGatewayMiddleware(app);
+  
   // Create server from the Express app
   const { createServer } = await import('http');
   const server = createServer(app);
