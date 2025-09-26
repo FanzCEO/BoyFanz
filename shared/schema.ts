@@ -32,6 +32,10 @@ export const sessions = pgTable(
 export const userRoleEnum = pgEnum("user_role", ["fan", "creator", "moderator", "admin"]);
 export const userStatusEnum = pgEnum("user_status", ["active", "suspended", "pending"]);
 
+// KYC and compliance enums for profiles  
+export const profileKycStatusEnum = pgEnum("profile_kyc_status", ["pending", "verified", "rejected", "expired"]);
+export const sanctionsStatusEnum = pgEnum("sanctions_status", ["clear", "pending", "blocked", "reviewing"]);
+
 // Users table for both Replit Auth and local username/password auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -62,6 +66,12 @@ export const profiles = pgTable("profiles", {
   engagementLevel: integer("engagement_level").default(0),
   totalPoints: integer("total_points").default(0),
   stripeCustomerId: varchar("stripe_customer_id"),
+  // Compliance and verification fields for auth middleware
+  kycStatus: profileKycStatusEnum("kyc_status").default("pending").notNull(),
+  ageVerified: boolean("age_verified").default(false).notNull(),
+  is2257Compliant: boolean("is_2257_compliant").default(false).notNull(),
+  lastSanctionsScreening: timestamp("last_sanctions_screening"),
+  sanctionsStatus: sanctionsStatusEnum("sanctions_status").default("clear").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -130,10 +130,15 @@ export function require2257Compliance(req: AuthRequest, res: Response, next: Nex
     return res.status(401).json({ error: 'Authentication required' });
   }
   
+  // Check if user role is creator first (role is on req.user, not userProfile)
+  if (req.user?.role !== 'creator') {
+    return res.status(403).json({ error: 'Creator account required' });
+  }
+  
   storage.getUserProfile(req.user!.id)
     .then(userProfile => {
-      if (!userProfile || userProfile.role !== 'creator') {
-        return res.status(403).json({ error: 'Creator account required' });
+      if (!userProfile) {
+        return res.status(404).json({ error: 'User profile not found' });
       }
       
       if (!userProfile.is2257Compliant) {
