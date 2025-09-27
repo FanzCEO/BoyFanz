@@ -2098,7 +2098,348 @@ export function registerRoutes(app: Express) {
     res.json(req.user);
   });
 
+  // ===== ADMIN DASHBOARD API ROUTES =====
+
+  // Dashboard Overview
+  app.get('/api/admin/dashboard/overview', requireAdmin, async (req, res) => {
+    try {
+      const overview = await storage.getAdminDashboardOverview();
+      res.json(overview);
+    } catch (error) {
+      console.error('Admin dashboard overview error:', error);
+      res.status(500).json({ error: 'Failed to load dashboard overview' });
+    }
+  });
+
+  app.get('/api/admin/dashboard/stats', requireAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getAdminDashboardStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Admin dashboard stats error:', error);
+      res.status(500).json({ error: 'Failed to load dashboard stats' });
+    }
+  });
+
+  app.get('/api/admin/dashboard/system-health', requireAdmin, async (req, res) => {
+    try {
+      const systemHealth = await storage.getSystemHealthMetrics();
+      res.json(systemHealth);
+    } catch (error) {
+      console.error('System health error:', error);
+      res.status(500).json({ error: 'Failed to load system health metrics' });
+    }
+  });
+
+  // Complaints Management
+  app.get('/api/admin/complaints', requireAdmin, async (req, res) => {
+    try {
+      const { status, category, priority, page = 1, limit = 20 } = req.query;
+      const complaints = await storage.getComplaints({
+        status: status as string,
+        category: category as string,
+        priority: priority as string,
+        page: Number(page),
+        limit: Number(limit)
+      });
+      res.json(complaints);
+    } catch (error) {
+      console.error('Get complaints error:', error);
+      res.status(500).json({ error: 'Failed to fetch complaints' });
+    }
+  });
+
+  app.get('/api/admin/complaints/:id', requireAdmin, async (req, res) => {
+    try {
+      const complaint = await storage.getComplaint(req.params.id);
+      if (!complaint) {
+        return res.status(404).json({ error: 'Complaint not found' });
+      }
+      res.json(complaint);
+    } catch (error) {
+      console.error('Get complaint error:', error);
+      res.status(500).json({ error: 'Failed to fetch complaint' });
+    }
+  });
+
+  app.put('/api/admin/complaints/:id/assign', requireAdmin, async (req, res) => {
+    try {
+      const { assignedToId } = req.body;
+      const complaint = await storage.assignComplaint(req.params.id, assignedToId, req.user!.id);
+      res.json(complaint);
+    } catch (error) {
+      console.error('Assign complaint error:', error);
+      res.status(500).json({ error: 'Failed to assign complaint' });
+    }
+  });
+
+  app.put('/api/admin/complaints/:id/resolve', requireAdmin, async (req, res) => {
+    try {
+      const { resolution, internalNotes } = req.body;
+      const complaint = await storage.resolveComplaint(req.params.id, resolution, internalNotes, req.user!.id);
+      res.json(complaint);
+    } catch (error) {
+      console.error('Resolve complaint error:', error);
+      res.status(500).json({ error: 'Failed to resolve complaint' });
+    }
+  });
+
+  app.post('/api/admin/complaints/:id/comments', requireAdmin, async (req, res) => {
+    try {
+      const { content, isInternal } = req.body;
+      const comment = await storage.addComplaintComment(req.params.id, content, isInternal, req.user!.id);
+      res.json(comment);
+    } catch (error) {
+      console.error('Add complaint comment error:', error);
+      res.status(500).json({ error: 'Failed to add comment' });
+    }
+  });
+
+  // Reports Management
+  app.get('/api/admin/reports/financial', requireAdmin, async (req, res) => {
+    try {
+      const { startDate, endDate, format = 'json' } = req.query;
+      const report = await storage.generateFinancialReport({
+        startDate: startDate as string,
+        endDate: endDate as string
+      });
+      
+      if (format === 'csv') {
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=financial-report.csv');
+        return res.send(report.csv);
+      }
+      
+      res.json(report);
+    } catch (error) {
+      console.error('Financial report error:', error);
+      res.status(500).json({ error: 'Failed to generate financial report' });
+    }
+  });
+
+  app.get('/api/admin/reports/users', requireAdmin, async (req, res) => {
+    try {
+      const { startDate, endDate, format = 'json' } = req.query;
+      const report = await storage.generateUserAnalyticsReport({
+        startDate: startDate as string,
+        endDate: endDate as string
+      });
+      
+      if (format === 'csv') {
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=user-analytics-report.csv');
+        return res.send(report.csv);
+      }
+      
+      res.json(report);
+    } catch (error) {
+      console.error('User analytics report error:', error);
+      res.status(500).json({ error: 'Failed to generate user analytics report' });
+    }
+  });
+
+  app.get('/api/admin/reports/content', requireAdmin, async (req, res) => {
+    try {
+      const { startDate, endDate, format = 'json' } = req.query;
+      const report = await storage.generateContentReport({
+        startDate: startDate as string,
+        endDate: endDate as string
+      });
+      
+      if (format === 'csv') {
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=content-report.csv');
+        return res.send(report.csv);
+      }
+      
+      res.json(report);
+    } catch (error) {
+      console.error('Content report error:', error);
+      res.status(500).json({ error: 'Failed to generate content report' });
+    }
+  });
+
+  app.get('/api/admin/reports/compliance', requireAdmin, async (req, res) => {
+    try {
+      const { startDate, endDate, format = 'json' } = req.query;
+      const report = await storage.generateComplianceReport({
+        startDate: startDate as string,
+        endDate: endDate as string
+      });
+      
+      if (format === 'csv') {
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=compliance-report.csv');
+        return res.send(report.csv);
+      }
+      
+      res.json(report);
+    } catch (error) {
+      console.error('Compliance report error:', error);
+      res.status(500).json({ error: 'Failed to generate compliance report' });
+    }
+  });
+
+  // Withdrawal/Payout Management
+  app.get('/api/admin/withdrawals', requireAdmin, async (req, res) => {
+    try {
+      const { status, page = 1, limit = 20 } = req.query;
+      const withdrawals = await storage.getPayoutRequests({
+        status: status as string,
+        page: Number(page),
+        limit: Number(limit)
+      });
+      res.json(withdrawals);
+    } catch (error) {
+      console.error('Get withdrawals error:', error);
+      res.status(500).json({ error: 'Failed to fetch withdrawal requests' });
+    }
+  });
+
+  app.get('/api/admin/withdrawals/:id', requireAdmin, async (req, res) => {
+    try {
+      const withdrawal = await storage.getPayoutRequest(req.params.id);
+      if (!withdrawal) {
+        return res.status(404).json({ error: 'Withdrawal request not found' });
+      }
+      res.json(withdrawal);
+    } catch (error) {
+      console.error('Get withdrawal error:', error);
+      res.status(500).json({ error: 'Failed to fetch withdrawal request' });
+    }
+  });
+
+  app.put('/api/admin/withdrawals/:id/approve', requireAdmin, async (req, res) => {
+    try {
+      const { notes } = req.body;
+      const withdrawal = await storage.approvePayoutRequest(req.params.id, notes, req.user!.id);
+      res.json(withdrawal);
+    } catch (error) {
+      console.error('Approve withdrawal error:', error);
+      res.status(500).json({ error: 'Failed to approve withdrawal' });
+    }
+  });
+
+  app.put('/api/admin/withdrawals/:id/reject', requireAdmin, async (req, res) => {
+    try {
+      const { reason } = req.body;
+      const withdrawal = await storage.rejectPayoutRequest(req.params.id, reason, req.user!.id);
+      res.json(withdrawal);
+    } catch (error) {
+      console.error('Reject withdrawal error:', error);
+      res.status(500).json({ error: 'Failed to reject withdrawal' });
+    }
+  });
+
+  app.post('/api/admin/withdrawals/:id/process', requireAdmin, async (req, res) => {
+    try {
+      const { paymentMethod, notes } = req.body;
+      const result = await storage.processPayoutRequest(req.params.id, paymentMethod, notes, req.user!.id);
+      res.json(result);
+    } catch (error) {
+      console.error('Process withdrawal error:', error);
+      res.status(500).json({ error: 'Failed to process withdrawal' });
+    }
+  });
+
+  // Verification Management
+  app.get('/api/admin/verification/kyc', requireAdmin, async (req, res) => {
+    try {
+      const { status, page = 1, limit = 20 } = req.query;
+      const verifications = await storage.getKYCVerifications({
+        status: status as string,
+        page: Number(page),
+        limit: Number(limit)
+      });
+      res.json(verifications);
+    } catch (error) {
+      console.error('Get KYC verifications error:', error);
+      res.status(500).json({ error: 'Failed to fetch KYC verifications' });
+    }
+  });
+
+  app.get('/api/admin/verification/age', requireAdmin, async (req, res) => {
+    try {
+      const { status, page = 1, limit = 20 } = req.query;
+      const verifications = await storage.getAgeVerifications({
+        status: status as string,
+        page: Number(page),
+        limit: Number(limit)
+      });
+      res.json(verifications);
+    } catch (error) {
+      console.error('Get age verifications error:', error);
+      res.status(500).json({ error: 'Failed to fetch age verifications' });
+    }
+  });
+
+  app.put('/api/admin/verification/kyc/:id/approve', requireAdmin, async (req, res) => {
+    try {
+      const { notes } = req.body;
+      const verification = await storage.approveKYCVerification(req.params.id, notes, req.user!.id);
+      res.json(verification);
+    } catch (error) {
+      console.error('Approve KYC verification error:', error);
+      res.status(500).json({ error: 'Failed to approve KYC verification' });
+    }
+  });
+
+  app.put('/api/admin/verification/kyc/:id/reject', requireAdmin, async (req, res) => {
+    try {
+      const { reason } = req.body;
+      const verification = await storage.rejectKYCVerification(req.params.id, reason, req.user!.id);
+      res.json(verification);
+    } catch (error) {
+      console.error('Reject KYC verification error:', error);
+      res.status(500).json({ error: 'Failed to reject KYC verification' });
+    }
+  });
+
+  app.put('/api/admin/verification/age/:id/approve', requireAdmin, async (req, res) => {
+    try {
+      const { notes } = req.body;
+      const verification = await storage.approveAgeVerification(req.params.id, notes, req.user!.id);
+      res.json(verification);
+    } catch (error) {
+      console.error('Approve age verification error:', error);
+      res.status(500).json({ error: 'Failed to approve age verification' });
+    }
+  });
+
+  app.put('/api/admin/verification/age/:id/reject', requireAdmin, async (req, res) => {
+    try {
+      const { reason } = req.body;
+      const verification = await storage.rejectAgeVerification(req.params.id, reason, req.user!.id);
+      res.json(verification);
+    } catch (error) {
+      console.error('Reject age verification error:', error);
+      res.status(500).json({ error: 'Failed to reject age verification' });
+    }
+  });
+
+  // Admin Configuration
+  app.get('/api/admin/config', requireAdmin, async (req, res) => {
+    try {
+      const config = await storage.getAdminConfig(req.user!.id);
+      res.json(config);
+    } catch (error) {
+      console.error('Get admin config error:', error);
+      res.status(500).json({ error: 'Failed to get admin configuration' });
+    }
+  });
+
+  app.put('/api/admin/config', requireAdmin, async (req, res) => {
+    try {
+      const config = await storage.updateAdminConfig(req.user!.id, req.body);
+      res.json(config);
+    } catch (error) {
+      console.error('Update admin config error:', error);
+      res.status(500).json({ error: 'Failed to update admin configuration' });
+    }
+  });
+
   console.log('🛡️ Enhanced routes registered with comprehensive security features');
+  console.log('👮 Admin dashboard routes registered with full CRUD operations');
 }
 
 // Import and register advanced features

@@ -13,7 +13,7 @@ import {
   RegisteredDevice,
   PushNotification
 } from '../services/mobileBackendService.js';
-import { requireAuth } from '../middleware/auth.js';
+import { isAuthenticated, requireAdmin } from '../middleware/auth.js';
 import { validateRequest } from '../middleware/validation.js';
 
 const router = Router();
@@ -114,7 +114,7 @@ const SyncDataSchema = z.object({
 
 // Apply authentication to most mobile routes
 const authenticatedRoutes = Router();
-authenticatedRoutes.use(requireAuth);
+authenticatedRoutes.use(isAuthenticated);
 
 // Public routes (no auth required)
 

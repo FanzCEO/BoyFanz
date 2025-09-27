@@ -9,7 +9,7 @@ import {
   MonitoringConfig,
   AlertThresholds
 } from '../services/realTimeMonitoringService.js';
-import { requireAuth, requireAdmin } from '../middleware/auth.js';
+import { isAuthenticated, requireAdmin } from '../middleware/auth.js';
 import { validateRequest } from '../middleware/validation.js';
 
 const router = Router();
@@ -38,8 +38,8 @@ const monitoringService = new RealTimeMonitoringService(defaultMonitoringConfig)
 // Start monitoring service
 monitoringService.start();
 
-// Apply authentication to all monitoring routes
-router.use(requireAuth);
+// Apply admin authentication to all monitoring routes
+router.use(requireAdmin);
 
 // Validation schemas
 const AlertFiltersSchema = z.object({

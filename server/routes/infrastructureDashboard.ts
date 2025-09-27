@@ -16,13 +16,13 @@ import {
   PROVIDER_CATEGORIES,
   COMPLIANCE_REQUIREMENTS
 } from '../../shared/infraConfig.js';
-import { requireAuth } from '../middleware/auth.js';
+import { isAuthenticated, requireAdmin } from '../middleware/auth.js';
 import { validateRequest } from '../middleware/validation.js';
 
 const router = Router();
 
-// Apply authentication to all infrastructure routes
-router.use(requireAuth);
+// Apply admin authentication to all infrastructure routes
+router.use(requireAdmin);
 
 // Schema for infrastructure queries
 const InfraQuerySchema = z.object({

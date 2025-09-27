@@ -1860,3 +1860,145 @@ export type TaxRecord = typeof taxRecords.$inferSelect;
 export type InsertTaxRecord = z.infer<typeof insertTaxRecordSchema>;
 export type VolumeTier = typeof volumeTiers.$inferSelect;
 export type InsertVolumeTier = z.infer<typeof insertVolumeTierSchema>;
+
+// Admin Dashboard - Complaints Management
+export const complaintCategoryEnum = pgEnum("complaint_category", ["content", "user_behavior", "technical", "billing", "copyright", "harassment", "spam", "other"]);
+export const complaintPriorityEnum = pgEnum("complaint_priority", ["low", "medium", "high", "urgent"]);
+export const complaintStatusEnum = pgEnum("complaint_status", ["open", "in_progress", "resolved", "closed", "escalated"]);
+
+export const complaints = pgTable("complaints", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  submitterId: varchar("submitter_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  subjectUserId: varchar("subject_user_id").references(() => users.id, { onDelete: "set null" }),
+  subjectContentId: varchar("subject_content_id"), // Reference to media or content
+  category: complaintCategoryEnum("category").notNull(),
+  priority: complaintPriorityEnum("priority").default("medium").notNull(),
+  status: complaintStatusEnum("status").default("open").notNull(),
+  title: varchar("title").notNull(),
+  description: text("description").notNull(),
+  evidenceUrls: text("evidence_urls").array().default([]),
+  assignedToId: varchar("assigned_to_id").references(() => users.id, { onDelete: "set null" }),
+  internalNotes: text("internal_notes"),
+  resolution: text("resolution"),
+  resolvedAt: timestamp("resolved_at"),
+  resolvedById: varchar("resolved_by_id").references(() => users.id, { onDelete: "set null" }),
+  escalatedAt: timestamp("escalated_at"),
+  escalatedById: varchar("escalated_by_id").references(() => users.id, { onDelete: "set null" }),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_complaints_status_priority").on(table.status, table.priority),
+  index("idx_complaints_assigned_status").on(table.assignedToId, table.status),
+  index("idx_complaints_category_created").on(table.category, table.createdAt.desc()),
+]);
+
+export const complaintComments = pgTable("complaint_comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  complaintId: varchar("complaint_id").notNull().references(() => complaints.id, { onDelete: "cascade" }),
+  authorId: varchar("author_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  isInternal: boolean("is_internal").default(true), // Internal admin comments vs public responses
+  attachmentUrls: text("attachment_urls").array().default([]),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_complaint_comments_complaint").on(table.complaintId, table.createdAt),
+]);
+
+// Admin Dashboard Configuration
+export const dashboardWidgetTypeEnum = pgEnum("dashboard_widget_type", ["stat_card", "chart", "table", "activity_feed", "quick_actions", "alert_panel"]);
+export const chartTypeEnum = pgEnum("chart_type", ["line", "bar", "pie", "doughnut", "area", "gauge"]);
+
+export const adminDashboardConfigs = pgTable("admin_dashboard_configs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name").notNull(),
+  isDefault: boolean("is_default").default(false),
+  layout: jsonb("layout").notNull(), // Grid layout configuration
+  widgets: jsonb("widgets").notNull(), // Widget configurations
+  refreshInterval: integer("refresh_interval").default(300), // Seconds
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_admin_dashboard_user").on(table.userId, table.isActive),
+]);
+
+// Admin Report Templates
+export const adminReportTypeEnum = pgEnum("admin_report_type", ["financial", "user_analytics", "content", "compliance", "custom"]);
+export const reportFrequencyEnum = pgEnum("report_frequency", ["on_demand", "daily", "weekly", "monthly", "quarterly", "yearly"]);
+export const reportFormatEnum = pgEnum("report_format", ["pdf", "csv", "excel", "json"]);
+
+export const adminReportTemplates = pgTable("admin_report_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  type: adminReportTypeEnum("type").notNull(),
+  config: jsonb("config").notNull(), // Report parameters and filters
+  frequency: reportFrequencyEnum("frequency").default("on_demand").notNull(),
+  format: reportFormatEnum("format").default("pdf").notNull(),
+  recipients: text("recipients").array().default([]), // Email addresses
+  isActive: boolean("is_active").default(true),
+  createdById: varchar("created_by_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  lastGenerated: timestamp("last_generated"),
+  nextScheduled: timestamp("next_scheduled"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_admin_reports_type_active").on(table.type, table.isActive),
+  index("idx_admin_reports_next_scheduled").on(table.nextScheduled),
+]);
+
+export const adminReportRuns = pgTable("admin_report_runs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  templateId: varchar("template_id").notNull().references(() => adminReportTemplates.id, { onDelete: "cascade" }),
+  status: varchar("status").default("pending").notNull(), // pending, generating, completed, failed
+  parameters: jsonb("parameters").default({}),
+  outputUrl: varchar("output_url"),
+  fileSize: integer("file_size"),
+  generatedById: varchar("generated_by_id").references(() => users.id, { onDelete: "set null" }),
+  errorMessage: text("error_message"),
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_admin_report_runs_template").on(table.templateId, table.createdAt.desc()),
+  index("idx_admin_report_runs_status").on(table.status),
+]);
+
+// System Health and Performance Metrics
+export const systemMetrics = pgTable("system_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  metricName: varchar("metric_name").notNull(),
+  metricValue: decimal("metric_value", { precision: 15, scale: 6 }).notNull(),
+  metricUnit: varchar("metric_unit"), // percent, count, bytes, seconds, etc.
+  category: varchar("category").notNull(), // database, api, storage, payment, etc.
+  tags: jsonb("tags").default({}),
+  collectedAt: timestamp("collected_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_system_metrics_name_time").on(table.metricName, table.collectedAt.desc()),
+  index("idx_system_metrics_category").on(table.category, table.collectedAt.desc()),
+]);
+
+// Insert schemas for admin tables
+export const insertComplaintSchema = createInsertSchema(complaints).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertComplaintCommentSchema = createInsertSchema(complaintComments).omit({ id: true, createdAt: true });
+export const insertAdminDashboardConfigSchema = createInsertSchema(adminDashboardConfigs).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertAdminReportTemplateSchema = createInsertSchema(adminReportTemplates).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertAdminReportRunSchema = createInsertSchema(adminReportRuns).omit({ id: true, createdAt: true });
+export const insertSystemMetricSchema = createInsertSchema(systemMetrics).omit({ id: true, createdAt: true });
+
+// Admin feature types
+export type Complaint = typeof complaints.$inferSelect;
+export type InsertComplaint = z.infer<typeof insertComplaintSchema>;
+export type ComplaintComment = typeof complaintComments.$inferSelect;
+export type InsertComplaintComment = z.infer<typeof insertComplaintCommentSchema>;
+export type AdminDashboardConfig = typeof adminDashboardConfigs.$inferSelect;
+export type InsertAdminDashboardConfig = z.infer<typeof insertAdminDashboardConfigSchema>;
+export type AdminReportTemplate = typeof adminReportTemplates.$inferSelect;
+export type InsertAdminReportTemplate = z.infer<typeof insertAdminReportTemplateSchema>;
+export type AdminReportRun = typeof adminReportRuns.$inferSelect;
+export type InsertAdminReportRun = z.infer<typeof insertAdminReportRunSchema>;
+export type SystemMetric = typeof systemMetrics.$inferSelect;
+export type InsertSystemMetric = z.infer<typeof insertSystemMetricSchema>;

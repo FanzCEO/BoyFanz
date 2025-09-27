@@ -10,7 +10,7 @@ import {
   ContentSecurityPolicy,
   ComplianceRule
 } from '../services/advancedSecurityService.js';
-import { requireAuth, requireAdmin } from '../middleware/auth.js';
+import { isAuthenticated, requireAdmin } from '../middleware/auth.js';
 import { validateRequest } from '../middleware/validation.js';
 
 const router = Router();
@@ -31,8 +31,8 @@ const defaultSecurityConfig: SecurityConfig = {
 
 const securityService = new AdvancedSecurityService(defaultSecurityConfig);
 
-// Apply authentication to all security routes
-router.use(requireAuth);
+// Apply admin authentication to all security routes
+router.use(requireAdmin);
 
 // Validation schemas
 const TokenizedUrlSchema = z.object({
