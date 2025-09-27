@@ -169,7 +169,7 @@ export function enforceGeoBlocking(feature: string) {
       const geoResult = await geoBlockingService.checkGeoAccess({
         ip,
         feature, 
-        type: 'content_access'
+        type: 'content'
       });
       
       if (!geoResult.allowed) {
@@ -184,8 +184,8 @@ export function enforceGeoBlocking(feature: string) {
       
       // Store geo info for audit logging
       req.geoInfo = {
-        country: geoResult.country,
-        region: geoResult.region,
+        country: geoResult.country || 'Unknown',
+        region: 'Unknown', // region not available in AccessCheckResult
         allowed: true
       };
       
