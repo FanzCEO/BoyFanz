@@ -3004,10 +3004,1100 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // ===== CONTENT MANAGEMENT ADMIN API ROUTES =====
+  
+  // Posts Management API Routes
+  app.get('/api/admin/posts', requireAdmin, async (req, res) => {
+    try {
+      const filters = {
+        searchQuery: req.query.searchQuery as string,
+        type: req.query.type as string,
+        status: req.query.status as string,
+        visibility: req.query.visibility as string,
+        creatorId: req.query.creatorId as string,
+        categoryId: req.query.categoryId as string,
+        dateRange: req.query.dateRange as string,
+        moderationStatus: req.query.moderationStatus as string,
+        revenueRange: req.query.revenueRange as string,
+        page: req.query.page ? parseInt(req.query.page as string) : 1,
+        pageSize: req.query.pageSize ? parseInt(req.query.pageSize as string) : 20,
+        sortBy: req.query.sortBy as string || 'createdAt',
+        sortOrder: req.query.sortOrder as 'asc' | 'desc' || 'desc'
+      };
+      const posts = await storage.getAdminPosts(filters);
+      res.json(posts);
+    } catch (error) {
+      console.error('Get admin posts error:', error);
+      res.status(500).json({ error: 'Failed to fetch posts' });
+    }
+  });
+
+  app.get('/api/admin/posts/stats', requireAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getPostsStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Get posts stats error:', error);
+      res.status(500).json({ error: 'Failed to fetch posts statistics' });
+    }
+  });
+
+  app.post('/api/admin/posts/moderate', requireAdmin, async (req, res) => {
+    try {
+      const { postId, action, reason, notes } = req.body;
+      await storage.moderatePost(postId, action, req.user!.id, reason, notes);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Moderate post error:', error);
+      res.status(500).json({ error: 'Failed to moderate post' });
+    }
+  });
+
+  app.post('/api/admin/posts/bulk', requireAdmin, async (req, res) => {
+    try {
+      const { postIds, operation, data } = req.body;
+      await storage.bulkOperationPosts(postIds, operation, req.user!.id, data);
+      res.json({ success: true, processed: postIds.length });
+    } catch (error) {
+      console.error('Bulk posts operation error:', error);
+      res.status(500).json({ error: 'Failed to execute bulk operation' });
+    }
+  });
+
+  // Live Streaming Management API Routes
+  app.get('/api/admin/streams', requireAdmin, async (req, res) => {
+    try {
+      const filters = {
+        searchQuery: req.query.searchQuery as string,
+        status: req.query.status as string,
+        type: req.query.type as string,
+        creatorId: req.query.creatorId as string,
+        quality: req.query.quality as string,
+        duration: req.query.duration as string,
+        viewerRange: req.query.viewerRange as string,
+        revenueRange: req.query.revenueRange as string,
+        page: req.query.page ? parseInt(req.query.page as string) : 1,
+        pageSize: req.query.pageSize ? parseInt(req.query.pageSize as string) : 20,
+        sortBy: req.query.sortBy as string || 'createdAt',
+        sortOrder: req.query.sortOrder as 'asc' | 'desc' || 'desc'
+      };
+      const streams = await storage.getAdminStreams(filters);
+      res.json(streams);
+    } catch (error) {
+      console.error('Get admin streams error:', error);
+      res.status(500).json({ error: 'Failed to fetch streams' });
+    }
+  });
+
+  app.get('/api/admin/streams/stats', requireAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getStreamsStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Get streams stats error:', error);
+      res.status(500).json({ error: 'Failed to fetch streams statistics' });
+    }
+  });
+
+  app.get('/api/admin/streams/live-analytics', requireAdmin, async (req, res) => {
+    try {
+      const analytics = await storage.getLiveStreamAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error('Get live analytics error:', error);
+      res.status(500).json({ error: 'Failed to fetch live analytics' });
+    }
+  });
+
+  app.post('/api/admin/streams/terminate', requireAdmin, async (req, res) => {
+    try {
+      const { streamId, reason, notify } = req.body;
+      await storage.terminateStream(streamId, req.user!.id, reason, notify);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Terminate stream error:', error);
+      res.status(500).json({ error: 'Failed to terminate stream' });
+    }
+  });
+
+  app.post('/api/admin/streams/moderate', requireAdmin, async (req, res) => {
+    try {
+      const { streamId, action, reason, notes } = req.body;
+      await storage.moderateStream(streamId, action, req.user!.id, reason, notes);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Moderate stream error:', error);
+      res.status(500).json({ error: 'Failed to moderate stream' });
+    }
+  });
+
+  app.post('/api/admin/streams/bulk', requireAdmin, async (req, res) => {
+    try {
+      const { streamIds, operation, data } = req.body;
+      await storage.bulkOperationStreams(streamIds, operation, req.user!.id, data);
+      res.json({ success: true, processed: streamIds.length });
+    } catch (error) {
+      console.error('Bulk streams operation error:', error);
+      res.status(500).json({ error: 'Failed to execute bulk operation' });
+    }
+  });
+
+  // Stories Management API Routes
+  app.get('/api/admin/stories', requireAdmin, async (req, res) => {
+    try {
+      const filters = {
+        searchQuery: req.query.searchQuery as string,
+        status: req.query.status as string,
+        creatorId: req.query.creatorId as string,
+        expiration: req.query.expiration as string,
+        engagement: req.query.engagement as string,
+        promotion: req.query.promotion as string,
+        moderation: req.query.moderation as string,
+        type: req.query.type as string,
+        dateRange: req.query.dateRange as string,
+        page: req.query.page ? parseInt(req.query.page as string) : 1,
+        pageSize: req.query.pageSize ? parseInt(req.query.pageSize as string) : 20,
+        sortBy: req.query.sortBy as string || 'createdAt',
+        sortOrder: req.query.sortOrder as 'asc' | 'desc' || 'desc'
+      };
+      const stories = await storage.getAdminStories(filters);
+      res.json(stories);
+    } catch (error) {
+      console.error('Get admin stories error:', error);
+      res.status(500).json({ error: 'Failed to fetch stories' });
+    }
+  });
+
+  app.get('/api/admin/stories/stats', requireAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getStoriesStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Get stories stats error:', error);
+      res.status(500).json({ error: 'Failed to fetch stories statistics' });
+    }
+  });
+
+  app.get('/api/admin/stories/trending', requireAdmin, async (req, res) => {
+    try {
+      const trending = await storage.getTrendingStories();
+      res.json(trending);
+    } catch (error) {
+      console.error('Get trending stories error:', error);
+      res.status(500).json({ error: 'Failed to fetch trending stories' });
+    }
+  });
+
+  app.post('/api/admin/stories/moderate', requireAdmin, async (req, res) => {
+    try {
+      const { storyId, action, reason, notes } = req.body;
+      await storage.moderateStory(storyId, action, req.user!.id, reason, notes);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Moderate story error:', error);
+      res.status(500).json({ error: 'Failed to moderate story' });
+    }
+  });
+
+  app.post('/api/admin/stories/extend', requireAdmin, async (req, res) => {
+    try {
+      const { storyId, hours } = req.body;
+      await storage.extendStoryExpiration(storyId, hours, req.user!.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Extend story expiration error:', error);
+      res.status(500).json({ error: 'Failed to extend story expiration' });
+    }
+  });
+
+  app.post('/api/admin/stories/:id/archive', requireAdmin, async (req, res) => {
+    try {
+      await storage.archiveStory(req.params.id, req.user!.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Archive story error:', error);
+      res.status(500).json({ error: 'Failed to archive story' });
+    }
+  });
+
+  app.post('/api/admin/stories/bulk', requireAdmin, async (req, res) => {
+    try {
+      const { storyIds, operation, data } = req.body;
+      await storage.bulkOperationStories(storyIds, operation, req.user!.id, data);
+      res.json({ success: true, processed: storyIds.length });
+    } catch (error) {
+      console.error('Bulk stories operation error:', error);
+      res.status(500).json({ error: 'Failed to execute bulk operation' });
+    }
+  });
+
+  // Shop Management API Routes
+  app.get('/api/admin/products', requireAdmin, async (req, res) => {
+    try {
+      const filters = {
+        searchQuery: req.query.searchQuery as string,
+        status: req.query.status as string,
+        type: req.query.type as string,
+        creatorId: req.query.creatorId as string,
+        categoryId: req.query.categoryId as string,
+        priceRange: req.query.priceRange as string,
+        inventory: req.query.inventory as string,
+        dateRange: req.query.dateRange as string,
+        page: req.query.page ? parseInt(req.query.page as string) : 1,
+        pageSize: req.query.pageSize ? parseInt(req.query.pageSize as string) : 20,
+        sortBy: req.query.sortBy as string || 'createdAt',
+        sortOrder: req.query.sortOrder as 'asc' | 'desc' || 'desc'
+      };
+      const products = await storage.getAdminProducts(filters);
+      res.json(products);
+    } catch (error) {
+      console.error('Get admin products error:', error);
+      res.status(500).json({ error: 'Failed to fetch products' });
+    }
+  });
+
+  app.get('/api/admin/orders', requireAdmin, async (req, res) => {
+    try {
+      const filters = {
+        searchQuery: req.query.searchQuery as string,
+        status: req.query.status as string,
+        fulfillmentStatus: req.query.fulfillmentStatus as string,
+        creatorId: req.query.creatorId as string,
+        dateRange: req.query.dateRange as string,
+        page: req.query.page ? parseInt(req.query.page as string) : 1,
+        pageSize: req.query.pageSize ? parseInt(req.query.pageSize as string) : 20,
+        sortBy: req.query.sortBy as string || 'createdAt',
+        sortOrder: req.query.sortOrder as 'asc' | 'desc' || 'desc'
+      };
+      const orders = await storage.getAdminOrders(filters);
+      res.json(orders);
+    } catch (error) {
+      console.error('Get admin orders error:', error);
+      res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+  });
+
+  app.get('/api/admin/shop/stats', requireAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getShopStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Get shop stats error:', error);
+      res.status(500).json({ error: 'Failed to fetch shop statistics' });
+    }
+  });
+
+  app.get('/api/admin/shop/revenue', requireAdmin, async (req, res) => {
+    try {
+      const revenue = await storage.getRevenueStats();
+      res.json(revenue);
+    } catch (error) {
+      console.error('Get revenue stats error:', error);
+      res.status(500).json({ error: 'Failed to fetch revenue statistics' });
+    }
+  });
+
+  app.post('/api/admin/orders/:id/fulfill', requireAdmin, async (req, res) => {
+    try {
+      const { trackingNumber, carrier, notes } = req.body;
+      await storage.fulfillOrder(req.params.id, req.user!.id, trackingNumber, carrier, notes);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Fulfill order error:', error);
+      res.status(500).json({ error: 'Failed to fulfill order' });
+    }
+  });
+
+  app.post('/api/admin/orders/:id/refund', requireAdmin, async (req, res) => {
+    try {
+      const { amount, reason } = req.body;
+      await storage.refundOrder(req.params.id, req.user!.id, amount, reason);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Refund order error:', error);
+      res.status(500).json({ error: 'Failed to refund order' });
+    }
+  });
+
+  app.post('/api/admin/shop/bulk-products', requireAdmin, async (req, res) => {
+    try {
+      const { itemIds, operation, data } = req.body;
+      await storage.bulkOperationProducts(itemIds, operation, req.user!.id, data);
+      res.json({ success: true, processed: itemIds.length });
+    } catch (error) {
+      console.error('Bulk products operation error:', error);
+      res.status(500).json({ error: 'Failed to execute bulk operation' });
+    }
+  });
+
+  app.post('/api/admin/shop/bulk-orders', requireAdmin, async (req, res) => {
+    try {
+      const { itemIds, operation, data } = req.body;
+      await storage.bulkOperationOrders(itemIds, operation, req.user!.id, data);
+      res.json({ success: true, processed: itemIds.length });
+    } catch (error) {
+      console.error('Bulk orders operation error:', error);
+      res.status(500).json({ error: 'Failed to execute bulk operation' });
+    }
+  });
+
+  // Categories Management API Routes
+  app.get('/api/admin/categories/content', requireAdmin, async (req, res) => {
+    try {
+      const filters = {
+        searchQuery: req.query.searchQuery as string,
+        status: req.query.status as string,
+        parent: req.query.parent as string,
+        sortBy: req.query.sortBy as string || 'name',
+        sortOrder: req.query.sortOrder as 'asc' | 'desc' || 'asc'
+      };
+      const categories = await storage.getAdminContentCategories(filters);
+      res.json(categories);
+    } catch (error) {
+      console.error('Get content categories error:', error);
+      res.status(500).json({ error: 'Failed to fetch content categories' });
+    }
+  });
+
+  app.get('/api/admin/categories/products', requireAdmin, async (req, res) => {
+    try {
+      const filters = {
+        searchQuery: req.query.searchQuery as string,
+        status: req.query.status as string,
+        parent: req.query.parent as string,
+        sortBy: req.query.sortBy as string || 'name',
+        sortOrder: req.query.sortOrder as 'asc' | 'desc' || 'asc'
+      };
+      const categories = await storage.getAdminProductCategories(filters);
+      res.json(categories);
+    } catch (error) {
+      console.error('Get product categories error:', error);
+      res.status(500).json({ error: 'Failed to fetch product categories' });
+    }
+  });
+
+  app.get('/api/admin/categories/:type/stats', requireAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getCategoriesStats(req.params.type);
+      res.json(stats);
+    } catch (error) {
+      console.error('Get categories stats error:', error);
+      res.status(500).json({ error: 'Failed to fetch categories statistics' });
+    }
+  });
+
+  app.get('/api/admin/categories/:type/performance', requireAdmin, async (req, res) => {
+    try {
+      const performance = await storage.getCategoriesPerformance(req.params.type);
+      res.json(performance);
+    } catch (error) {
+      console.error('Get categories performance error:', error);
+      res.status(500).json({ error: 'Failed to fetch categories performance' });
+    }
+  });
+
+  app.post('/api/admin/categories/:type', requireAdmin, async (req, res) => {
+    try {
+      const category = await storage.createCategory(req.params.type, req.body, req.user!.id);
+      res.status(201).json(category);
+    } catch (error) {
+      console.error('Create category error:', error);
+      res.status(500).json({ error: 'Failed to create category' });
+    }
+  });
+
+  app.patch('/api/admin/categories/:type/:id', requireAdmin, async (req, res) => {
+    try {
+      await storage.updateCategory(req.params.type, req.params.id, req.body, req.user!.id);
+      const category = await storage.getCategory(req.params.type, req.params.id);
+      res.json(category);
+    } catch (error) {
+      console.error('Update category error:', error);
+      res.status(500).json({ error: 'Failed to update category' });
+    }
+  });
+
+  app.delete('/api/admin/categories/:type/:id', requireAdmin, async (req, res) => {
+    try {
+      await storage.deleteCategory(req.params.type, req.params.id, req.user!.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Delete category error:', error);
+      res.status(500).json({ error: 'Failed to delete category' });
+    }
+  });
+
+  app.post('/api/admin/categories/:type/bulk', requireAdmin, async (req, res) => {
+    try {
+      const { categoryIds, operation } = req.body;
+      await storage.bulkOperationCategories(req.params.type, categoryIds, operation, req.user!.id);
+      res.json({ success: true, processed: categoryIds.length });
+    } catch (error) {
+      console.error('Bulk categories operation error:', error);
+      res.status(500).json({ error: 'Failed to execute bulk operation' });
+    }
+  });
+
+  app.post('/api/admin/categories/:type/reorder', requireAdmin, async (req, res) => {
+    try {
+      const { categoryIds, newOrders } = req.body;
+      await storage.reorderCategories(req.params.type, categoryIds, newOrders, req.user!.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Reorder categories error:', error);
+      res.status(500).json({ error: 'Failed to reorder categories' });
+    }
+  });
+
+  // Supporting API Routes
+  app.get('/api/admin/creators', requireAdmin, async (req, res) => {
+    try {
+      const creators = await storage.getAllCreators();
+      res.json(creators);
+    } catch (error) {
+      console.error('Get creators error:', error);
+      res.status(500).json({ error: 'Failed to fetch creators' });
+    }
+  });
+
+  app.get('/api/admin/product-categories', requireAdmin, async (req, res) => {
+    try {
+      const categories = await storage.getProductCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error('Get product categories error:', error);
+      res.status(500).json({ error: 'Failed to fetch product categories' });
+    }
+  });
+
+  // ===== COMPREHENSIVE FINANCIAL ADMIN SYSTEM API ROUTES =====
+  
+  // 1. TRANSACTIONS MANAGEMENT API
+  app.get('/api/admin/financial/transactions', requireAdmin, async (req, res) => {
+    try {
+      const { 
+        page = 1, 
+        limit = 50, 
+        type, 
+        status, 
+        userId, 
+        startDate, 
+        endDate, 
+        minAmount, 
+        maxAmount, 
+        paymentMethod,
+        sortBy = 'createdAt',
+        sortOrder = 'desc'
+      } = req.query;
+
+      const transactions = await storage.getTransactionsByFilters({
+        page: Number(page),
+        limit: Number(limit),
+        type: type as string,
+        status: status as string,
+        userId: userId as string,
+        startDate: startDate ? new Date(startDate as string) : undefined,
+        endDate: endDate ? new Date(endDate as string) : undefined,
+        minAmount: minAmount ? Number(minAmount) : undefined,
+        maxAmount: maxAmount ? Number(maxAmount) : undefined,
+        paymentMethod: paymentMethod as string,
+        sortBy: sortBy as string,
+        sortOrder: sortOrder as string
+      });
+
+      res.json(transactions);
+    } catch (error) {
+      console.error('Get transactions error:', error);
+      res.status(500).json({ error: 'Failed to fetch transactions' });
+    }
+  });
+
+  app.get('/api/admin/financial/transactions/:id', requireAdmin, async (req, res) => {
+    try {
+      const transaction = await storage.getTransaction(req.params.id);
+      if (!transaction) {
+        return res.status(404).json({ error: 'Transaction not found' });
+      }
+      res.json(transaction);
+    } catch (error) {
+      console.error('Get transaction error:', error);
+      res.status(500).json({ error: 'Failed to fetch transaction details' });
+    }
+  });
+
+  app.post('/api/admin/financial/transactions/:id/refund', requireAdmin, async (req, res) => {
+    try {
+      const { reason, amount } = req.body;
+      const result = await enhancedPaymentService.processRefund(req.params.id, {
+        reason,
+        amount: amount ? Number(amount) : undefined,
+        adminId: req.user!.id
+      });
+      res.json(result);
+    } catch (error) {
+      console.error('Process refund error:', error);
+      res.status(500).json({ error: 'Failed to process refund' });
+    }
+  });
+
+  app.patch('/api/admin/financial/transactions/:id/status', requireAdmin, async (req, res) => {
+    try {
+      const { status, notes } = req.body;
+      await storage.updateTransaction(req.params.id, { status, adminNotes: notes });
+      
+      // Create audit log
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'transaction_status_updated',
+        targetType: 'transaction',
+        targetId: req.params.id,
+        diffJson: { status, notes }
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Update transaction status error:', error);
+      res.status(500).json({ error: 'Failed to update transaction status' });
+    }
+  });
+
+  app.post('/api/admin/financial/transactions/bulk', requireAdmin, async (req, res) => {
+    try {
+      const { transactionIds, operation, data } = req.body;
+      let processed = 0;
+
+      for (const transactionId of transactionIds) {
+        try {
+          switch (operation) {
+            case 'update_status':
+              await storage.updateTransaction(transactionId, { status: data.status });
+              break;
+            case 'flag_for_review':
+              await storage.updateTransaction(transactionId, { flaggedForReview: true, reviewReason: data.reason });
+              break;
+            case 'export':
+              // Export will be handled separately
+              break;
+          }
+          processed++;
+        } catch (error) {
+          console.error(`Failed to process transaction ${transactionId}:`, error);
+        }
+      }
+
+      res.json({ success: true, processed });
+    } catch (error) {
+      console.error('Bulk transaction operation error:', error);
+      res.status(500).json({ error: 'Failed to execute bulk operation' });
+    }
+  });
+
+  app.get('/api/admin/financial/transactions/analytics', requireAdmin, async (req, res) => {
+    try {
+      const { startDate, endDate, groupBy = 'day' } = req.query;
+      const analytics = await comprehensiveAnalyticsService.getTransactionAnalytics({
+        startDate: new Date(startDate as string),
+        endDate: new Date(endDate as string),
+        groupBy: groupBy as string
+      });
+      res.json(analytics);
+    } catch (error) {
+      console.error('Transaction analytics error:', error);
+      res.status(500).json({ error: 'Failed to fetch transaction analytics' });
+    }
+  });
+
+  app.get('/api/admin/financial/transactions/export', requireAdmin, async (req, res) => {
+    try {
+      const { format = 'csv', ...filters } = req.query;
+      const transactions = await storage.getTransactionsByFilters(filters);
+      
+      if (format === 'csv') {
+        const csv = await financialLedgerService.exportTransactions(transactions, 'csv');
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=transactions-export.csv');
+        return res.send(csv);
+      }
+      
+      res.json(transactions);
+    } catch (error) {
+      console.error('Transaction export error:', error);
+      res.status(500).json({ error: 'Failed to export transactions' });
+    }
+  });
+
+  // 2. BILLING MANAGEMENT API
+  app.get('/api/admin/financial/billing/profiles', requireAdmin, async (req, res) => {
+    try {
+      const { page = 1, limit = 50, search } = req.query;
+      const profiles = await storage.getBillingProfiles({
+        page: Number(page),
+        limit: Number(limit),
+        search: search as string
+      });
+      res.json(profiles);
+    } catch (error) {
+      console.error('Get billing profiles error:', error);
+      res.status(500).json({ error: 'Failed to fetch billing profiles' });
+    }
+  });
+
+  app.get('/api/admin/financial/billing/profiles/:id', requireAdmin, async (req, res) => {
+    try {
+      const profile = await storage.getBillingProfile(req.params.id);
+      if (!profile) {
+        return res.status(404).json({ error: 'Billing profile not found' });
+      }
+      res.json(profile);
+    } catch (error) {
+      console.error('Get billing profile error:', error);
+      res.status(500).json({ error: 'Failed to fetch billing profile' });
+    }
+  });
+
+  app.post('/api/admin/financial/billing/profiles', requireAdmin, async (req, res) => {
+    try {
+      const profile = await storage.createBillingProfile(req.body);
+      res.status(201).json(profile);
+    } catch (error) {
+      console.error('Create billing profile error:', error);
+      res.status(500).json({ error: 'Failed to create billing profile' });
+    }
+  });
+
+  app.patch('/api/admin/financial/billing/profiles/:id', requireAdmin, async (req, res) => {
+    try {
+      await storage.updateBillingProfile(req.params.id, req.body);
+      const profile = await storage.getBillingProfile(req.params.id);
+      res.json(profile);
+    } catch (error) {
+      console.error('Update billing profile error:', error);
+      res.status(500).json({ error: 'Failed to update billing profile' });
+    }
+  });
+
+  app.get('/api/admin/financial/billing/invoices', requireAdmin, async (req, res) => {
+    try {
+      const { page = 1, limit = 50, status, billingProfileId, startDate, endDate } = req.query;
+      const invoices = await storage.getInvoices({
+        page: Number(page),
+        limit: Number(limit),
+        status: status as string,
+        billingProfileId: billingProfileId as string,
+        startDate: startDate ? new Date(startDate as string) : undefined,
+        endDate: endDate ? new Date(endDate as string) : undefined
+      });
+      res.json(invoices);
+    } catch (error) {
+      console.error('Get invoices error:', error);
+      res.status(500).json({ error: 'Failed to fetch invoices' });
+    }
+  });
+
+  app.post('/api/admin/financial/billing/invoices', requireAdmin, async (req, res) => {
+    try {
+      const invoice = await storage.createInvoice(req.body);
+      res.status(201).json(invoice);
+    } catch (error) {
+      console.error('Create invoice error:', error);
+      res.status(500).json({ error: 'Failed to create invoice' });
+    }
+  });
+
+  app.patch('/api/admin/financial/billing/invoices/:id/status', requireAdmin, async (req, res) => {
+    try {
+      const { status, notes } = req.body;
+      await storage.updateInvoice(req.params.id, { status, adminNotes: notes });
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Update invoice status error:', error);
+      res.status(500).json({ error: 'Failed to update invoice status' });
+    }
+  });
+
+  // 3. TAX RATES MANAGEMENT API
+  app.get('/api/admin/financial/tax-rates', requireAdmin, async (req, res) => {
+    try {
+      const { page = 1, limit = 50, jurisdiction, taxType, isActive } = req.query;
+      const taxRates = await storage.getTaxRates({
+        page: Number(page),
+        limit: Number(limit),
+        jurisdiction: jurisdiction as string,
+        taxType: taxType as string,
+        isActive: isActive === 'true'
+      });
+      res.json(taxRates);
+    } catch (error) {
+      console.error('Get tax rates error:', error);
+      res.status(500).json({ error: 'Failed to fetch tax rates' });
+    }
+  });
+
+  app.post('/api/admin/financial/tax-rates', requireAdmin, async (req, res) => {
+    try {
+      const taxRate = await storage.createTaxRate(req.body);
+      res.status(201).json(taxRate);
+    } catch (error) {
+      console.error('Create tax rate error:', error);
+      res.status(500).json({ error: 'Failed to create tax rate' });
+    }
+  });
+
+  app.patch('/api/admin/financial/tax-rates/:id', requireAdmin, async (req, res) => {
+    try {
+      await storage.updateTaxRate(req.params.id, req.body);
+      const taxRate = await storage.getTaxRate(req.params.id);
+      res.json(taxRate);
+    } catch (error) {
+      console.error('Update tax rate error:', error);
+      res.status(500).json({ error: 'Failed to update tax rate' });
+    }
+  });
+
+  app.post('/api/admin/financial/tax-rates/calculate', requireAdmin, async (req, res) => {
+    try {
+      const { amount, jurisdiction, taxType } = req.body;
+      const calculation = await storage.calculateTax({
+        amount: Number(amount),
+        jurisdiction,
+        taxType
+      });
+      res.json(calculation);
+    } catch (error) {
+      console.error('Tax calculation error:', error);
+      res.status(500).json({ error: 'Failed to calculate tax' });
+    }
+  });
+
+  // 4. PAYMENT GATEWAYS MANAGEMENT API
+  app.get('/api/admin/financial/payment-gateways', requireAdmin, async (req, res) => {
+    try {
+      const gateways = await storage.getPaymentGateways();
+      // Remove sensitive credentials from response
+      const sanitizedGateways = gateways.map(gateway => ({
+        ...gateway,
+        credentials: Object.keys(gateway.credentials || {}).reduce((acc, key) => {
+          acc[key] = '***HIDDEN***';
+          return acc;
+        }, {} as any)
+      }));
+      res.json(sanitizedGateways);
+    } catch (error) {
+      console.error('Get payment gateways error:', error);
+      res.status(500).json({ error: 'Failed to fetch payment gateways' });
+    }
+  });
+
+  app.post('/api/admin/financial/payment-gateways', requireAdmin, async (req, res) => {
+    try {
+      const gateway = await storage.createPaymentGateway(req.body);
+      res.status(201).json(gateway);
+    } catch (error) {
+      console.error('Create payment gateway error:', error);
+      res.status(500).json({ error: 'Failed to create payment gateway' });
+    }
+  });
+
+  app.patch('/api/admin/financial/payment-gateways/:id', requireAdmin, async (req, res) => {
+    try {
+      await storage.updatePaymentGateway(req.params.id, req.body);
+      const gateway = await storage.getPaymentGateway(req.params.id);
+      res.json(gateway);
+    } catch (error) {
+      console.error('Update payment gateway error:', error);
+      res.status(500).json({ error: 'Failed to update payment gateway' });
+    }
+  });
+
+  app.post('/api/admin/financial/payment-gateways/:id/test', requireAdmin, async (req, res) => {
+    try {
+      const result = await enhancedPaymentService.testGatewayConnection(req.params.id);
+      res.json(result);
+    } catch (error) {
+      console.error('Test payment gateway error:', error);
+      res.status(500).json({ error: 'Failed to test payment gateway' });
+    }
+  });
+
+  // 5. DEPOSITS MANAGEMENT API
+  app.get('/api/admin/financial/deposits', requireAdmin, async (req, res) => {
+    try {
+      const { 
+        page = 1, 
+        limit = 50, 
+        status, 
+        amlStatus, 
+        userId, 
+        startDate, 
+        endDate,
+        minAmount,
+        maxAmount 
+      } = req.query;
+
+      const deposits = await storage.getDeposits({
+        page: Number(page),
+        limit: Number(limit),
+        status: status as string,
+        amlStatus: amlStatus as string,
+        userId: userId as string,
+        startDate: startDate ? new Date(startDate as string) : undefined,
+        endDate: endDate ? new Date(endDate as string) : undefined,
+        minAmount: minAmount ? Number(minAmount) : undefined,
+        maxAmount: maxAmount ? Number(maxAmount) : undefined
+      });
+
+      res.json(deposits);
+    } catch (error) {
+      console.error('Get deposits error:', error);
+      res.status(500).json({ error: 'Failed to fetch deposits' });
+    }
+  });
+
+  app.get('/api/admin/financial/deposits/:id', requireAdmin, async (req, res) => {
+    try {
+      const deposit = await storage.getDeposit(req.params.id);
+      if (!deposit) {
+        return res.status(404).json({ error: 'Deposit not found' });
+      }
+      res.json(deposit);
+    } catch (error) {
+      console.error('Get deposit error:', error);
+      res.status(500).json({ error: 'Failed to fetch deposit details' });
+    }
+  });
+
+  app.patch('/api/admin/financial/deposits/:id/status', requireAdmin, async (req, res) => {
+    try {
+      const { status, amlStatus, notes } = req.body;
+      await storage.updateDeposit(req.params.id, { 
+        status, 
+        amlStatus, 
+        adminNotes: notes,
+        processedBy: req.user!.id,
+        processedAt: new Date()
+      });
+
+      // Create audit log
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'deposit_status_updated',
+        targetType: 'deposit',
+        targetId: req.params.id,
+        diffJson: { status, amlStatus, notes }
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Update deposit status error:', error);
+      res.status(500).json({ error: 'Failed to update deposit status' });
+    }
+  });
+
+  app.get('/api/admin/financial/deposits/analytics', requireAdmin, async (req, res) => {
+    try {
+      const { startDate, endDate, groupBy = 'day' } = req.query;
+      const analytics = await comprehensiveAnalyticsService.getDepositAnalytics({
+        startDate: new Date(startDate as string),
+        endDate: new Date(endDate as string),
+        groupBy: groupBy as string
+      });
+      res.json(analytics);
+    } catch (error) {
+      console.error('Deposit analytics error:', error);
+      res.status(500).json({ error: 'Failed to fetch deposit analytics' });
+    }
+  });
+
+  // 6. FRAUD DETECTION API
+  app.get('/api/admin/financial/fraud/rules', requireAdmin, async (req, res) => {
+    try {
+      const rules = await storage.getFraudRules();
+      res.json(rules);
+    } catch (error) {
+      console.error('Get fraud rules error:', error);
+      res.status(500).json({ error: 'Failed to fetch fraud rules' });
+    }
+  });
+
+  app.post('/api/admin/financial/fraud/rules', requireAdmin, async (req, res) => {
+    try {
+      const rule = await storage.createFraudRule(req.body);
+      res.status(201).json(rule);
+    } catch (error) {
+      console.error('Create fraud rule error:', error);
+      res.status(500).json({ error: 'Failed to create fraud rule' });
+    }
+  });
+
+  app.get('/api/admin/financial/fraud/alerts', requireAdmin, async (req, res) => {
+    try {
+      const { page = 1, limit = 50, status, riskLevel } = req.query;
+      const alerts = await storage.getFraudAlerts({
+        page: Number(page),
+        limit: Number(limit),
+        status: status as string,
+        riskLevel: riskLevel as string
+      });
+      res.json(alerts);
+    } catch (error) {
+      console.error('Get fraud alerts error:', error);
+      res.status(500).json({ error: 'Failed to fetch fraud alerts' });
+    }
+  });
+
+  app.patch('/api/admin/financial/fraud/alerts/:id', requireAdmin, async (req, res) => {
+    try {
+      const { status, resolution, notes } = req.body;
+      await storage.updateFraudAlert(req.params.id, {
+        status,
+        resolution,
+        notes,
+        reviewedBy: req.user!.id,
+        reviewedAt: new Date()
+      });
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Update fraud alert error:', error);
+      res.status(500).json({ error: 'Failed to update fraud alert' });
+    }
+  });
+
+  // 7. AML/KYC MANAGEMENT API
+  app.get('/api/admin/financial/aml/checks', requireAdmin, async (req, res) => {
+    try {
+      const { page = 1, limit = 50, userId, checkType, status } = req.query;
+      const checks = await storage.getAmlChecks({
+        page: Number(page),
+        limit: Number(limit),
+        userId: userId as string,
+        checkType: checkType as string,
+        status: status as string
+      });
+      res.json(checks);
+    } catch (error) {
+      console.error('Get AML checks error:', error);
+      res.status(500).json({ error: 'Failed to fetch AML checks' });
+    }
+  });
+
+  app.post('/api/admin/financial/aml/checks', requireAdmin, async (req, res) => {
+    try {
+      const check = await storage.createAmlCheck(req.body);
+      res.status(201).json(check);
+    } catch (error) {
+      console.error('Create AML check error:', error);
+      res.status(500).json({ error: 'Failed to create AML check' });
+    }
+  });
+
+  app.get('/api/admin/financial/kyc/documents', requireAdmin, async (req, res) => {
+    try {
+      const { page = 1, limit = 50, userId, documentType, verificationStatus } = req.query;
+      const documents = await storage.getKycDocuments({
+        page: Number(page),
+        limit: Number(limit),
+        userId: userId as string,
+        documentType: documentType as string,
+        verificationStatus: verificationStatus as string
+      });
+      res.json(documents);
+    } catch (error) {
+      console.error('Get KYC documents error:', error);
+      res.status(500).json({ error: 'Failed to fetch KYC documents' });
+    }
+  });
+
+  app.patch('/api/admin/financial/kyc/documents/:id/verify', requireAdmin, async (req, res) => {
+    try {
+      const { status, rejectionReason } = req.body;
+      await storage.updateKycDocument(req.params.id, {
+        verificationStatus: status,
+        rejectionReason,
+        verifiedAt: status === 'verified' ? new Date() : null
+      });
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Verify KYC document error:', error);
+      res.status(500).json({ error: 'Failed to verify KYC document' });
+    }
+  });
+
+  // 8. FINANCIAL SETTINGS API
+  app.get('/api/admin/financial/settings', requireAdmin, async (req, res) => {
+    try {
+      const { category } = req.query;
+      const settings = await storage.getFinancialSettings(category as string);
+      res.json(settings);
+    } catch (error) {
+      console.error('Get financial settings error:', error);
+      res.status(500).json({ error: 'Failed to fetch financial settings' });
+    }
+  });
+
+  app.patch('/api/admin/financial/settings/:key', requireAdmin, async (req, res) => {
+    try {
+      const { value } = req.body;
+      await storage.updateFinancialSetting(req.params.key, {
+        settingValue: value,
+        lastModifiedBy: req.user!.id
+      });
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Update financial setting error:', error);
+      res.status(500).json({ error: 'Failed to update financial setting' });
+    }
+  });
+
+  // 9. FINANCIAL REPORTS API
+  app.get('/api/admin/financial/reports', requireAdmin, async (req, res) => {
+    try {
+      const { page = 1, limit = 50, type, status } = req.query;
+      const reports = await storage.getFinancialReports({
+        page: Number(page),
+        limit: Number(limit),
+        type: type as string,
+        status: status as string
+      });
+      res.json(reports);
+    } catch (error) {
+      console.error('Get financial reports error:', error);
+      res.status(500).json({ error: 'Failed to fetch financial reports' });
+    }
+  });
+
+  app.post('/api/admin/financial/reports/generate', requireAdmin, async (req, res) => {
+    try {
+      const { type, format, parameters, filters } = req.body;
+      const report = await storage.generateFinancialReport({
+        type,
+        format,
+        parameters,
+        filters,
+        generatedBy: req.user!.id
+      });
+      res.status(201).json(report);
+    } catch (error) {
+      console.error('Generate financial report error:', error);
+      res.status(500).json({ error: 'Failed to generate financial report' });
+    }
+  });
+
+  app.get('/api/admin/financial/dashboard/overview', requireAdmin, async (req, res) => {
+    try {
+      const overview = await comprehensiveAnalyticsService.getFinancialOverview();
+      res.json(overview);
+    } catch (error) {
+      console.error('Financial dashboard overview error:', error);
+      res.status(500).json({ error: 'Failed to fetch financial overview' });
+    }
+  });
+
   console.log('🛡️ Enhanced routes registered with comprehensive security features');
   console.log('👮 Admin dashboard routes registered with full CRUD operations');
   console.log('📋 Comprehensive admin management routes registered: Complaints, Payouts, Verifications');
   console.log('👥 User management routes registered with advanced filtering and bulk operations');
+  console.log('🎯 Content Management Admin routes registered: Posts, Streams, Stories, Shop, Categories');
+  console.log('💰 Comprehensive Financial Admin API routes registered: Transactions, Billing, Tax Rates, Payment Gateways, Deposits, Fraud Detection, AML/KYC, Reports');
 }
 
 // Import and register advanced features

@@ -50,6 +50,22 @@ export default function Sidebar({ user }: SidebarProps) {
     { path: "/admin/reports", icon: "fas fa-chart-bar", label: "Reports & Analytics" },
   ];
 
+  const contentManagementItems = [
+    { path: "/admin/posts", icon: "fas fa-file-alt", label: "Posts Management" },
+    { path: "/admin/streaming", icon: "fas fa-broadcast-tower", label: "Live Streaming" },
+    { path: "/admin/stories", icon: "fas fa-clock", label: "Stories Management" },
+    { path: "/admin/shop", icon: "fas fa-store", label: "Shop Management" },
+    { path: "/admin/categories", icon: "fas fa-folder-tree", label: "Categories Management" },
+  ];
+
+  const financialManagementItems = [
+    { path: "/admin/transactions", icon: "fas fa-exchange-alt", label: "Transactions" },
+    { path: "/admin/billing", icon: "fas fa-file-invoice", label: "Billing Management" },
+    { path: "/admin/tax-rates", icon: "fas fa-percentage", label: "Tax Rates" },
+    { path: "/admin/payment-settings", icon: "fas fa-cogs", label: "Payment Settings" },
+    { path: "/admin/deposits", icon: "fas fa-wallet", label: "Deposits" },
+  ];
+
   const sidebarContent = (
     <div className="flex h-full flex-col">
       {/* Logo */}
@@ -205,6 +221,62 @@ export default function Sidebar({ user }: SidebarProps) {
                       {item.badge}
                     </span>
                   )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Content Management Section */}
+        {(user?.role === 'admin' || user?.role === 'moderator') && (
+          <div className="mt-6 md:mt-8">
+            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Content Management
+            </h3>
+            <div className="mt-2 space-y-1">
+              {contentManagementItems.map((item) => (
+                <Link 
+                  key={item.path} 
+                  href={item.path}
+                  onClick={isMobile ? handleMobileLinkClick : undefined}
+                  className={cn(
+                    "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                    isActive(item.path)
+                      ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  <i className={`${item.icon} w-5 h-5 md:w-4 md:h-4`}></i>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Financial Management Section */}
+        {user?.role === 'admin' && (
+          <div className="mt-6 md:mt-8">
+            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Financial Management
+            </h3>
+            <div className="mt-2 space-y-1">
+              {financialManagementItems.map((item) => (
+                <Link 
+                  key={item.path} 
+                  href={item.path}
+                  onClick={isMobile ? handleMobileLinkClick : undefined}
+                  className={cn(
+                    "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                    isActive(item.path)
+                      ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  <i className={`${item.icon} w-5 h-5 md:w-4 md:h-4`}></i>
+                  {item.label}
                 </Link>
               ))}
             </div>

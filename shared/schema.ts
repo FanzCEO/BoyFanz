@@ -2338,7 +2338,329 @@ export const orderLineItems = pgTable("order_line_items", {
   index("idx_order_line_items_product").on(table.productId),
 ]);
 
-// ===== 5. USER MANAGEMENT ENHANCEMENTS =====
+// ===== 5. COMPREHENSIVE FINANCIAL ADMIN SYSTEM =====
+
+// Billing Information Management
+export const billingCycleEnum = pgEnum("billing_cycle", ["weekly", "monthly", "quarterly", "annually"]);
+export const invoiceStatusEnum = pgEnum("invoice_status", ["draft", "sent", "paid", "overdue", "cancelled", "refunded"]);
+export const paymentMethodTypeEnum = pgEnum("payment_method_type", ["card", "bank_transfer", "crypto", "paypal", "stripe_connect", "wire"]);
+
+export const billingProfiles = pgTable("billing_profiles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  companyName: varchar("company_name"),
+  taxId: varchar("tax_id"),
+  vatNumber: varchar("vat_number"),
+  billingAddress: jsonb("billing_address").notNull(),
+  paymentTerms: integer("payment_terms").default(30), // Days
+  preferredCurrency: varchar("preferred_currency").default("USD"),
+  billingCycle: billingCycleEnum("billing_cycle").default("monthly"),
+  creditLimit: integer("credit_limit_cents").default(0),
+  currentBalance: integer("current_balance_cents").default(0),
+  autoPayEnabled: boolean("auto_pay_enabled").default(false),
+  invoiceDeliveryMethod: varchar("invoice_delivery_method").default("email"),
+  customFields: jsonb("custom_fields").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_billing_profiles_user").on(table.userId),
+  index("idx_billing_profiles_tax_id").on(table.taxId),
+]);
+
+export const invoices = pgTable("invoices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  invoiceNumber: varchar("invoice_number").notNull().unique(),
+  billingProfileId: varchar("billing_profile_id").notNull().references(() => billingProfiles.id),
+  customerId: varchar("customer_id").notNull().references(() => users.id),
+  status: invoiceStatusEnum("status").default("draft"),
+  subtotalCents: integer("subtotal_cents").notNull(),
+  taxCents: integer("tax_cents").default(0),
+  discountCents: integer("discount_cents").default(0),
+  totalCents: integer("total_cents").notNull(),
+  currency: varchar("currency").default("USD"),
+  dueDate: timestamp("due_date").notNull(),
+  paidAt: timestamp("paid_at"),
+  paymentReference: varchar("payment_reference"),
+  notes: text("notes"),
+  lineItems: jsonb("line_items").notNull(),
+  taxBreakdown: jsonb("tax_breakdown").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_invoices_billing_profile").on(table.billingProfileId),
+  index("idx_invoices_customer").on(table.customerId),
+  index("idx_invoices_status").on(table.status),
+  index("idx_invoices_due_date").on(table.dueDate),
+]);
+
+// Tax Rates Management
+export const taxTypeEnum = pgEnum("tax_type", ["vat", "sales", "gst", "income", "withholding", "digital_services"]);
+export const taxCalculationMethodEnum = pgEnum("tax_calculation_method", ["inclusive", "exclusive", "compound"]);
+
+export const taxRates = pgTable("tax_rates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  code: varchar("code").notNull(),
+  taxType: taxTypeEnum("tax_type").notNull(),
+  rate: decimal("rate", { precision: 5, scale: 4 }).notNull(),
+  jurisdiction: varchar("jurisdiction").notNull(), // Country, state, or province
+  region: varchar("region"), // For more granular location targeting
+  calculationMethod: taxCalculationMethodEnum("calculation_method").default("exclusive"),
+  isActive: boolean("is_active").default(true),
+  effectiveFrom: timestamp("effective_from").notNull(),
+  effectiveTo: timestamp("effective_to"),
+  description: text("description"),
+  applicableBusinessTypes: text("applicable_business_types").array().default([]),
+  thresholdCents: integer("threshold_cents").default(0),
+  exemptions: jsonb("exemptions").default({}),
+  apiIntegration: jsonb("api_integration").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_tax_rates_jurisdiction").on(table.jurisdiction),
+  index("idx_tax_rates_active").on(table.isActive),
+  index("idx_tax_rates_effective").on(table.effectiveFrom, table.effectiveTo),
+  unique("unique_tax_rate_code").on(table.code),
+]);
+
+// Payment Gateway Configurations
+export const gatewayStatusEnum = pgEnum("gateway_status", ["active", "inactive", "testing", "maintenance"]);
+export const gatewayTypeEnum = pgEnum("gateway_type", ["stripe", "paypal", "square", "coinbase", "bitpay", "bank_transfer", "custom"]);
+
+export const paymentGateways = pgTable("payment_gateways", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  type: gatewayTypeEnum("type").notNull(),
+  status: gatewayStatusEnum("status").default("inactive"),
+  configuration: jsonb("configuration").notNull(),
+  credentials: jsonb("credentials").notNull(), // Encrypted
+  supportedCurrencies: text("supported_currencies").array().default(["USD"]),
+  supportedCountries: text("supported_countries").array().default([]),
+  feeStructure: jsonb("fee_structure").notNull(),
+  minimumAmount: integer("minimum_amount_cents").default(100),
+  maximumAmount: integer("maximum_amount_cents"),
+  processingTimeHours: integer("processing_time_hours").default(24),
+  webhookUrl: varchar("webhook_url"),
+  webhookSecret: varchar("webhook_secret"),
+  testMode: boolean("test_mode").default(true),
+  priority: integer("priority").default(0),
+  autoRetryEnabled: boolean("auto_retry_enabled").default(true),
+  fraudDetectionSettings: jsonb("fraud_detection_settings").default({}),
+  complianceSettings: jsonb("compliance_settings").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_payment_gateways_type").on(table.type),
+  index("idx_payment_gateways_status").on(table.status),
+  index("idx_payment_gateways_priority").on(table.priority),
+]);
+
+// Deposits Management
+export const depositMethodEnum = pgEnum("deposit_method", ["bank_transfer", "wire", "crypto", "card", "paypal", "stripe_transfer"]);
+export const depositStatusEnum = pgEnum("deposit_status", ["pending", "processing", "completed", "failed", "cancelled", "under_review"]);
+export const amlStatusEnum = pgEnum("aml_status", ["clear", "flagged", "under_review", "blocked", "escalated"]);
+
+export const depositMethods = pgTable("deposit_methods", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  method: depositMethodEnum("method").notNull(),
+  accountDetails: jsonb("account_details").notNull(), // Encrypted bank/crypto details
+  verificationStatus: varchar("verification_status").default("pending"),
+  verificationDocuments: jsonb("verification_documents").default({}),
+  isDefault: boolean("is_default").default(false),
+  isActive: boolean("is_active").default(true),
+  minimumDeposit: integer("minimum_deposit_cents").default(1000),
+  maximumDeposit: integer("maximum_deposit_cents").default(1000000),
+  feeStructure: jsonb("fee_structure").default({}),
+  lastUsedAt: timestamp("last_used_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_deposit_methods_user").on(table.userId),
+  index("idx_deposit_methods_method").on(table.method),
+  index("idx_deposit_methods_verification").on(table.verificationStatus),
+]);
+
+export const deposits = pgTable("deposits", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  depositMethodId: varchar("deposit_method_id").references(() => depositMethods.id),
+  referenceNumber: varchar("reference_number").notNull().unique(),
+  amountCents: integer("amount_cents").notNull(),
+  currency: varchar("currency").default("USD"),
+  exchangeRate: decimal("exchange_rate", { precision: 10, scale: 6 }),
+  convertedAmountCents: integer("converted_amount_cents"),
+  feeCents: integer("fee_cents").default(0),
+  netAmountCents: integer("net_amount_cents").notNull(),
+  status: depositStatusEnum("status").default("pending"),
+  amlStatus: amlStatusEnum("aml_status").default("clear"),
+  riskScore: integer("risk_score").default(0),
+  gatewayId: varchar("gateway_id").references(() => paymentGateways.id),
+  externalReference: varchar("external_reference"),
+  processedBy: varchar("processed_by").references(() => users.id),
+  processedAt: timestamp("processed_at"),
+  notes: text("notes"),
+  fraudAnalysis: jsonb("fraud_analysis").default({}),
+  complianceChecks: jsonb("compliance_checks").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_deposits_user").on(table.userId),
+  index("idx_deposits_status").on(table.status),
+  index("idx_deposits_aml_status").on(table.amlStatus),
+  index("idx_deposits_created_at").on(table.createdAt.desc()),
+  index("idx_deposits_reference").on(table.referenceNumber),
+]);
+
+// Financial Reporting and Analytics
+export const financialReportTypeEnum = pgEnum("financial_report_type", ["revenue", "transactions", "tax", "billing", "deposits", "payouts", "compliance"]);
+export const financialReportFormatEnum = pgEnum("financial_report_format", ["pdf", "csv", "xlsx", "json"]);
+
+export const financialReports = pgTable("financial_reports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  type: financialReportTypeEnum("type").notNull(),
+  format: financialReportFormatEnum("format").default("pdf"),
+  schedule: varchar("schedule"), // cron expression for automated reports
+  parameters: jsonb("parameters").default({}),
+  filters: jsonb("filters").default({}),
+  generatedBy: varchar("generated_by").references(() => users.id),
+  generatedAt: timestamp("generated_at"),
+  fileUrl: varchar("file_url"),
+  fileSize: integer("file_size"),
+  recordCount: integer("record_count"),
+  status: varchar("status").default("pending"),
+  error: text("error"),
+  isAutomated: boolean("is_automated").default(false),
+  retentionDays: integer("retention_days").default(365),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_financial_reports_type").on(table.type),
+  index("idx_financial_reports_generated_by").on(table.generatedBy),
+  index("idx_financial_reports_generated_at").on(table.generatedAt.desc()),
+]);
+
+// Fraud Detection and Risk Management
+export const fraudRuleTypeEnum = pgEnum("fraud_rule_type", ["velocity", "amount", "geo", "device", "behavioral", "pattern"]);
+export const riskLevelEnum = pgEnum("risk_level", ["low", "medium", "high", "critical"]);
+
+export const fraudRules = pgTable("fraud_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  type: fraudRuleTypeEnum("type").notNull(),
+  riskLevel: riskLevelEnum("risk_level").notNull(),
+  isActive: boolean("is_active").default(true),
+  conditions: jsonb("conditions").notNull(),
+  actions: jsonb("actions").notNull(),
+  scoreAdjustment: integer("score_adjustment").default(0),
+  blockTransaction: boolean("block_transaction").default(false),
+  requireManualReview: boolean("require_manual_review").default(false),
+  notifyAdmin: boolean("notify_admin").default(false),
+  priority: integer("priority").default(0),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_fraud_rules_type").on(table.type),
+  index("idx_fraud_rules_active").on(table.isActive),
+  index("idx_fraud_rules_priority").on(table.priority),
+]);
+
+export const fraudAlerts = pgTable("fraud_alerts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  transactionId: varchar("transaction_id").references(() => transactions.id),
+  depositId: varchar("deposit_id").references(() => deposits.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  ruleId: varchar("rule_id").references(() => fraudRules.id),
+  riskScore: integer("risk_score").notNull(),
+  riskLevel: riskLevelEnum("risk_level").notNull(),
+  status: varchar("status").default("pending"),
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  resolution: varchar("resolution"),
+  notes: text("notes"),
+  triggerData: jsonb("trigger_data").notNull(),
+  actionsTaken: jsonb("actions_taken").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_fraud_alerts_user").on(table.userId),
+  index("idx_fraud_alerts_status").on(table.status),
+  index("idx_fraud_alerts_risk_level").on(table.riskLevel),
+  index("idx_fraud_alerts_created_at").on(table.createdAt.desc()),
+]);
+
+// AML/KYC Enhanced Tracking
+export const amlCheckTypeEnum = pgEnum("aml_check_type", ["sanctions", "pep", "adverse_media", "identity", "source_of_funds"]);
+export const kycDocumentTypeEnum = pgEnum("kyc_document_type", ["passport", "drivers_license", "national_id", "utility_bill", "bank_statement", "tax_document"]);
+
+export const amlChecks = pgTable("aml_checks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  checkType: amlCheckTypeEnum("check_type").notNull(),
+  provider: varchar("provider").notNull(),
+  providerReference: varchar("provider_reference"),
+  status: varchar("status").default("pending"),
+  result: varchar("result"),
+  confidence: decimal("confidence", { precision: 3, scale: 2 }),
+  matchDetails: jsonb("match_details").default({}),
+  rawResponse: jsonb("raw_response").default({}),
+  cost: integer("cost_cents").default(0),
+  processedAt: timestamp("processed_at"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_aml_checks_user").on(table.userId),
+  index("idx_aml_checks_type").on(table.checkType),
+  index("idx_aml_checks_status").on(table.status),
+  index("idx_aml_checks_expires_at").on(table.expiresAt),
+]);
+
+export const kycDocuments = pgTable("kyc_documents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  documentType: kycDocumentTypeEnum("document_type").notNull(),
+  frontImageUrl: varchar("front_image_url"),
+  backImageUrl: varchar("back_image_url"),
+  extractedData: jsonb("extracted_data").default({}),
+  verificationStatus: varchar("verification_status").default("pending"),
+  verificationProvider: varchar("verification_provider"),
+  verificationReference: varchar("verification_reference"),
+  rejectionReason: text("rejection_reason"),
+  expiryDate: timestamp("expiry_date"),
+  issuingCountry: varchar("issuing_country"),
+  documentNumber: varchar("document_number"),
+  uploadedAt: timestamp("uploaded_at").defaultNow(),
+  verifiedAt: timestamp("verified_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_kyc_documents_user").on(table.userId),
+  index("idx_kyc_documents_type").on(table.documentType),
+  index("idx_kyc_documents_status").on(table.verificationStatus),
+]);
+
+// Financial Admin Settings
+export const financialSettings = pgTable("financial_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  settingKey: varchar("setting_key").notNull().unique(),
+  settingValue: jsonb("setting_value").notNull(),
+  description: text("description"),
+  category: varchar("category").notNull(),
+  isEncrypted: boolean("is_encrypted").default(false),
+  lastModifiedBy: varchar("last_modified_by").references(() => users.id),
+  validationRules: jsonb("validation_rules").default({}),
+  effectiveFrom: timestamp("effective_from").defaultNow(),
+  effectiveTo: timestamp("effective_to"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_financial_settings_category").on(table.category),
+  index("idx_financial_settings_effective").on(table.effectiveFrom, table.effectiveTo),
+]);
+
+// ===== 6. USER MANAGEMENT ENHANCEMENTS =====
 export const suspensionReasonEnum = pgEnum("suspension_reason", ["violation", "abuse", "fraud", "dmca", "manual", "auto_flag"]);
 export const banTypeEnum = pgEnum("ban_type", ["temporary", "permanent", "shadow"]);
 
@@ -2408,6 +2730,20 @@ export const insertOrderLineItemSchema = createInsertSchema(orderLineItems).omit
 export const insertUserSuspensionSchema = createInsertSchema(userSuspensions).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertUserActivityLogSchema = createInsertSchema(userActivityLog).omit({ id: true });
 
+// Financial Admin Insert Schemas
+export const insertBillingProfileSchema = createInsertSchema(billingProfiles).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertInvoiceSchema = createInsertSchema(invoices).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertTaxRateSchema = createInsertSchema(taxRates).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertPaymentGatewaySchema = createInsertSchema(paymentGateways).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertDepositMethodSchema = createInsertSchema(depositMethods).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertDepositSchema = createInsertSchema(deposits).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertFinancialReportSchema = createInsertSchema(financialReports).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertFraudRuleSchema = createInsertSchema(fraudRules).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertFraudAlertSchema = createInsertSchema(fraudAlerts).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertAmlCheckSchema = createInsertSchema(amlChecks).omit({ id: true, createdAt: true });
+export const insertKycDocumentSchema = createInsertSchema(kycDocuments).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertFinancialSettingSchema = createInsertSchema(financialSettings).omit({ id: true, createdAt: true, updatedAt: true });
+
 // Types for new tables
 export type Leaderboard = typeof leaderboards.$inferSelect;
 export type InsertLeaderboard = z.infer<typeof insertLeaderboardSchema>;
@@ -2447,3 +2783,29 @@ export type UserSuspension = typeof userSuspensions.$inferSelect;
 export type InsertUserSuspension = z.infer<typeof insertUserSuspensionSchema>;
 export type UserActivityLog = typeof userActivityLog.$inferSelect;
 export type InsertUserActivityLog = z.infer<typeof insertUserActivityLogSchema>;
+
+// Financial Admin Types
+export type BillingProfile = typeof billingProfiles.$inferSelect;
+export type InsertBillingProfile = z.infer<typeof insertBillingProfileSchema>;
+export type Invoice = typeof invoices.$inferSelect;
+export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+export type TaxRate = typeof taxRates.$inferSelect;
+export type InsertTaxRate = z.infer<typeof insertTaxRateSchema>;
+export type PaymentGateway = typeof paymentGateways.$inferSelect;
+export type InsertPaymentGateway = z.infer<typeof insertPaymentGatewaySchema>;
+export type DepositMethod = typeof depositMethods.$inferSelect;
+export type InsertDepositMethod = z.infer<typeof insertDepositMethodSchema>;
+export type Deposit = typeof deposits.$inferSelect;
+export type InsertDeposit = z.infer<typeof insertDepositSchema>;
+export type FinancialReport = typeof financialReports.$inferSelect;
+export type InsertFinancialReport = z.infer<typeof insertFinancialReportSchema>;
+export type FraudRule = typeof fraudRules.$inferSelect;
+export type InsertFraudRule = z.infer<typeof insertFraudRuleSchema>;
+export type FraudAlert = typeof fraudAlerts.$inferSelect;
+export type InsertFraudAlert = z.infer<typeof insertFraudAlertSchema>;
+export type AmlCheck = typeof amlChecks.$inferSelect;
+export type InsertAmlCheck = z.infer<typeof insertAmlCheckSchema>;
+export type KycDocument = typeof kycDocuments.$inferSelect;
+export type InsertKycDocument = z.infer<typeof insertKycDocumentSchema>;
+export type FinancialSetting = typeof financialSettings.$inferSelect;
+export type InsertFinancialSetting = z.infer<typeof insertFinancialSettingSchema>;

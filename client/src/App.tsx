@@ -30,6 +30,18 @@ import ComplaintsManagement from "@/pages/Admin/Complaints";
 import WithdrawalsManagement from "@/pages/Admin/Withdrawals";
 import VerificationManagement from "@/pages/Admin/Verification";
 import AdminReports from "@/pages/Admin/Reports";
+// Content Management Admin Pages
+import PostsManagement from "@/pages/Admin/PostsManagement";
+import LiveStreaming from "@/pages/Admin/LiveStreaming";
+import StoriesManagement from "@/pages/Admin/StoriesManagement";
+import ShopManagement from "@/pages/Admin/ShopManagement";
+import CategoriesManagement from "@/pages/Admin/CategoriesManagement";
+// Financial Management Admin Pages
+import TransactionsManagement from "@/pages/Admin/TransactionsManagement";
+import BillingManagement from "@/pages/Admin/BillingManagement";
+import TaxRatesManagement from "@/pages/Admin/TaxRatesManagement";
+import PaymentSettings from "@/pages/Admin/PaymentSettings";
+import DepositsManagement from "@/pages/Admin/DepositsManagement";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/layout/Sidebar";
@@ -149,6 +161,18 @@ function Router() {
             <Route path="/admin/delegation" component={DelegationManager} />
             <Route path="/admin/themes" component={ThemeManager} />
             <Route path="/admin/reports" component={AdminReports} />
+            {/* Content Management Admin Routes */}
+            <Route path="/admin/posts" component={PostsManagement} />
+            <Route path="/admin/streaming" component={LiveStreaming} />
+            <Route path="/admin/stories" component={StoriesManagement} />
+            <Route path="/admin/shop" component={ShopManagement} />
+            <Route path="/admin/categories" component={CategoriesManagement} />
+            {/* Financial Management Admin Routes */}
+            <Route path="/admin/transactions" component={TransactionsManagement} />
+            <Route path="/admin/billing" component={BillingManagement} />
+            <Route path="/admin/tax-rates" component={TaxRatesManagement} />
+            <Route path="/admin/payment-settings" component={PaymentSettings} />
+            <Route path="/admin/deposits" component={DepositsManagement} />
             <Route path="/settings" component={Settings} />
             <Route path="/creator/:userId" component={CreatorProfile} />
             <Route path="/feed" component={PostsFeed} />
