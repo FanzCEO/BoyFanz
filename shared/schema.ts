@@ -1989,6 +1989,10 @@ export const insertAdminReportTemplateSchema = createInsertSchema(adminReportTem
 export const insertAdminReportRunSchema = createInsertSchema(adminReportRuns).omit({ id: true, createdAt: true });
 export const insertSystemMetricSchema = createInsertSchema(systemMetrics).omit({ id: true, createdAt: true });
 
+// Missing insert schemas for admin features
+export const insertPayoutAccountSchema = createInsertSchema(payoutAccounts).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertKycVerificationSchema = createInsertSchema(kycVerifications).omit({ id: true, createdAt: true, updatedAt: true });
+
 // Admin feature types
 export type Complaint = typeof complaints.$inferSelect;
 export type InsertComplaint = z.infer<typeof insertComplaintSchema>;
@@ -2002,3 +2006,444 @@ export type AdminReportRun = typeof adminReportRuns.$inferSelect;
 export type InsertAdminReportRun = z.infer<typeof insertAdminReportRunSchema>;
 export type SystemMetric = typeof systemMetrics.$inferSelect;
 export type InsertSystemMetric = z.infer<typeof insertSystemMetricSchema>;
+
+// Additional admin feature types
+export type PayoutAccount = typeof payoutAccounts.$inferSelect;
+export type InsertPayoutAccount = z.infer<typeof insertPayoutAccountSchema>;
+export type KycVerification = typeof kycVerifications.$inferSelect;
+export type InsertKycVerification = z.infer<typeof insertKycVerificationSchema>;
+
+// ===== ADMIN MANAGEMENT SYSTEM EXTENSIONS =====
+
+// ===== 1. LEADERBOARD SYSTEM =====
+export const leaderboardTypeEnum = pgEnum("leaderboard_type", ["earnings", "engagement", "followers", "content", "tips", "streams", "posts"]);
+export const leaderboardPeriodEnum = pgEnum("leaderboard_period", ["daily", "weekly", "monthly", "quarterly", "yearly", "all_time"]);
+
+export const leaderboards = pgTable("leaderboards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  type: leaderboardTypeEnum("type").notNull(),
+  period: leaderboardPeriodEnum("period").notNull(),
+  description: text("description"),
+  isActive: boolean("is_active").default(true),
+  isPublic: boolean("is_public").default(true),
+  maxEntries: integer("max_entries").default(100),
+  scoringAlgorithm: jsonb("scoring_algorithm").default({}),
+  weights: jsonb("weights").default({}),
+  criteria: jsonb("criteria").default({}),
+  prizesEnabled: boolean("prizes_enabled").default(false),
+  prizeStructure: jsonb("prize_structure").default({}),
+  resetFrequency: varchar("reset_frequency").default("weekly"), // daily, weekly, monthly, never
+  lastResetAt: timestamp("last_reset_at"),
+  nextResetAt: timestamp("next_reset_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_leaderboards_type_period").on(table.type, table.period),
+  index("idx_leaderboards_active").on(table.isActive),
+]);
+
+export const leaderboardEntries = pgTable("leaderboard_entries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leaderboardId: varchar("leaderboard_id").notNull().references(() => leaderboards.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  score: decimal("score", { precision: 15, scale: 2 }).notNull(),
+  rank: integer("rank").notNull(),
+  previousRank: integer("previous_rank"),
+  rankChange: integer("rank_change").default(0),
+  bonus: decimal("bonus", { precision: 10, scale: 2 }).default("0"),
+  badge: varchar("badge"),
+  metadata: jsonb("metadata").default({}),
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  unique("unique_leaderboard_user_period").on(table.leaderboardId, table.userId, table.periodStart),
+  index("idx_leaderboard_entries_rank").on(table.leaderboardId, table.rank),
+  index("idx_leaderboard_entries_score").on(table.leaderboardId, table.score.desc()),
+  index("idx_leaderboard_entries_user").on(table.userId),
+]);
+
+export const leaderboardAchievements = pgTable("leaderboard_achievements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  badgeIcon: varchar("badge_icon"),
+  badgeColor: varchar("badge_color"),
+  leaderboardType: leaderboardTypeEnum("leaderboard_type"),
+  requirement: jsonb("requirement").notNull(), // e.g., {"type": "rank", "value": 1, "consecutive_periods": 3}
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userAchievements = pgTable("user_achievements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  achievementId: varchar("achievement_id").notNull().references(() => leaderboardAchievements.id, { onDelete: "cascade" }),
+  unlockedAt: timestamp("unlocked_at").defaultNow(),
+  isVisible: boolean("is_visible").default(true),
+  metadata: jsonb("metadata").default({}),
+}, (table) => [
+  unique("unique_user_achievement").on(table.userId, table.achievementId),
+  index("idx_user_achievements_user").on(table.userId),
+]);
+
+// ===== 2. ENHANCED CONSENT FORMS SYSTEM =====
+export const consentFormTypeEnum = pgEnum("consent_form_type", ["model_release", "costar_consent", "age_verification", "custom_form"]);
+export const consentStatusEnum = pgEnum("consent_status", ["pending", "signed", "expired", "withdrawn", "rejected"]);
+
+export const consentFormTemplates = pgTable("consent_form_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  type: consentFormTypeEnum("type").notNull(),
+  version: varchar("version").default("1.0"),
+  description: text("description"),
+  formData: jsonb("form_data").notNull(), // Form structure and fields
+  legalText: text("legal_text").notNull(),
+  requirements: jsonb("requirements").default({}),
+  expirationDays: integer("expiration_days").default(365),
+  isActive: boolean("is_active").default(true),
+  isRequired: boolean("is_required").default(false),
+  jurisdiction: varchar("jurisdiction").default("US"),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const consentForms = pgTable("consent_forms", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  templateId: varchar("template_id").notNull().references(() => consentFormTemplates.id),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  costarUserId: varchar("costar_user_id").references(() => users.id, { onDelete: "cascade" }), // For co-star consents
+  status: consentStatusEnum("status").default("pending").notNull(),
+  formData: jsonb("form_data").notNull(), // Filled form data
+  documentsUploaded: text("documents_uploaded").array().default([]),
+  digitalSignature: text("digital_signature"),
+  ipAddress: varchar("ip_address"),
+  signedAt: timestamp("signed_at"),
+  expiresAt: timestamp("expires_at"),
+  withdrawnAt: timestamp("withdrawn_at"),
+  withdrawalReason: text("withdrawal_reason"),
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  reviewNotes: text("review_notes"),
+  notificationsSent: jsonb("notifications_sent").default([]),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_consent_forms_user").on(table.userId),
+  index("idx_consent_forms_status").on(table.status),
+  index("idx_consent_forms_expires").on(table.expiresAt),
+  index("idx_consent_forms_costar").on(table.costarUserId),
+]);
+
+export const consentNotificationSchedule = pgTable("consent_notification_schedule", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  consentFormId: varchar("consent_form_id").notNull().references(() => consentForms.id, { onDelete: "cascade" }),
+  notificationType: varchar("notification_type").notNull(), // "expiring_soon", "expired", "renewal_reminder"
+  scheduledFor: timestamp("scheduled_for").notNull(),
+  sentAt: timestamp("sent_at"),
+  status: varchar("status").default("pending"), // pending, sent, failed
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_consent_notifications_scheduled").on(table.scheduledFor),
+  index("idx_consent_notifications_status").on(table.status),
+]);
+
+// ===== 3. STORIES MANAGEMENT SYSTEM =====
+export const storyStatusEnum = pgEnum("story_status", ["active", "expired", "archived", "hidden", "flagged"]);
+export const storyTypeEnum = pgEnum("story_type", ["photo", "video", "text", "poll", "question"]);
+
+export const stories = pgTable("stories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: storyTypeEnum("type").notNull(),
+  status: storyStatusEnum("status").default("active").notNull(),
+  mediaUrl: varchar("media_url"),
+  thumbnailUrl: varchar("thumbnail_url"),
+  text: text("text"),
+  duration: integer("duration"), // For videos, in seconds
+  viewsCount: integer("views_count").default(0),
+  likesCount: integer("likes_count").default(0),
+  repliesCount: integer("replies_count").default(0),
+  isHighlighted: boolean("is_highlighted").default(false),
+  isPromoted: boolean("is_promoted").default(false),
+  pollData: jsonb("poll_data"), // For poll stories
+  questionData: jsonb("question_data"), // For question stories
+  viewerList: jsonb("viewer_list").default([]), // Array of user IDs who viewed
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_stories_creator_created").on(table.creatorId, table.createdAt.desc()),
+  index("idx_stories_status_expires").on(table.status, table.expiresAt),
+  index("idx_stories_promoted").on(table.isPromoted),
+]);
+
+export const storyViews = pgTable("story_views", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  storyId: varchar("story_id").notNull().references(() => stories.id, { onDelete: "cascade" }),
+  viewerId: varchar("viewer_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  viewedAt: timestamp("viewed_at").defaultNow(),
+  viewDuration: integer("view_duration"), // How long they viewed it, in seconds
+}, (table) => [
+  unique("unique_story_viewer").on(table.storyId, table.viewerId),
+  index("idx_story_views_story").on(table.storyId),
+  index("idx_story_views_viewer").on(table.viewerId),
+]);
+
+export const storyReplies = pgTable("story_replies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  storyId: varchar("story_id").notNull().references(() => stories.id, { onDelete: "cascade" }),
+  fromUserId: varchar("from_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  mediaUrl: varchar("media_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_story_replies_story").on(table.storyId),
+  index("idx_story_replies_from").on(table.fromUserId),
+]);
+
+// ===== 4. SHOP MANAGEMENT SYSTEM =====
+export const productStatusEnum = pgEnum("product_status", ["draft", "active", "inactive", "out_of_stock", "discontinued"]);
+export const productTypeEnum = pgEnum("product_type", ["digital", "physical", "subscription", "bundle"]);
+export const orderStatusEnum = pgEnum("order_status", ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled", "refunded"]);
+export const fulfillmentStatusEnum = pgEnum("fulfillment_status", ["pending", "processing", "shipped", "delivered", "cancelled"]);
+
+export const productCategories = pgTable("product_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  slug: varchar("slug").notNull().unique(),
+  description: text("description"),
+  imageUrl: varchar("image_url"),
+  parentId: varchar("parent_id").references(() => productCategories.id),
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_product_categories_parent").on(table.parentId),
+  index("idx_product_categories_active").on(table.isActive),
+]);
+
+export const products = pgTable("products", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  categoryId: varchar("category_id").references(() => productCategories.id),
+  name: varchar("name").notNull(),
+  slug: varchar("slug").notNull(),
+  description: text("description"),
+  shortDescription: text("short_description"),
+  type: productTypeEnum("type").notNull(),
+  status: productStatusEnum("status").default("draft").notNull(),
+  priceCents: integer("price_cents").notNull(),
+  comparePriceCents: integer("compare_price_cents"), // Original price for discounts
+  costCents: integer("cost_cents"), // Creator's cost
+  sku: varchar("sku"),
+  barcode: varchar("barcode"),
+  weight: integer("weight"), // in grams
+  dimensions: jsonb("dimensions"), // {length, width, height}
+  images: text("images").array().default([]),
+  tags: text("tags").array().default([]),
+  inventory: jsonb("inventory").default({}), // {track: bool, quantity: int, policy: string}
+  shippingRequired: boolean("shipping_required").default(false),
+  shippingSettings: jsonb("shipping_settings").default({}),
+  digitalAssets: text("digital_assets").array().default([]), // For digital products
+  metadata: jsonb("metadata").default({}),
+  seoTitle: varchar("seo_title"),
+  seoDescription: text("seo_description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique("unique_creator_product_slug").on(table.creatorId, table.slug),
+  index("idx_products_creator_status").on(table.creatorId, table.status),
+  index("idx_products_category").on(table.categoryId),
+  index("idx_products_status").on(table.status),
+]);
+
+export const productVariants = pgTable("product_variants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
+  title: varchar("title").notNull(),
+  option1: varchar("option1"), // e.g., "Size"
+  option2: varchar("option2"), // e.g., "Color"
+  option3: varchar("option3"), // e.g., "Material"
+  priceCents: integer("price_cents").notNull(),
+  comparePriceCents: integer("compare_price_cents"),
+  costCents: integer("cost_cents"),
+  sku: varchar("sku"),
+  barcode: varchar("barcode"),
+  inventoryQuantity: integer("inventory_quantity").default(0),
+  weight: integer("weight"),
+  imageUrl: varchar("image_url"),
+  position: integer("position").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_product_variants_product").on(table.productId),
+  index("idx_product_variants_sku").on(table.sku),
+]);
+
+export const orders = pgTable("orders", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  orderNumber: varchar("order_number").notNull().unique(),
+  customerId: varchar("customer_id").notNull().references(() => users.id),
+  creatorId: varchar("creator_id").notNull().references(() => users.id),
+  status: orderStatusEnum("status").default("pending").notNull(),
+  fulfillmentStatus: fulfillmentStatusEnum("fulfillment_status").default("pending").notNull(),
+  subtotalCents: integer("subtotal_cents").notNull(),
+  taxCents: integer("tax_cents").default(0),
+  shippingCents: integer("shipping_cents").default(0),
+  discountCents: integer("discount_cents").default(0),
+  totalCents: integer("total_cents").notNull(),
+  currency: varchar("currency").default("USD"),
+  customerEmail: varchar("customer_email").notNull(),
+  shippingAddress: jsonb("shipping_address"),
+  billingAddress: jsonb("billing_address"),
+  paymentMethod: varchar("payment_method"),
+  paymentStatus: varchar("payment_status").default("pending"),
+  paymentReference: varchar("payment_reference"),
+  notes: text("notes"),
+  cancelReason: text("cancel_reason"),
+  cancelledAt: timestamp("cancelled_at"),
+  processedAt: timestamp("processed_at"),
+  shippedAt: timestamp("shipped_at"),
+  deliveredAt: timestamp("delivered_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_orders_customer").on(table.customerId),
+  index("idx_orders_creator").on(table.creatorId),
+  index("idx_orders_status").on(table.status),
+  index("idx_orders_number").on(table.orderNumber),
+]);
+
+export const orderLineItems = pgTable("order_line_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  orderId: varchar("order_id").notNull().references(() => orders.id, { onDelete: "cascade" }),
+  productId: varchar("product_id").references(() => products.id),
+  variantId: varchar("variant_id").references(() => productVariants.id),
+  title: varchar("title").notNull(),
+  variantTitle: varchar("variant_title"),
+  quantity: integer("quantity").notNull(),
+  priceCents: integer("price_cents").notNull(),
+  totalCents: integer("total_cents").notNull(),
+  sku: varchar("sku"),
+  productData: jsonb("product_data"), // Snapshot of product at order time
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_order_line_items_order").on(table.orderId),
+  index("idx_order_line_items_product").on(table.productId),
+]);
+
+// ===== 5. USER MANAGEMENT ENHANCEMENTS =====
+export const suspensionReasonEnum = pgEnum("suspension_reason", ["violation", "abuse", "fraud", "dmca", "manual", "auto_flag"]);
+export const banTypeEnum = pgEnum("ban_type", ["temporary", "permanent", "shadow"]);
+
+export const userSuspensions = pgTable("user_suspensions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  reason: suspensionReasonEnum("reason").notNull(),
+  banType: banTypeEnum("ban_type").notNull(),
+  description: text("description").notNull(),
+  violationDetails: jsonb("violation_details").default({}),
+  suspendedBy: varchar("suspended_by").notNull().references(() => users.id),
+  duration: integer("duration"), // In hours, null for permanent
+  startedAt: timestamp("started_at").defaultNow(),
+  endsAt: timestamp("ends_at"),
+  liftedAt: timestamp("lifted_at"),
+  liftedBy: varchar("lifted_by").references(() => users.id),
+  liftReason: text("lift_reason"),
+  appealSubmitted: boolean("appeal_submitted").default(false),
+  appealText: text("appeal_text"),
+  appealedAt: timestamp("appealed_at"),
+  appealDecision: varchar("appeal_decision"), // approved, rejected, pending
+  appealDecidedBy: varchar("appeal_decided_by").references(() => users.id),
+  appealDecidedAt: timestamp("appeal_decided_at"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_user_suspensions_user").on(table.userId),
+  index("idx_user_suspensions_active").on(table.isActive),
+  index("idx_user_suspensions_ends").on(table.endsAt),
+]);
+
+export const userActivityLog = pgTable("user_activity_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  activity: varchar("activity").notNull(), // login, logout, post_create, message_send, etc.
+  details: jsonb("details").default({}),
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  sessionId: varchar("session_id"),
+  timestamp: timestamp("timestamp").defaultNow(),
+}, (table) => [
+  index("idx_user_activity_user_time").on(table.userId, table.timestamp.desc()),
+  index("idx_user_activity_activity").on(table.activity),
+]);
+
+// Insert schemas for new tables
+export const insertLeaderboardSchema = createInsertSchema(leaderboards).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertLeaderboardEntrySchema = createInsertSchema(leaderboardEntries).omit({ id: true, createdAt: true });
+export const insertLeaderboardAchievementSchema = createInsertSchema(leaderboardAchievements).omit({ id: true, createdAt: true });
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({ id: true });
+
+export const insertConsentFormTemplateSchema = createInsertSchema(consentFormTemplates).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertConsentFormSchema = createInsertSchema(consentForms).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertConsentNotificationSchema = createInsertSchema(consentNotificationSchedule).omit({ id: true, createdAt: true });
+
+export const insertStorySchema = createInsertSchema(stories).omit({ id: true, viewsCount: true, likesCount: true, repliesCount: true, createdAt: true, updatedAt: true });
+export const insertStoryViewSchema = createInsertSchema(storyViews).omit({ id: true });
+export const insertStoryReplySchema = createInsertSchema(storyReplies).omit({ id: true, createdAt: true });
+
+export const insertProductCategorySchema = createInsertSchema(productCategories).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertProductSchema = createInsertSchema(products).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertProductVariantSchema = createInsertSchema(productVariants).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertOrderLineItemSchema = createInsertSchema(orderLineItems).omit({ id: true, createdAt: true });
+
+export const insertUserSuspensionSchema = createInsertSchema(userSuspensions).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertUserActivityLogSchema = createInsertSchema(userActivityLog).omit({ id: true });
+
+// Types for new tables
+export type Leaderboard = typeof leaderboards.$inferSelect;
+export type InsertLeaderboard = z.infer<typeof insertLeaderboardSchema>;
+export type LeaderboardEntry = typeof leaderboardEntries.$inferSelect;
+export type InsertLeaderboardEntry = z.infer<typeof insertLeaderboardEntrySchema>;
+export type LeaderboardAchievement = typeof leaderboardAchievements.$inferSelect;
+export type InsertLeaderboardAchievement = z.infer<typeof insertLeaderboardAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+
+export type ConsentFormTemplate = typeof consentFormTemplates.$inferSelect;
+export type InsertConsentFormTemplate = z.infer<typeof insertConsentFormTemplateSchema>;
+export type ConsentForm = typeof consentForms.$inferSelect;
+export type InsertConsentForm = z.infer<typeof insertConsentFormSchema>;
+export type ConsentNotificationSchedule = typeof consentNotificationSchedule.$inferSelect;
+export type InsertConsentNotification = z.infer<typeof insertConsentNotificationSchema>;
+
+export type Story = typeof stories.$inferSelect;
+export type InsertStory = z.infer<typeof insertStorySchema>;
+export type StoryView = typeof storyViews.$inferSelect;
+export type InsertStoryView = z.infer<typeof insertStoryViewSchema>;
+export type StoryReply = typeof storyReplies.$inferSelect;
+export type InsertStoryReply = z.infer<typeof insertStoryReplySchema>;
+
+export type ProductCategory = typeof productCategories.$inferSelect;
+export type InsertProductCategory = z.infer<typeof insertProductCategorySchema>;
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type ProductVariant = typeof productVariants.$inferSelect;
+export type InsertProductVariant = z.infer<typeof insertProductVariantSchema>;
+export type Order = typeof orders.$inferSelect;
+export type InsertOrder = z.infer<typeof insertOrderSchema>;
+export type OrderLineItem = typeof orderLineItems.$inferSelect;
+export type InsertOrderLineItem = z.infer<typeof insertOrderLineItemSchema>;
+
+export type UserSuspension = typeof userSuspensions.$inferSelect;
+export type InsertUserSuspension = z.infer<typeof insertUserSuspensionSchema>;
+export type UserActivityLog = typeof userActivityLog.$inferSelect;
+export type InsertUserActivityLog = z.infer<typeof insertUserActivityLogSchema>;

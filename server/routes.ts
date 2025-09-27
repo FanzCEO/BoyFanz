@@ -2438,8 +2438,576 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // ===== COMPREHENSIVE ADMIN MANAGEMENT API ROUTES =====
+
+  // Complaints Management System API Routes
+  app.get('/api/admin/complaints', requireAdmin, async (req, res) => {
+    try {
+      const filters = {
+        status: req.query.status as string,
+        category: req.query.category as string,
+        priority: req.query.priority as string,
+        assignedToId: req.query.assignedToId as string,
+        submitterId: req.query.submitterId as string,
+        startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
+        endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
+        offset: req.query.offset ? parseInt(req.query.offset as string) : 0,
+        sortBy: req.query.sortBy as string || 'createdAt',
+        sortOrder: req.query.sortOrder as 'asc' | 'desc' || 'desc'
+      };
+      const result = await storage.getComplaints(filters);
+      res.json(result);
+    } catch (error) {
+      console.error('Get complaints error:', error);
+      res.status(500).json({ error: 'Failed to fetch complaints' });
+    }
+  });
+
+  app.get('/api/admin/complaints/stats', requireAdmin, async (req, res) => {
+    try {
+      const filters = {
+        startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
+        endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined
+      };
+      const stats = await storage.getComplaintStats(filters);
+      res.json(stats);
+    } catch (error) {
+      console.error('Get complaint stats error:', error);
+      res.status(500).json({ error: 'Failed to fetch complaint statistics' });
+    }
+  });
+
+  app.get('/api/admin/complaints/:id', requireAdmin, async (req, res) => {
+    try {
+      const complaint = await storage.getComplaint(req.params.id);
+      if (!complaint) {
+        return res.status(404).json({ error: 'Complaint not found' });
+      }
+      res.json(complaint);
+    } catch (error) {
+      console.error('Get complaint error:', error);
+      res.status(500).json({ error: 'Failed to fetch complaint' });
+    }
+  });
+
+  app.post('/api/admin/complaints', requireAdmin, async (req, res) => {
+    try {
+      const complaint = await storage.createComplaint(req.body);
+      res.status(201).json(complaint);
+    } catch (error) {
+      console.error('Create complaint error:', error);
+      res.status(500).json({ error: 'Failed to create complaint' });
+    }
+  });
+
+  app.patch('/api/admin/complaints/:id', requireAdmin, async (req, res) => {
+    try {
+      await storage.updateComplaint(req.params.id, req.body);
+      const complaint = await storage.getComplaint(req.params.id);
+      res.json(complaint);
+    } catch (error) {
+      console.error('Update complaint error:', error);
+      res.status(500).json({ error: 'Failed to update complaint' });
+    }
+  });
+
+  app.post('/api/admin/complaints/:id/assign', requireAdmin, async (req, res) => {
+    try {
+      const { assignedToId } = req.body;
+      await storage.assignComplaint(req.params.id, assignedToId, req.user!.id);
+      const complaint = await storage.getComplaint(req.params.id);
+      res.json(complaint);
+    } catch (error) {
+      console.error('Assign complaint error:', error);
+      res.status(500).json({ error: 'Failed to assign complaint' });
+    }
+  });
+
+  app.post('/api/admin/complaints/:id/escalate', requireAdmin, async (req, res) => {
+    try {
+      const { reason } = req.body;
+      await storage.escalateComplaint(req.params.id, req.user!.id, reason);
+      const complaint = await storage.getComplaint(req.params.id);
+      res.json(complaint);
+    } catch (error) {
+      console.error('Escalate complaint error:', error);
+      res.status(500).json({ error: 'Failed to escalate complaint' });
+    }
+  });
+
+  app.post('/api/admin/complaints/:id/resolve', requireAdmin, async (req, res) => {
+    try {
+      const { resolution } = req.body;
+      await storage.resolveComplaint(req.params.id, resolution, req.user!.id);
+      const complaint = await storage.getComplaint(req.params.id);
+      res.json(complaint);
+    } catch (error) {
+      console.error('Resolve complaint error:', error);
+      res.status(500).json({ error: 'Failed to resolve complaint' });
+    }
+  });
+
+  app.get('/api/admin/complaints/:id/comments', requireAdmin, async (req, res) => {
+    try {
+      const comments = await storage.getComplaintComments(req.params.id);
+      res.json(comments);
+    } catch (error) {
+      console.error('Get complaint comments error:', error);
+      res.status(500).json({ error: 'Failed to fetch complaint comments' });
+    }
+  });
+
+  app.post('/api/admin/complaints/:id/comments', requireAdmin, async (req, res) => {
+    try {
+      const comment = await storage.addComplaintComment({
+        complaintId: req.params.id,
+        authorId: req.user!.id,
+        ...req.body
+      });
+      res.status(201).json(comment);
+    } catch (error) {
+      console.error('Add complaint comment error:', error);
+      res.status(500).json({ error: 'Failed to add complaint comment' });
+    }
+  });
+
+  app.patch('/api/admin/complaints/bulk', requireAdmin, async (req, res) => {
+    try {
+      const { complaintIds, updates } = req.body;
+      await storage.bulkUpdateComplaints(complaintIds, updates, req.user!.id);
+      res.json({ success: true, updated: complaintIds.length });
+    } catch (error) {
+      console.error('Bulk update complaints error:', error);
+      res.status(500).json({ error: 'Failed to bulk update complaints' });
+    }
+  });
+
+  // Withdrawals/Payouts Management System API Routes
+  app.get('/api/admin/payouts', requireAdmin, async (req, res) => {
+    try {
+      const filters = {
+        status: req.query.status as string,
+        userId: req.query.userId as string,
+        startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
+        endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
+        minAmount: req.query.minAmount ? parseFloat(req.query.minAmount as string) : undefined,
+        maxAmount: req.query.maxAmount ? parseFloat(req.query.maxAmount as string) : undefined,
+        provider: req.query.provider as string,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
+        offset: req.query.offset ? parseInt(req.query.offset as string) : 0,
+        sortBy: req.query.sortBy as string || 'createdAt',
+        sortOrder: req.query.sortOrder as 'asc' | 'desc' || 'desc'
+      };
+      const result = await storage.getAllPayoutRequests(filters);
+      res.json(result);
+    } catch (error) {
+      console.error('Get payouts error:', error);
+      res.status(500).json({ error: 'Failed to fetch payouts' });
+    }
+  });
+
+  app.get('/api/admin/payouts/stats', requireAdmin, async (req, res) => {
+    try {
+      const filters = {
+        startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
+        endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined
+      };
+      const stats = await storage.getPayoutStats(filters);
+      res.json(stats);
+    } catch (error) {
+      console.error('Get payout stats error:', error);
+      res.status(500).json({ error: 'Failed to fetch payout statistics' });
+    }
+  });
+
+  app.patch('/api/admin/payouts/:id/status', requireAdmin, async (req, res) => {
+    try {
+      const { status, notes } = req.body;
+      await storage.updatePayoutStatus(req.params.id, status, req.user!.id, notes);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Update payout status error:', error);
+      res.status(500).json({ error: 'Failed to update payout status' });
+    }
+  });
+
+  app.post('/api/admin/payouts/batch', requireAdmin, async (req, res) => {
+    try {
+      const { payoutIds, action } = req.body;
+      await storage.batchProcessPayouts(payoutIds, action, req.user!.id);
+      res.json({ success: true, processed: payoutIds.length });
+    } catch (error) {
+      console.error('Batch process payouts error:', error);
+      res.status(500).json({ error: 'Failed to batch process payouts' });
+    }
+  });
+
+  app.get('/api/admin/payouts/:id/audit', requireAdmin, async (req, res) => {
+    try {
+      const auditTrail = await storage.getPayoutAuditTrail(req.params.id);
+      res.json(auditTrail);
+    } catch (error) {
+      console.error('Get payout audit trail error:', error);
+      res.status(500).json({ error: 'Failed to fetch payout audit trail' });
+    }
+  });
+
+  app.post('/api/admin/payouts/:id/fraud-check', requireAdmin, async (req, res) => {
+    try {
+      const { userId, amount } = req.body;
+      const fraudScore = await storage.getFraudScore(userId, amount);
+      res.json({ fraudScore });
+    } catch (error) {
+      console.error('Get fraud score error:', error);
+      res.status(500).json({ error: 'Failed to calculate fraud score' });
+    }
+  });
+
+  // Verification Requests System API Routes
+  app.get('/api/admin/verifications', requireAdmin, async (req, res) => {
+    try {
+      const filters = {
+        type: req.query.type as 'kyc' | 'age' | 'costar' | '2257',
+        status: req.query.status as string,
+        userId: req.query.userId as string,
+        startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
+        endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
+        offset: req.query.offset ? parseInt(req.query.offset as string) : 0,
+        sortBy: req.query.sortBy as string || 'createdAt',
+        sortOrder: req.query.sortOrder as 'asc' | 'desc' || 'desc'
+      };
+      const result = await storage.getVerificationRequests(filters);
+      res.json(result);
+    } catch (error) {
+      console.error('Get verifications error:', error);
+      res.status(500).json({ error: 'Failed to fetch verifications' });
+    }
+  });
+
+  app.get('/api/admin/verifications/stats', requireAdmin, async (req, res) => {
+    try {
+      const filters = {
+        startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
+        endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined
+      };
+      const stats = await storage.getVerificationStats(filters);
+      res.json(stats);
+    } catch (error) {
+      console.error('Get verification stats error:', error);
+      res.status(500).json({ error: 'Failed to fetch verification statistics' });
+    }
+  });
+
+  app.patch('/api/admin/verifications/kyc/:id', requireAdmin, async (req, res) => {
+    try {
+      await storage.updateKycVerification(req.params.id, req.body);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Update KYC verification error:', error);
+      res.status(500).json({ error: 'Failed to update KYC verification' });
+    }
+  });
+
+  app.patch('/api/admin/verifications/age/:id', requireAdmin, async (req, res) => {
+    try {
+      await storage.updateAgeVerification(req.params.id, req.body);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Update age verification error:', error);
+      res.status(500).json({ error: 'Failed to update age verification' });
+    }
+  });
+
+  app.patch('/api/admin/verifications/costar/:id', requireAdmin, async (req, res) => {
+    try {
+      await storage.updateCostarVerification(req.params.id, req.body);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Update costar verification error:', error);
+      res.status(500).json({ error: 'Failed to update costar verification' });
+    }
+  });
+
+  app.post('/api/admin/verifications/bulk', requireAdmin, async (req, res) => {
+    try {
+      const { verificationIds, updates } = req.body;
+      await storage.bulkUpdateVerifications(verificationIds, updates, req.user!.id);
+      res.json({ success: true, updated: verificationIds.length });
+    } catch (error) {
+      console.error('Bulk update verifications error:', error);
+      res.status(500).json({ error: 'Failed to bulk update verifications' });
+    }
+  });
+
+  app.get('/api/admin/verifications/:id/documents', requireAdmin, async (req, res) => {
+    try {
+      const documents = await storage.getVerificationDocuments(req.params.id);
+      res.json(documents);
+    } catch (error) {
+      console.error('Get verification documents error:', error);
+      res.status(500).json({ error: 'Failed to fetch verification documents' });
+    }
+  });
+
+  app.post('/api/admin/verifications/:id/notes', requireAdmin, async (req, res) => {
+    try {
+      const { note } = req.body;
+      const verificationNote = await storage.addVerificationNote(req.params.id, note, req.user!.id);
+      res.status(201).json(verificationNote);
+    } catch (error) {
+      console.error('Add verification note error:', error);
+      res.status(500).json({ error: 'Failed to add verification note' });
+    }
+  });
+
+  // ===== COMPREHENSIVE USER MANAGEMENT ADMIN ROUTES =====
+
+  // Get users with advanced filtering
+  app.get('/api/admin/users', requireAdmin, async (req, res) => {
+    try {
+      const filters = {
+        searchQuery: req.query.searchQuery as string,
+        role: req.query.role as string,
+        status: req.query.status as string,
+        verificationLevel: req.query.verificationLevel as string,
+        subscriptionTier: req.query.subscriptionTier as string,
+        isSuspended: req.query.isSuspended === 'true' ? true : req.query.isSuspended === 'false' ? false : undefined,
+        startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
+        endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
+        limit: req.query.pageSize ? parseInt(req.query.pageSize as string) : 20,
+        offset: req.query.page ? (parseInt(req.query.page as string) - 1) * (parseInt(req.query.pageSize as string) || 20) : 0,
+        sortBy: req.query.sortBy as string || 'createdAt',
+        sortOrder: req.query.sortOrder as 'asc' | 'desc' || 'desc'
+      };
+      
+      const result = await storage.getUsersWithFiltering(filters);
+      res.json(result);
+    } catch (error) {
+      console.error('Get users error:', error);
+      res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  });
+
+  // Get user statistics
+  app.get('/api/admin/users/stats', requireAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getUserStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Get user stats error:', error);
+      res.status(500).json({ error: 'Failed to fetch user statistics' });
+    }
+  });
+
+  // Suspend user
+  app.post('/api/admin/users/suspend', requireAdmin, async (req, res) => {
+    try {
+      const { userId, reason, duration } = req.body;
+      
+      if (!userId || !reason) {
+        return res.status(400).json({ error: 'User ID and reason are required' });
+      }
+
+      // Convert duration to hours
+      let durationHours = null;
+      if (duration && duration !== 'permanent') {
+        const durationMap: Record<string, number> = {
+          '24h': 24,
+          '3d': 72,
+          '7d': 168,
+          '30d': 720
+        };
+        durationHours = durationMap[duration];
+      }
+
+      const suspension = await storage.suspendUser({
+        userId,
+        reason,
+        banType: duration === 'permanent' ? 'permanent' : 'temporary',
+        description: reason,
+        suspendedBy: req.user!.id,
+        duration: durationHours,
+        startedAt: new Date(),
+        endsAt: durationHours ? new Date(Date.now() + durationHours * 60 * 60 * 1000) : null
+      });
+
+      // Update user status
+      await storage.updateUser(userId, { status: 'suspended' });
+
+      // Log the action
+      await storage.logUserActivity({
+        userId,
+        activity: 'suspended',
+        details: { 
+          reason, 
+          duration, 
+          suspendedBy: req.user!.id,
+          suspensionId: suspension.id 
+        },
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        timestamp: new Date()
+      });
+
+      res.json({ success: true, suspension });
+    } catch (error) {
+      console.error('Suspend user error:', error);
+      res.status(500).json({ error: 'Failed to suspend user' });
+    }
+  });
+
+  // Bulk user operations
+  app.post('/api/admin/users/bulk', requireAdmin, async (req, res) => {
+    try {
+      const { userIds, operation, data } = req.body;
+      
+      if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+        return res.status(400).json({ error: 'User IDs array is required' });
+      }
+
+      if (!operation) {
+        return res.status(400).json({ error: 'Operation is required' });
+      }
+
+      await storage.bulkUserOperation(userIds, operation, req.user!.id, data);
+
+      // Log bulk operation
+      await storage.logUserActivity({
+        userId: req.user!.id,
+        activity: `bulk_${operation}`,
+        details: { 
+          targetUserIds: userIds,
+          operation,
+          data,
+          count: userIds.length
+        },
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        timestamp: new Date()
+      });
+
+      res.json({ success: true, affectedUsers: userIds.length });
+    } catch (error) {
+      console.error('Bulk user operation error:', error);
+      res.status(500).json({ error: 'Failed to perform bulk operation' });
+    }
+  });
+
+  // Update user
+  app.patch('/api/admin/users/:id', requireAdmin, async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const updates = req.body;
+
+      // Remove sensitive fields that shouldn't be updated directly
+      delete updates.password;
+      delete updates.id;
+      delete updates.createdAt;
+      delete updates.updatedAt;
+
+      await storage.updateUserProfile(userId, updates);
+
+      // Log the update
+      await storage.logUserActivity({
+        userId,
+        activity: 'profile_updated_by_admin',
+        details: { 
+          updates,
+          updatedBy: req.user!.id
+        },
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        timestamp: new Date()
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Update user error:', error);
+      res.status(500).json({ error: 'Failed to update user' });
+    }
+  });
+
+  // Get user details with profile
+  app.get('/api/admin/users/:id', requireAdmin, async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const user = await storage.getUserWithProfile(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.json(user);
+    } catch (error) {
+      console.error('Get user details error:', error);
+      res.status(500).json({ error: 'Failed to fetch user details' });
+    }
+  });
+
+  // Get user activity logs
+  app.get('/api/admin/users/:id/activity', requireAdmin, async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      
+      const activities = await storage.getUserActivityLogs(userId, limit);
+      res.json(activities);
+    } catch (error) {
+      console.error('Get user activity error:', error);
+      res.status(500).json({ error: 'Failed to fetch user activity' });
+    }
+  });
+
+  // Get user suspensions
+  app.get('/api/admin/users/:id/suspensions', requireAdmin, async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const suspensions = await storage.getUserSuspensions(userId);
+      res.json(suspensions);
+    } catch (error) {
+      console.error('Get user suspensions error:', error);
+      res.status(500).json({ error: 'Failed to fetch user suspensions' });
+    }
+  });
+
+  // Lift user suspension
+  app.post('/api/admin/users/:id/lift-suspension', requireAdmin, async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const { suspensionId, reason } = req.body;
+      
+      await storage.liftSuspension(suspensionId, req.user!.id, reason);
+      
+      // Update user status back to active
+      await storage.updateUser(userId, { status: 'active' });
+
+      // Log the action
+      await storage.logUserActivity({
+        userId,
+        activity: 'suspension_lifted',
+        details: { 
+          reason,
+          liftedBy: req.user!.id,
+          suspensionId
+        },
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        timestamp: new Date()
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Lift suspension error:', error);
+      res.status(500).json({ error: 'Failed to lift suspension' });
+    }
+  });
+
   console.log('🛡️ Enhanced routes registered with comprehensive security features');
   console.log('👮 Admin dashboard routes registered with full CRUD operations');
+  console.log('📋 Comprehensive admin management routes registered: Complaints, Payouts, Verifications');
+  console.log('👥 User management routes registered with advanced filtering and bulk operations');
 }
 
 // Import and register advanced features

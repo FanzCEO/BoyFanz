@@ -25,6 +25,11 @@ import ModerationQueue from "@/pages/Admin/ModerationQueue";
 import UserManagement from "@/pages/Admin/UserManagement";
 import DelegationManager from "@/pages/Admin/DelegationManager";
 import ThemeManager from "@/pages/Admin/ThemeManager";
+import AdminDashboard from "@/pages/Admin/Dashboard";
+import ComplaintsManagement from "@/pages/Admin/Complaints";
+import WithdrawalsManagement from "@/pages/Admin/Withdrawals";
+import VerificationManagement from "@/pages/Admin/Verification";
+import AdminReports from "@/pages/Admin/Reports";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/layout/Sidebar";
@@ -134,11 +139,16 @@ function Router() {
             <Route path="/subscriptions" component={Subscriptions} />
             <Route path="/release-forms" component={ReleaseForms} />
             <Route path="/nearby" component={Nearby} />
+            <Route path="/admin/dashboard" component={AdminDashboard} />
+            <Route path="/admin/complaints" component={ComplaintsManagement} />
+            <Route path="/admin/withdrawals" component={WithdrawalsManagement} />
+            <Route path="/admin/verification" component={VerificationManagement} />
             <Route path="/admin/moderation" component={ModerationQueue} />
             <Route path="/admin/moderation-queue" component={ModerationQueue} />
             <Route path="/admin/users" component={UserManagement} />
             <Route path="/admin/delegation" component={DelegationManager} />
             <Route path="/admin/themes" component={ThemeManager} />
+            <Route path="/admin/reports" component={AdminReports} />
             <Route path="/settings" component={Settings} />
             <Route path="/creator/:userId" component={CreatorProfile} />
             <Route path="/feed" component={PostsFeed} />

@@ -510,6 +510,277 @@ export interface IStorage {
   getUserTransactionCount(userId: string, options: any): Promise<number>;
   getTransactionsByDateRange(startDate: Date, endDate: Date, providerId?: string): Promise<any[]>;
   getTransactionsByFilters(filters: any): Promise<any[]>;
+
+  // ===== COMPREHENSIVE ADMIN INTERFACE STORAGE METHODS =====
+
+  // Complaints Management System
+  createComplaint(complaint: any): Promise<any>;
+  getComplaint(id: string): Promise<any>;
+  updateComplaint(id: string, updates: any): Promise<void>;
+  getComplaints(filters?: {
+    status?: string;
+    category?: string;
+    priority?: string;
+    assignedToId?: string;
+    submitterId?: string;
+    startDate?: Date;
+    endDate?: Date;
+    limit?: number;
+    offset?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{ complaints: any[]; total: number; }>;
+  assignComplaint(complaintId: string, assignedToId: string, assignedById: string): Promise<void>;
+  escalateComplaint(complaintId: string, escalatedById: string, reason?: string): Promise<void>;
+  resolveComplaint(complaintId: string, resolution: string, resolvedById: string): Promise<void>;
+  addComplaintComment(comment: any): Promise<any>;
+  getComplaintComments(complaintId: string): Promise<any[]>;
+  getComplaintStats(filters?: { startDate?: Date; endDate?: Date; }): Promise<{
+    totalComplaints: number;
+    openComplaints: number;
+    resolvedComplaints: number;
+    avgResolutionTime: number;
+    complaintsByCategory: Array<{ category: string; count: number; }>;
+    complaintsByPriority: Array<{ priority: string; count: number; }>;
+  }>;
+  bulkUpdateComplaints(complaintIds: string[], updates: any, updatedById: string): Promise<void>;
+  
+  // Withdrawals/Payouts Management System
+  getAllPayoutRequests(filters?: {
+    status?: string;
+    userId?: string;
+    startDate?: Date;
+    endDate?: Date;
+    minAmount?: number;
+    maxAmount?: number;
+    provider?: string;
+    limit?: number;
+    offset?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{ payouts: any[]; total: number; }>;
+  updatePayoutStatus(payoutId: string, status: string, updatedById: string, notes?: string): Promise<void>;
+  batchProcessPayouts(payoutIds: string[], action: 'approve' | 'reject' | 'process', processedById: string): Promise<void>;
+  getPayoutAccount(userId: string, provider: string): Promise<any>;
+  createPayoutAccount(account: any): Promise<any>;
+  updatePayoutAccount(userId: string, provider: string, updates: any): Promise<void>;
+  getPayoutStats(filters?: { startDate?: Date; endDate?: Date; }): Promise<{
+    totalPayouts: number;
+    pendingPayouts: number;
+    completedPayouts: number;
+    totalAmount: number;
+    avgPayoutAmount: number;
+    payoutsByStatus: Array<{ status: string; count: number; amount: number; }>;
+    payoutsByProvider: Array<{ provider: string; count: number; amount: number; }>;
+  }>;
+  calculateTaxWithholding(userId: string, amount: number): Promise<number>;
+  getFraudScore(userId: string, amount: number): Promise<number>;
+  getPayoutAuditTrail(payoutId: string): Promise<any[]>;
+
+  // Verification Requests System
+  getVerificationRequests(filters?: {
+    type?: 'kyc' | 'age' | 'costar' | '2257';
+    status?: string;
+    userId?: string;
+    startDate?: Date;
+    endDate?: Date;
+    limit?: number;
+    offset?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{ verifications: any[]; total: number; }>;
+  updateKycVerification(verificationId: string, updates: any): Promise<void>;
+  updateAgeVerification(verificationId: string, updates: any): Promise<void>;
+  updateCostarVerification(verificationId: string, updates: any): Promise<void>;
+  createAgeVerification(verification: any): Promise<any>;
+  getAgeVerification(id: string): Promise<any>;
+  getAgeVerifications(userId: string): Promise<any[]>;
+  createCostarVerification(verification: any): Promise<any>;
+  getCostarVerification(id: string): Promise<any>;
+  getCostarVerifications(userId: string): Promise<any[]>;
+  create2257Record(record: any): Promise<any>;
+  get2257Record(id: string): Promise<any>;
+  get2257Records(userId: string): Promise<any[]>;
+  getVerificationStats(filters?: { startDate?: Date; endDate?: Date; }): Promise<{
+    totalVerifications: number;
+    pendingVerifications: number;
+    approvedVerifications: number;
+    rejectedVerifications: number;
+    verificationsByType: Array<{ type: string; count: number; }>;
+    verificationsByStatus: Array<{ status: string; count: number; }>;
+    avgProcessingTime: number;
+  }>;
+  bulkUpdateVerifications(verificationIds: string[], updates: any, updatedById: string): Promise<void>;
+  getVerificationDocuments(verificationId: string): Promise<any[]>;
+  addVerificationNote(verificationId: string, note: string, authorId: string): Promise<any>;
+
+  // ===== NEW ADMIN MANAGEMENT SYSTEM METHODS =====
+
+  // Enhanced User Management with Suspension/Ban System
+  getUsersWithFiltering(filters?: {
+    role?: string;
+    status?: string;
+    verificationLevel?: string;
+    subscriptionTier?: string;
+    searchQuery?: string;
+    startDate?: Date;
+    endDate?: Date;
+    isSuspended?: boolean;
+    limit?: number;
+    offset?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{ users: any[]; total: number; }>;
+  getUserWithProfile(userId: string): Promise<any>;
+  updateUserProfile(userId: string, updates: any): Promise<void>;
+  suspendUser(suspension: any): Promise<any>;
+  liftSuspension(suspensionId: string, liftedBy: string, reason: string): Promise<void>;
+  getUserSuspensions(userId: string): Promise<any[]>;
+  bulkUserOperation(userIds: string[], operation: string, operatorId: string, data?: any): Promise<void>;
+  getUserActivityLogs(userId: string, limit?: number): Promise<any[]>;
+  logUserActivity(log: any): Promise<void>;
+  getUserStats(): Promise<{
+    totalUsers: number;
+    activeUsers: number;
+    suspendedUsers: number;
+    creatorCount: number;
+    fanCount: number;
+    newUsersToday: number;
+    verifiedUsers: number;
+  }>;
+
+  // Leaderboard Management System
+  createLeaderboard(leaderboard: any): Promise<any>;
+  getLeaderboard(id: string): Promise<any>;
+  updateLeaderboard(id: string, updates: any): Promise<void>;
+  deleteLeaderboard(id: string): Promise<void>;
+  getLeaderboards(filters?: {
+    type?: string;
+    period?: string;
+    isActive?: boolean;
+    isPublic?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ leaderboards: any[]; total: number; }>;
+  getLeaderboardEntries(leaderboardId: string, limit?: number): Promise<any[]>;
+  updateLeaderboardEntry(entryId: string, updates: any): Promise<void>;
+  calculateLeaderboardScores(leaderboardId: string): Promise<void>;
+  resetLeaderboard(leaderboardId: string): Promise<void>;
+  getLeaderboardAchievements(): Promise<any[]>;
+  createLeaderboardAchievement(achievement: any): Promise<any>;
+  awardUserAchievement(userId: string, achievementId: string): Promise<void>;
+  getUserAchievements(userId: string): Promise<any[]>;
+
+  // Consent Forms Management System
+  createConsentFormTemplate(template: any): Promise<any>;
+  getConsentFormTemplate(id: string): Promise<any>;
+  updateConsentFormTemplate(id: string, updates: any): Promise<void>;
+  getConsentFormTemplates(filters?: {
+    type?: string;
+    isActive?: boolean;
+    jurisdiction?: string;
+  }): Promise<any[]>;
+  createConsentForm(form: any): Promise<any>;
+  getConsentForm(id: string): Promise<any>;
+  updateConsentForm(id: string, updates: any): Promise<void>;
+  getConsentForms(filters?: {
+    userId?: string;
+    templateId?: string;
+    status?: string;
+    expiringWithinDays?: number;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ forms: any[]; total: number; }>;
+  signConsentForm(formId: string, signatureData: any): Promise<void>;
+  withdrawConsent(formId: string, userId: string, reason: string): Promise<void>;
+  scheduleConsentNotification(notification: any): Promise<void>;
+  getExpiringConsents(days: number): Promise<any[]>;
+
+  // Stories Management System
+  createStory(story: any): Promise<any>;
+  getStory(id: string): Promise<any>;
+  updateStory(id: string, updates: any): Promise<void>;
+  deleteStory(id: string): Promise<void>;
+  getStories(filters?: {
+    creatorId?: string;
+    status?: string;
+    type?: string;
+    isPromoted?: boolean;
+    limit?: number;
+    offset?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{ stories: any[]; total: number; }>;
+  getStoryViews(storyId: string): Promise<any[]>;
+  addStoryView(storyId: string, viewerId: string, viewDuration?: number): Promise<void>;
+  getStoryReplies(storyId: string): Promise<any[]>;
+  addStoryReply(reply: any): Promise<any>;
+  promoteStory(storyId: string, promoted: boolean): Promise<void>;
+  archiveExpiredStories(): Promise<number>;
+  getStoryAnalytics(filters?: {
+    creatorId?: string;
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<any>;
+
+  // Shop Management System
+  createProductCategory(category: any): Promise<any>;
+  getProductCategory(id: string): Promise<any>;
+  updateProductCategory(id: string, updates: any): Promise<void>;
+  deleteProductCategory(id: string): Promise<void>;
+  getProductCategories(filters?: {
+    parentId?: string;
+    isActive?: boolean;
+  }): Promise<any[]>;
+  createProduct(product: any): Promise<any>;
+  getProduct(id: string): Promise<any>;
+  updateProduct(id: string, updates: any): Promise<void>;
+  deleteProduct(id: string): Promise<void>;
+  getProducts(filters?: {
+    creatorId?: string;
+    categoryId?: string;
+    status?: string;
+    type?: string;
+    searchQuery?: string;
+    limit?: number;
+    offset?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{ products: any[]; total: number; }>;
+  createProductVariant(variant: any): Promise<any>;
+  getProductVariants(productId: string): Promise<any[]>;
+  updateProductVariant(variantId: string, updates: any): Promise<void>;
+  deleteProductVariant(variantId: string): Promise<void>;
+  createOrder(order: any): Promise<any>;
+  getOrder(id: string): Promise<any>;
+  updateOrder(id: string, updates: any): Promise<void>;
+  getOrders(filters?: {
+    customerId?: string;
+    creatorId?: string;
+    status?: string;
+    fulfillmentStatus?: string;
+    startDate?: Date;
+    endDate?: Date;
+    limit?: number;
+    offset?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{ orders: any[]; total: number; }>;
+  getOrderLineItems(orderId: string): Promise<any[]>;
+  addOrderLineItem(lineItem: any): Promise<any>;
+  updateInventory(productId: string, variantId: string, quantity: number): Promise<void>;
+  getShopAnalytics(filters?: {
+    creatorId?: string;
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<{
+    totalOrders: number;
+    totalRevenue: number;
+    avgOrderValue: number;
+    topProducts: any[];
+    salesByCategory: any[];
+    ordersByStatus: any[];
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
