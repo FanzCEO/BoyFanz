@@ -1395,6 +1395,333 @@ export type InsertCostarVerification = z.infer<typeof insertCostarVerificationSc
 export type InsertMedia2257Link = z.infer<typeof insertMedia2257LinkSchema>;
 export type InsertCustodianOfRecords = z.infer<typeof insertCustodianOfRecordsSchema>;
 
+// ===== COMMUNICATION MANAGEMENT SYSTEM =====
+
+// Comment Moderation and Enhanced Features
+export const commentStatusEnum = pgEnum("comment_status", ["approved", "pending", "flagged", "hidden", "deleted"]);
+export const sentimentEnum = pgEnum("sentiment", ["positive", "neutral", "negative", "toxic"]);
+
+export const commentModerations = pgTable("comment_moderations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  commentId: varchar("comment_id").notNull().references(() => comments.id, { onDelete: "cascade" }),
+  moderatorId: varchar("moderator_id").references(() => users.id),
+  status: commentStatusEnum("status").notNull(),
+  reason: text("reason"),
+  autoModerated: boolean("auto_moderated").default(false),
+  aiConfidence: integer("ai_confidence").default(0),
+  sentimentScore: sentimentEnum("sentiment_score"),
+  toxicityScore: integer("toxicity_score").default(0),
+  spamScore: integer("spam_score").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  commentIdIdx: index("idx_comment_mods_comment").on(table.commentId),
+  statusIdx: index("idx_comment_mods_status").on(table.status),
+  moderatorIdx: index("idx_comment_mods_moderator").on(table.moderatorId),
+}));
+
+// Message Moderation and Privacy-Compliant Monitoring
+export const messageStatusEnum = pgEnum("message_status", ["normal", "flagged", "hidden", "deleted"]);
+export const messageFlagReasonEnum = pgEnum("message_flag_reason", ["spam", "harassment", "inappropriate", "scam", "other"]);
+
+export const messageModerations = pgTable("message_moderations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  messageId: varchar("message_id").notNull().references(() => messages.id, { onDelete: "cascade" }),
+  reporterId: varchar("reporter_id").references(() => users.id),
+  moderatorId: varchar("moderator_id").references(() => users.id),
+  status: messageStatusEnum("status").notNull(),
+  flagReason: messageFlagReasonEnum("flag_reason"),
+  notes: text("notes"),
+  autoFlagged: boolean("auto_flagged").default(false),
+  reviewRequired: boolean("review_required").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  messageIdIdx: index("idx_msg_mods_message").on(table.messageId),
+  statusIdx: index("idx_msg_mods_status").on(table.status),
+  moderatorIdx: index("idx_msg_mods_moderator").on(table.moderatorId),
+}));
+
+// System Announcements
+export const announcementTypeEnum = pgEnum("announcement_type", ["system", "feature", "maintenance", "promotion", "emergency"]);
+export const announcementStatusEnum = pgEnum("announcement_status", ["draft", "scheduled", "active", "paused", "ended", "cancelled"]);
+export const targetAudienceEnum = pgEnum("target_audience", ["all", "creators", "fans", "subscribers", "verified", "custom"]);
+
+export const announcements = pgTable("announcements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  title: varchar("title").notNull(),
+  content: text("content").notNull(),
+  type: announcementTypeEnum("type").notNull(),
+  status: announcementStatusEnum("status").default("draft").notNull(),
+  targetAudience: targetAudienceEnum("target_audience").default("all").notNull(),
+  customAudienceFilter: jsonb("custom_audience_filter").default({}),
+  channels: text("channels").array().default(['in_app']), // 'in_app', 'email', 'push', 'sms'
+  priority: integer("priority").default(1), // 1=low, 2=medium, 3=high, 4=critical
+  scheduledFor: timestamp("scheduled_for"),
+  expiresAt: timestamp("expires_at"),
+  imageUrl: varchar("image_url"),
+  linkUrl: varchar("link_url"),
+  linkText: varchar("link_text"),
+  // Analytics
+  impressions: integer("impressions").default(0),
+  clicks: integer("clicks").default(0),
+  dismissals: integer("dismissals").default(0),
+  // A/B Testing
+  isAbTest: boolean("is_ab_test").default(false),
+  abTestGroup: varchar("ab_test_group"), // 'A', 'B', etc.
+  abTestParentId: varchar("ab_test_parent_id").references(() => announcements.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  statusIdx: index("idx_announcements_status").on(table.status),
+  creatorIdx: index("idx_announcements_creator").on(table.creatorId),
+  scheduledIdx: index("idx_announcements_scheduled").on(table.scheduledFor),
+  typeIdx: index("idx_announcements_type").on(table.type),
+}));
+
+// Announcement Delivery Tracking
+export const deliveryStatusEnum = pgEnum("delivery_status", ["pending", "sent", "delivered", "failed", "bounced"]);
+
+export const announcementDeliveries = pgTable("announcement_deliveries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  announcementId: varchar("announcement_id").notNull().references(() => announcements.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  channel: varchar("channel").notNull(), // 'in_app', 'email', 'push', 'sms'
+  status: deliveryStatusEnum("status").default("pending").notNull(),
+  sentAt: timestamp("sent_at"),
+  deliveredAt: timestamp("delivered_at"),
+  readAt: timestamp("read_at"),
+  clickedAt: timestamp("clicked_at"),
+  dismissedAt: timestamp("dismissed_at"),
+  errorMessage: text("error_message"),
+  externalId: varchar("external_id"), // FCM, email service, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  announcementUserIdx: index("idx_announcement_deliveries_user").on(table.announcementId, table.userId),
+  statusIdx: index("idx_announcement_deliveries_status").on(table.status),
+  channelIdx: index("idx_announcement_deliveries_channel").on(table.channel),
+}));
+
+// Push Notification Campaigns  
+export const campaignStatusEnum = pgEnum("campaign_status", ["draft", "scheduled", "sending", "sent", "paused", "cancelled"]);
+export const notificationPlatformEnum = pgEnum("notification_platform", ["web", "ios", "android", "desktop"]);
+
+export const pushNotificationCampaigns = pgTable("push_notification_campaigns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name").notNull(),
+  title: varchar("title").notNull(),
+  body: text("body").notNull(),
+  icon: varchar("icon"),
+  image: varchar("image"),
+  badgeIcon: varchar("badge_icon"),
+  sound: varchar("sound").default("default"),
+  clickAction: varchar("click_action"),
+  deepLink: varchar("deep_link"),
+  status: campaignStatusEnum("status").default("draft").notNull(),
+  targetPlatforms: text("target_platforms").array().default(['web', 'ios', 'android']),
+  targetAudience: targetAudienceEnum("target_audience").default("all").notNull(),
+  customAudienceFilter: jsonb("custom_audience_filter").default({}),
+  // Scheduling
+  scheduledFor: timestamp("scheduled_for"),
+  timeZone: varchar("time_zone").default("UTC"),
+  sendImmediately: boolean("send_immediately").default(false),
+  // Analytics
+  totalTargeted: integer("total_targeted").default(0),
+  totalSent: integer("total_sent").default(0),
+  totalDelivered: integer("total_delivered").default(0),
+  totalClicked: integer("total_clicked").default(0),
+  totalFailed: integer("total_failed").default(0),
+  // A/B Testing
+  isAbTest: boolean("is_ab_test").default(false),
+  abTestGroup: varchar("ab_test_group"),
+  abTestParentId: varchar("ab_test_parent_id").references(() => pushNotificationCampaigns.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  statusIdx: index("idx_push_campaigns_status").on(table.status),
+  creatorIdx: index("idx_push_campaigns_creator").on(table.creatorId),
+  scheduledIdx: index("idx_push_campaigns_scheduled").on(table.scheduledFor),
+}));
+
+// Push Notification Delivery Tracking
+export const pushDeliveryStatusEnum = pgEnum("push_delivery_status", ["pending", "sent", "delivered", "clicked", "failed", "expired"]);
+
+export const pushNotificationDeliveries = pgTable("push_notification_deliveries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignId: varchar("campaign_id").notNull().references(() => pushNotificationCampaigns.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  platform: notificationPlatformEnum("platform").notNull(),
+  deviceToken: varchar("device_token"),
+  status: pushDeliveryStatusEnum("status").default("pending").notNull(),
+  sentAt: timestamp("sent_at"),
+  deliveredAt: timestamp("delivered_at"),
+  clickedAt: timestamp("clicked_at"),
+  errorMessage: text("error_message"),
+  fcmMessageId: varchar("fcm_message_id"),
+  apnsMessageId: varchar("apns_message_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  campaignUserIdx: index("idx_push_deliveries_campaign_user").on(table.campaignId, table.userId),
+  statusIdx: index("idx_push_deliveries_status").on(table.status),
+  platformIdx: index("idx_push_deliveries_platform").on(table.platform),
+}));
+
+// User Communication Preferences and Consent
+export const consentStatusEnum = pgEnum("consent_status", ["granted", "denied", "pending", "withdrawn"]);
+
+export const userCommunicationPreferences = pgTable("user_communication_preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  // Email preferences
+  emailMarketing: consentStatusEnum("email_marketing").default("pending").notNull(),
+  emailTransactional: consentStatusEnum("email_transactional").default("granted").notNull(),
+  emailSystem: consentStatusEnum("email_system").default("granted").notNull(),
+  // Push notification preferences
+  pushMarketing: consentStatusEnum("push_marketing").default("pending").notNull(),
+  pushTransactional: consentStatusEnum("push_transactional").default("granted").notNull(),
+  pushSystem: consentStatusEnum("push_system").default("granted").notNull(),
+  // SMS preferences
+  smsMarketing: consentStatusEnum("sms_marketing").default("denied").notNull(),
+  smsTransactional: consentStatusEnum("sms_transactional").default("denied").notNull(),
+  // In-app preferences
+  inAppAnnouncements: boolean("in_app_announcements").default(true),
+  inAppNotifications: boolean("in_app_notifications").default(true),
+  // Frequency settings
+  maxDailyEmails: integer("max_daily_emails").default(5),
+  maxDailyPush: integer("max_daily_push").default(10),
+  maxWeeklySms: integer("max_weekly_sms").default(2),
+  // Device tokens for push notifications
+  webPushToken: varchar("web_push_token"),
+  iosPushToken: varchar("ios_push_token"),
+  androidPushToken: varchar("android_push_token"),
+  desktopPushToken: varchar("desktop_push_token"),
+  // Metadata
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  consentDate: timestamp("consent_date").defaultNow(),
+  ipAddress: varchar("ip_address"),
+  userAgent: varchar("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  userIdIdx: index("idx_user_comm_prefs_user").on(table.userId),
+}));
+
+// Communication Analytics and Reporting
+export const communicationAnalytics = pgTable("communication_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  date: timestamp("date").notNull(),
+  type: varchar("type").notNull(), // 'comments', 'messages', 'announcements', 'push_notifications'
+  // Aggregate metrics
+  totalSent: integer("total_sent").default(0),
+  totalDelivered: integer("total_delivered").default(0),
+  totalOpened: integer("total_opened").default(0),
+  totalClicked: integer("total_clicked").default(0),
+  totalReplied: integer("total_replied").default(0),
+  totalReported: integer("total_reported").default(0),
+  totalBlocked: integer("total_blocked").default(0),
+  // Moderation metrics
+  totalFlagged: integer("total_flagged").default(0),
+  totalApproved: integer("total_approved").default(0),
+  totalRejected: integer("total_rejected").default(0),
+  autoModerationAccuracy: decimal("auto_moderation_accuracy", { precision: 5, scale: 2 }),
+  // Engagement metrics
+  averageEngagementRate: decimal("average_engagement_rate", { precision: 5, scale: 2 }),
+  averageSentimentScore: decimal("average_sentiment_score", { precision: 5, scale: 2 }),
+  toxicContentPercentage: decimal("toxic_content_percentage", { precision: 5, scale: 2 }),
+  spamDetectionRate: decimal("spam_detection_rate", { precision: 5, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  dateTypeIdx: index("idx_comm_analytics_date_type").on(table.date, table.type),
+  typeIdx: index("idx_comm_analytics_type").on(table.type),
+}));
+
+// Mass Message Templates
+export const messageTemplateTypeEnum = pgEnum("message_template_type", ["welcome", "promotion", "announcement", "reminder", "custom"]);
+
+export const massMessageTemplates = pgTable("mass_message_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name").notNull(),
+  type: messageTemplateTypeEnum("type").notNull(),
+  subject: varchar("subject"),
+  content: text("content").notNull(),
+  mediaUrl: varchar("media_url"),
+  priceCents: integer("price_cents").default(0),
+  targetAudience: targetAudienceEnum("target_audience").default("all").notNull(),
+  customAudienceFilter: jsonb("custom_audience_filter").default({}),
+  isActive: boolean("is_active").default(true),
+  timesUsed: integer("times_used").default(0),
+  averageResponseRate: decimal("average_response_rate", { precision: 5, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  creatorTypeIdx: index("idx_msg_templates_creator_type").on(table.creatorId, table.type),
+  activeIdx: index("idx_msg_templates_active").on(table.isActive),
+}));
+
+// Zod schemas for new communication tables
+export const insertCommentModerationSchema = createInsertSchema(commentModerations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCommentModeration = z.infer<typeof insertCommentModerationSchema>;
+export type SelectCommentModeration = typeof commentModerations.$inferSelect;
+
+export const insertMessageModerationSchema = createInsertSchema(messageModerations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertMessageModeration = z.infer<typeof insertMessageModerationSchema>;
+export type SelectMessageModeration = typeof messageModerations.$inferSelect;
+
+export const insertAnnouncementSchema = createInsertSchema(announcements).omit({
+  id: true,
+  impressions: true,
+  clicks: true,
+  dismissals: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertAnnouncement = z.infer<typeof insertAnnouncementSchema>;
+export type SelectAnnouncement = typeof announcements.$inferSelect;
+
+export const insertPushNotificationCampaignSchema = createInsertSchema(pushNotificationCampaigns).omit({
+  id: true,
+  totalTargeted: true,
+  totalSent: true,
+  totalDelivered: true,
+  totalClicked: true,
+  totalFailed: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertPushNotificationCampaign = z.infer<typeof insertPushNotificationCampaignSchema>;
+export type SelectPushNotificationCampaign = typeof pushNotificationCampaigns.$inferSelect;
+
+export const insertUserCommunicationPreferencesSchema = createInsertSchema(userCommunicationPreferences).omit({
+  id: true,
+  lastUpdated: true,
+  consentDate: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertUserCommunicationPreferences = z.infer<typeof insertUserCommunicationPreferencesSchema>;
+export type SelectUserCommunicationPreferences = typeof userCommunicationPreferences.$inferSelect;
+
+export const insertMassMessageTemplateSchema = createInsertSchema(massMessageTemplates).omit({
+  id: true,
+  timesUsed: true,
+  averageResponseRate: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertMassMessageTemplate = z.infer<typeof insertMassMessageTemplateSchema>;
+export type SelectMassMessageTemplate = typeof massMessageTemplates.$inferSelect;
+
 // DMCA Compliance Tables
 export const dmcaStatusEnum = pgEnum("dmca_status", ["pending", "processed", "rejected", "counter_claimed"]);
 export const repeatInfringerStatusEnum = pgEnum("repeat_infringer_status", ["warning", "probation", "suspended", "terminated"]);
@@ -2091,7 +2418,7 @@ export const userAchievements = pgTable("user_achievements", {
 
 // ===== 2. ENHANCED CONSENT FORMS SYSTEM =====
 export const consentFormTypeEnum = pgEnum("consent_form_type", ["model_release", "costar_consent", "age_verification", "custom_form"]);
-export const consentStatusEnum = pgEnum("consent_status", ["pending", "signed", "expired", "withdrawn", "rejected"]);
+export const consentFormStatusEnum = pgEnum("consent_form_status", ["pending", "signed", "expired", "withdrawn", "rejected"]);
 
 export const consentFormTemplates = pgTable("consent_form_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -2116,7 +2443,7 @@ export const consentForms = pgTable("consent_forms", {
   templateId: varchar("template_id").notNull().references(() => consentFormTemplates.id),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   costarUserId: varchar("costar_user_id").references(() => users.id, { onDelete: "cascade" }), // For co-star consents
-  status: consentStatusEnum("status").default("pending").notNull(),
+  status: consentFormStatusEnum("status").default("pending").notNull(),
   formData: jsonb("form_data").notNull(), // Filled form data
   documentsUploaded: text("documents_uploaded").array().default([]),
   digitalSignature: text("digital_signature"),
@@ -2660,7 +2987,204 @@ export const financialSettings = pgTable("financial_settings", {
   index("idx_financial_settings_effective").on(table.effectiveFrom, table.effectiveTo),
 ]);
 
-// ===== 6. USER MANAGEMENT ENHANCEMENTS =====
+// ===== 6. MULTI-CLOUD STORAGE PROVIDER SYSTEM =====
+export const storageProviderEnum = pgEnum("storage_provider", [
+  "aws_s3", 
+  "digitalocean_spaces", 
+  "wasabi", 
+  "backblaze_b2", 
+  "vultr_object_storage", 
+  "pushr"
+]);
+
+export const storageConfigStatusEnum = pgEnum("storage_config_status", [
+  "active", 
+  "inactive", 
+  "testing", 
+  "error", 
+  "maintenance"
+]);
+
+export const storageHealthStatusEnum = pgEnum("storage_health_status", [
+  "healthy", 
+  "degraded", 
+  "unhealthy", 
+  "unknown"
+]);
+
+export const storageTierEnum = pgEnum("storage_tier", [
+  "hot", 
+  "warm", 
+  "cold", 
+  "archive"
+]);
+
+// Storage provider configurations
+export const storageProviderConfigs = pgTable("storage_provider_configs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  provider: storageProviderEnum("provider").notNull(),
+  name: varchar("name").notNull(), // Display name
+  isActive: boolean("is_active").default(false),
+  isPrimary: boolean("is_primary").default(false), // Primary provider for uploads
+  status: storageConfigStatusEnum("status").default("inactive"),
+  
+  // Generic configuration (encrypted JSON)
+  configData: jsonb("config_data").notNull().default({}),
+  
+  // Provider-specific fields
+  region: varchar("region"),
+  bucket: varchar("bucket"),
+  endpoint: varchar("endpoint"), // Custom endpoints for compatible providers
+  cdnHostname: varchar("cdn_hostname"), // For CDN configurations
+  
+  // Cost and performance settings
+  costPerGb: decimal("cost_per_gb", { precision: 10, scale: 6 }),
+  bandwidthCostPerGb: decimal("bandwidth_cost_per_gb", { precision: 10, scale: 6 }),
+  maxStorageGb: integer("max_storage_gb"), // Storage limits
+  maxBandwidthGb: integer("max_bandwidth_gb"), // Bandwidth limits
+  
+  // Feature flags
+  cdnEnabled: boolean("cdn_enabled").default(false),
+  versioning: boolean("versioning").default(false),
+  encryption: boolean("encryption").default(true),
+  publicRead: boolean("public_read").default(false),
+  
+  // Monitoring and alerting
+  healthCheckEnabled: boolean("health_check_enabled").default(true),
+  healthCheckIntervalMinutes: integer("health_check_interval_minutes").default(5),
+  alertThresholds: jsonb("alert_thresholds").default({}),
+  
+  // Metadata
+  description: text("description"),
+  tags: text("tags").array().default([]),
+  configuredBy: varchar("configured_by").notNull().references(() => users.id),
+  lastConfiguredBy: varchar("last_configured_by").references(() => users.id),
+  lastTestResult: jsonb("last_test_result").default({}),
+  lastTestedAt: timestamp("last_tested_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique("unique_provider_name").on(table.provider, table.name),
+  index("idx_storage_provider_active").on(table.isActive),
+  index("idx_storage_provider_primary").on(table.isPrimary),
+  index("idx_storage_provider_status").on(table.status),
+]);
+
+// Storage provider health monitoring
+export const storageProviderHealth = pgTable("storage_provider_health", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").notNull().references(() => storageProviderConfigs.id, { onDelete: "cascade" }),
+  healthStatus: storageHealthStatusEnum("health_status").notNull(),
+  responseTimeMs: integer("response_time_ms"),
+  availability: decimal("availability", { precision: 5, scale: 2 }), // Percentage
+  errorRate: decimal("error_rate", { precision: 5, scale: 2 }), // Percentage
+  lastError: text("last_error"),
+  errorDetails: jsonb("error_details").default({}),
+  
+  // Performance metrics
+  uploadSpeedMbps: decimal("upload_speed_mbps", { precision: 10, scale: 2 }),
+  downloadSpeedMbps: decimal("download_speed_mbps", { precision: 10, scale: 2 }),
+  
+  // Storage metrics
+  totalStorageGb: decimal("total_storage_gb", { precision: 15, scale: 6 }),
+  usedStorageGb: decimal("used_storage_gb", { precision: 15, scale: 6 }),
+  fileCount: integer("file_count"),
+  
+  checkedAt: timestamp("checked_at").defaultNow(),
+}, (table) => [
+  index("idx_storage_health_provider_time").on(table.providerId, table.checkedAt.desc()),
+  index("idx_storage_health_status").on(table.healthStatus),
+]);
+
+// Storage cost tracking
+export const storageProviderCosts = pgTable("storage_provider_costs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").notNull().references(() => storageProviderConfigs.id, { onDelete: "cascade" }),
+  
+  // Cost metrics for the period
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  storageCost: decimal("storage_cost", { precision: 10, scale: 4 }).default("0"),
+  bandwidthCost: decimal("bandwidth_cost", { precision: 10, scale: 4 }).default("0"),
+  requestCost: decimal("request_cost", { precision: 10, scale: 4 }).default("0"),
+  totalCost: decimal("total_cost", { precision: 10, scale: 4 }).default("0"),
+  
+  // Usage metrics
+  averageStorageGb: decimal("average_storage_gb", { precision: 15, scale: 6 }),
+  totalBandwidthGb: decimal("total_bandwidth_gb", { precision: 15, scale: 6 }),
+  totalRequests: integer("total_requests"),
+  
+  // Cost optimization recommendations
+  recommendations: jsonb("recommendations").default([]),
+  potentialSavings: decimal("potential_savings", { precision: 10, scale: 4 }).default("0"),
+  
+  calculatedAt: timestamp("calculated_at").defaultNow(),
+}, (table) => [
+  index("idx_storage_costs_provider_period").on(table.providerId, table.periodStart.desc()),
+  index("idx_storage_costs_period").on(table.periodStart, table.periodEnd),
+]);
+
+// Storage provider alerts
+export const storageProviderAlerts = pgTable("storage_provider_alerts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").notNull().references(() => storageProviderConfigs.id, { onDelete: "cascade" }),
+  alertType: varchar("alert_type").notNull(), // cost, performance, availability, error
+  severity: varchar("severity").notNull(), // low, medium, high, critical
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  details: jsonb("details").default({}),
+  
+  // Alert status
+  isAcknowledged: boolean("is_acknowledged").default(false),
+  acknowledgedBy: varchar("acknowledged_by").references(() => users.id),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  
+  isResolved: boolean("is_resolved").default(false),
+  resolvedBy: varchar("resolved_by").references(() => users.id),
+  resolvedAt: timestamp("resolved_at"),
+  resolutionNotes: text("resolution_notes"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_storage_alerts_provider").on(table.providerId),
+  index("idx_storage_alerts_severity").on(table.severity),
+  index("idx_storage_alerts_unresolved").on(table.isResolved, table.createdAt.desc()),
+]);
+
+// Storage provider failover configurations
+export const storageProviderFailover = pgTable("storage_provider_failover", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  primaryProviderId: varchar("primary_provider_id").notNull().references(() => storageProviderConfigs.id, { onDelete: "cascade" }),
+  backupProviderId: varchar("backup_provider_id").notNull().references(() => storageProviderConfigs.id, { onDelete: "cascade" }),
+  
+  // Failover settings
+  isActive: boolean("is_active").default(true),
+  failoverThreshold: integer("failover_threshold").default(3), // Number of failed checks before failover
+  healthCheckIntervalSeconds: integer("health_check_interval_seconds").default(30),
+  automaticFailback: boolean("automatic_failback").default(false),
+  
+  // Failover history
+  lastFailoverAt: timestamp("last_failover_at"),
+  failoverCount: integer("failover_count").default(0),
+  lastFailbackAt: timestamp("last_failback_at"),
+  failbackCount: integer("failback_count").default(0),
+  
+  // Configuration
+  syncEnabled: boolean("sync_enabled").default(false), // Whether to sync data between providers
+  syncIntervalHours: integer("sync_interval_hours").default(24),
+  lastSyncAt: timestamp("last_sync_at"),
+  
+  configuredBy: varchar("configured_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique("unique_primary_backup").on(table.primaryProviderId, table.backupProviderId),
+  index("idx_failover_active").on(table.isActive),
+  index("idx_failover_primary").on(table.primaryProviderId),
+]);
+
+// ===== 7. USER MANAGEMENT ENHANCEMENTS =====
 export const suspensionReasonEnum = pgEnum("suspension_reason", ["violation", "abuse", "fraud", "dmca", "manual", "auto_flag"]);
 export const banTypeEnum = pgEnum("ban_type", ["temporary", "permanent", "shadow"]);
 
@@ -2706,6 +3230,28 @@ export const userActivityLog = pgTable("user_activity_log", {
   index("idx_user_activity_user_time").on(table.userId, table.timestamp.desc()),
   index("idx_user_activity_activity").on(table.activity),
 ]);
+
+// Storage Provider Insert Schemas
+export const insertStorageProviderConfigSchema = createInsertSchema(storageProviderConfigs).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true 
+});
+export const insertStorageProviderHealthSchema = createInsertSchema(storageProviderHealth).omit({ 
+  id: true 
+});
+export const insertStorageProviderCostSchema = createInsertSchema(storageProviderCosts).omit({ 
+  id: true 
+});
+export const insertStorageProviderAlertSchema = createInsertSchema(storageProviderAlerts).omit({ 
+  id: true, 
+  createdAt: true 
+});
+export const insertStorageProviderFailoverSchema = createInsertSchema(storageProviderFailover).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true 
+});
 
 // Insert schemas for new tables
 export const insertLeaderboardSchema = createInsertSchema(leaderboards).omit({ id: true, createdAt: true, updatedAt: true });
@@ -2783,6 +3329,19 @@ export type UserSuspension = typeof userSuspensions.$inferSelect;
 export type InsertUserSuspension = z.infer<typeof insertUserSuspensionSchema>;
 export type UserActivityLog = typeof userActivityLog.$inferSelect;
 export type InsertUserActivityLog = z.infer<typeof insertUserActivityLogSchema>;
+
+// Storage Provider Types
+export type StorageProviderConfig = typeof storageProviderConfigs.$inferSelect;
+export type InsertStorageProviderConfig = z.infer<typeof insertStorageProviderConfigSchema>;
+export type UpdateStorageProviderConfig = Partial<InsertStorageProviderConfig>;
+export type StorageProviderHealth = typeof storageProviderHealth.$inferSelect;
+export type InsertStorageProviderHealth = z.infer<typeof insertStorageProviderHealthSchema>;
+export type StorageProviderCost = typeof storageProviderCosts.$inferSelect;
+export type InsertStorageProviderCost = z.infer<typeof insertStorageProviderCostSchema>;
+export type StorageProviderAlert = typeof storageProviderAlerts.$inferSelect;
+export type InsertStorageProviderAlert = z.infer<typeof insertStorageProviderAlertSchema>;
+export type StorageProviderFailover = typeof storageProviderFailover.$inferSelect;
+export type InsertStorageProviderFailover = z.infer<typeof insertStorageProviderFailoverSchema>;
 
 // Financial Admin Types
 export type BillingProfile = typeof billingProfiles.$inferSelect;

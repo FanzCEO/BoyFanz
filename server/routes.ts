@@ -202,6 +202,286 @@ export function registerRoutes(app: Express) {
   // Set up CSRF token endpoint
   setupCSRFTokenEndpoint(app);
 
+  // ===== STORAGE PROVIDER MANAGEMENT ROUTES =====
+  
+  // Get all storage provider configurations
+  app.get('/api/admin/storage-providers', requireAdmin, async (req, res) => {
+    try {
+      const configs = await storage.getAllStorageProviderConfigs();
+      res.json(configs);
+    } catch (error) {
+      console.error('Failed to get storage provider configs:', error);
+      res.status(500).json({ error: 'Failed to get storage provider configurations' });
+    }
+  });
+
+  // Get storage provider configuration by ID
+  app.get('/api/admin/storage-providers/:id', requireAdmin, async (req, res) => {
+    try {
+      const config = await storage.getStorageProviderConfig(req.params.id);
+      if (!config) {
+        return res.status(404).json({ error: 'Storage provider configuration not found' });
+      }
+      res.json(config);
+    } catch (error) {
+      console.error('Failed to get storage provider config:', error);
+      res.status(500).json({ error: 'Failed to get storage provider configuration' });
+    }
+  });
+
+  // Create storage provider configuration
+  app.post('/api/admin/storage-providers', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const configData = {
+        ...req.body,
+        configuredBy: req.user!.id
+      };
+
+      const config = await storage.createStorageProviderConfig(configData);
+      
+      // Log the configuration creation
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'STORAGE_PROVIDER_CREATED',
+        targetType: 'storage_provider_config',
+        targetId: config.id,
+        diffJson: { created: config }
+      });
+
+      res.status(201).json(config);
+    } catch (error) {
+      console.error('Failed to create storage provider config:', error);
+      res.status(500).json({ error: 'Failed to create storage provider configuration' });
+    }
+  });
+
+  // Update storage provider configuration
+  app.put('/api/admin/storage-providers/:id', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const updateData = {
+        ...req.body,
+        lastConfiguredBy: req.user!.id
+      };
+
+      const config = await storage.updateStorageProviderConfig(req.params.id, updateData);
+      
+      // Log the configuration update
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'STORAGE_PROVIDER_UPDATED',
+        targetType: 'storage_provider_config',
+        targetId: req.params.id,
+        diffJson: { updated: updateData }
+      });
+
+      res.json(config);
+    } catch (error) {
+      console.error('Failed to update storage provider config:', error);
+      res.status(500).json({ error: 'Failed to update storage provider configuration' });
+    }
+  });
+
+  // Delete storage provider configuration
+  app.delete('/api/admin/storage-providers/:id', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      await storage.deleteStorageProviderConfig(req.params.id);
+      
+      // Log the configuration deletion
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'STORAGE_PROVIDER_DELETED',
+        targetType: 'storage_provider_config',
+        targetId: req.params.id,
+        diffJson: { deleted: true }
+      });
+
+      res.json({ message: 'Storage provider configuration deleted successfully' });
+    } catch (error) {
+      console.error('Failed to delete storage provider config:', error);
+      res.status(500).json({ error: 'Failed to delete storage provider configuration' });
+    }
+  });
+
+  // Test storage provider connection
+  app.post('/api/admin/storage-providers/:id/test', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const result = await storage.testStorageProviderConnection(req.params.id);
+      res.json(result);
+    } catch (error) {
+      console.error('Failed to test storage provider connection:', error);
+      res.status(500).json({ error: 'Failed to test storage provider connection' });
+    }
+  });
+
+  // Set primary storage provider
+  app.put('/api/admin/storage-providers/:id/set-primary', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      await storage.setPrimaryStorageProvider(req.params.id);
+      
+      // Log the primary provider change
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'STORAGE_PROVIDER_SET_PRIMARY',
+        targetType: 'storage_provider_config',
+        targetId: req.params.id,
+        diffJson: { setPrimary: true }
+      });
+
+      res.json({ message: 'Primary storage provider updated successfully' });
+    } catch (error) {
+      console.error('Failed to set primary storage provider:', error);
+      res.status(500).json({ error: 'Failed to set primary storage provider' });
+    }
+  });
+
+  // Get storage provider health metrics
+  app.get('/api/admin/storage-providers/health/summary', requireAdmin, async (req, res) => {
+    try {
+      const healthSummary = await storage.getStorageProviderHealthSummary();
+      res.json(healthSummary);
+    } catch (error) {
+      console.error('Failed to get storage provider health summary:', error);
+      res.status(500).json({ error: 'Failed to get storage provider health summary' });
+    }
+  });
+
+  // Get storage provider health history
+  app.get('/api/admin/storage-providers/:id/health', requireAdmin, async (req, res) => {
+    try {
+      const hours = parseInt(req.query.hours as string) || 24;
+      const healthData = await storage.getStorageProviderHealth(req.params.id, hours);
+      res.json(healthData);
+    } catch (error) {
+      console.error('Failed to get storage provider health data:', error);
+      res.status(500).json({ error: 'Failed to get storage provider health data' });
+    }
+  });
+
+  // Get cost summary by provider
+  app.get('/api/admin/storage-providers/costs/summary', requireAdmin, async (req, res) => {
+    try {
+      const costSummary = await storage.getCostSummaryByProvider();
+      res.json(costSummary);
+    } catch (error) {
+      console.error('Failed to get cost summary:', error);
+      res.status(500).json({ error: 'Failed to get cost summary' });
+    }
+  });
+
+  // Get cost optimization recommendations
+  app.get('/api/admin/storage-providers/costs/recommendations', requireAdmin, async (req, res) => {
+    try {
+      const recommendations = await storage.getCostOptimizationRecommendations();
+      res.json(recommendations);
+    } catch (error) {
+      console.error('Failed to get cost optimization recommendations:', error);
+      res.status(500).json({ error: 'Failed to get cost optimization recommendations' });
+    }
+  });
+
+  // Get storage provider alerts
+  app.get('/api/admin/storage-providers/alerts', requireAdmin, async (req, res) => {
+    try {
+      const { providerId, severity, unresolved } = req.query;
+      let alerts;
+
+      if (unresolved === 'true') {
+        alerts = await storage.getUnresolvedStorageProviderAlerts();
+      } else {
+        alerts = await storage.getStorageProviderAlerts(
+          providerId as string,
+          severity as string
+        );
+      }
+      
+      res.json(alerts);
+    } catch (error) {
+      console.error('Failed to get storage provider alerts:', error);
+      res.status(500).json({ error: 'Failed to get storage provider alerts' });
+    }
+  });
+
+  // Acknowledge storage provider alert
+  app.put('/api/admin/storage-providers/alerts/:id/acknowledge', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      await storage.acknowledgeStorageProviderAlert(req.params.id, req.user!.id);
+      res.json({ message: 'Alert acknowledged successfully' });
+    } catch (error) {
+      console.error('Failed to acknowledge alert:', error);
+      res.status(500).json({ error: 'Failed to acknowledge alert' });
+    }
+  });
+
+  // Resolve storage provider alert
+  app.put('/api/admin/storage-providers/alerts/:id/resolve', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const { resolutionNotes } = req.body;
+      await storage.resolveStorageProviderAlert(req.params.id, req.user!.id, resolutionNotes);
+      res.json({ message: 'Alert resolved successfully' });
+    } catch (error) {
+      console.error('Failed to resolve alert:', error);
+      res.status(500).json({ error: 'Failed to resolve alert' });
+    }
+  });
+
+  // Get failover configurations
+  app.get('/api/admin/storage-providers/failover', requireAdmin, async (req, res) => {
+    try {
+      const failoverConfigs = await storage.getAllFailoverConfigs();
+      res.json(failoverConfigs);
+    } catch (error) {
+      console.error('Failed to get failover configurations:', error);
+      res.status(500).json({ error: 'Failed to get failover configurations' });
+    }
+  });
+
+  // Create failover configuration
+  app.post('/api/admin/storage-providers/failover', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const failoverData = {
+        ...req.body,
+        configuredBy: req.user!.id
+      };
+
+      const failoverConfig = await storage.createStorageProviderFailover(failoverData);
+      
+      // Log failover configuration creation
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'STORAGE_FAILOVER_CREATED',
+        targetType: 'storage_provider_failover',
+        targetId: failoverConfig.id,
+        diffJson: { created: failoverConfig }
+      });
+
+      res.status(201).json(failoverConfig);
+    } catch (error) {
+      console.error('Failed to create failover configuration:', error);
+      res.status(500).json({ error: 'Failed to create failover configuration' });
+    }
+  });
+
+  // Trigger manual failover
+  app.post('/api/admin/storage-providers/:id/failover', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      await storage.triggerFailover(req.params.id);
+      
+      // Log manual failover trigger
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'STORAGE_FAILOVER_TRIGGERED',
+        targetType: 'storage_provider_config',
+        targetId: req.params.id,
+        diffJson: { manualFailover: true }
+      });
+
+      res.json({ message: 'Failover triggered successfully' });
+    } catch (error) {
+      console.error('Failed to trigger failover:', error);
+      res.status(500).json({ error: 'Failed to trigger failover' });
+    }
+  });
+
   // ===== THEME ROUTES =====
   
   // Get active theme
@@ -1777,6 +2057,529 @@ export function registerRoutes(app: Express) {
     } catch (error) {
       console.error('Alert rule creation failed:', error);
       res.status(500).json({ error: 'Alert rule creation failed' });
+    }
+  });
+
+  // ===== COMMUNICATION MANAGEMENT ADMIN ROUTES =====
+
+  // Comment Moderation Routes
+  app.get('/api/admin/comments', requireAdmin, async (req, res) => {
+    try {
+      const {
+        limit = 50,
+        offset = 0,
+        postId,
+        userId,
+        status,
+        sentimentScore,
+        sortBy = 'created',
+        sortOrder = 'desc'
+      } = req.query;
+
+      const comments = await storage.getComments({
+        limit: Number(limit),
+        offset: Number(offset),
+        postId: postId as string,
+        userId: userId as string,
+        status: status as string,
+        sentimentScore: sentimentScore as string,
+        sortBy: sortBy as any,
+        sortOrder: sortOrder as any
+      });
+
+      res.json(comments);
+    } catch (error) {
+      console.error('Failed to get comments:', error);
+      res.status(500).json({ error: 'Failed to get comments' });
+    }
+  });
+
+  app.get('/api/admin/comments/:id', requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const comment = await storage.getComment(id);
+      
+      if (!comment) {
+        return res.status(404).json({ error: 'Comment not found' });
+      }
+
+      res.json(comment);
+    } catch (error) {
+      console.error('Failed to get comment:', error);
+      res.status(500).json({ error: 'Failed to get comment' });
+    }
+  });
+
+  app.post('/api/admin/comments/:id/moderate', requireAdmin, csrfProtection, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status, reason, aiConfidence, sentimentScore, toxicityScore, spamScore } = req.body;
+      const moderatorId = req.user?.id;
+
+      const moderation = await storage.moderateComment({
+        commentId: id,
+        moderatorId,
+        status,
+        reason,
+        autoModerated: false,
+        aiConfidence: aiConfidence || 0,
+        sentimentScore,
+        toxicityScore: toxicityScore || 0,
+        spamScore: spamScore || 0
+      });
+
+      // Log moderation action
+      await storage.createAuditLog({
+        userId: moderatorId,
+        action: 'COMMENT_MODERATED',
+        details: JSON.stringify({ commentId: id, status, reason }),
+        timestamp: new Date()
+      });
+
+      res.json(moderation);
+    } catch (error) {
+      console.error('Failed to moderate comment:', error);
+      res.status(500).json({ error: 'Failed to moderate comment' });
+    }
+  });
+
+  app.post('/api/admin/comments/bulk-moderate', requireAdmin, csrfProtection, async (req, res) => {
+    try {
+      const { commentIds, action, reason } = req.body;
+      const moderatorId = req.user?.id;
+
+      if (!Array.isArray(commentIds) || commentIds.length === 0) {
+        return res.status(400).json({ error: 'commentIds must be a non-empty array' });
+      }
+
+      await storage.bulkModerateComments(commentIds, action, reason, moderatorId);
+
+      // Log bulk moderation action
+      await storage.createAuditLog({
+        userId: moderatorId,
+        action: 'BULK_COMMENT_MODERATION',
+        details: JSON.stringify({ commentIds, action, reason, count: commentIds.length }),
+        timestamp: new Date()
+      });
+
+      res.json({ success: true, moderatedCount: commentIds.length });
+    } catch (error) {
+      console.error('Failed to bulk moderate comments:', error);
+      res.status(500).json({ error: 'Failed to bulk moderate comments' });
+    }
+  });
+
+  app.get('/api/admin/comments/analytics', requireAdmin, async (req, res) => {
+    try {
+      const { dateFrom, dateTo } = req.query;
+      
+      if (!dateFrom || !dateTo) {
+        return res.status(400).json({ error: 'dateFrom and dateTo are required' });
+      }
+
+      const analytics = await storage.getCommentAnalytics(
+        new Date(dateFrom as string),
+        new Date(dateTo as string)
+      );
+
+      res.json(analytics);
+    } catch (error) {
+      console.error('Failed to get comment analytics:', error);
+      res.status(500).json({ error: 'Failed to get comment analytics' });
+    }
+  });
+
+  // Message Moderation Routes
+  app.get('/api/admin/messages', requireAdmin, async (req, res) => {
+    try {
+      const {
+        limit = 50,
+        offset = 0,
+        senderId,
+        receiverId,
+        flagged,
+        status,
+        sortBy = 'created',
+        sortOrder = 'desc'
+      } = req.query;
+
+      const messages = await storage.getMessages({
+        limit: Number(limit),
+        offset: Number(offset),
+        senderId: senderId as string,
+        receiverId: receiverId as string,
+        flagged: flagged === 'true',
+        status: status as string,
+        sortBy: sortBy as any,
+        sortOrder: sortOrder as any
+      });
+
+      res.json(messages);
+    } catch (error) {
+      console.error('Failed to get messages:', error);
+      res.status(500).json({ error: 'Failed to get messages' });
+    }
+  });
+
+  app.post('/api/admin/messages/:id/flag', requireAdmin, csrfProtection, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { flagReason, notes, reporterId } = req.body;
+      const moderatorId = req.user?.id;
+
+      const moderation = await storage.flagMessage({
+        messageId: id,
+        reporterId,
+        moderatorId,
+        status: 'flagged',
+        flagReason,
+        notes,
+        autoFlagged: false,
+        reviewRequired: true
+      });
+
+      await storage.createAuditLog({
+        userId: moderatorId,
+        action: 'MESSAGE_FLAGGED',
+        details: JSON.stringify({ messageId: id, flagReason, notes }),
+        timestamp: new Date()
+      });
+
+      res.json(moderation);
+    } catch (error) {
+      console.error('Failed to flag message:', error);
+      res.status(500).json({ error: 'Failed to flag message' });
+    }
+  });
+
+  app.get('/api/admin/messages/analytics', requireAdmin, async (req, res) => {
+    try {
+      const { dateFrom, dateTo } = req.query;
+      
+      if (!dateFrom || !dateTo) {
+        return res.status(400).json({ error: 'dateFrom and dateTo are required' });
+      }
+
+      const analytics = await storage.getMessageAnalytics(
+        new Date(dateFrom as string),
+        new Date(dateTo as string)
+      );
+
+      res.json(analytics);
+    } catch (error) {
+      console.error('Failed to get message analytics:', error);
+      res.status(500).json({ error: 'Failed to get message analytics' });
+    }
+  });
+
+  // Mass Message Templates Routes
+  app.get('/api/admin/message-templates', requireAdmin, async (req, res) => {
+    try {
+      const { type, isActive, limit = 50, offset = 0 } = req.query;
+      const creatorId = req.user?.id || '';
+
+      const templates = await storage.getMassMessageTemplates(creatorId, {
+        type: type as string,
+        isActive: isActive === 'true',
+        limit: Number(limit),
+        offset: Number(offset)
+      });
+
+      res.json(templates);
+    } catch (error) {
+      console.error('Failed to get message templates:', error);
+      res.status(500).json({ error: 'Failed to get message templates' });
+    }
+  });
+
+  app.post('/api/admin/message-templates', requireAdmin, csrfProtection, async (req, res) => {
+    try {
+      const templateData = {
+        ...req.body,
+        creatorId: req.user?.id || ''
+      };
+
+      const template = await storage.createMassMessageTemplate(templateData);
+
+      await storage.createAuditLog({
+        userId: req.user?.id,
+        action: 'MESSAGE_TEMPLATE_CREATED',
+        details: JSON.stringify({ templateId: template.id, name: template.name }),
+        timestamp: new Date()
+      });
+
+      res.json(template);
+    } catch (error) {
+      console.error('Failed to create message template:', error);
+      res.status(500).json({ error: 'Failed to create message template' });
+    }
+  });
+
+  app.post('/api/admin/message-templates/:id/send', requireAdmin, csrfProtection, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { targetAudience, customFilter } = req.body;
+
+      const result = await storage.sendMassMessage(id, targetAudience, customFilter);
+
+      await storage.createAuditLog({
+        userId: req.user?.id,
+        action: 'MASS_MESSAGE_SENT',
+        details: JSON.stringify({ templateId: id, targetAudience, ...result }),
+        timestamp: new Date()
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error('Failed to send mass message:', error);
+      res.status(500).json({ error: 'Failed to send mass message' });
+    }
+  });
+
+  // Announcements Management Routes
+  app.get('/api/admin/announcements', requireAdmin, async (req, res) => {
+    try {
+      const {
+        limit = 50,
+        offset = 0,
+        creatorId,
+        type,
+        status,
+        targetAudience,
+        sortBy = 'created',
+        sortOrder = 'desc'
+      } = req.query;
+
+      const announcements = await storage.getAnnouncements({
+        limit: Number(limit),
+        offset: Number(offset),
+        creatorId: creatorId as string,
+        type: type as string,
+        status: status as string,
+        targetAudience: targetAudience as string,
+        sortBy: sortBy as any,
+        sortOrder: sortOrder as any
+      });
+
+      res.json(announcements);
+    } catch (error) {
+      console.error('Failed to get announcements:', error);
+      res.status(500).json({ error: 'Failed to get announcements' });
+    }
+  });
+
+  app.post('/api/admin/announcements', requireAdmin, csrfProtection, async (req, res) => {
+    try {
+      const announcementData = {
+        ...req.body,
+        creatorId: req.user?.id || ''
+      };
+
+      const announcement = await storage.createAnnouncement(announcementData);
+
+      await storage.createAuditLog({
+        userId: req.user?.id,
+        action: 'ANNOUNCEMENT_CREATED',
+        details: JSON.stringify({ announcementId: announcement.id, title: announcement.title }),
+        timestamp: new Date()
+      });
+
+      res.json(announcement);
+    } catch (error) {
+      console.error('Failed to create announcement:', error);
+      res.status(500).json({ error: 'Failed to create announcement' });
+    }
+  });
+
+  app.post('/api/admin/announcements/:id/publish', requireAdmin, csrfProtection, async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const result = await storage.publishAnnouncement(id);
+
+      await storage.createAuditLog({
+        userId: req.user?.id,
+        action: 'ANNOUNCEMENT_PUBLISHED',
+        details: JSON.stringify({ announcementId: id, ...result }),
+        timestamp: new Date()
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error('Failed to publish announcement:', error);
+      res.status(500).json({ error: 'Failed to publish announcement' });
+    }
+  });
+
+  app.get('/api/admin/announcements/:id/analytics', requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const analytics = await storage.getAnnouncementAnalytics(id);
+      res.json(analytics);
+    } catch (error) {
+      console.error('Failed to get announcement analytics:', error);
+      res.status(500).json({ error: 'Failed to get announcement analytics' });
+    }
+  });
+
+  // Push Notification Campaigns Routes
+  app.get('/api/admin/push-campaigns', requireAdmin, async (req, res) => {
+    try {
+      const {
+        limit = 50,
+        offset = 0,
+        creatorId,
+        status,
+        targetAudience,
+        sortBy = 'created',
+        sortOrder = 'desc'
+      } = req.query;
+
+      const campaigns = await storage.getPushCampaigns({
+        limit: Number(limit),
+        offset: Number(offset),
+        creatorId: creatorId as string,
+        status: status as string,
+        targetAudience: targetAudience as string,
+        sortBy: sortBy as any,
+        sortOrder: sortOrder as any
+      });
+
+      res.json(campaigns);
+    } catch (error) {
+      console.error('Failed to get push campaigns:', error);
+      res.status(500).json({ error: 'Failed to get push campaigns' });
+    }
+  });
+
+  app.post('/api/admin/push-campaigns', requireAdmin, csrfProtection, async (req, res) => {
+    try {
+      const campaignData = {
+        ...req.body,
+        creatorId: req.user?.id || ''
+      };
+
+      const campaign = await storage.createPushCampaign(campaignData);
+
+      await storage.createAuditLog({
+        userId: req.user?.id,
+        action: 'PUSH_CAMPAIGN_CREATED',
+        details: JSON.stringify({ campaignId: campaign.id, name: campaign.name }),
+        timestamp: new Date()
+      });
+
+      res.json(campaign);
+    } catch (error) {
+      console.error('Failed to create push campaign:', error);
+      res.status(500).json({ error: 'Failed to create push campaign' });
+    }
+  });
+
+  app.post('/api/admin/push-campaigns/:id/send', requireAdmin, csrfProtection, async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const result = await storage.sendPushCampaign(id);
+
+      await storage.createAuditLog({
+        userId: req.user?.id,
+        action: 'PUSH_CAMPAIGN_SENT',
+        details: JSON.stringify({ campaignId: id, ...result }),
+        timestamp: new Date()
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error('Failed to send push campaign:', error);
+      res.status(500).json({ error: 'Failed to send push campaign' });
+    }
+  });
+
+  app.get('/api/admin/push-campaigns/:id/analytics', requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const analytics = await storage.getPushCampaignAnalytics(id);
+      res.json(analytics);
+    } catch (error) {
+      console.error('Failed to get push campaign analytics:', error);
+      res.status(500).json({ error: 'Failed to get push campaign analytics' });
+    }
+  });
+
+  // User Communication Preferences Routes
+  app.get('/api/admin/users/:userId/communication-preferences', requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const preferences = await storage.getUserCommunicationPreferences(userId);
+      res.json(preferences);
+    } catch (error) {
+      console.error('Failed to get user communication preferences:', error);
+      res.status(500).json({ error: 'Failed to get user communication preferences' });
+    }
+  });
+
+  app.post('/api/admin/users/:userId/device-token', requireAdmin, csrfProtection, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { platform, token } = req.body;
+
+      await storage.updateUserDeviceToken(userId, platform, token);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Failed to update device token:', error);
+      res.status(500).json({ error: 'Failed to update device token' });
+    }
+  });
+
+  // Communication Analytics and Overview Routes
+  app.get('/api/admin/communication/analytics', requireAdmin, async (req, res) => {
+    try {
+      const { type, dateFrom, dateTo } = req.query;
+      
+      if (!type || !dateFrom || !dateTo) {
+        return res.status(400).json({ error: 'type, dateFrom, and dateTo are required' });
+      }
+
+      const analytics = await storage.getCommunicationAnalytics(
+        type as string,
+        new Date(dateFrom as string),
+        new Date(dateTo as string)
+      );
+
+      res.json(analytics);
+    } catch (error) {
+      console.error('Failed to get communication analytics:', error);
+      res.status(500).json({ error: 'Failed to get communication analytics' });
+    }
+  });
+
+  app.get('/api/admin/communication/stats', requireAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getOverallCommunicationStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Failed to get communication stats:', error);
+      res.status(500).json({ error: 'Failed to get communication stats' });
+    }
+  });
+
+  app.get('/api/admin/users/targeting', requireAdmin, async (req, res) => {
+    try {
+      const { targetAudience, customFilter } = req.query;
+      
+      if (!targetAudience) {
+        return res.status(400).json({ error: 'targetAudience is required' });
+      }
+
+      const users = await storage.getUsersForTargeting(
+        targetAudience as string,
+        customFilter ? JSON.parse(customFilter as string) : undefined
+      );
+
+      res.json(users);
+    } catch (error) {
+      console.error('Failed to get users for targeting:', error);
+      res.status(500).json({ error: 'Failed to get users for targeting' });
     }
   });
 

@@ -118,6 +118,29 @@ import {
   type InsertDashboardChart,
   type AgeVerification,
   type InsertAgeVerification,
+  // Communication Management Types
+  type SelectCommentModeration,
+  type InsertCommentModeration,
+  type SelectMessageModeration,
+  type InsertMessageModeration,
+  type SelectAnnouncement,
+  type InsertAnnouncement,
+  type SelectPushNotificationCampaign,
+  type InsertPushNotificationCampaign,
+  type SelectUserCommunicationPreferences,
+  type InsertUserCommunicationPreferences,
+  type SelectMassMessageTemplate,
+  type InsertMassMessageTemplate,
+  // Communication Management Tables
+  commentModerations,
+  messageModerations,
+  announcements,
+  announcementDeliveries,
+  pushNotificationCampaigns,
+  pushNotificationDeliveries,
+  userCommunicationPreferences,
+  communicationAnalytics,
+  massMessageTemplates,
   // Enhanced Earnings System Types
   type PerformanceTier,
   type InsertPerformanceTier,
@@ -147,6 +170,24 @@ import {
   earningsAnalytics,
   taxRecords,
   volumeTiers,
+  // Storage Provider Tables
+  storageProviderConfigs,
+  storageProviderHealth,
+  storageProviderCosts,
+  storageProviderAlerts,
+  storageProviderFailover,
+  // Storage Provider Types
+  type StorageProviderConfig,
+  type InsertStorageProviderConfig,
+  type UpdateStorageProviderConfig,
+  type StorageProviderHealth,
+  type InsertStorageProviderHealth,
+  type StorageProviderCost,
+  type InsertStorageProviderCost,
+  type StorageProviderAlert,
+  type InsertStorageProviderAlert,
+  type StorageProviderFailover,
+  type InsertStorageProviderFailover,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, count, sql, or, lt, isNull, gte, lte, not, arrayContains, getTableColumns } from "drizzle-orm";
@@ -211,6 +252,66 @@ export interface IStorage {
   updateTheme(id: string, updates: UpdateThemeSettings): Promise<ThemeSettings>;
   setActiveTheme(id: string): Promise<void>;
   deleteTheme(id: string): Promise<void>;
+
+  // Storage Provider Configuration operations
+  createStorageProviderConfig(config: InsertStorageProviderConfig): Promise<StorageProviderConfig>;
+  getStorageProviderConfig(id: string): Promise<StorageProviderConfig | undefined>;
+  getAllStorageProviderConfigs(): Promise<StorageProviderConfig[]>;
+  getStorageProviderConfigsByProvider(provider: string): Promise<StorageProviderConfig[]>;
+  updateStorageProviderConfig(id: string, updates: UpdateStorageProviderConfig): Promise<StorageProviderConfig>;
+  deleteStorageProviderConfig(id: string): Promise<void>;
+  getActiveStorageProviders(): Promise<StorageProviderConfig[]>;
+  getPrimaryStorageProvider(): Promise<StorageProviderConfig | undefined>;
+  setPrimaryStorageProvider(id: string): Promise<void>;
+  testStorageProviderConnection(id: string): Promise<{ success: boolean; message: string; details?: any }>;
+
+  // Storage Provider Health operations
+  recordStorageProviderHealth(health: InsertStorageProviderHealth): Promise<StorageProviderHealth>;
+  getStorageProviderHealth(providerId: string, hours?: number): Promise<StorageProviderHealth[]>;
+  getLatestStorageProviderHealth(providerId: string): Promise<StorageProviderHealth | undefined>;
+  getStorageProviderHealthSummary(): Promise<{
+    providerId: string;
+    providerName: string;
+    healthStatus: string;
+    responseTimeMs: number;
+    availability: number;
+    lastChecked: Date;
+  }[]>;
+
+  // Storage Provider Cost operations
+  recordStorageProviderCost(cost: InsertStorageProviderCost): Promise<StorageProviderCost>;
+  getStorageProviderCosts(providerId: string, startDate?: Date, endDate?: Date): Promise<StorageProviderCost[]>;
+  getCostSummaryByProvider(): Promise<{
+    providerId: string;
+    providerName: string;
+    totalCost: number;
+    storageCost: number;
+    bandwidthCost: number;
+    requestCost: number;
+    period: { start: Date; end: Date };
+  }[]>;
+  getCostOptimizationRecommendations(): Promise<{
+    providerId: string;
+    recommendations: any[];
+    potentialSavings: number;
+  }[]>;
+
+  // Storage Provider Alert operations
+  createStorageProviderAlert(alert: InsertStorageProviderAlert): Promise<StorageProviderAlert>;
+  getStorageProviderAlerts(providerId?: string, severity?: string): Promise<StorageProviderAlert[]>;
+  getUnresolvedStorageProviderAlerts(): Promise<StorageProviderAlert[]>;
+  acknowledgeStorageProviderAlert(id: string, acknowledgedBy: string): Promise<void>;
+  resolveStorageProviderAlert(id: string, resolvedBy: string, resolutionNotes?: string): Promise<void>;
+
+  // Storage Provider Failover operations
+  createStorageProviderFailover(failover: InsertStorageProviderFailover): Promise<StorageProviderFailover>;
+  getStorageProviderFailover(id: string): Promise<StorageProviderFailover | undefined>;
+  getFailoverConfigsByProvider(providerId: string): Promise<StorageProviderFailover[]>;
+  getAllFailoverConfigs(): Promise<StorageProviderFailover[]>;
+  updateStorageProviderFailover(id: string, updates: Partial<StorageProviderFailover>): Promise<StorageProviderFailover>;
+  deleteStorageProviderFailover(id: string): Promise<void>;
+  triggerFailover(primaryProviderId: string): Promise<void>;
+  triggerFailback(failoverId: string): Promise<void>;
   
   // Creator Economy Operations
   
@@ -780,6 +881,154 @@ export interface IStorage {
     topProducts: any[];
     salesByCategory: any[];
     ordersByStatus: any[];
+  }>;
+
+  // Communication Management Operations
+  
+  // Comment Moderation
+  getComments(options?: {
+    limit?: number;
+    offset?: number;
+    postId?: string;
+    userId?: string;
+    status?: string;
+    sentimentScore?: string;
+    sortBy?: 'created' | 'updated' | 'toxicity' | 'spam';
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<(Comment & { user: User; post: Post; moderation?: SelectCommentModeration })[]>;
+  getComment(commentId: string): Promise<(Comment & { user: User; post: Post; moderation?: SelectCommentModeration }) | undefined>;
+  moderateComment(moderation: InsertCommentModeration): Promise<SelectCommentModeration>;
+  updateCommentModeration(commentId: string, updates: Partial<SelectCommentModeration>): Promise<SelectCommentModeration>;
+  bulkModerateComments(commentIds: string[], action: string, reason?: string, moderatorId?: string): Promise<void>;
+  getCommentAnalytics(dateFrom: Date, dateTo: Date): Promise<{
+    totalComments: number;
+    flaggedComments: number;
+    approvedComments: number;
+    rejectedComments: number;
+    averageSentiment: number;
+    toxicityRate: number;
+    spamRate: number;
+  }>;
+
+  // Message Moderation
+  getMessages(options?: {
+    limit?: number;
+    offset?: number;
+    senderId?: string;
+    receiverId?: string;
+    flagged?: boolean;
+    status?: string;
+    sortBy?: 'created' | 'updated';
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<(Message & { sender: User; receiver: User; moderation?: SelectMessageModeration })[]>;
+  getMessage(messageId: string): Promise<(Message & { sender: User; receiver: User; moderation?: SelectMessageModeration }) | undefined>;
+  flagMessage(moderation: InsertMessageModeration): Promise<SelectMessageModeration>;
+  updateMessageModeration(messageId: string, updates: Partial<SelectMessageModeration>): Promise<SelectMessageModeration>;
+  bulkModerateMessages(messageIds: string[], action: string, notes?: string, moderatorId?: string): Promise<void>;
+  getMessageAnalytics(dateFrom: Date, dateTo: Date): Promise<{
+    totalMessages: number;
+    flaggedMessages: number;
+    normalMessages: number;
+    hiddenMessages: number;
+    deletedMessages: number;
+  }>;
+
+  // Mass Message Templates
+  getMassMessageTemplates(creatorId: string, options?: {
+    type?: string;
+    isActive?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<SelectMassMessageTemplate[]>;
+  getMassMessageTemplate(templateId: string): Promise<SelectMassMessageTemplate | undefined>;
+  createMassMessageTemplate(template: InsertMassMessageTemplate): Promise<SelectMassMessageTemplate>;
+  updateMassMessageTemplate(templateId: string, updates: Partial<SelectMassMessageTemplate>): Promise<SelectMassMessageTemplate>;
+  deleteMassMessageTemplate(templateId: string): Promise<void>;
+  sendMassMessage(templateId: string, targetAudience: string, customFilter?: any): Promise<{ messagesSent: number; targetCount: number }>;
+
+  // Announcements Management
+  getAnnouncements(options?: {
+    limit?: number;
+    offset?: number;
+    creatorId?: string;
+    type?: string;
+    status?: string;
+    targetAudience?: string;
+    sortBy?: 'created' | 'updated' | 'scheduled';
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<(SelectAnnouncement & { creator: User })[]>;
+  getAnnouncement(announcementId: string): Promise<(SelectAnnouncement & { creator: User }) | undefined>;
+  createAnnouncement(announcement: InsertAnnouncement): Promise<SelectAnnouncement>;
+  updateAnnouncement(announcementId: string, updates: Partial<SelectAnnouncement>): Promise<SelectAnnouncement>;
+  deleteAnnouncement(announcementId: string): Promise<void>;
+  publishAnnouncement(announcementId: string): Promise<{ deliveriesSent: number; targetCount: number }>;
+  getAnnouncementDeliveries(announcementId: string, options?: {
+    status?: string;
+    channel?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<any[]>;
+  getAnnouncementAnalytics(announcementId: string): Promise<{
+    totalDeliveries: number;
+    sent: number;
+    delivered: number;
+    read: number;
+    clicked: number;
+    dismissed: number;
+    failedDeliveries: number;
+    engagementRate: number;
+    clickThroughRate: number;
+  }>;
+
+  // Push Notification Campaigns
+  getPushCampaigns(options?: {
+    limit?: number;
+    offset?: number;
+    creatorId?: string;
+    status?: string;
+    targetAudience?: string;
+    sortBy?: 'created' | 'updated' | 'scheduled';
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<(SelectPushNotificationCampaign & { creator: User })[]>;
+  getPushCampaign(campaignId: string): Promise<(SelectPushNotificationCampaign & { creator: User }) | undefined>;
+  createPushCampaign(campaign: InsertPushNotificationCampaign): Promise<SelectPushNotificationCampaign>;
+  updatePushCampaign(campaignId: string, updates: Partial<SelectPushNotificationCampaign>): Promise<SelectPushNotificationCampaign>;
+  deletePushCampaign(campaignId: string): Promise<void>;
+  sendPushCampaign(campaignId: string): Promise<{ notificationsSent: number; targetCount: number }>;
+  getPushCampaignDeliveries(campaignId: string, options?: {
+    status?: string;
+    platform?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<any[]>;
+  getPushCampaignAnalytics(campaignId: string): Promise<{
+    totalDeliveries: number;
+    sent: number;
+    delivered: number;
+    clicked: number;
+    failed: number;
+    expired: number;
+    deliveryRate: number;
+    clickThroughRate: number;
+  }>;
+
+  // User Communication Preferences
+  getUserCommunicationPreferences(userId: string): Promise<SelectUserCommunicationPreferences | undefined>;
+  updateUserCommunicationPreferences(userId: string, preferences: Partial<SelectUserCommunicationPreferences>): Promise<SelectUserCommunicationPreferences>;
+  updateUserDeviceToken(userId: string, platform: string, token: string): Promise<void>;
+  getUsersForTargeting(targetAudience: string, customFilter?: any): Promise<User[]>;
+  checkUserConsent(userId: string, communicationType: string): Promise<boolean>;
+
+  // Communication Analytics
+  getCommunicationAnalytics(type: string, dateFrom: Date, dateTo: Date): Promise<any>;
+  getOverallCommunicationStats(): Promise<{
+    totalComments: number;
+    totalMessages: number;
+    totalAnnouncements: number;
+    totalPushCampaigns: number;
+    avgModerationTime: number;
+    flaggedContentRate: number;
+    userEngagementRate: number;
   }>;
 }
 
