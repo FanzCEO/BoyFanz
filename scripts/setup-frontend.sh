@@ -259,7 +259,6 @@ create_ui_package() {
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.4",
-    "@radix-ui/react-button": "^0.1.0",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
     "@radix-ui/react-label": "^2.0.2",
@@ -492,7 +491,7 @@ create_platform_apps() {
         
         # Install additional dependencies
         if [ "$PKG_MANAGER" = "yarn" ]; then
-            yarn add @tanstack/react-query zustand @hookform/react-hook-form zod framer-motion @fanz/ui @fanz/shared
+            yarn add @tanstack/react-query zustand @hookform/react-hook-form zod framer-motion
             yarn add -D @types/node
         else
             npm install @tanstack/react-query zustand @hookform/react-hook-form zod framer-motion
