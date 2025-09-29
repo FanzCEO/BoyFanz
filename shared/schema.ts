@@ -3966,3 +3966,468 @@ export type InsertKycDocument = z.infer<typeof insertKycDocumentSchema>;
 export type FinancialSetting = typeof financialSettings.$inferSelect;
 export type InsertFinancialSetting = z.infer<typeof insertFinancialSettingSchema>;
 
+// ===== HELP AND SUPPORT SYSTEM SCHEMA =====
+// Comprehensive help desk, wiki, and tutorial system
+
+// Help desk ticket categories and types
+export const ticketCategoryEnum = pgEnum("ticket_category", [
+  "technical_support", "bug_report", "feature_request", "billing", 
+  "account_issues", "compliance", "content_policy", "general_inquiry"
+]);
+
+export const ticketPriorityEnum = pgEnum("ticket_priority", [
+  "low", "normal", "high", "urgent", "critical"
+]);
+
+export const ticketStatusEnum = pgEnum("ticket_status", [
+  "open", "pending", "in_progress", "waiting_user", "resolved", "closed", "escalated"
+]);
+
+export const ticketChannelEnum = pgEnum("ticket_channel", [
+  "in_app", "email", "chat", "api", "phone"
+]);
+
+// Support tickets table
+export const supportTickets = pgTable("support_tickets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ticketNumber: varchar("ticket_number").unique().notNull(), // Human-readable ticket ID
+  subject: varchar("subject").notNull(),
+  description: text("description").notNull(),
+  category: ticketCategoryEnum("category").notNull(),
+  priority: ticketPriorityEnum("priority").default("normal").notNull(),
+  status: ticketStatusEnum("status").default("open").notNull(),
+  channel: ticketChannelEnum("channel").default("in_app").notNull(),
+  
+  // User information
+  userId: varchar("user_id").references(() => accounts.id, { onDelete: "cascade" }),
+  userEmail: varchar("user_email"), // For non-registered users
+  userName: varchar("user_name"), // For non-registered users
+  
+  // Assignment and handling
+  assignedTo: varchar("assigned_to").references(() => accounts.id),
+  assignedAt: timestamp("assigned_at"),
+  
+  // Metadata and tracking
+  tags: text("tags").array().default([]),
+  metadata: jsonb("metadata").default({}), // Browser, IP, device info, error logs
+  customerSatisfaction: integer("customer_satisfaction"), // 1-5 rating
+  
+  // Timestamps and SLA tracking
+  firstResponseAt: timestamp("first_response_at"),
+  resolvedAt: timestamp("resolved_at"),
+  closedAt: timestamp("closed_at"),
+  slaBreachAt: timestamp("sla_breach_at"), // When SLA will be breached
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_support_tickets_user").on(table.userId),
+  index("idx_support_tickets_status").on(table.status),
+  index("idx_support_tickets_category").on(table.category),
+  index("idx_support_tickets_priority").on(table.priority),
+  index("idx_support_tickets_assigned").on(table.assignedTo),
+  index("idx_support_tickets_created").on(table.createdAt),
+]);
+
+// Ticket comments/messages
+export const ticketMessageTypeEnum = pgEnum("ticket_message_type", [
+  "user_message", "agent_response", "internal_note", "system_message", "auto_response"
+]);
+
+export const ticketMessages = pgTable("ticket_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ticketId: varchar("ticket_id").notNull().references(() => supportTickets.id, { onDelete: "cascade" }),
+  authorId: varchar("author_id").references(() => accounts.id), // null for system messages
+  type: ticketMessageTypeEnum("type").notNull(),
+  content: text("content").notNull(),
+  isInternal: boolean("is_internal").default(false), // Internal notes not visible to user
+  attachments: jsonb("attachments").default([]), // File attachments
+  metadata: jsonb("metadata").default({}),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_ticket_messages_ticket").on(table.ticketId),
+  index("idx_ticket_messages_author").on(table.authorId),
+  index("idx_ticket_messages_created").on(table.createdAt),
+]);
+
+// Wiki categories for organization (declare before using)
+export const wikiCategories = pgTable("wiki_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  slug: varchar("slug").unique().notNull(),
+  description: text("description"),
+  parentId: varchar("parent_id").references(() => wikiCategories.id), // Hierarchical categories
+  icon: varchar("icon"), // Icon class or URL
+  color: varchar("color"), // Hex color for UI
+  sortOrder: integer("sort_order").default(0),
+  isVisible: boolean("is_visible").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_wiki_categories_parent").on(table.parentId),
+  index("idx_wiki_categories_sort").on(table.sortOrder),
+]);
+
+// Tutorial categories (declare before using)
+export const tutorialCategories = pgTable("tutorial_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  slug: varchar("slug").unique().notNull(),
+  description: text("description"),
+  icon: varchar("icon"),
+  color: varchar("color"),
+  sortOrder: integer("sort_order").default(0),
+  isVisible: boolean("is_visible").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_tutorial_categories_sort").on(table.sortOrder),
+]);
+
+// Gamification badges (declare before using)
+export const badges = pgTable("badges", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  icon: varchar("icon"), // Icon URL or class
+  color: varchar("color"),
+  criteria: jsonb("criteria"), // Requirements to earn badge
+  rewardPoints: integer("reward_points").default(0),
+  isActive: boolean("is_active").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Wiki articles system
+export const articleStatusEnum = pgEnum("article_status", [
+  "draft", "pending_review", "published", "archived", "deprecated"
+]);
+
+export const articleTypeEnum = pgEnum("article_type", [
+  "guide", "tutorial", "faq", "troubleshooting", "policy", "announcement", "reference"
+]);
+
+export const wikiArticles = pgTable("wiki_articles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  slug: varchar("slug").unique().notNull(), // URL-friendly identifier
+  title: varchar("title").notNull(),
+  excerpt: text("excerpt"), // Short description/summary
+  content: text("content").notNull(), // Markdown content
+  type: articleTypeEnum("type").notNull(),
+  status: articleStatusEnum("status").default("draft").notNull(),
+  
+  // Authoring and editing
+  authorId: varchar("author_id").notNull().references(() => accounts.id),
+  lastEditedBy: varchar("last_edited_by").references(() => accounts.id),
+  reviewedBy: varchar("reviewed_by").references(() => accounts.id),
+  
+  // Categorization and tagging
+  categoryId: varchar("category_id").references(() => wikiCategories.id),
+  tags: text("tags").array().default([]),
+  
+  // SEO and search
+  metaTitle: varchar("meta_title"),
+  metaDescription: text("meta_description"),
+  keywords: text("keywords").array().default([]),
+  searchVector: text("search_vector"), // For full-text search
+  
+  // Analytics and feedback
+  viewCount: integer("view_count").default(0),
+  helpfulVotes: integer("helpful_votes").default(0),
+  notHelpfulVotes: integer("not_helpful_votes").default(0),
+  averageRating: decimal("average_rating", { precision: 3, scale: 2 }),
+  
+  // Publishing and visibility
+  publishedAt: timestamp("published_at"),
+  featuredUntil: timestamp("featured_until"), // Featured article expiry
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_wiki_articles_slug").on(table.slug),
+  index("idx_wiki_articles_status").on(table.status),
+  index("idx_wiki_articles_type").on(table.type),
+  index("idx_wiki_articles_category").on(table.categoryId),
+  index("idx_wiki_articles_author").on(table.authorId),
+  index("idx_wiki_articles_published").on(table.publishedAt),
+]);
+
+// Tutorial system
+export const tutorialStatusEnum = pgEnum("tutorial_status", [
+  "draft", "published", "archived", "maintenance"
+]);
+
+export const tutorialDifficultyEnum = pgEnum("tutorial_difficulty", [
+  "beginner", "intermediate", "advanced", "expert"
+]);
+
+export const tutorials = pgTable("tutorials", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title").notNull(),
+  slug: varchar("slug").unique().notNull(),
+  description: text("description"),
+  status: tutorialStatusEnum("status").default("draft").notNull(),
+  difficulty: tutorialDifficultyEnum("difficulty").default("beginner").notNull(),
+  
+  // Content and structure
+  steps: jsonb("steps").notNull(), // Array of tutorial steps with content, actions, etc.
+  estimatedDuration: integer("estimated_duration"), // Minutes to complete
+  prerequisites: text("prerequisites").array().default([]), // Required knowledge/tutorials
+  
+  // Authoring
+  authorId: varchar("author_id").notNull().references(() => accounts.id),
+  categoryId: varchar("category_id").references(() => tutorialCategories.id),
+  tags: text("tags").array().default([]),
+  
+  // Analytics and engagement
+  completionCount: integer("completion_count").default(0),
+  averageCompletionTime: integer("average_completion_time"), // Minutes
+  successRate: decimal("success_rate", { precision: 5, scale: 2 }), // Percentage
+  rating: decimal("rating", { precision: 3, scale: 2 }),
+  
+  // Gamification
+  rewardPoints: integer("reward_points").default(0),
+  badgeId: varchar("badge_id").references(() => badges.id),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_tutorials_slug").on(table.slug),
+  index("idx_tutorials_status").on(table.status),
+  index("idx_tutorials_difficulty").on(table.difficulty),
+  index("idx_tutorials_category").on(table.categoryId),
+  index("idx_tutorials_author").on(table.authorId),
+]);
+
+// User tutorial progress tracking
+export const tutorialProgressStatusEnum = pgEnum("tutorial_progress_status", [
+  "not_started", "in_progress", "completed", "abandoned"
+]);
+
+export const userTutorialProgress = pgTable("user_tutorial_progress", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  tutorialId: varchar("tutorial_id").notNull().references(() => tutorials.id, { onDelete: "cascade" }),
+  status: tutorialProgressStatusEnum("status").default("not_started").notNull(),
+  
+  // Progress tracking
+  currentStep: integer("current_step").default(0),
+  totalSteps: integer("total_steps").notNull(),
+  completedSteps: integer("completed_steps").default(0),
+  progressPercentage: decimal("progress_percentage", { precision: 5, scale: 2 }).default("0"),
+  
+  // Timing and analytics
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  lastAccessedAt: timestamp("last_accessed_at"),
+  totalTimeSpent: integer("total_time_spent").default(0), // Seconds
+  
+  // User feedback
+  rating: integer("rating"), // 1-5 stars
+  feedback: text("feedback"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique().on(table.userId, table.tutorialId), // One progress record per user per tutorial
+  index("idx_user_tutorial_progress_user").on(table.userId),
+  index("idx_user_tutorial_progress_tutorial").on(table.tutorialId),
+  index("idx_user_tutorial_progress_status").on(table.status),
+]);
+
+// User badge assignments
+export const userBadges = pgTable("user_badges", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  badgeId: varchar("badge_id").notNull().references(() => badges.id, { onDelete: "cascade" }),
+  earnedAt: timestamp("earned_at").defaultNow(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  unique().on(table.userId, table.badgeId), // One badge per user
+  index("idx_user_badges_user").on(table.userId),
+  index("idx_user_badges_badge").on(table.badgeId),
+]);
+
+// Knowledge base FAQ entries
+export const faqEntries = pgTable("faq_entries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  question: text("question").notNull(),
+  answer: text("answer").notNull(), // Markdown content
+  categoryId: varchar("category_id").references(() => wikiCategories.id),
+  tags: text("tags").array().default([]),
+  sortOrder: integer("sort_order").default(0),
+  isVisible: boolean("is_visible").default(true),
+  
+  // Analytics
+  viewCount: integer("view_count").default(0),
+  helpfulVotes: integer("helpful_votes").default(0),
+  notHelpfulVotes: integer("not_helpful_votes").default(0),
+  
+  // Authoring
+  authorId: varchar("author_id").notNull().references(() => accounts.id),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_faq_entries_category").on(table.categoryId),
+  index("idx_faq_entries_author").on(table.authorId),
+  index("idx_faq_entries_sort").on(table.sortOrder),
+]);
+
+// Navigation breadcrumbs for enhanced navigation
+export const navigationPaths = pgTable("navigation_paths", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => accounts.id, { onDelete: "cascade" }),
+  sessionId: varchar("session_id"),
+  path: varchar("path").notNull(), // URL path
+  title: varchar("title"), // Page title
+  timestamp: timestamp("timestamp").defaultNow(),
+  metadata: jsonb("metadata").default({}), // Additional context
+}, (table) => [
+  index("idx_navigation_paths_user").on(table.userId),
+  index("idx_navigation_paths_session").on(table.sessionId),
+  index("idx_navigation_paths_timestamp").on(table.timestamp),
+]);
+
+// Search analytics for improving help content
+export const searchAnalytics = pgTable("search_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => accounts.id),
+  sessionId: varchar("session_id"),
+  query: text("query").notNull(),
+  resultsCount: integer("results_count").default(0),
+  clickedResultId: varchar("clicked_result_id"), // ID of clicked article/tutorial
+  clickedResultType: varchar("clicked_result_type"), // 'article', 'tutorial', 'faq'
+  searchContext: varchar("search_context"), // Where search was performed
+  timestamp: timestamp("timestamp").defaultNow(),
+}, (table) => [
+  index("idx_search_analytics_user").on(table.userId),
+  index("idx_search_analytics_query").on(table.query),
+  index("idx_search_analytics_timestamp").on(table.timestamp),
+]);
+
+// ===== HELP SYSTEM INSERT SCHEMAS =====
+
+// Support tickets
+export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({
+  id: true,
+  ticketNumber: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
+export type SupportTicket = typeof supportTickets.$inferSelect;
+
+// Ticket messages
+export const insertTicketMessageSchema = createInsertSchema(ticketMessages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTicketMessage = z.infer<typeof insertTicketMessageSchema>;
+export type TicketMessage = typeof ticketMessages.$inferSelect;
+
+// Wiki articles
+export const insertWikiArticleSchema = createInsertSchema(wikiArticles).omit({
+  id: true,
+  slug: true,
+  viewCount: true,
+  helpfulVotes: true,
+  notHelpfulVotes: true,
+  averageRating: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertWikiArticle = z.infer<typeof insertWikiArticleSchema>;
+export type WikiArticle = typeof wikiArticles.$inferSelect;
+
+// Wiki categories
+export const insertWikiCategorySchema = createInsertSchema(wikiCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertWikiCategory = z.infer<typeof insertWikiCategorySchema>;
+export type WikiCategory = typeof wikiCategories.$inferSelect;
+
+// Tutorials
+export const insertTutorialSchema = createInsertSchema(tutorials).omit({
+  id: true,
+  slug: true,
+  completionCount: true,
+  averageCompletionTime: true,
+  successRate: true,
+  rating: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTutorial = z.infer<typeof insertTutorialSchema>;
+export type Tutorial = typeof tutorials.$inferSelect;
+
+// Tutorial categories
+export const insertTutorialCategorySchema = createInsertSchema(tutorialCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTutorialCategory = z.infer<typeof insertTutorialCategorySchema>;
+export type TutorialCategory = typeof tutorialCategories.$inferSelect;
+
+// User tutorial progress
+export const insertUserTutorialProgressSchema = createInsertSchema(userTutorialProgress).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertUserTutorialProgress = z.infer<typeof insertUserTutorialProgressSchema>;
+export type UserTutorialProgress = typeof userTutorialProgress.$inferSelect;
+
+// FAQ entries
+export const insertFaqEntrySchema = createInsertSchema(faqEntries).omit({
+  id: true,
+  viewCount: true,
+  helpfulVotes: true,
+  notHelpfulVotes: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertFaqEntry = z.infer<typeof insertFaqEntrySchema>;
+export type FaqEntry = typeof faqEntries.$inferSelect;
+
+// Badges
+export const insertBadgeSchema = createInsertSchema(badges).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertBadge = z.infer<typeof insertBadgeSchema>;
+export type Badge = typeof badges.$inferSelect;
+
+// User badges
+export const insertUserBadgeSchema = createInsertSchema(userBadges).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertUserBadge = z.infer<typeof insertUserBadgeSchema>;
+export type UserBadge = typeof userBadges.$inferSelect;
+
+// Navigation paths
+export const insertNavigationPathSchema = createInsertSchema(navigationPaths).omit({
+  id: true,
+});
+export type InsertNavigationPath = z.infer<typeof insertNavigationPathSchema>;
+export type NavigationPath = typeof navigationPaths.$inferSelect;
+
+// Search analytics
+export const insertSearchAnalyticsSchema = createInsertSchema(searchAnalytics).omit({
+  id: true,
+});
+export type InsertSearchAnalytics = z.infer<typeof insertSearchAnalyticsSchema>;
+export type SearchAnalytics = typeof searchAnalytics.$inferSelect;
+
