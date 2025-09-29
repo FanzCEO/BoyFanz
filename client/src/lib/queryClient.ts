@@ -14,12 +14,53 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+// Overloaded apiRequest function to support both old and new patterns
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
-): Promise<Response> {
-  const headers: HeadersInit = data ? { "Content-Type": "application/json" } : {};
+): Promise<Response>;
+export async function apiRequest<T = any>(
+  url: string,
+  options?: {
+    method?: string;
+    body?: unknown;
+    headers?: HeadersInit;
+  }
+): Promise<T>;
+export async function apiRequest<T = any>(
+  urlOrMethod: string,
+  urlOrOptions?: string | {
+    method?: string;
+    body?: unknown;
+    headers?: HeadersInit;
+  },
+  data?: unknown
+): Promise<T | Response> {
+  let url: string;
+  let method: string;
+  let body: unknown;
+  let customHeaders: HeadersInit = {};
+
+  // Handle both call patterns
+  if (typeof urlOrOptions === 'string') {
+    // Old pattern: apiRequest(method, url, data)
+    method = urlOrMethod;
+    url = urlOrOptions;
+    body = data;
+  } else {
+    // New pattern: apiRequest(url, options)
+    url = urlOrMethod;
+    const options = urlOrOptions || {};
+    method = options.method || 'GET';
+    body = options.body;
+    customHeaders = options.headers || {};
+  }
+
+  const headers: Record<string, string> = {
+    ...customHeaders as Record<string, string>,
+    ...(body ? { "Content-Type": "application/json" } : {})
+  };
   
   // Add CSRF token for state-changing methods
   if (method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS') {
@@ -32,12 +73,17 @@ export async function apiRequest(
   const res = await fetch(url, {
     method,
     headers,
-    body: data ? JSON.stringify(data) : undefined,
+    body: body ? JSON.stringify(body) : undefined,
     credentials: "include",
   });
 
   await throwIfResNotOk(res);
-  return res;
+  
+  // For the new pattern, return parsed JSON; for old pattern, return Response
+  if (typeof urlOrOptions !== 'string') {
+    return await res.json();
+  }
+  return res as T | Response;
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

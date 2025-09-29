@@ -61,6 +61,13 @@ import PostView from "@/pages/PostView";
 import EarningsPage from "@/pages/Creator/EarningsPage";
 import Blog from "@/pages/Blog";
 import Contact from "@/pages/Contact";
+import { HelpCenter } from "@/pages/HelpCenter";
+import { WikiPage } from "@/pages/help/WikiPage";
+import { TutorialsPage } from "@/pages/help/TutorialsPage";
+import { TicketsPage } from "@/pages/help/TicketsPage";
+import { ChatPage } from "@/pages/help/ChatPage";
+import { TicketCreationPage } from "@/pages/help/TicketCreationPage";
+import TicketDetailPage from "@/pages/help/TicketDetailPage";
 import StreamCreation from "@/pages/StreamCreation";
 import StreamDashboard from "@/pages/StreamDashboard";
 import LiveViewer from "@/pages/LiveViewer";
@@ -192,6 +199,16 @@ function Router() {
             <Route path="/streams/:id/analytics">
               {(params) => <StreamAnalytics streamId={params.id} />}
             </Route>
+            {/* Help Center Routes */}
+            <Route path="/help" component={HelpCenter} />
+            <Route path="/help/wiki" component={WikiPage} />
+            <Route path="/help/tutorials" component={TutorialsPage} />
+            <Route path="/help/tickets/new" component={TicketCreationPage} />
+            <Route path="/help/tickets/:ticketId">
+              {(params) => <TicketDetailPage ticketId={params.ticketId} />}
+            </Route>
+            <Route path="/help/tickets" component={TicketsPage} />
+            <Route path="/help/chat" component={ChatPage} />
             <Route path="/blog" component={Blog} />
             <Route path="/contact" component={Contact} />
             <Route component={NotFound} />

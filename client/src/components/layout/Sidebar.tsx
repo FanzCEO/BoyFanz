@@ -167,9 +167,79 @@ export default function Sidebar({ user }: SidebarProps) {
         {/* Support Section */}
         <div className="mt-6 md:mt-8">
           <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Support
+            Support & Help
           </h3>
           <div className="mt-2 space-y-1">
+            <Link 
+              href="/help"
+              onClick={isMobile ? handleMobileLinkClick : undefined}
+              className={cn(
+                "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                isActive("/help")
+                  ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+              data-testid="nav-help-center"
+            >
+              <i className="fas fa-question-circle w-5 h-5 md:w-4 md:h-4"></i>
+              Help Center
+            </Link>
+            <Link 
+              href="/help/wiki"
+              onClick={isMobile ? handleMobileLinkClick : undefined}
+              className={cn(
+                "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                isActive("/help/wiki")
+                  ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+              data-testid="nav-ai-wiki"
+            >
+              <i className="fas fa-brain w-5 h-5 md:w-4 md:h-4"></i>
+              AI Wiki
+            </Link>
+            <Link 
+              href="/help/tutorials"
+              onClick={isMobile ? handleMobileLinkClick : undefined}
+              className={cn(
+                "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                isActive("/help/tutorials")
+                  ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+              data-testid="nav-tutorials"
+            >
+              <i className="fas fa-play-circle w-5 h-5 md:w-4 md:h-4"></i>
+              Tutorials
+            </Link>
+            <Link 
+              href="/help/tickets"
+              onClick={isMobile ? handleMobileLinkClick : undefined}
+              className={cn(
+                "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                isActive("/help/tickets")
+                  ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+              data-testid="nav-support-tickets"
+            >
+              <i className="fas fa-ticket-alt w-5 h-5 md:w-4 md:h-4"></i>
+              Support Tickets
+            </Link>
+            <Link 
+              href="/help/chat"
+              onClick={isMobile ? handleMobileLinkClick : undefined}
+              className={cn(
+                "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                isActive("/help/chat")
+                  ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+              data-testid="nav-ai-chat"
+            >
+              <i className="fas fa-robot w-5 h-5 md:w-4 md:h-4"></i>
+              AI Chat Support
+            </Link>
             <Link 
               href="/blog"
               onClick={isMobile ? handleMobileLinkClick : undefined}

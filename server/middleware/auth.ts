@@ -57,6 +57,19 @@ export function requireCreatorOrAdmin(req: Request, res: Response, next: NextFun
   next();
 }
 
+// Middleware to check if user is moderator or admin
+export function requireModeratorOrAdmin(req: Request, res: Response, next: NextFunction) {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  
+  if (req.user?.role !== 'moderator' && req.user?.role !== 'admin') {
+    return res.status(403).json({ error: 'Moderator or admin access required' });
+  }
+  
+  next();
+}
+
 // Middleware to check if user owns resource or is admin
 export function requireOwnershipOrAdmin(resourceUserIdField: string = 'userId') {
   return (req: Request, res: Response, next: NextFunction) => {

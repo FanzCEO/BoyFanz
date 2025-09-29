@@ -107,6 +107,10 @@ export const accountRole = pgTable("account_role", {
 // Unified profile system - creator/fan profiles are global with per-tenant presence
 export const profileTypeEnum = pgEnum("profile_type", ["creator", "fan", "staff", "admin"]);
 
+// KYC and compliance enums for profiles  
+export const profileKycStatusEnum = pgEnum("profile_kyc_status", ["pending", "verified", "rejected", "expired"]);
+export const sanctionsStatusEnum = pgEnum("sanctions_status", ["clear", "pending", "blocked", "reviewing"]);
+
 export const profiles = pgTable("profiles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   accountId: varchar("account_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
@@ -123,12 +127,22 @@ export const profiles = pgTable("profiles", {
   preferences: jsonb("preferences").default({}), // user preferences
   stats: jsonb("stats").default({}), // follower counts, engagement, etc.
   verificationLevel: integer("verification_level").default(0), // 0=unverified, 1=verified, 2=official
+  
+  // Compliance fields for quick auth middleware checks
+  kycStatus: profileKycStatusEnum("kyc_status").default("pending"),
+  ageVerified: boolean("age_verified").default(false),
+  is2257Compliant: boolean("is_2257_compliant").default(false),
+  lastSanctionsScreening: timestamp("last_sanctions_screening"),
+  sanctionsStatus: sanctionsStatusEnum("sanctions_status").default("clear"),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
   index("idx_profiles_handle").on(table.handle),
   index("idx_profiles_account").on(table.accountId),
   index("idx_profiles_type").on(table.type),
+  index("idx_profiles_kyc_status").on(table.kycStatus),
+  index("idx_profiles_sanctions_status").on(table.sanctionsStatus),
 ]);
 
 // Per-tenant profile presence and visibility
@@ -163,10 +177,6 @@ export const sessions = pgTable(
 // User roles enum
 export const userRoleEnum = pgEnum("user_role", ["fan", "creator", "moderator", "admin"]);
 export const userStatusEnum = pgEnum("user_status", ["active", "suspended", "pending"]);
-
-// KYC and compliance enums for profiles  
-export const profileKycStatusEnum = pgEnum("profile_kyc_status", ["pending", "verified", "rejected", "expired"]);
-export const sanctionsStatusEnum = pgEnum("sanctions_status", ["clear", "pending", "blocked", "reviewing"]);
 
 // Users table for both Replit Auth and local username/password auth
 export const users = pgTable("users", {
