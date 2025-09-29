@@ -11,6 +11,7 @@ import {
   apiKeys,
   themeSettings,
   records2257,
+  socialAccounts,
   // Advanced features tables
   nftAssets,
   analyticsEvents,
@@ -33,6 +34,8 @@ import {
   type ThemeSettings,
   type InsertThemeSettings,
   type UpdateThemeSettings,
+  type SocialAccount,
+  type InsertSocialAccount,
   // Creator Economy Types
   type CreatorProfile,
   type Subscription,
@@ -191,6 +194,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, count, sql, or, lt, isNull, gte, lte, not, arrayContains, getTableColumns } from "drizzle-orm";
+import { decryptToken } from "./utils/tokenEncryption";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -243,6 +247,13 @@ export interface IStorage {
   // API key operations
   createApiKey(apiKey: Omit<ApiKey, 'id' | 'createdAt'>): Promise<ApiKey>;
   getApiKeys(userId: string): Promise<ApiKey[]>;
+  
+  // Social account operations
+  createSocialAccount(account: Omit<SocialAccount, 'id' | 'createdAt' | 'updatedAt'>): Promise<SocialAccount>;
+  getSocialAccountByProvider(provider: string, providerId: string): Promise<SocialAccount | undefined>;
+  getSocialAccountsByUserId(userId: string): Promise<SocialAccount[]>;
+  updateSocialAccount(id: string, updates: Partial<SocialAccount>): Promise<void>;
+  deleteSocialAccountByProvider(userId: string, provider: string): Promise<boolean>;
   
   // Theme operations
   createTheme(theme: InsertThemeSettings): Promise<ThemeSettings>;
@@ -3894,6 +3905,58 @@ export class DatabaseStorage implements IStorage {
 
   async getTransactionsByFilters(filters: any): Promise<any[]> {
     return [];
+  }
+
+  // Social Account operations for OAuth integration
+  async createSocialAccount(account: Omit<SocialAccount, 'id' | 'createdAt' | 'updatedAt'>): Promise<SocialAccount> {
+    const [socialAccount] = await db.insert(socialAccounts).values(account).returning();
+    return socialAccount;
+  }
+
+  async getSocialAccountByProvider(provider: string, providerId: string): Promise<SocialAccount | undefined> {
+    const [account] = await db
+      .select()
+      .from(socialAccounts)
+      .where(and(eq(socialAccounts.provider, provider), eq(socialAccounts.providerId, providerId)));
+    
+    if (!account) return account;
+    
+    // Decrypt OAuth tokens before returning
+    return {
+      ...account,
+      accessToken: decryptToken(account.accessToken),
+      refreshToken: decryptToken(account.refreshToken),
+    };
+  }
+
+  async getSocialAccountsByUserId(userId: string): Promise<SocialAccount[]> {
+    const accounts = await db
+      .select()
+      .from(socialAccounts)
+      .where(eq(socialAccounts.userId, userId))
+      .orderBy(socialAccounts.createdAt);
+    
+    // Decrypt OAuth tokens before returning
+    return accounts.map(account => ({
+      ...account,
+      accessToken: decryptToken(account.accessToken),
+      refreshToken: decryptToken(account.refreshToken),
+    }));
+  }
+
+  async updateSocialAccount(id: string, updates: Partial<SocialAccount>): Promise<void> {
+    await db
+      .update(socialAccounts)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(socialAccounts.id, id));
+  }
+
+  async deleteSocialAccountByProvider(userId: string, provider: string): Promise<boolean> {
+    const result = await db
+      .delete(socialAccounts)
+      .where(and(eq(socialAccounts.userId, userId), eq(socialAccounts.provider, provider)))
+      .returning();
+    return result.length > 0;
   }
 }
 

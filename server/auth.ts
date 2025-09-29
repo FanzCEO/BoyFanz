@@ -38,10 +38,13 @@ export function setupLocalAuth(app: Express) {
   // Unified session serialization for both local and OIDC users
   // Set up serialization (will override replitAuth but handle both types)
   passport.serializeUser((user: any, done) => {
-      // Handle both OIDC users (with expires_at) and local users (with id only)
+      // Handle OIDC users (with expires_at), social users (with authProvider), and local users
       if (user.expires_at) {
         // OIDC user - store full object for token refresh
         done(null, { type: 'oidc', user });
+      } else if (user.authProvider === 'social' || user.socialProvider) {
+        // Social auth user - store ID and provider info
+        done(null, { type: 'social', id: user.id, provider: user.socialProvider });
       } else {
         // Local user - store ID only
         done(null, { type: 'local', id: user.id });
@@ -53,13 +56,19 @@ export function setupLocalAuth(app: Express) {
         if (data.type === 'oidc') {
           // OIDC user - return stored object
           return done(null, data.user);
-        } else if (data.type === 'local') {
-          // Local user - fetch from database
+        } else if (data.type === 'local' || data.type === 'social') {
+          // Local or social user - fetch from database
           const user = await storage.getUser(data.id);
           if (!user) return done(null, false);
           
           // Don't include password in session
           const { password, ...userWithoutPassword } = user;
+          
+          // For social users, add provider info back to session
+          if (data.type === 'social' && data.provider) {
+            userWithoutPassword.socialProvider = data.provider;
+          }
+          
           done(null, userWithoutPassword);
         } else {
           done(null, false);

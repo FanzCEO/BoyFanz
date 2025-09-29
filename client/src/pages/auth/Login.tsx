@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCSRF } from "@/hooks/useCSRF";
 import { LogIn, Crown, Heart, Zap, Shield, Star, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -118,6 +119,11 @@ export default function Login() {
                 }
               </Button>
             </form>
+
+            {/* Social Login Options */}
+            <div className="mt-6">
+              <SocialLoginButtons mode="login" variant="outline" className="w-full" />
+            </div>
 
             <div className="mt-8 text-center space-y-4">
               <p className="text-sm neon-white-body">

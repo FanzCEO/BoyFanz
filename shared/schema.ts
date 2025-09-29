@@ -196,6 +196,27 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Social Accounts table - links social provider accounts to users
+export const socialAccounts = pgTable("social_accounts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  provider: varchar("provider").notNull(), // 'google', 'facebook', 'twitter', 'discord', 'github'
+  providerId: varchar("provider_id").notNull(), // User ID from the provider
+  email: varchar("email"),
+  displayName: varchar("display_name"),
+  profileUrl: varchar("profile_url"),
+  profileImageUrl: varchar("profile_image_url"),
+  accessToken: text("access_token"), // Encrypted OAuth access token
+  refreshToken: text("refresh_token"), // Encrypted OAuth refresh token
+  expiresAt: timestamp("expires_at"), // Token expiration
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => [
+  unique().on(table.provider, table.providerId), // Unique constraint per provider
+  index("idx_social_accounts_user").on(table.userId),
+  index("idx_social_accounts_provider").on(table.provider),
+]);
+
 
 // ===== COMPREHENSIVE COMPLIANCE SYSTEM =====
 // 2257, KYC/KYB, Identity Verification, Model Releases
@@ -1323,12 +1344,20 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   apiKeys: many(apiKeys),
   notifications: many(notifications),
   auditLogs: many(auditLogs),
+  socialAccounts: many(socialAccounts),
 }));
 
 export const profilesRelations = relations(profiles, ({ one }) => ({
   account: one(accounts, {
     fields: [profiles.accountId],
     references: [accounts.id],
+  }),
+}));
+
+export const socialAccountsRelations = relations(socialAccounts, ({ one }) => ({
+  user: one(users, {
+    fields: [socialAccounts.userId],
+    references: [users.id],
   }),
 }));
 
@@ -1376,6 +1405,26 @@ export const registerUserSchema = z.object({
   role: z.enum(["fan", "creator", "admin"]).default("fan"),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
+});
+
+// Social accounts schemas
+export const insertSocialAccountSchema = createInsertSchema(socialAccounts).pick({
+  userId: true,
+  provider: true,
+  providerId: true,
+  email: true,
+  displayName: true,
+  profileUrl: true,
+  profileImageUrl: true,
+  accessToken: true,
+  refreshToken: true,
+  expiresAt: true,
+});
+
+export const socialLoginSchema = z.object({
+  provider: z.enum(["google", "facebook", "twitter", "discord", "github"]),
+  code: z.string().optional(), // OAuth authorization code
+  state: z.string().optional(), // CSRF state parameter
 });
 
 export const insertProfileSchema = createInsertSchema(profiles).pick({
@@ -1744,6 +1793,9 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type LoginUser = z.infer<typeof loginUserSchema>;
 export type RegisterUser = z.infer<typeof registerUserSchema>;
+export type SocialAccount = typeof socialAccounts.$inferSelect;
+export type InsertSocialAccount = z.infer<typeof insertSocialAccountSchema>;
+export type SocialLogin = z.infer<typeof socialLoginSchema>;
 export type Profile = typeof profiles.$inferSelect;
 export type MediaAsset = typeof mediaAssets.$inferSelect;
 export type ModerationQueueItem = typeof moderationQueue.$inferSelect;

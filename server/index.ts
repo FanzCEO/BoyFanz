@@ -6,6 +6,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import { logger, requestIdMiddleware, requestLoggingMiddleware } from "./logger";
 import { setupHealthEndpoints, setupGracefulShutdown } from "./health";
 import { setupCSRFTokenEndpoint } from "./middleware/csrf";
+import { setupSocialAuth } from "./socialAuth";
 
 const app = express();
 
@@ -84,7 +85,7 @@ app.post('/api/webhooks/getstream', express.raw({ type: 'application/json' }), a
     // Import and initialize GetStream service
     const { createGetstreamService } = await import('./services/getstreamService');
     const { storage } = await import('./storage');
-    const getstreamService = createGetstreamService(storage);
+    const getstreamService = createGetstreamService(storage as any);
     
     // Extract signature value (handle "sha256=..." prefix if present)
     const signatureValue = signature.toString().replace(/^sha256=/, '');
@@ -130,6 +131,9 @@ setupCSRFTokenEndpoint(app);
   // Import and setup local authentication
   const { setupLocalAuth } = await import('./auth');
   setupLocalAuth(app);
+  
+  // Setup social OAuth authentication
+  setupSocialAuth(app);
   
   await registerRoutes(app);
   

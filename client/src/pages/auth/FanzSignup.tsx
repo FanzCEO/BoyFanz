@@ -8,6 +8,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Heart, Sparkles, MessageCircle, Gift, Eye, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 
 export default function FanzSignup() {
   const [, setLocation] = useLocation();
@@ -190,6 +191,11 @@ export default function FanzSignup() {
                 {registerMutation.isPending ? "Creating Account..." : "Join the Playground"}
               </Button>
             </form>
+
+            {/* Social Signup Options */}
+            <div className="mt-6">
+              <SocialLoginButtons mode="signup" variant="outline" className="w-full" role="fan" />
+            </div>
 
             <div className="mt-6 text-center">
               <p className="text-sm neon-white-body">
