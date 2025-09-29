@@ -3231,6 +3231,416 @@ export const userActivityLog = pgTable("user_activity_log", {
   index("idx_user_activity_activity").on(table.activity),
 ]);
 
+// ===== ANNOUNCEMENTS MANAGEMENT =====
+export const announcementStatusEnum = pgEnum("announcement_status", ["draft", "scheduled", "published", "paused", "archived"]);
+export const announcementTypeEnum = pgEnum("announcement_type", ["general", "emergency", "maintenance", "promotion", "update"]);
+export const announcementChannelEnum = pgEnum("announcement_channel", ["in_app", "email", "push", "sms", "all"]);
+
+export const announcements = pgTable("announcements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title").notNull(),
+  content: text("content").notNull(),
+  richContent: jsonb("rich_content").default({}), // Rich text editor content
+  type: announcementTypeEnum("type").default("general").notNull(),
+  status: announcementStatusEnum("status").default("draft").notNull(),
+  priority: integer("priority").default(1), // 1-5, 5 being highest
+  channels: announcementChannelEnum("channels").array().default(sql`ARRAY['in_app']::announcement_channel[]`),
+  
+  // Scheduling
+  scheduledAt: timestamp("scheduled_at"),
+  publishedAt: timestamp("published_at"),
+  expiresAt: timestamp("expires_at"),
+  
+  // Targeting
+  targetUserRoles: text("target_user_roles").array(), // ["fan", "creator", "admin"]
+  targetUserIds: text("target_user_ids").array(), // Specific user IDs
+  targetCountries: text("target_countries").array(), // Country codes
+  targetSubscriptionTiers: text("target_subscription_tiers").array(),
+  targetingConditions: jsonb("targeting_conditions").default({}), // Complex targeting logic
+  
+  // A/B Testing
+  isAbTest: boolean("is_ab_test").default(false),
+  abTestVariantId: varchar("ab_test_variant_id"),
+  abTestPercentage: integer("ab_test_percentage").default(100), // 1-100
+  
+  // Analytics
+  totalRecipients: integer("total_recipients").default(0),
+  totalSent: integer("total_sent").default(0),
+  totalDelivered: integer("total_delivered").default(0),
+  totalOpened: integer("total_opened").default(0),
+  totalClicked: integer("total_clicked").default(0),
+  
+  // Metadata
+  templateId: varchar("template_id"),
+  mediaUrls: text("media_urls").array(),
+  actionUrl: varchar("action_url"), // CTA link
+  actionText: varchar("action_text"), // CTA button text
+  
+  // Approval workflow
+  requiresApproval: boolean("requires_approval").default(false),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  rejectedBy: varchar("rejected_by").references(() => users.id),
+  rejectedAt: timestamp("rejected_at"),
+  rejectionReason: text("rejection_reason"),
+  
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_announcements_status").on(table.status),
+  index("idx_announcements_scheduled").on(table.scheduledAt),
+  index("idx_announcements_published").on(table.publishedAt),
+  index("idx_announcements_priority").on(table.priority.desc()),
+  index("idx_announcements_creator").on(table.createdBy),
+]);
+
+export const announcementTemplates = pgTable("announcement_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  type: announcementTypeEnum("type").default("general").notNull(),
+  titleTemplate: varchar("title_template").notNull(),
+  contentTemplate: text("content_template").notNull(),
+  richContentTemplate: jsonb("rich_content_template").default({}),
+  channels: announcementChannelEnum("channels").array().default(sql`ARRAY['in_app']::announcement_channel[]`),
+  personalizationTokens: text("personalization_tokens").array(), // ["{first_name}", "{last_seen}", etc.]
+  defaultTargeting: jsonb("default_targeting").default({}),
+  isActive: boolean("is_active").default(true),
+  usageCount: integer("usage_count").default(0),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_announcement_templates_type").on(table.type),
+  index("idx_announcement_templates_active").on(table.isActive),
+]);
+
+export const announcementDeliveries = pgTable("announcement_deliveries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  announcementId: varchar("announcement_id").notNull().references(() => announcements.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  channel: announcementChannelEnum("channel").notNull(),
+  status: varchar("status").default("pending").notNull(), // pending, sent, delivered, failed, opened, clicked
+  sentAt: timestamp("sent_at"),
+  deliveredAt: timestamp("delivered_at"),
+  openedAt: timestamp("opened_at"),
+  clickedAt: timestamp("clicked_at"),
+  failureReason: text("failure_reason"),
+  metadata: jsonb("metadata").default({}), // Channel-specific delivery info
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_announcement_deliveries_announcement").on(table.announcementId),
+  index("idx_announcement_deliveries_user").on(table.userId),
+  index("idx_announcement_deliveries_status").on(table.status),
+  index("idx_announcement_deliveries_sent").on(table.sentAt),
+  unique("unique_announcement_user_channel").on(table.announcementId, table.userId, table.channel),
+]);
+
+// ===== PUSH NOTIFICATIONS MANAGEMENT =====
+export const notificationCampaignStatusEnum = pgEnum("notification_campaign_status", ["draft", "scheduled", "sending", "completed", "paused", "cancelled"]);
+export const notificationPlatformEnum = pgEnum("notification_platform", ["ios", "android", "web", "desktop", "all"]);
+export const notificationTriggerTypeEnum = pgEnum("notification_trigger_type", ["manual", "behavioral", "time_based", "event_based"]);
+
+export const notificationCampaigns = pgTable("notification_campaigns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  status: notificationCampaignStatusEnum("status").default("draft").notNull(),
+  
+  // Content
+  title: varchar("title").notNull(),
+  body: text("body").notNull(),
+  icon: varchar("icon"),
+  image: varchar("image"),
+  badge: varchar("badge"),
+  sound: varchar("sound"),
+  clickAction: varchar("click_action"), // URL or deep link
+  
+  // Targeting
+  platforms: notificationPlatformEnum("platforms").array().default(sql`ARRAY['all']::notification_platform[]`),
+  targetUserRoles: text("target_user_roles").array(),
+  targetUserIds: text("target_user_ids").array(),
+  targetCountries: text("target_countries").array(),
+  targetingConditions: jsonb("targeting_conditions").default({}),
+  
+  // Behavioral targeting
+  engagementLevel: varchar("engagement_level"), // low, medium, high
+  lastSeenDays: integer("last_seen_days"), // Users last seen X days ago
+  subscriptionStatus: varchar("subscription_status"), // active, inactive, trial
+  customEventTrigger: varchar("custom_event_trigger"), // purchase, login, etc.
+  
+  // Scheduling
+  triggerType: notificationTriggerTypeEnum("trigger_type").default("manual").notNull(),
+  scheduledAt: timestamp("scheduled_at"),
+  timeZoneHandling: varchar("timezone_handling").default("user_timezone"), // user_timezone, utc, specific_timezone
+  specificTimezone: varchar("specific_timezone"),
+  
+  // Frequency capping
+  maxSendsPerUser: integer("max_sends_per_user").default(1),
+  cooldownHours: integer("cooldown_hours").default(24),
+  
+  // Analytics
+  totalTargeted: integer("total_targeted").default(0),
+  totalSent: integer("total_sent").default(0),
+  totalDelivered: integer("total_delivered").default(0),
+  totalOpened: integer("total_opened").default(0),
+  totalClicked: integer("total_clicked").default(0),
+  totalDismissed: integer("total_dismissed").default(0),
+  
+  // A/B Testing
+  isAbTest: boolean("is_ab_test").default(false),
+  abTestVariants: jsonb("ab_test_variants").default([]), // Array of variant configs
+  
+  // Template
+  templateId: varchar("template_id"),
+  personalizationData: jsonb("personalization_data").default({}),
+  
+  // GDPR Compliance
+  respectOptOuts: boolean("respect_opt_outs").default(true),
+  legalBasis: varchar("legal_basis"), // consent, legitimate_interest, etc.
+  
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_notification_campaigns_status").on(table.status),
+  index("idx_notification_campaigns_scheduled").on(table.scheduledAt),
+  index("idx_notification_campaigns_trigger").on(table.triggerType),
+  index("idx_notification_campaigns_creator").on(table.createdBy),
+]);
+
+export const notificationTemplates = pgTable("notification_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  category: varchar("category").default("general").notNull(), // welcome, reminder, promotion, update
+  titleTemplate: varchar("title_template").notNull(),
+  bodyTemplate: text("body_template").notNull(),
+  platforms: notificationPlatformEnum("platforms").array().default(sql`ARRAY['all']::notification_platform[]`),
+  defaultIcon: varchar("default_icon"),
+  defaultImage: varchar("default_image"),
+  defaultClickAction: varchar("default_click_action"),
+  personalizationTokens: text("personalization_tokens").array(),
+  isActive: boolean("is_active").default(true),
+  usageCount: integer("usage_count").default(0),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_notification_templates_category").on(table.category),
+  index("idx_notification_templates_active").on(table.isActive),
+]);
+
+export const userNotificationPreferences = pgTable("user_notification_preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  // Platform preferences
+  pushEnabled: boolean("push_enabled").default(true),
+  emailEnabled: boolean("email_enabled").default(true),
+  smsEnabled: boolean("sms_enabled").default(false),
+  
+  // Category preferences
+  marketingEnabled: boolean("marketing_enabled").default(true),
+  transactionalEnabled: boolean("transactional_enabled").default(true),
+  securityEnabled: boolean("security_enabled").default(true),
+  socialEnabled: boolean("social_enabled").default(true),
+  
+  // Advanced preferences
+  quietHoursEnabled: boolean("quiet_hours_enabled").default(false),
+  quietHoursStart: varchar("quiet_hours_start").default("22:00"),
+  quietHoursEnd: varchar("quiet_hours_end").default("08:00"),
+  timezone: varchar("timezone").default("UTC"),
+  frequency: varchar("frequency").default("instant"), // instant, hourly, daily, weekly
+  
+  // GDPR
+  consentGiven: boolean("consent_given").default(false),
+  consentAt: timestamp("consent_at"),
+  optOutReason: text("opt_out_reason"),
+  
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique("unique_user_notification_prefs").on(table.userId),
+  index("idx_user_notification_prefs_consent").on(table.consentGiven),
+]);
+
+export const notificationDeliveries = pgTable("notification_deliveries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignId: varchar("campaign_id").notNull().references(() => notificationCampaigns.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  platform: notificationPlatformEnum("platform").notNull(),
+  
+  // Delivery details
+  deviceToken: varchar("device_token"),
+  status: varchar("status").default("pending").notNull(), // pending, sent, delivered, failed, opened, clicked, dismissed
+  sentAt: timestamp("sent_at"),
+  deliveredAt: timestamp("delivered_at"),
+  openedAt: timestamp("opened_at"),
+  clickedAt: timestamp("clicked_at"),
+  dismissedAt: timestamp("dismissed_at"),
+  
+  // Error handling
+  failureReason: text("failure_reason"),
+  retryCount: integer("retry_count").default(0),
+  lastRetryAt: timestamp("last_retry_at"),
+  
+  // Content sent (for analytics)
+  sentTitle: varchar("sent_title"),
+  sentBody: text("sent_body"),
+  sentClickAction: varchar("sent_click_action"),
+  
+  // Provider details
+  providerMessageId: varchar("provider_message_id"),
+  providerResponse: jsonb("provider_response").default({}),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_notification_deliveries_campaign").on(table.campaignId),
+  index("idx_notification_deliveries_user").on(table.userId),
+  index("idx_notification_deliveries_status").on(table.status),
+  index("idx_notification_deliveries_platform").on(table.platform),
+  index("idx_notification_deliveries_sent").on(table.sentAt),
+]);
+
+// ===== SYSTEM SETTINGS MANAGEMENT =====
+export const systemSettingTypeEnum = pgEnum("system_setting_type", ["string", "number", "boolean", "json", "encrypted"]);
+export const systemSettingCategoryEnum = pgEnum("system_setting_category", [
+  "general", "maintenance", "email", "theme", "security", "backup", "api", "features", "languages", "custom"
+]);
+
+export const systemSettings = pgTable("system_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: varchar("key").notNull().unique(),
+  value: text("value"),
+  encryptedValue: text("encrypted_value"), // For sensitive settings
+  type: systemSettingTypeEnum("type").default("string").notNull(),
+  category: systemSettingCategoryEnum("category").default("general").notNull(),
+  
+  // Metadata
+  name: varchar("name").notNull(),
+  description: text("description"),
+  defaultValue: text("default_value"),
+  validationRules: jsonb("validation_rules").default({}), // min, max, regex, etc.
+  isPublic: boolean("is_public").default(false), // Whether to expose in public API
+  isReadOnly: boolean("is_read_only").default(false),
+  requiresRestart: boolean("requires_restart").default(false),
+  
+  // Environment overrides
+  environment: varchar("environment").default("production"), // production, staging, development
+  canOverrideInEnv: boolean("can_override_in_env").default(true),
+  envVarName: varchar("env_var_name"), // Corresponding environment variable name
+  
+  // Audit
+  lastModifiedBy: varchar("last_modified_by").references(() => users.id),
+  lastModifiedAt: timestamp("last_modified_at").defaultNow(),
+  changeReason: text("change_reason"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_system_settings_category").on(table.category),
+  index("idx_system_settings_environment").on(table.environment),
+  index("idx_system_settings_public").on(table.isPublic),
+]);
+
+export const systemSettingHistory = pgTable("system_setting_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  settingId: varchar("setting_id").notNull().references(() => systemSettings.id, { onDelete: "cascade" }),
+  oldValue: text("old_value"),
+  newValue: text("new_value"),
+  changeType: varchar("change_type").notNull(), // create, update, delete
+  changedBy: varchar("changed_by").references(() => users.id),
+  changeReason: text("change_reason"),
+  rollbackData: jsonb("rollback_data").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_system_setting_history_setting").on(table.settingId),
+  index("idx_system_setting_history_changed_by").on(table.changedBy),
+  index("idx_system_setting_history_created").on(table.createdAt.desc()),
+]);
+
+export const maintenanceSchedule = pgTable("maintenance_schedule", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  maintenanceType: varchar("maintenance_type").notNull(), // planned, emergency, security, update
+  
+  // Scheduling
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  timezone: varchar("timezone").default("UTC"),
+  
+  // Status
+  status: varchar("status").default("scheduled").notNull(), // scheduled, in_progress, completed, cancelled
+  actualStartTime: timestamp("actual_start_time"),
+  actualEndTime: timestamp("actual_end_time"),
+  
+  // Configuration
+  enableMaintenanceMode: boolean("enable_maintenance_mode").default(true),
+  customMessage: text("custom_message"),
+  allowAdminAccess: boolean("allow_admin_access").default(true),
+  redirectUrl: varchar("redirect_url"),
+  
+  // Notifications
+  notifyUsers: boolean("notify_users").default(true),
+  notificationChannels: text("notification_channels").array().default(sql`ARRAY['in_app', 'email']`),
+  notifyHoursBefore: integer("notify_hours_before").default(24),
+  lastNotificationSent: timestamp("last_notification_sent"),
+  
+  // Affected services
+  affectedServices: text("affected_services").array().default(sql`ARRAY['all']`),
+  expectedImpact: varchar("expected_impact").default("full_outage"), // full_outage, partial_outage, degraded_performance
+  
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_maintenance_schedule_start").on(table.startTime),
+  index("idx_maintenance_schedule_status").on(table.status),
+  index("idx_maintenance_schedule_type").on(table.maintenanceType),
+]);
+
+export const emailSettings = pgTable("email_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull().unique(),
+  isDefault: boolean("is_default").default(false),
+  isActive: boolean("is_active").default(true),
+  
+  // SMTP Configuration
+  smtpHost: varchar("smtp_host").notNull(),
+  smtpPort: integer("smtp_port").default(587),
+  smtpSecurity: varchar("smtp_security").default("tls"), // none, tls, ssl
+  smtpUsername: varchar("smtp_username"),
+  smtpPassword: text("smtp_password"), // Encrypted
+  
+  // Sender settings
+  fromName: varchar("from_name").notNull(),
+  fromEmail: varchar("from_email").notNull(),
+  replyToEmail: varchar("reply_to_email"),
+  
+  // Delivery settings
+  maxSendRate: integer("max_send_rate").default(100), // emails per minute
+  enableTracking: boolean("enable_tracking").default(true),
+  enableBounceHandling: boolean("enable_bounce_handling").default(true),
+  
+  // Template settings
+  headerHtml: text("header_html"),
+  footerHtml: text("footer_html"),
+  unsubscribeHtml: text("unsubscribe_html"),
+  
+  // Testing
+  lastTestedAt: timestamp("last_tested_at"),
+  testResults: jsonb("test_results").default({}),
+  
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_email_settings_default").on(table.isDefault),
+  index("idx_email_settings_active").on(table.isActive),
+]);
+
 // Storage Provider Insert Schemas
 export const insertStorageProviderConfigSchema = createInsertSchema(storageProviderConfigs).omit({ 
   id: true, 
@@ -3368,3 +3778,46 @@ export type KycDocument = typeof kycDocuments.$inferSelect;
 export type InsertKycDocument = z.infer<typeof insertKycDocumentSchema>;
 export type FinancialSetting = typeof financialSettings.$inferSelect;
 export type InsertFinancialSetting = z.infer<typeof insertFinancialSettingSchema>;
+
+// Announcement Insert Schemas
+export const insertAnnouncementSchema = createInsertSchema(announcements).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertAnnouncementTemplateSchema = createInsertSchema(announcementTemplates).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertAnnouncementDeliverySchema = createInsertSchema(announcementDeliveries).omit({ id: true, createdAt: true });
+
+// Push Notification Insert Schemas
+export const insertNotificationCampaignSchema = createInsertSchema(notificationCampaigns).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertNotificationTemplateSchema = createInsertSchema(notificationTemplates).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertUserNotificationPreferencesSchema = createInsertSchema(userNotificationPreferences).omit({ id: true, updatedAt: true });
+export const insertNotificationDeliverySchema = createInsertSchema(notificationDeliveries).omit({ id: true, createdAt: true });
+
+// System Settings Insert Schemas
+export const insertSystemSettingSchema = createInsertSchema(systemSettings).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertSystemSettingHistorySchema = createInsertSchema(systemSettingHistory).omit({ id: true, createdAt: true });
+export const insertMaintenanceScheduleSchema = createInsertSchema(maintenanceSchedule).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertEmailSettingsSchema = createInsertSchema(emailSettings).omit({ id: true, createdAt: true, updatedAt: true });
+
+// New table types
+export type Announcement = typeof announcements.$inferSelect;
+export type InsertAnnouncement = z.infer<typeof insertAnnouncementSchema>;
+export type AnnouncementTemplate = typeof announcementTemplates.$inferSelect;
+export type InsertAnnouncementTemplate = z.infer<typeof insertAnnouncementTemplateSchema>;
+export type AnnouncementDelivery = typeof announcementDeliveries.$inferSelect;
+export type InsertAnnouncementDelivery = z.infer<typeof insertAnnouncementDeliverySchema>;
+
+export type NotificationCampaign = typeof notificationCampaigns.$inferSelect;
+export type InsertNotificationCampaign = z.infer<typeof insertNotificationCampaignSchema>;
+export type NotificationTemplate = typeof notificationTemplates.$inferSelect;
+export type InsertNotificationTemplate = z.infer<typeof insertNotificationTemplateSchema>;
+export type UserNotificationPreferences = typeof userNotificationPreferences.$inferSelect;
+export type InsertUserNotificationPreferences = z.infer<typeof insertUserNotificationPreferencesSchema>;
+export type NotificationDelivery = typeof notificationDeliveries.$inferSelect;
+export type InsertNotificationDelivery = z.infer<typeof insertNotificationDeliverySchema>;
+
+export type SystemSetting = typeof systemSettings.$inferSelect;
+export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
+export type SystemSettingHistory = typeof systemSettingHistory.$inferSelect;
+export type InsertSystemSettingHistory = z.infer<typeof insertSystemSettingHistorySchema>;
+export type MaintenanceSchedule = typeof maintenanceSchedule.$inferSelect;
+export type InsertMaintenanceSchedule = z.infer<typeof insertMaintenanceScheduleSchema>;
+export type EmailSettings = typeof emailSettings.$inferSelect;
+export type InsertEmailSettings = z.infer<typeof insertEmailSettingsSchema>;
