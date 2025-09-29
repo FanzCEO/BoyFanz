@@ -1226,7 +1226,7 @@ export const costarVerifications = pgTable("costar_verifications", {
   inviteToken: varchar("invite_token").unique(),
   consentDocument2257Id: varchar("consent_document_2257_id").references(() => records2257.id, { onDelete: "set null" }),
   signedAt: timestamp("signed_at"),
-  kycVerificationId: varchar("kyc_verification_id").references(() => kycVerifications.id, { onDelete: "set null" }),
+  kycVerificationId: varchar("kyc_verification_id").references(() => identityVerifications.id, { onDelete: "set null" }),
   notes: text("notes"),
   expiresAt: timestamp("expires_at"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -1304,11 +1304,11 @@ export const notifications = pgTable("notifications", {
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(profiles),
-  kycVerifications: many(kycVerifications),
+  kycVerifications: many(identityVerifications),
   records2257: many(records2257),
   mediaAssets: many(mediaAssets),
   payoutAccounts: many(payoutAccounts),
-  payoutRequests: many(payoutRequests),
+  payouts: many(payouts),
   webhooks: many(webhooks),
   apiKeys: many(apiKeys),
   notifications: many(notifications),
@@ -1316,9 +1316,9 @@ export const usersRelations = relations(users, ({ one, many }) => ({
 }));
 
 export const profilesRelations = relations(profiles, ({ one }) => ({
-  user: one(users, {
-    fields: [profiles.userId],
-    references: [users.id],
+  account: one(accounts, {
+    fields: [profiles.accountId],
+    references: [accounts.id],
   }),
 }));
 
@@ -1737,9 +1737,9 @@ export type RegisterUser = z.infer<typeof registerUserSchema>;
 export type Profile = typeof profiles.$inferSelect;
 export type MediaAsset = typeof mediaAssets.$inferSelect;
 export type ModerationQueueItem = typeof moderationQueue.$inferSelect;
-export type PayoutRequest = typeof payoutRequests.$inferSelect;
+export type PayoutRequest = typeof payouts.$inferSelect;
 export type Notification = typeof notifications.$inferSelect;
-export type KycVerification = typeof kycVerifications.$inferSelect;
+export type KycVerification = typeof identityVerifications.$inferSelect;
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type Webhook = typeof webhooks.$inferSelect;
 export type ApiKey = typeof apiKeys.$inferSelect;
@@ -2776,7 +2776,7 @@ export const insertSystemMetricSchema = createInsertSchema(systemMetrics).omit({
 
 // Missing insert schemas for admin features
 export const insertPayoutAccountSchema = createInsertSchema(payoutAccounts).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertKycVerificationSchema = createInsertSchema(kycVerifications).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertKycVerificationSchema = createInsertSchema(identityVerifications).omit({ id: true, createdAt: true, updatedAt: true });
 
 // Admin feature types
 export type Complaint = typeof complaints.$inferSelect;
@@ -2795,7 +2795,7 @@ export type InsertSystemMetric = z.infer<typeof insertSystemMetricSchema>;
 // Additional admin feature types
 export type PayoutAccount = typeof payoutAccounts.$inferSelect;
 export type InsertPayoutAccount = z.infer<typeof insertPayoutAccountSchema>;
-export type KycVerification = typeof kycVerifications.$inferSelect;
+export type KycVerification = typeof identityVerifications.$inferSelect;
 export type InsertKycVerification = z.infer<typeof insertKycVerificationSchema>;
 
 // ===== ADMIN MANAGEMENT SYSTEM EXTENSIONS =====
