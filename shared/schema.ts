@@ -853,55 +853,7 @@ export const creatorProfiles = pgTable("creator_profiles", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Subscriptions
-export const subscriptionStatusEnum = pgEnum("subscription_status", ["active", "cancelled", "expired", "pending"]);
 
-export const subscriptions = pgTable("subscriptions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  fanId: varchar("fan_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  stripeSubscriptionId: varchar("stripe_subscription_id"),
-  status: subscriptionStatusEnum("status").default("pending").notNull(),
-  monthlyPriceCents: integer("monthly_price_cents").notNull(),
-  currentPeriodStart: timestamp("current_period_start"),
-  currentPeriodEnd: timestamp("current_period_end"),
-  cancelledAt: timestamp("cancelled_at"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => ({
-  // Unique constraint to prevent duplicate subscriptions
-  uniqueFanCreator: unique().on(table.fanId, table.creatorId),
-  // Indexes for performance - composite indexes for common filters
-  creatorStatusIdx: index("idx_subs_creator_status").on(table.creatorId, table.status),
-  fanStatusIdx: index("idx_subs_fan_status").on(table.fanId, table.status),
-  statusIdx: index("idx_subscriptions_status").on(table.status),
-  currentPeriodEndIdx: index("idx_subscriptions_current_period_end").on(table.currentPeriodEnd),
-}));
-
-// Enhanced Subscription System
-export const subscriptionPlanDurationEnum = pgEnum("subscription_plan_duration", ["weekly", "monthly", "quarterly", "semi_annually", "yearly"]);
-
-// Subscription Plans (Multiple pricing tiers per creator)
-export const subscriptionPlans = pgTable("subscription_plans", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  name: varchar("name").notNull(), // "VIP", "Premium", "Gold", etc.
-  description: text("description"),
-  duration: subscriptionPlanDurationEnum("duration").notNull(),
-  priceCents: integer("price_cents").notNull(),
-  originalPriceCents: integer("original_price_cents"), // For showing discounts
-  discountPercentage: integer("discount_percentage").default(0),
-  isActive: boolean("is_active").default(true),
-  sortOrder: integer("sort_order").default(0),
-  benefits: jsonb("benefits").default([]), // List of benefits
-  maxSubscribers: integer("max_subscribers"), // Limited availability
-  currentSubscribers: integer("current_subscribers").default(0),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => ({
-  creatorActiveIdx: index("idx_plans_creator_active").on(table.creatorId, table.isActive),
-  creatorSortIdx: index("idx_plans_creator_sort").on(table.creatorId, table.sortOrder),
-}));
 
 // Promotional Codes
 export const promoCodeStatusEnum = pgEnum("promo_code_status", ["active", "expired", "exhausted", "disabled"]);
@@ -957,7 +909,7 @@ export const subscriptionsEnhanced = pgTable("subscriptions_enhanced", {
   subscriptionPlanId: varchar("subscription_plan_id").notNull().references(() => subscriptionPlans.id, { onDelete: "cascade" }),
   promoCodeId: varchar("promo_code_id").references(() => promoCodes.id, { onDelete: "set null" }),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
-  status: subscriptionStatusEnum("status").default("pending").notNull(),
+  status: subscriptionStatus("status").default("pending").notNull(),
   originalPriceCents: integer("original_price_cents").notNull(),
   finalPriceCents: integer("final_price_cents").notNull(), // After discounts
   discountAppliedCents: integer("discount_applied_cents").default(0),
