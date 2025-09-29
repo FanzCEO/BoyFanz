@@ -364,6 +364,34 @@ jobs:
             echo "✅ All compliance files present"
           fi
 
+      - name: 📋 Check WARP documentation
+        run: |
+          echo "🔍 Checking WARP documentation files..."
+          
+          # Required WARP files
+          WARP_FILES=(
+            "WARP.md"
+            ".warp/workflows.yaml"
+          )
+          
+          MISSING_WARP=()
+          
+          for file in "${WARP_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              MISSING_WARP+=("$file")
+              echo "❌ Missing: $file"
+            else
+              echo "✅ Found: $file"
+            fi
+          done
+          
+          if [ ${#MISSING_WARP[@]} -gt 0 ]; then
+            echo "❌ WARP documentation is incomplete. Required files must exist."
+            exit 1
+          else
+            echo "✅ WARP documentation complete"
+          fi
+
       - name: 🔍 Domain allowlist check
         run: |
           echo "🔍 Checking for non-approved domains..."

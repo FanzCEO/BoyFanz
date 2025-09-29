@@ -179,6 +179,7 @@ Related to #
 - [ ] ✅ API documentation updated (if applicable)
 - [ ] ✅ User documentation updated (if applicable)
 - [ ] ✅ README updated (if applicable)
+- [ ] ✅ WARP.md updated or confirmed accurate (required)
 - [ ] ✅ CHANGELOG.md updated
 - [ ] N/A - No documentation changes needed
 
