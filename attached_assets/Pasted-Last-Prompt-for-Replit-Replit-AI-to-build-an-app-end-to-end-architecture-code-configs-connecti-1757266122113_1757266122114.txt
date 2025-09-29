@@ -1,6 +1,6 @@
 Last Prompt for Replit	
 
-Replit AI to build an app end-to-end (architecture, code, configs, connections, docs). It’s Replit-compatible (no Docker/Laravel/blocked stacks), creator-economy ready, and tuned for FUN standards (no Stripe/PayPal references, 2257/VerifyMy, audit logs, SSO-ready).
+Replit AI to build an app end-to-end (architecture, code, configs, connections, docs). It’s Replit-compatible (no Docker/Laravel/blocked stacks), creator-economy ready, and tuned for FANZ standards (no Stripe/PayPal references, 2257/VerifyMy, audit logs, SSO-ready).
 
 ⸻
 
@@ -11,7 +11,7 @@ You are a senior staff engineer inside Replit. Build the full application end-to
 0) Project Identity
 	•	Product Name: <<<Fanz>>>
 	•	Brand Theme: Neon/Varsity aesthetic (clean, accessible UI, dark mode default).
-	•	Owner: Fanz Unlimited Network (FUN)
+	•	Owner: FANZ (FANZ)
 	•	Primary Domain (future): <<<APP_DOMAIN>>> (Replit-hosted preview now)
 
 1) Replit-Compatible Tech Stack (Hard Requirements)

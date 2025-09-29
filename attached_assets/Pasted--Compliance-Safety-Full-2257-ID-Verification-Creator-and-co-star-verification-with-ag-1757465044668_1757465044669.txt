@@ -27,7 +27,7 @@
 ⸻
 
 📱 Fan Experience
-	•	Clean UI / Varsity Style Branding: Consistent with FUN’s neon-Vegas aesthetic.
+	•	Clean UI / Varsity Style Branding: Consistent with FANZ’s neon-Vegas aesthetic.
 	•	Discovery: Trending creators, search filters (age, body type, kink tags, location).
 	•	Fan Engagement: Comments, likes, emoji reactions, DMs, voice/video messages.
 	•	Fan Perks: Badges for top tippers, subscription bundles, loyalty rewards (FanzCoin ready).

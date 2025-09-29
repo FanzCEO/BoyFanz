@@ -2,7 +2,7 @@ Fanz Creator App – Specification for a Club Fans Replica
 
 Overview
 
-Fanz Unlimited Network (FUN) is planning to introduce a creator‑focused platform that mirrors the Club Fans app by Takeoff Labs.  The objective is to build a single umbrella app called Fanz where sub‑communities (e.g., BoyFanz, GirlFanz, PupFanz) function as categories rather than separate apps.  The platform will give creators full ownership of their content and earnings while monetizing through a small fee added to fan purchases.  The design draws heavily on the existing Club Fans platform, whose recent updates and features are documented in third‑party app summaries .
+FANZ (FANZ) is planning to introduce a creator‑focused platform that mirrors the Club Fans app by Takeoff Labs.  The objective is to build a single umbrella app called Fanz where sub‑communities (e.g., BoyFanz, GirlFanz, PupFanz) function as categories rather than separate apps.  The platform will give creators full ownership of their content and earnings while monetizing through a small fee added to fan purchases.  The design draws heavily on the existing Club Fans platform, whose recent updates and features are documented in third‑party app summaries .
 
 Core Monetization Features
 

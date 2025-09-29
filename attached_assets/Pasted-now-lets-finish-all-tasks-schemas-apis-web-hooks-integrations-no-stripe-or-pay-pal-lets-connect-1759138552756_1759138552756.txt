@@ -1,4 +1,4 @@
-now lets finish all tasks, schemas, apis, web hooks, integrations, no stripe or pay pal lets connect this to the rest of our empire alright Josh — let’s wire this empire the right way. below is a clean, scalable backend + API blueprint so GirlFanz, PupFanz, and DaddyFanz plug into a shared FUN core (forensic media hub, vault, dash, security, compliance/2257), while staying brand-distinct. single sign-on, cross-posting, shared ads, and micro services all included.
+now lets finish all tasks, schemas, apis, web hooks, integrations, no stripe or pay pal lets connect this to the rest of our empire alright Josh — let’s wire this empire the right way. below is a clean, scalable backend + API blueprint so GirlFanz, PupFanz, and DaddyFanz plug into a shared FANZ core (forensic media hub, vault, dash, security, compliance/2257), while staying brand-distinct. single sign-on, cross-posting, shared ads, and micro services all included.
 
 Reference Architecture (high level)
 	•	Core platform (multi-tenant): identity, auth, profiles, payments, compliance, media, ads, analytics.

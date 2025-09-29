@@ -197,7 +197,7 @@ $primary-colors: (
 - Warm, welcoming colors
 - Playful animations
 - Community-focused layouts
-- Fun, approachable typography
+- FANZ, approachable typography
 - Interactive elements
 
 ### 🏳️‍⚧️ TransFanz.com - "Authentic Stories"

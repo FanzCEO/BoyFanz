@@ -319,7 +319,7 @@ export default function Landing() {
 
           <div className="text-center mb-4">
             <p className="text-xs text-gray-500">
-              © 2025 BoyFanz. All rights reserved. Fanz Unlimited Network (FUN) L.L.C. - Address: 30 N Gould St #45302 Sheridan, Wyoming United States
+              © 2025 BoyFanz. All rights reserved. FANZ (FANZ) L.L.C. - Address: 30 N Gould St #45302 Sheridan, Wyoming United States
             </p>
           </div>
 

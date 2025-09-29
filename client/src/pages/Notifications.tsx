@@ -147,7 +147,7 @@ const mockNotifications = [
     id: '12',
     type: 'like',
     username: 'nicholas1808',
-    action: 'like you post Fun in florida @Damienwinters',
+    action: 'like you post FANZ in florida @Damienwinters',
     time: '3 days ago',
     avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=40&h=40&fit=crop&crop=face',
     readAt: '2024-09-17T14:30:00Z'

@@ -21,9 +21,9 @@ import { z } from "zod";
 import { relations } from "drizzle-orm";
 
 // ===== MULTI-TENANT CORE SCHEMA =====
-// Core tenancy and identity system for FUN empire (GirlFanz, PupFanz, DaddyFanz, etc.)
+// Core tenancy and identity system for FANZ empire (GirlFanz, PupFanz, DaddyFanz, etc.)
 
-// Tenant definitions - each brand in the FUN empire
+// Tenant definitions - each brand in the FANZ empire
 export const tenantStatusEnum = pgEnum("tenant_status", ["active", "inactive", "maintenance"]);
 
 export const tenants = pgTable("tenants", {
@@ -40,7 +40,7 @@ export const tenants = pgTable("tenants", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Unified account system - one account across all FUN empire brands
+// Unified account system - one account across all FANZ empire brands
 export const accountStatusEnum = pgEnum("account_status", ["active", "disabled", "pending", "suspended"]);
 
 export const accounts = pgTable("accounts", {
@@ -604,7 +604,7 @@ export const payouts = pgTable("payouts", {
 ]);
 
 // ===== CROSS-PLATFORM ADVERTISING SYSTEM =====
-// Unified advertising network across all FUN empire brands
+// Unified advertising network across all FANZ empire brands
 
 // Ad campaign management
 export const adCampaignStatus = pgEnum("ad_campaign_status", ["draft", "active", "paused", "completed", "cancelled"]);
@@ -4536,14 +4536,14 @@ export const referralCodes = pgTable("referral_codes", {
 ]);
 
 // Referral campaigns for special promotions
-export const campaignStatusEnum = pgEnum("campaign_status", ["draft", "active", "paused", "completed", "cancelled"]);
+export const referralCampaignStatusEnum = pgEnum("referral_campaign_status", ["draft", "active", "paused", "completed", "cancelled"]);
 
 export const referralCampaigns = pgTable("referral_campaigns", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: varchar("name").notNull(),
   description: text("description"),
   slug: varchar("slug").unique().notNull(),
-  status: campaignStatusEnum("status").default("draft").notNull(),
+  status: referralCampaignStatusEnum("status").default("draft").notNull(),
   
   // Timing
   startDate: timestamp("start_date"),
