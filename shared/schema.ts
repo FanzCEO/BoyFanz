@@ -1384,7 +1384,7 @@ export const insertMediaAssetSchema = createInsertSchema(mediaAssets).pick({
   checksum: true,
 });
 
-export const insertPayoutRequestSchema = createInsertSchema(payoutRequests).pick({
+export const insertPayoutRequestSchema = createInsertSchema(payouts).pick({
   amountCents: true,
   currency: true,
 });
