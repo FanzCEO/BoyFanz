@@ -15,7 +15,7 @@ git pull --rebase
 # 2. Environment setup
 nvm use                           # Use pinned Node version from .nvmrc
 pnpm install --frozen-lockfile    # Install dependencies
-cp .env.example .env              # Configure environment (edit as needed)
+cp env/.env.local.example env/.env.local  # Configure environment (edit locally; never commit secrets)
 
 # 3. Validate setup
 warp run env:check               # Verify environment variables
@@ -84,8 +84,10 @@ warp run deps:sync     # ✅ Sync pnpm lockfile and modules
 
 ### Environment Files Strategy
 ```bash
-.env                    # Local development (never commit secrets)
-.env.example           # Template with safe defaults
+env/.env.local         # Local development (never commit secrets)
+env/.env.local.example # Template with safe defaults
+env/.env.staging       # Staging environment variables
+env/.env.prod          # Production environment variables
 ```
 
 ### Domain Mapping (Production)
