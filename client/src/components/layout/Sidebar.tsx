@@ -66,6 +66,13 @@ export default function Sidebar({ user }: SidebarProps) {
     { path: "/admin/deposits", icon: "fas fa-wallet", label: "Deposits" },
   ];
 
+  const systemManagementItems = [
+    { path: "/admin/announcements", icon: "fas fa-bullhorn", label: "Announcements" },
+    { path: "/admin/push-notifications", icon: "fas fa-bell", label: "Push Notifications" },
+    { path: "/admin/system-settings", icon: "fas fa-cog", label: "System Settings" },
+    { path: "/admin/storage", icon: "fas fa-hdd", label: "Storage Management" },
+  ];
+
   const sidebarContent = (
     <div className="flex h-full flex-col">
       {/* Logo */}
@@ -263,6 +270,34 @@ export default function Sidebar({ user }: SidebarProps) {
             </h3>
             <div className="mt-2 space-y-1">
               {financialManagementItems.map((item) => (
+                <Link 
+                  key={item.path} 
+                  href={item.path}
+                  onClick={isMobile ? handleMobileLinkClick : undefined}
+                  className={cn(
+                    "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                    isActive(item.path)
+                      ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  <i className={`${item.icon} w-5 h-5 md:w-4 md:h-4`}></i>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* System Management Section */}
+        {user?.role === 'admin' && (
+          <div className="mt-6 md:mt-8">
+            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              System Management
+            </h3>
+            <div className="mt-2 space-y-1">
+              {systemManagementItems.map((item) => (
                 <Link 
                   key={item.path} 
                   href={item.path}

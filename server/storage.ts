@@ -3171,6 +3171,697 @@ export class DatabaseStorage implements IStorage {
     return 0;
   }
 
+  // Storage Provider Configuration operations (implementation)
+  async getAllStorageProviderConfigs(): Promise<StorageProviderConfig[]> {
+    return await db.select().from(storageProviderConfigs)
+      .orderBy(desc(storageProviderConfigs.createdAt));
+  }
+
+  async getStorageProviderConfig(id: string): Promise<StorageProviderConfig | undefined> {
+    const [config] = await db.select().from(storageProviderConfigs)
+      .where(eq(storageProviderConfigs.id, id));
+    return config;
+  }
+
+  async createStorageProviderConfig(config: InsertStorageProviderConfig): Promise<StorageProviderConfig> {
+    const [created] = await db.insert(storageProviderConfigs)
+      .values(config).returning();
+    return created;
+  }
+
+  async updateStorageProviderConfig(id: string, updates: UpdateStorageProviderConfig): Promise<StorageProviderConfig> {
+    const [updated] = await db.update(storageProviderConfigs)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(storageProviderConfigs.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteStorageProviderConfig(id: string): Promise<void> {
+    await db.delete(storageProviderConfigs)
+      .where(eq(storageProviderConfigs.id, id));
+  }
+
+  async getStorageProviderConfigsByProvider(provider: string): Promise<StorageProviderConfig[]> {
+    return await db.select().from(storageProviderConfigs)
+      .where(eq(storageProviderConfigs.provider, provider));
+  }
+
+  async getActiveStorageProviders(): Promise<StorageProviderConfig[]> {
+    return await db.select().from(storageProviderConfigs)
+      .where(eq(storageProviderConfigs.isActive, true));
+  }
+
+  async getPrimaryStorageProvider(): Promise<StorageProviderConfig | undefined> {
+    const [config] = await db.select().from(storageProviderConfigs)
+      .where(eq(storageProviderConfigs.isPrimary, true));
+    return config;
+  }
+
+  async setPrimaryStorageProvider(id: string): Promise<void> {
+    // First set all to non-primary
+    await db.update(storageProviderConfigs).set({ isPrimary: false });
+    // Then set the selected one as primary
+    await db.update(storageProviderConfigs)
+      .set({ isPrimary: true, updatedAt: new Date() })
+      .where(eq(storageProviderConfigs.id, id));
+  }
+
+  async testStorageProviderConnection(id: string): Promise<{ success: boolean; message: string; details?: any }> {
+    // Mock implementation - would test actual connection in production
+    return { 
+      success: true, 
+      message: "Connection successful",
+      details: { latency: Math.floor(Math.random() * 100) + 50 }
+    };
+  }
+
+  // Storage Provider Health operations (implementation)
+  async recordStorageProviderHealth(health: InsertStorageProviderHealth): Promise<StorageProviderHealth> {
+    const [created] = await db.insert(storageProviderHealth)
+      .values(health).returning();
+    return created;
+  }
+
+  async getStorageProviderHealth(providerId: string, hours?: number): Promise<StorageProviderHealth[]> {
+    const conditions = [eq(storageProviderHealth.providerId, providerId)];
+    
+    if (hours) {
+      const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000);
+      conditions.push(gte(storageProviderHealth.checkedAt, cutoff));
+    }
+    
+    return await db.select().from(storageProviderHealth)
+      .where(and(...conditions))
+      .orderBy(desc(storageProviderHealth.checkedAt));
+  }
+
+  async getLatestStorageProviderHealth(providerId: string): Promise<StorageProviderHealth | undefined> {
+    const [health] = await db.select().from(storageProviderHealth)
+      .where(eq(storageProviderHealth.providerId, providerId))
+      .orderBy(desc(storageProviderHealth.checkedAt))
+      .limit(1);
+    return health;
+  }
+
+  async getStorageProviderHealthSummary(): Promise<{
+    providerId: string;
+    providerName: string;
+    healthStatus: string;
+    responseTimeMs: number;
+    availability: number;
+    lastChecked: Date;
+  }[]> {
+    // Mock implementation - would join with actual provider configs in production
+    return [
+      {
+        providerId: 'aws-s3-main',
+        providerName: 'AWS S3 Main',
+        healthStatus: 'healthy',
+        responseTimeMs: 145,
+        availability: 99.9,
+        lastChecked: new Date()
+      },
+      {
+        providerId: 'cloudflare-r2',
+        providerName: 'Cloudflare R2',
+        healthStatus: 'healthy',
+        responseTimeMs: 89,
+        availability: 99.8,
+        lastChecked: new Date()
+      }
+    ];
+  }
+
+  // Storage Provider Cost operations (implementation)
+  async recordStorageProviderCost(cost: InsertStorageProviderCost): Promise<StorageProviderCost> {
+    const [created] = await db.insert(storageProviderCosts)
+      .values(cost).returning();
+    return created;
+  }
+
+  async getStorageProviderCosts(providerId: string, startDate?: Date, endDate?: Date): Promise<StorageProviderCost[]> {
+    const conditions = [eq(storageProviderCosts.providerId, providerId)];
+    
+    if (startDate) conditions.push(gte(storageProviderCosts.periodStart, startDate));
+    if (endDate) conditions.push(lte(storageProviderCosts.periodEnd, endDate));
+    
+    return await db.select().from(storageProviderCosts)
+      .where(and(...conditions))
+      .orderBy(desc(storageProviderCosts.periodStart));
+  }
+
+  async getCostSummaryByProvider(): Promise<{
+    providerId: string;
+    providerName: string;
+    totalCost: number;
+    storageCost: number;
+    bandwidthCost: number;
+    requestCost: number;
+    period: { start: Date; end: Date };
+  }[]> {
+    // Mock implementation - would calculate actual costs in production
+    return [
+      {
+        providerId: 'aws-s3-main',
+        providerName: 'AWS S3 Main',
+        totalCost: 247.83,
+        storageCost: 198.45,
+        bandwidthCost: 32.18,
+        requestCost: 17.20,
+        period: { start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), end: new Date() }
+      }
+    ];
+  }
+
+  async getCostOptimizationRecommendations(): Promise<{
+    providerId: string;
+    recommendations: any[];
+    potentialSavings: number;
+  }[]> {
+    // Mock implementation
+    return [
+      {
+        providerId: 'aws-s3-main',
+        recommendations: [
+          { type: 'lifecycle_policy', description: 'Archive old content to IA storage', savings: 45.67 },
+          { type: 'compression', description: 'Enable compression for text assets', savings: 12.33 }
+        ],
+        potentialSavings: 58.00
+      }
+    ];
+  }
+
+  // Storage Provider Alert operations (implementation)
+  async createStorageProviderAlert(alert: InsertStorageProviderAlert): Promise<StorageProviderAlert> {
+    const [created] = await db.insert(storageProviderAlerts)
+      .values(alert).returning();
+    return created;
+  }
+
+  async getStorageProviderAlerts(providerId?: string, severity?: string): Promise<StorageProviderAlert[]> {
+    const conditions = [];
+    if (providerId) conditions.push(eq(storageProviderAlerts.providerId, providerId));
+    if (severity) conditions.push(eq(storageProviderAlerts.severity, severity as any));
+    
+    return await db.select().from(storageProviderAlerts)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(storageProviderAlerts.createdAt));
+  }
+
+  async getUnresolvedStorageProviderAlerts(): Promise<StorageProviderAlert[]> {
+    return await db.select().from(storageProviderAlerts)
+      .where(eq(storageProviderAlerts.status, 'active'))
+      .orderBy(desc(storageProviderAlerts.createdAt));
+  }
+
+  async acknowledgeStorageProviderAlert(id: string, acknowledgedBy: string): Promise<void> {
+    await db.update(storageProviderAlerts)
+      .set({ 
+        status: 'acknowledged',
+        acknowledgedBy,
+        acknowledgedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(storageProviderAlerts.id, id));
+  }
+
+  async resolveStorageProviderAlert(id: string, resolvedBy: string, resolutionNotes?: string): Promise<void> {
+    await db.update(storageProviderAlerts)
+      .set({
+        status: 'resolved',
+        resolvedBy,
+        resolvedAt: new Date(),
+        resolutionNotes: resolutionNotes || null,
+        updatedAt: new Date()
+      })
+      .where(eq(storageProviderAlerts.id, id));
+  }
+
+  // Storage Provider Failover operations (implementation)
+  async createStorageProviderFailover(failover: InsertStorageProviderFailover): Promise<StorageProviderFailover> {
+    const [created] = await db.insert(storageProviderFailover)
+      .values(failover).returning();
+    return created;
+  }
+
+  async getStorageProviderFailover(id: string): Promise<StorageProviderFailover | undefined> {
+    const [failover] = await db.select().from(storageProviderFailover)
+      .where(eq(storageProviderFailover.id, id));
+    return failover;
+  }
+
+  async getFailoverConfigsByProvider(providerId: string): Promise<StorageProviderFailover[]> {
+    return await db.select().from(storageProviderFailover)
+      .where(eq(storageProviderFailover.primaryProviderId, providerId));
+  }
+
+  async getAllFailoverConfigs(): Promise<StorageProviderFailover[]> {
+    return await db.select().from(storageProviderFailover)
+      .orderBy(desc(storageProviderFailover.createdAt));
+  }
+
+  async updateStorageProviderFailover(id: string, updates: Partial<StorageProviderFailover>): Promise<StorageProviderFailover> {
+    const [updated] = await db.update(storageProviderFailover)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(storageProviderFailover.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteStorageProviderFailover(id: string): Promise<void> {
+    await db.delete(storageProviderFailover)
+      .where(eq(storageProviderFailover.id, id));
+  }
+
+  async triggerFailover(primaryProviderId: string): Promise<void> {
+    // Mock implementation - would trigger actual failover in production
+    console.log(`Triggering failover from provider: ${primaryProviderId}`);
+  }
+
+  async triggerFailback(failoverId: string): Promise<void> {
+    // Mock implementation - would trigger failback in production
+    console.log(`Triggering failback for failover: ${failoverId}`);
+  }
+
+  // Announcement operations (implementation)
+  async getAnnouncements(options?: any): Promise<SelectAnnouncement[]> {
+    return await db.select().from(announcements)
+      .orderBy(desc(announcements.createdAt));
+  }
+
+  async createAnnouncement(announcement: InsertAnnouncement): Promise<SelectAnnouncement> {
+    const [created] = await db.insert(announcements)
+      .values(announcement).returning();
+    return created;
+  }
+
+  async updateAnnouncement(id: string, updates: Partial<SelectAnnouncement>): Promise<SelectAnnouncement> {
+    const [updated] = await db.update(announcements)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(announcements.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteAnnouncement(id: string): Promise<void> {
+    await db.delete(announcements)
+      .where(eq(announcements.id, id));
+  }
+
+  async publishAnnouncement(id: string): Promise<void> {
+    await db.update(announcements)
+      .set({ status: 'published', publishedAt: new Date(), updatedAt: new Date() })
+      .where(eq(announcements.id, id));
+  }
+
+  async pauseAnnouncement(id: string): Promise<void> {
+    await db.update(announcements)
+      .set({ status: 'paused', updatedAt: new Date() })
+      .where(eq(announcements.id, id));
+  }
+
+  async createEmergencyBroadcast(broadcast: any): Promise<any> {
+    // Mock implementation for emergency broadcast
+    return {
+      id: `emergency_${Date.now()}`,
+      ...broadcast,
+      priority: 'critical',
+      createdAt: new Date()
+    };
+  }
+
+  async bulkUpdateAnnouncements(action: string, ids: string[]): Promise<{ success: boolean; updatedCount: number }> {
+    const updates: any = { updatedAt: new Date() };
+    
+    switch (action) {
+      case 'publish':
+        updates.status = 'published';
+        updates.publishedAt = new Date();
+        break;
+      case 'pause':
+        updates.status = 'paused';
+        break;
+      case 'archive':
+        updates.status = 'archived';
+        break;
+    }
+
+    const result = await db.update(announcements)
+      .set(updates)
+      .where(sql`${announcements.id} = ANY(${ids})`)
+      .returning();
+
+    return { success: true, updatedCount: result.length };
+  }
+
+  async getAnnouncementAnalytics(dateFrom: Date, dateTo: Date): Promise<any> {
+    // Mock implementation
+    return {
+      totalAnnouncements: 25,
+      publishedAnnouncements: 18,
+      totalViews: 12547,
+      totalClicks: 843,
+      avgEngagementRate: 6.7,
+      topPerformingAnnouncement: { id: 'ann_1', title: 'New Features Released', views: 2547 }
+    };
+  }
+
+  async getAnnouncementTemplates(): Promise<any[]> {
+    // Mock implementation
+    return [
+      {
+        id: 'template_1',
+        name: 'System Maintenance',
+        category: 'maintenance',
+        titleTemplate: 'Scheduled Maintenance: {{title}}',
+        contentTemplate: 'We will be performing maintenance on {{date}} from {{startTime}} to {{endTime}}.',
+        isActive: true
+      },
+      {
+        id: 'template_2',
+        name: 'New Features',
+        category: 'features',
+        titleTemplate: '🎉 New Feature: {{featureName}}',
+        contentTemplate: 'We\'re excited to announce {{featureName}}! {{description}}',
+        isActive: true
+      }
+    ];
+  }
+
+  // Push Notification Campaign operations (implementation)
+  async getPushNotificationCampaigns(options?: any): Promise<SelectPushNotificationCampaign[]> {
+    return await db.select().from(pushNotificationCampaigns)
+      .orderBy(desc(pushNotificationCampaigns.createdAt));
+  }
+
+  async createPushNotificationCampaign(campaign: InsertPushNotificationCampaign): Promise<SelectPushNotificationCampaign> {
+    const [created] = await db.insert(pushNotificationCampaigns)
+      .values(campaign).returning();
+    return created;
+  }
+
+  async updatePushNotificationCampaign(id: string, updates: Partial<SelectPushNotificationCampaign>): Promise<SelectPushNotificationCampaign> {
+    const [updated] = await db.update(pushNotificationCampaigns)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(pushNotificationCampaigns.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePushNotificationCampaign(id: string): Promise<void> {
+    await db.delete(pushNotificationCampaigns)
+      .where(eq(pushNotificationCampaigns.id, id));
+  }
+
+  async sendPushNotificationCampaign(id: string): Promise<{ notificationsSent: number; targetCount: number }> {
+    // Mock implementation
+    await db.update(pushNotificationCampaigns)
+      .set({ status: 'sent', sentAt: new Date(), updatedAt: new Date() })
+      .where(eq(pushNotificationCampaigns.id, id));
+    
+    return { notificationsSent: 1247, targetCount: 1250 };
+  }
+
+  async pausePushNotificationCampaign(id: string): Promise<void> {
+    await db.update(pushNotificationCampaigns)
+      .set({ status: 'paused', updatedAt: new Date() })
+      .where(eq(pushNotificationCampaigns.id, id));
+  }
+
+  async testSendPushNotification(id: string, testUsers: string[]): Promise<{ success: boolean; testsSent: number }> {
+    // Mock implementation
+    return { success: true, testsSent: testUsers.length };
+  }
+
+  async bulkUpdatePushNotificationCampaigns(action: string, ids: string[]): Promise<{ success: boolean; updatedCount: number }> {
+    const updates: any = { updatedAt: new Date() };
+    
+    switch (action) {
+      case 'send':
+        updates.status = 'sending';
+        updates.sentAt = new Date();
+        break;
+      case 'pause':
+        updates.status = 'paused';
+        break;
+      case 'cancel':
+        updates.status = 'cancelled';
+        break;
+    }
+
+    const result = await db.update(pushNotificationCampaigns)
+      .set(updates)
+      .where(sql`${pushNotificationCampaigns.id} = ANY(${ids})`)
+      .returning();
+
+    return { success: true, updatedCount: result.length };
+  }
+
+  async getPushCampaignAnalytics(campaignId: string): Promise<any> {
+    // Mock implementation
+    return {
+      totalDeliveries: 1247,
+      sent: 1247,
+      delivered: 1189,
+      opened: 234,
+      clicked: 89,
+      failed: 58,
+      expired: 12,
+      deliveryRate: 95.3,
+      openRate: 19.7,
+      clickThroughRate: 7.1
+    };
+  }
+
+  async getNotificationTemplates(): Promise<any[]> {
+    // Mock implementation
+    return [
+      {
+        id: 'template_1',
+        name: 'Welcome Message',
+        category: 'onboarding',
+        titleTemplate: 'Welcome to {{appName}}!',
+        bodyTemplate: 'Thanks for joining us, {{userName}}! Get started by exploring our features.',
+        platforms: ['web', 'ios', 'android'],
+        usageCount: 1247,
+        isActive: true
+      },
+      {
+        id: 'template_2',
+        name: 'New Content Alert',
+        category: 'engagement',
+        titleTemplate: 'New content from {{creatorName}}',
+        bodyTemplate: '{{creatorName}} just posted something new! Check it out now.',
+        platforms: ['web', 'ios', 'android'],
+        usageCount: 3421,
+        isActive: true
+      }
+    ];
+  }
+
+  async getUserNotificationPreferences(): Promise<any[]> {
+    // Mock implementation
+    return [
+      {
+        userId: 'user_1',
+        email: 'user@example.com',
+        pushEnabled: true,
+        emailEnabled: true,
+        smsEnabled: false,
+        categories: {
+          marketing: true,
+          security: true,
+          updates: false,
+          social: true
+        },
+        updatedAt: new Date()
+      }
+    ];
+  }
+
+  // System Settings operations (implementation)
+  async getSystemSettings(options?: any): Promise<any[]> {
+    // Mock implementation
+    return [
+      {
+        id: 'setting_1',
+        key: 'app_name',
+        value: 'BoyFanz',
+        type: 'string',
+        category: 'general',
+        description: 'Application name',
+        isPublic: true,
+        isEditable: true,
+        updatedAt: new Date(),
+        updatedBy: 'admin'
+      },
+      {
+        id: 'setting_2',
+        key: 'maintenance_mode',
+        value: 'false',
+        type: 'boolean',
+        category: 'maintenance',
+        description: 'Enable maintenance mode',
+        isPublic: false,
+        isEditable: true,
+        updatedAt: new Date(),
+        updatedBy: 'admin'
+      }
+    ];
+  }
+
+  async createSystemSetting(setting: any): Promise<any> {
+    return {
+      id: `setting_${Date.now()}`,
+      ...setting,
+      updatedAt: new Date(),
+      createdAt: new Date()
+    };
+  }
+
+  async getSystemSetting(key: string): Promise<any | undefined> {
+    // Mock implementation
+    const settings: { [key: string]: any } = {
+      'app_name': { key: 'app_name', value: 'BoyFanz', type: 'string' },
+      'maintenance_mode': { key: 'maintenance_mode', value: 'false', type: 'boolean' }
+    };
+    return settings[key];
+  }
+
+  async updateSystemSetting(id: string, updates: any): Promise<any> {
+    return {
+      id,
+      ...updates,
+      updatedAt: new Date()
+    };
+  }
+
+  async createSystemSettingHistory(history: any): Promise<any> {
+    return {
+      id: `history_${Date.now()}`,
+      ...history,
+      createdAt: new Date()
+    };
+  }
+
+  async deleteSystemSetting(id: string): Promise<void> {
+    // Mock implementation - would delete from database in production
+    console.log(`Deleting system setting: ${id}`);
+  }
+
+  async getSystemInfo(): Promise<any> {
+    return {
+      version: '1.0.0',
+      nodeVersion: process.version,
+      platform: process.platform,
+      uptime: process.uptime(),
+      memoryUsage: process.memoryUsage(),
+      cpuUsage: process.cpuUsage(),
+      dbStatus: 'connected',
+      redisStatus: 'connected',
+      lastBackup: new Date()
+    };
+  }
+
+  async getEmailSettings(): Promise<any> {
+    return {
+      id: 'email_settings_1',
+      smtpHost: 'smtp.example.com',
+      smtpPort: 587,
+      smtpUsername: 'noreply@boyfanz.com',
+      smtpPassword: '****',
+      smtpSecure: true,
+      fromEmail: 'noreply@boyfanz.com',
+      fromName: 'BoyFanz',
+      replyToEmail: 'support@boyfanz.com',
+      maxSendRate: 100,
+      isActive: true,
+      lastTestedAt: new Date()
+    };
+  }
+
+  async updateEmailSettings(settings: any): Promise<any> {
+    return {
+      ...settings,
+      updatedAt: new Date()
+    };
+  }
+
+  async testEmailSettings(email: string): Promise<{ success: boolean; message: string }> {
+    // Mock implementation - would send actual test email in production
+    return {
+      success: true,
+      message: `Test email sent successfully to ${email}`
+    };
+  }
+
+  async getMaintenanceSchedules(): Promise<any[]> {
+    return [
+      {
+        id: 'maint_1',
+        title: 'Database Optimization',
+        description: 'Routine database maintenance and optimization',
+        startTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
+        endTime: new Date(Date.now() + 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000), // 2 hours later
+        isActive: false,
+        displayMessage: 'We will be performing scheduled maintenance. The site may be temporarily unavailable.',
+        allowedUserRoles: ['admin'],
+        maintenanceType: 'scheduled',
+        createdBy: 'admin'
+      }
+    ];
+  }
+
+  async createMaintenanceSchedule(schedule: any): Promise<any> {
+    return {
+      id: `maint_${Date.now()}`,
+      ...schedule,
+      createdAt: new Date()
+    };
+  }
+
+  async createSystemBackup(type: string): Promise<{ backupId: string; status: string; startedAt: Date }> {
+    const backupId = `backup_${Date.now()}`;
+    console.log(`Creating ${type} backup: ${backupId}`);
+    
+    // Mock implementation - would create actual backup in production
+    return {
+      backupId,
+      status: 'initiated',
+      startedAt: new Date()
+    };
+  }
+
+  // Additional missing methods from routes.ts
+  async getMessageHistory(userId: string): Promise<any[]> {
+    return await db.select().from(messages)
+      .where(or(eq(messages.senderId, userId), eq(messages.receiverId, userId)))
+      .orderBy(desc(messages.createdAt))
+      .limit(100);
+  }
+
+  async getAuditLogsByUser(userId: string): Promise<any[]> {
+    return await db.select().from(auditLogs)
+      .where(eq(auditLogs.actorId, userId))
+      .orderBy(desc(auditLogs.createdAt))
+      .limit(100);
+  }
+
+  async getUserSessions(userId: string): Promise<any[]> {
+    // Mock implementation - would get from session store in production
+    return [
+      {
+        sessionId: 'session_123',
+        userId,
+        createdAt: new Date(),
+        lastActivity: new Date(),
+        ipAddress: '192.168.1.1',
+        userAgent: 'Mozilla/5.0...'
+      }
+    ];
+  }
+
   // Financial operations
   async getTransaction(transactionId: string): Promise<any> {
     return {

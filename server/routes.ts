@@ -482,6 +482,655 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // ===== ADMIN ANNOUNCEMENTS ROUTES =====
+  
+  // Get all announcements with filtering
+  app.get('/api/admin/announcements', requireAdmin, async (req, res) => {
+    try {
+      const { searchQuery, status, type, channel, priority, limit = 20, offset = 0, sortBy = 'created', sortOrder = 'desc' } = req.query;
+      
+      const filters: any = {};
+      if (searchQuery) filters.searchQuery = searchQuery;
+      if (status && status !== 'all') filters.status = status;
+      if (type && type !== 'all') filters.type = type;
+      if (channel && channel !== 'all') filters.channel = channel;
+      if (priority && priority !== 'all') filters.priority = parseInt(priority as string);
+      
+      const announcements = await storage.getAnnouncements({
+        ...filters,
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string),
+        sortBy: sortBy as string,
+        sortOrder: sortOrder as 'asc' | 'desc'
+      });
+      
+      res.json(announcements);
+    } catch (error) {
+      console.error('Failed to get announcements:', error);
+      res.status(500).json({ error: 'Failed to get announcements' });
+    }
+  });
+
+  // Create announcement
+  app.post('/api/admin/announcements', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const announcementData = {
+        ...req.body,
+        createdBy: req.user!.id,
+        status: req.body.scheduledAt ? 'scheduled' : 'draft'
+      };
+      
+      const announcement = await storage.createAnnouncement(announcementData);
+      
+      // Log announcement creation
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'ANNOUNCEMENT_CREATED',
+        targetType: 'announcement',
+        targetId: announcement.id,
+        diffJson: { created: announcement }
+      });
+      
+      res.status(201).json(announcement);
+    } catch (error) {
+      console.error('Failed to create announcement:', error);
+      res.status(500).json({ error: 'Failed to create announcement' });
+    }
+  });
+
+  // Update announcement
+  app.put('/api/admin/announcements/:id', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const updatedAnnouncement = await storage.updateAnnouncement(req.params.id, req.body);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'ANNOUNCEMENT_UPDATED',
+        targetType: 'announcement',
+        targetId: req.params.id,
+        diffJson: { updated: req.body }
+      });
+      
+      res.json(updatedAnnouncement);
+    } catch (error) {
+      console.error('Failed to update announcement:', error);
+      res.status(500).json({ error: 'Failed to update announcement' });
+    }
+  });
+
+  // Delete announcement
+  app.delete('/api/admin/announcements/:id', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      await storage.deleteAnnouncement(req.params.id);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'ANNOUNCEMENT_DELETED',
+        targetType: 'announcement',
+        targetId: req.params.id,
+        diffJson: { deleted: true }
+      });
+      
+      res.json({ message: 'Announcement deleted successfully' });
+    } catch (error) {
+      console.error('Failed to delete announcement:', error);
+      res.status(500).json({ error: 'Failed to delete announcement' });
+    }
+  });
+
+  // Publish announcement
+  app.post('/api/admin/announcements/:id/publish', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      await storage.publishAnnouncement(req.params.id);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'ANNOUNCEMENT_PUBLISHED',
+        targetType: 'announcement',
+        targetId: req.params.id,
+        diffJson: { published: true }
+      });
+      
+      res.json({ message: 'Announcement published successfully' });
+    } catch (error) {
+      console.error('Failed to publish announcement:', error);
+      res.status(500).json({ error: 'Failed to publish announcement' });
+    }
+  });
+
+  // Pause announcement
+  app.post('/api/admin/announcements/:id/pause', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      await storage.pauseAnnouncement(req.params.id);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'ANNOUNCEMENT_PAUSED',
+        targetType: 'announcement',
+        targetId: req.params.id,
+        diffJson: { paused: true }
+      });
+      
+      res.json({ message: 'Announcement paused successfully' });
+    } catch (error) {
+      console.error('Failed to pause announcement:', error);
+      res.status(500).json({ error: 'Failed to pause announcement' });
+    }
+  });
+
+  // Emergency broadcast
+  app.post('/api/admin/announcements/emergency-broadcast', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const { title, content, channels } = req.body;
+      
+      const emergencyAnnouncement = await storage.createEmergencyBroadcast({
+        title,
+        content,
+        channels,
+        createdBy: req.user!.id
+      });
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'EMERGENCY_BROADCAST_SENT',
+        targetType: 'announcement',
+        targetId: emergencyAnnouncement.id,
+        diffJson: { emergency: true, title, content, channels }
+      });
+      
+      res.status(201).json(emergencyAnnouncement);
+    } catch (error) {
+      console.error('Failed to send emergency broadcast:', error);
+      res.status(500).json({ error: 'Failed to send emergency broadcast' });
+    }
+  });
+
+  // Bulk operations on announcements
+  app.post('/api/admin/announcements/bulk', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const { action, ids } = req.body;
+      
+      await storage.bulkUpdateAnnouncements(ids, action);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: `ANNOUNCEMENTS_BULK_${action.toUpperCase()}`,
+        targetType: 'announcement',
+        targetId: 'bulk_operation',
+        diffJson: { action, ids, count: ids.length }
+      });
+      
+      res.json({ message: `Bulk ${action} completed successfully` });
+    } catch (error) {
+      console.error('Failed to perform bulk operation:', error);
+      res.status(500).json({ error: 'Failed to perform bulk operation' });
+    }
+  });
+
+  // Get announcement analytics
+  app.get('/api/admin/announcements/analytics', requireAdmin, async (req, res) => {
+    try {
+      const { dateFrom, dateTo } = req.query;
+      const analytics = await storage.getAnnouncementAnalytics({
+        dateFrom: dateFrom as string,
+        dateTo: dateTo as string
+      });
+      res.json(analytics);
+    } catch (error) {
+      console.error('Failed to get announcement analytics:', error);
+      res.status(500).json({ error: 'Failed to get announcement analytics' });
+    }
+  });
+
+  // Get announcement templates
+  app.get('/api/admin/announcement-templates', requireAdmin, async (req, res) => {
+    try {
+      const templates = await storage.getAnnouncementTemplates();
+      res.json(templates);
+    } catch (error) {
+      console.error('Failed to get announcement templates:', error);
+      res.status(500).json({ error: 'Failed to get announcement templates' });
+    }
+  });
+
+  // ===== ADMIN PUSH NOTIFICATIONS ROUTES =====
+  
+  // Get all push notification campaigns
+  app.get('/api/admin/push-notification-campaigns', requireAdmin, async (req, res) => {
+    try {
+      const { searchQuery, status, platform, audience, limit = 20, offset = 0, sortBy = 'created', sortOrder = 'desc' } = req.query;
+      
+      const filters: any = {};
+      if (searchQuery) filters.searchQuery = searchQuery;
+      if (status && status !== 'all') filters.status = status;
+      if (platform && platform !== 'all') filters.platform = platform;
+      if (audience && audience !== 'all') filters.audience = audience;
+      
+      const campaigns = await storage.getPushNotificationCampaigns({
+        ...filters,
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string),
+        sortBy: sortBy as string,
+        sortOrder: sortOrder as 'asc' | 'desc'
+      });
+      
+      res.json(campaigns);
+    } catch (error) {
+      console.error('Failed to get push notification campaigns:', error);
+      res.status(500).json({ error: 'Failed to get push notification campaigns' });
+    }
+  });
+
+  // Create push notification campaign
+  app.post('/api/admin/push-notification-campaigns', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const campaignData = {
+        ...req.body,
+        createdBy: req.user!.id,
+        status: req.body.scheduledAt ? 'scheduled' : 'draft'
+      };
+      
+      const campaign = await storage.createPushNotificationCampaign(campaignData);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'PUSH_CAMPAIGN_CREATED',
+        targetType: 'push_notification_campaign',
+        targetId: campaign.id,
+        diffJson: { created: campaign }
+      });
+      
+      res.status(201).json(campaign);
+    } catch (error) {
+      console.error('Failed to create push notification campaign:', error);
+      res.status(500).json({ error: 'Failed to create push notification campaign' });
+    }
+  });
+
+  // Update push notification campaign
+  app.put('/api/admin/push-notification-campaigns/:id', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const updatedCampaign = await storage.updatePushNotificationCampaign(req.params.id, req.body);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'PUSH_CAMPAIGN_UPDATED',
+        targetType: 'push_notification_campaign',
+        targetId: req.params.id,
+        diffJson: { updated: req.body }
+      });
+      
+      res.json(updatedCampaign);
+    } catch (error) {
+      console.error('Failed to update push notification campaign:', error);
+      res.status(500).json({ error: 'Failed to update push notification campaign' });
+    }
+  });
+
+  // Delete push notification campaign
+  app.delete('/api/admin/push-notification-campaigns/:id', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      await storage.deletePushNotificationCampaign(req.params.id);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'PUSH_CAMPAIGN_DELETED',
+        targetType: 'push_notification_campaign',
+        targetId: req.params.id,
+        diffJson: { deleted: true }
+      });
+      
+      res.json({ message: 'Push notification campaign deleted successfully' });
+    } catch (error) {
+      console.error('Failed to delete push notification campaign:', error);
+      res.status(500).json({ error: 'Failed to delete push notification campaign' });
+    }
+  });
+
+  // Send push notification campaign
+  app.post('/api/admin/push-notification-campaigns/:id/send', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      await storage.sendPushNotificationCampaign(req.params.id);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'PUSH_CAMPAIGN_SENT',
+        targetType: 'push_notification_campaign',
+        targetId: req.params.id,
+        diffJson: { sent: true }
+      });
+      
+      res.json({ message: 'Push notification campaign sent successfully' });
+    } catch (error) {
+      console.error('Failed to send push notification campaign:', error);
+      res.status(500).json({ error: 'Failed to send push notification campaign' });
+    }
+  });
+
+  // Pause push notification campaign
+  app.post('/api/admin/push-notification-campaigns/:id/pause', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      await storage.pausePushNotificationCampaign(req.params.id);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'PUSH_CAMPAIGN_PAUSED',
+        targetType: 'push_notification_campaign',
+        targetId: req.params.id,
+        diffJson: { paused: true }
+      });
+      
+      res.json({ message: 'Push notification campaign paused successfully' });
+    } catch (error) {
+      console.error('Failed to pause push notification campaign:', error);
+      res.status(500).json({ error: 'Failed to pause push notification campaign' });
+    }
+  });
+
+  // Test send push notification
+  app.post('/api/admin/push-notification-campaigns/:id/test-send', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const { testUsers } = req.body;
+      
+      await storage.testSendPushNotification(req.params.id, testUsers);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'PUSH_CAMPAIGN_TEST_SENT',
+        targetType: 'push_notification_campaign',
+        targetId: req.params.id,
+        diffJson: { testUsers }
+      });
+      
+      res.json({ message: 'Test notification sent successfully' });
+    } catch (error) {
+      console.error('Failed to send test notification:', error);
+      res.status(500).json({ error: 'Failed to send test notification' });
+    }
+  });
+
+  // Bulk operations on push campaigns
+  app.post('/api/admin/push-notification-campaigns/bulk', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const { action, ids } = req.body;
+      
+      await storage.bulkUpdatePushNotificationCampaigns(ids, action);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: `PUSH_CAMPAIGNS_BULK_${action.toUpperCase()}`,
+        targetType: 'push_notification_campaign',
+        diffJson: { action, ids, count: ids.length }
+      });
+      
+      res.json({ message: `Bulk ${action} completed successfully` });
+    } catch (error) {
+      console.error('Failed to perform bulk operation:', error);
+      res.status(500).json({ error: 'Failed to perform bulk operation' });
+    }
+  });
+
+  // Get push campaign analytics
+  app.get('/api/admin/push-campaigns/analytics', requireAdmin, async (req, res) => {
+    try {
+      const { dateFrom, dateTo } = req.query;
+      const analytics = await storage.getPushCampaignAnalytics({
+        dateFrom: dateFrom as string,
+        dateTo: dateTo as string
+      });
+      res.json(analytics);
+    } catch (error) {
+      console.error('Failed to get push campaign analytics:', error);
+      res.status(500).json({ error: 'Failed to get push campaign analytics' });
+    }
+  });
+
+  // Get notification templates
+  app.get('/api/admin/notification-templates', requireAdmin, async (req, res) => {
+    try {
+      const templates = await storage.getNotificationTemplates();
+      res.json(templates);
+    } catch (error) {
+      console.error('Failed to get notification templates:', error);
+      res.status(500).json({ error: 'Failed to get notification templates' });
+    }
+  });
+
+  // Get user notification preferences
+  app.get('/api/admin/user-notification-preferences', requireAdmin, async (req, res) => {
+    try {
+      const preferences = await storage.getUserNotificationPreferences();
+      res.json(preferences);
+    } catch (error) {
+      console.error('Failed to get user notification preferences:', error);
+      res.status(500).json({ error: 'Failed to get user notification preferences' });
+    }
+  });
+
+  // ===== ADMIN SYSTEM SETTINGS ROUTES =====
+  
+  // Get all system settings
+  app.get('/api/admin/system-settings', requireAdmin, async (req, res) => {
+    try {
+      const { search, category } = req.query;
+      
+      const filters: any = {};
+      if (search) filters.search = search;
+      if (category && category !== 'all') filters.category = category;
+      
+      const settings = await storage.getSystemSettings(filters);
+      res.json(settings);
+    } catch (error) {
+      console.error('Failed to get system settings:', error);
+      res.status(500).json({ error: 'Failed to get system settings' });
+    }
+  });
+
+  // Create system setting
+  app.post('/api/admin/system-settings', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const settingData = {
+        ...req.body,
+        updatedBy: req.user!.id
+      };
+      
+      const setting = await storage.createSystemSetting(settingData);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'SYSTEM_SETTING_CREATED',
+        targetType: 'system_setting',
+        targetId: setting.id,
+        diffJson: { created: setting }
+      });
+      
+      res.status(201).json(setting);
+    } catch (error) {
+      console.error('Failed to create system setting:', error);
+      res.status(500).json({ error: 'Failed to create system setting' });
+    }
+  });
+
+  // Update system setting
+  app.put('/api/admin/system-settings/:id', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const oldSetting = await storage.getSystemSetting(req.params.id);
+      
+      const updatedSetting = await storage.updateSystemSetting(req.params.id, {
+        ...req.body,
+        updatedBy: req.user!.id
+      });
+      
+      // Store change history
+      await storage.createSystemSettingHistory({
+        settingId: req.params.id,
+        oldValue: oldSetting?.value,
+        newValue: req.body.value,
+        changedBy: req.user!.id,
+        changeReason: req.body.changeReason
+      });
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'SYSTEM_SETTING_UPDATED',
+        targetType: 'system_setting',
+        targetId: req.params.id,
+        diffJson: { 
+          old: { value: oldSetting?.value },
+          new: { value: req.body.value }
+        }
+      });
+      
+      res.json(updatedSetting);
+    } catch (error) {
+      console.error('Failed to update system setting:', error);
+      res.status(500).json({ error: 'Failed to update system setting' });
+    }
+  });
+
+  // Delete system setting
+  app.delete('/api/admin/system-settings/:id', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      await storage.deleteSystemSetting(req.params.id);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'SYSTEM_SETTING_DELETED',
+        targetType: 'system_setting',
+        targetId: req.params.id
+      });
+      
+      res.json({ message: 'System setting deleted successfully' });
+    } catch (error) {
+      console.error('Failed to delete system setting:', error);
+      res.status(500).json({ error: 'Failed to delete system setting' });
+    }
+  });
+
+  // Get system info
+  app.get('/api/admin/system-info', requireAdmin, async (req, res) => {
+    try {
+      const systemInfo = await storage.getSystemInfo();
+      res.json(systemInfo);
+    } catch (error) {
+      console.error('Failed to get system info:', error);
+      res.status(500).json({ error: 'Failed to get system info' });
+    }
+  });
+
+  // Get email settings
+  app.get('/api/admin/email-settings', requireAdmin, async (req, res) => {
+    try {
+      const emailSettings = await storage.getEmailSettings();
+      res.json(emailSettings);
+    } catch (error) {
+      console.error('Failed to get email settings:', error);
+      res.status(500).json({ error: 'Failed to get email settings' });
+    }
+  });
+
+  // Update email settings
+  app.put('/api/admin/email-settings', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const updatedSettings = await storage.updateEmailSettings({
+        ...req.body,
+        updatedBy: req.user!.id
+      });
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'EMAIL_SETTINGS_UPDATED',
+        targetType: 'email_settings',
+        targetId: updatedSettings.id,
+        diffJson: { updated: req.body }
+      });
+      
+      res.json(updatedSettings);
+    } catch (error) {
+      console.error('Failed to update email settings:', error);
+      res.status(500).json({ error: 'Failed to update email settings' });
+    }
+  });
+
+  // Test email settings
+  app.post('/api/admin/email-settings/test', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      await storage.testEmailSettings(email);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'EMAIL_SETTINGS_TESTED',
+        targetType: 'email_settings',
+        diffJson: { testEmail: email }
+      });
+      
+      res.json({ message: 'Test email sent successfully' });
+    } catch (error) {
+      console.error('Failed to send test email:', error);
+      res.status(500).json({ error: 'Failed to send test email' });
+    }
+  });
+
+  // Get maintenance schedules
+  app.get('/api/admin/maintenance-schedules', requireAdmin, async (req, res) => {
+    try {
+      const schedules = await storage.getMaintenanceSchedules();
+      res.json(schedules);
+    } catch (error) {
+      console.error('Failed to get maintenance schedules:', error);
+      res.status(500).json({ error: 'Failed to get maintenance schedules' });
+    }
+  });
+
+  // Create maintenance schedule
+  app.post('/api/admin/maintenance-schedules', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const scheduleData = {
+        ...req.body,
+        createdBy: req.user!.id
+      };
+      
+      const schedule = await storage.createMaintenanceSchedule(scheduleData);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'MAINTENANCE_SCHEDULE_CREATED',
+        targetType: 'maintenance_schedule',
+        targetId: schedule.id,
+        diffJson: { created: schedule }
+      });
+      
+      res.status(201).json(schedule);
+    } catch (error) {
+      console.error('Failed to create maintenance schedule:', error);
+      res.status(500).json({ error: 'Failed to create maintenance schedule' });
+    }
+  });
+
+  // System backup
+  app.post('/api/admin/backup', csrfProtection, requireAdmin, async (req, res) => {
+    try {
+      const { type } = req.body;
+      
+      const backup = await storage.createSystemBackup(type);
+      
+      await storage.createAuditLog({
+        actorId: req.user!.id,
+        action: 'SYSTEM_BACKUP_CREATED',
+        targetType: 'system_backup',
+        targetId: backup.id,
+        diffJson: { type, backup }
+      });
+      
+      res.status(201).json(backup);
+    } catch (error) {
+      console.error('Failed to create system backup:', error);
+      res.status(500).json({ error: 'Failed to create system backup' });
+    }
+  });
+
   // ===== THEME ROUTES =====
   
   // Get active theme

@@ -12,10 +12,142 @@ import {
   boolean,
   decimal,
   pgEnum,
+  bigserial,
+  bigint,
+  inet,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
+
+// ===== MULTI-TENANT CORE SCHEMA =====
+// Core tenancy and identity system for FUN empire (GirlFanz, PupFanz, DaddyFanz, etc.)
+
+// Tenant definitions - each brand in the FUN empire
+export const tenantStatusEnum = pgEnum("tenant_status", ["active", "inactive", "maintenance"]);
+
+export const tenants = pgTable("tenants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  slug: varchar("slug").unique().notNull(), // girlfanz, pupfanz, daddyfanz, taboofanz, transfanz
+  name: varchar("name").notNull(), // GirlFanz, PupFanz, DaddyFanz, TabooFanz, TransFanz
+  domain: varchar("domain"), // girlfanz.com, pupfanz.com, etc.
+  status: tenantStatusEnum("status").default("active").notNull(),
+  settings: jsonb("settings").default({}), // brand-specific configs, themes, features
+  branding: jsonb("branding").default({}), // colors, logos, messaging
+  features: jsonb("features").default({}), // feature flags per tenant
+  compliance: jsonb("compliance").default({}), // jurisdiction-specific rules
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Unified account system - one account across all FUN empire brands
+export const accountStatusEnum = pgEnum("account_status", ["active", "disabled", "pending", "suspended"]);
+
+export const accounts = pgTable("accounts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: varchar("email").unique().notNull(), // using citext equivalent
+  phone: varchar("phone"),
+  passwordHash: varchar("password_hash"), // null for social-only accounts
+  status: accountStatusEnum("status").default("active").notNull(),
+  emailVerified: boolean("email_verified").default(false),
+  phoneVerified: boolean("phone_verified").default(false),
+  lastLoginAt: timestamp("last_login_at"),
+  metadata: jsonb("metadata").default({}), // additional account data
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_accounts_email").on(table.email),
+  index("idx_accounts_status").on(table.status),
+]);
+
+// External identity providers (OIDC, OAuth2, SAML)
+export const accountIdentity = pgTable("account_identity", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  accountId: varchar("account_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  provider: varchar("provider").notNull(), // google, twitter, discord, replit, etc.
+  subject: varchar("subject").notNull(), // provider's user ID
+  metadata: jsonb("metadata").default({}), // provider-specific data
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique().on(table.provider, table.subject),
+  index("idx_account_identity_account").on(table.accountId),
+]);
+
+// Role-based access control system
+export const roleScope = pgEnum("role_scope", ["global", "tenant"]);
+
+export const roles = pgTable("roles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  scope: roleScope("scope").default("tenant").notNull(),
+  permissions: text("permissions").array().default([]), // content:write, ads:manage, etc.
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique().on(table.name, table.scope),
+]);
+
+// Account role assignments
+export const accountRole = pgTable("account_role", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  accountId: varchar("account_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  roleId: varchar("role_id").notNull().references(() => roles.id, { onDelete: "cascade" }),
+  tenantId: varchar("tenant_id").references(() => tenants.id, { onDelete: "cascade" }), // null for global roles
+  grantedBy: varchar("granted_by").references(() => accounts.id),
+  expiresAt: timestamp("expires_at"), // optional role expiration
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  unique().on(table.accountId, table.roleId, table.tenantId),
+  index("idx_account_role_account").on(table.accountId),
+  index("idx_account_role_tenant").on(table.tenantId),
+]);
+
+// Unified profile system - creator/fan profiles are global with per-tenant presence
+export const profileTypeEnum = pgEnum("profile_type", ["creator", "fan", "staff", "admin"]);
+
+export const profiles = pgTable("profiles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  accountId: varchar("account_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  handle: varchar("handle").unique().notNull(), // global handle across all tenants
+  displayName: varchar("display_name"),
+  bio: text("bio"),
+  type: profileTypeEnum("type").default("fan").notNull(),
+  avatarUrl: varchar("avatar_url"),
+  bannerUrl: varchar("banner_url"),
+  location: varchar("location"),
+  website: varchar("website"),
+  socialLinks: jsonb("social_links").default({}), // twitter, instagram, etc.
+  flags: jsonb("flags").default({}), // profile flags and settings
+  preferences: jsonb("preferences").default({}), // user preferences
+  stats: jsonb("stats").default({}), // follower counts, engagement, etc.
+  verificationLevel: integer("verification_level").default(0), // 0=unverified, 1=verified, 2=official
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_profiles_handle").on(table.handle),
+  index("idx_profiles_account").on(table.accountId),
+  index("idx_profiles_type").on(table.type),
+]);
+
+// Per-tenant profile presence and visibility
+export const profileTenant = pgTable("profile_tenant", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  profileId: varchar("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
+  isVisible: boolean("is_visible").default(true),
+  isActive: boolean("is_active").default(true),
+  settings: jsonb("settings").default({}), // tenant-specific profile settings
+  customization: jsonb("customization").default({}), // tenant-specific branding
+  stats: jsonb("stats").default({}), // tenant-specific stats
+  joinedAt: timestamp("joined_at").defaultNow(),
+  lastActiveAt: timestamp("last_active_at").defaultNow(),
+}, (table) => [
+  unique().on(table.profileId, table.tenantId),
+  index("idx_profile_tenant_profile").on(table.profileId),
+  index("idx_profile_tenant_tenant").on(table.tenantId),
+]);
 
 // Session storage table for Replit Auth
 export const sessions = pgTable(
@@ -54,78 +186,242 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// User profiles
-export const profiles = pgTable("profiles", {
-  userId: varchar("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
-  displayName: varchar("display_name"),
-  bio: text("bio"),
-  avatarUrl: varchar("avatar_url"),
-  publicFlags: jsonb("public_flags").default({}),
-  onboardingCompleted: boolean("onboarding_completed").default(false),
-  profileTheme: varchar("profile_theme").default("default"),
-  engagementLevel: integer("engagement_level").default(0),
-  totalPoints: integer("total_points").default(0),
-  stripeCustomerId: varchar("stripe_customer_id"),
-  // Compliance and verification fields for auth middleware
-  kycStatus: profileKycStatusEnum("kyc_status").default("pending").notNull(),
-  ageVerified: boolean("age_verified").default(false).notNull(),
-  is2257Compliant: boolean("is_2257_compliant").default(false).notNull(),
-  lastSanctionsScreening: timestamp("last_sanctions_screening"),
-  sanctionsStatus: sanctionsStatusEnum("sanctions_status").default("clear").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-// KYC verifications
-export const kycVerificationStatusEnum = pgEnum("kyc_status", ["pending", "approved", "rejected", "expired"]);
+// ===== COMPREHENSIVE COMPLIANCE SYSTEM =====
+// 2257, KYC/KYB, Identity Verification, Model Releases
 
-export const kycVerifications = pgTable("kyc_verifications", {
+// Enhanced identity verification system
+export const verificationCheckType = pgEnum("verification_check_type", ["KYC", "Age", "KYB", "Sanctions"]);
+export const verificationStatus = pgEnum("verification_status", ["pending", "approved", "rejected", "expired", "requires_review"]);
+
+export const identityVerifications = pgTable("identity_verifications", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  provider: varchar("provider").default("verifymy").notNull(),
-  externalId: varchar("external_id"),
-  status: kycVerificationStatusEnum("status").default("pending").notNull(),
-  dataJson: jsonb("data_json").default({}),
+  accountId: varchar("account_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  profileId: varchar("profile_id").references(() => profiles.id), // optional profile context
+  vendor: varchar("vendor").notNull(), // verifymy, jumio, onfido, etc.
+  checkType: verificationCheckType("check_type").notNull(),
+  status: verificationStatus("status").default("pending").notNull(),
+  externalId: varchar("external_id"), // vendor's verification ID
+  result: jsonb("result").default({}), // verification results
+  documents: jsonb("documents").default({}), // document metadata
+  biometrics: jsonb("biometrics").default({}), // biometric check results
+  sanctions: jsonb("sanctions").default({}), // sanctions screening results
+  riskScore: integer("risk_score"), // vendor risk assessment
+  failureReason: text("failure_reason"),
+  reviewNotes: text("review_notes"), // manual review notes
+  reviewedBy: varchar("reviewed_by").references(() => accounts.id),
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  expiresAt: timestamp("expires_at"), // when verification expires
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_identity_verifications_account").on(table.accountId),
+  index("idx_identity_verifications_profile").on(table.profileId),
+  index("idx_identity_verifications_status").on(table.status),
+  index("idx_identity_verifications_vendor").on(table.vendor),
+]);
 
-// 18 U.S.C. §2257 compliance records
-export const record2257TypeEnum = pgEnum("record_2257_type", ["id_verification", "consent_form", "model_release"]);
+// Model releases for content compliance
+export const modelReleaseStatus = pgEnum("model_release_status", ["pending", "signed", "expired", "revoked"]);
+
+export const modelReleases = pgTable("model_releases", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contentId: varchar("content_id").notNull().references(() => content.id, { onDelete: "cascade" }),
+  performerProfileId: varchar("performer_profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  creatorProfileId: varchar("creator_profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
+  status: modelReleaseStatus("status").default("pending").notNull(),
+  releaseType: varchar("release_type").notNull(), // standard, commercial, exclusive
+  signedAt: timestamp("signed_at"),
+  expiresAt: timestamp("expires_at"),
+  revokedAt: timestamp("revoked_at"),
+  documents: jsonb("documents").default({}), // signed documents metadata
+  terms: jsonb("terms").default({}), // release terms and conditions
+  compensation: jsonb("compensation").default({}), // compensation terms
+  jurisdiction: varchar("jurisdiction"), // legal jurisdiction
+  ipAddress: inet("ip_address"), // signing IP for audit
+  userAgent: text("user_agent"), // signing user agent
+  digitalSignature: text("digital_signature"), // cryptographic signature
+  witnessInfo: jsonb("witness_info").default({}), // witness information if required
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_model_releases_content").on(table.contentId),
+  index("idx_model_releases_performer").on(table.performerProfileId),
+  index("idx_model_releases_creator").on(table.creatorProfileId),
+  index("idx_model_releases_tenant").on(table.tenantId),
+  index("idx_model_releases_status").on(table.status),
+]);
+
+// Enhanced 2257 record keeping system
+export const record2257Type = pgEnum("record_2257_type", ["id_verification", "consent_form", "model_release", "age_verification", "performer_agreement"]);
 
 export const records2257 = pgTable("records_2257", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  docType: record2257TypeEnum("doc_type").notNull(),
-  s3Key: varchar("s3_key").notNull(),
-  checksum: varchar("checksum").notNull(),
+  contentId: varchar("content_id").notNull().references(() => content.id, { onDelete: "cascade" }),
+  performerProfileId: varchar("performer_profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  custodianAccountId: varchar("custodian_account_id").notNull().references(() => accounts.id), // record custodian
+  docType: record2257Type("doc_type").notNull(),
+  locationUri: text("location_uri").notNull(), // where records are stored
+  indexMetadata: jsonb("index_metadata").default({}), // catalog and retrieval info
+  custodianContact: jsonb("custodian_contact").default({}), // custodian contact info
+  jurisdiction: varchar("jurisdiction").notNull(), // legal jurisdiction
+  retentionPeriod: integer("retention_period").default(7), // years to retain
+  isDigital: boolean("is_digital").default(true),
+  physicalLocation: text("physical_location"), // for physical records
+  accessLog: jsonb("access_log").default([]), // who accessed when
+  verificationChecksum: varchar("verification_checksum"), // for integrity verification
+  encryptionKeyId: varchar("encryption_key_id"), // KMS key for encrypted records
+  complianceNotes: text("compliance_notes"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_records_2257_content").on(table.contentId),
+  index("idx_records_2257_performer").on(table.performerProfileId),
+  index("idx_records_2257_custodian").on(table.custodianAccountId),
+  index("idx_records_2257_type").on(table.docType),
+  index("idx_records_2257_jurisdiction").on(table.jurisdiction),
+]);
 
-// Media assets
-export const mediaStatusEnum = pgEnum("media_status", ["pending", "approved", "rejected", "processing", "flagged", "ai_reviewing", "escalated"]);
+// Enhanced audit logging with multi-tenant support
+export const auditLogs = pgTable("audit_logs", {
+  id: bigserial("id", { mode: "number" }).primaryKey(), // use bigserial for high volume
+  actorAccountId: varchar("actor_account_id").references(() => accounts.id), // who performed the action
+  actorProfileId: varchar("actor_profile_id").references(() => profiles.id), // profile context
+  tenantId: varchar("tenant_id").references(() => tenants.id), // tenant context
+  action: varchar("action").notNull(), // what action was performed
+  subjectTable: varchar("subject_table").notNull(), // which table was affected
+  subjectId: varchar("subject_id").notNull(), // which record was affected
+  changes: jsonb("changes").default({}), // before/after diff
+  metadata: jsonb("metadata").default({}), // additional context
+  ipAddress: inet("ip_address"), // source IP
+  userAgent: text("user_agent"), // user agent string
+  sessionId: varchar("session_id"), // session identifier
+  requestId: varchar("request_id"), // request correlation ID
+  severity: varchar("severity").default("info"), // info, warning, error, critical
+  tags: text("tags").array().default([]), // searchable tags
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+}, (table) => [
+  index("idx_audit_logs_actor_account").on(table.actorAccountId),
+  index("idx_audit_logs_actor_profile").on(table.actorProfileId),
+  index("idx_audit_logs_tenant").on(table.tenantId),
+  index("idx_audit_logs_action").on(table.action),
+  index("idx_audit_logs_subject").on(table.subjectTable, table.subjectId),
+  index("idx_audit_logs_timestamp").on(table.timestamp),
+  index("idx_audit_logs_severity").on(table.severity),
+]);
+
+// ===== ENHANCED CONTENT & MEDIA SYSTEM =====
+// Cross-platform content publishing with forensic media hub
+
+// Content visibility levels
+export const contentVisibilityEnum = pgEnum("content_visibility", ["public", "subscribers", "ppv", "private"]);
+export const contentStatusEnum = pgEnum("content_status", ["draft", "scheduled", "published", "archived", "deleted"]);
+
+// Enhanced content system for cross-platform publishing
+export const content = pgTable("content", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorProfileId: varchar("creator_profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  title: varchar("title").notNull(),
+  caption: text("caption"),
+  description: text("description"),
+  priceCents: integer("price_cents").default(0), // 0 for free, >0 for PPV
+  visibility: contentVisibilityEnum("visibility").default("public").notNull(),
+  status: contentStatusEnum("status").default("draft").notNull(),
+  canonicalTenant: varchar("canonical_tenant").notNull().references(() => tenants.id), // original brand
+  tags: text("tags").array().default([]),
+  metadata: jsonb("metadata").default({}), // additional content metadata
+  analytics: jsonb("analytics").default({}), // view counts, engagement metrics
+  scheduledFor: timestamp("scheduled_for"), // for scheduled posts
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_content_creator").on(table.creatorProfileId),
+  index("idx_content_tenant").on(table.canonicalTenant),
+  index("idx_content_status").on(table.status),
+  index("idx_content_published").on(table.publishedAt),
+]);
+
+// Cross-posting mapping - one content, many tenants
+export const contentTenantMap = pgTable("content_tenant_map", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contentId: varchar("content_id").notNull().references(() => content.id, { onDelete: "cascade" }),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
+  status: contentStatusEnum("status").default("published").notNull(),
+  customization: jsonb("customization").default({}), // tenant-specific customizations
+  publishedAt: timestamp("published_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  unique().on(table.contentId, table.tenantId),
+  index("idx_content_tenant_map_content").on(table.contentId),
+  index("idx_content_tenant_map_tenant").on(table.tenantId),
+]);
+
+// Forensic Media Hub - enhanced media system with forensic capabilities
+export const mediaStatusEnum = pgEnum("media_status", ["pending", "processing", "approved", "rejected", "flagged", "ai_reviewing", "escalated"]);
+export const moderationStateEnum = pgEnum("moderation_state", ["pending", "approved", "rejected", "escalated"]);
 
 export const mediaAssets = pgTable("media_assets", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  ownerId: varchar("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  title: varchar("title").notNull(),
+  contentId: varchar("content_id").references(() => content.id, { onDelete: "cascade" }),
+  ownerId: varchar("owner_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  title: varchar("title"),
   description: text("description"),
-  s3Key: varchar("s3_key").notNull(),
+  storageKey: varchar("storage_key").notNull(), // S3/object storage key
   mimeType: varchar("mime_type").notNull(),
-  size: integer("size").notNull(),
-  checksum: varchar("checksum").notNull(),
-  status: mediaStatusEnum("status").default("pending").notNull(),
-  flagsJson: jsonb("flags_json").default({}),
-  aiAnalysisJson: jsonb("ai_analysis_json").default({}),
-  riskScore: integer("risk_score").default(0),
-  contentTags: text("content_tags").array(),
-  // Forensic watermarking fields
-  forensicSignature: text("forensic_signature"),
+  fileSize: bigint("file_size", { mode: "number" }).notNull(),
+  duration: integer("duration"), // seconds for video/audio
+  width: integer("width"), // for images/video
+  height: integer("height"), // for images/video
+  
+  // Forensic signature and integrity
+  checksumSha256: varchar("checksum_sha256").notNull(),
+  perceptualHash: varchar("perceptual_hash"), // pHash for duplicate detection
+  forensicWatermark: jsonb("forensic_watermark").default({}), // watermark metadata
+  forensicSignature: text("forensic_signature"), // unique content fingerprint
   watermarked: boolean("watermarked").default(false),
   watermarkedAt: timestamp("watermarked_at"),
+  
+  // Content analysis and moderation
+  status: mediaStatusEnum("status").default("pending").notNull(),
+  moderationState: moderationStateEnum("moderation_state").default("pending").notNull(),
+  aiAnalysis: jsonb("ai_analysis").default({}), // AI analysis results
+  riskScore: integer("risk_score").default(0), // 0-100 risk assessment
+  flags: jsonb("flags").default({}), // moderation flags
+  contentTags: text("content_tags").array().default([]),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_media_assets_content").on(table.contentId),
+  index("idx_media_assets_owner").on(table.ownerId),
+  index("idx_media_assets_status").on(table.status),
+  index("idx_media_assets_checksum").on(table.checksumSha256),
+  index("idx_media_assets_perceptual").on(table.perceptualHash),
+]);
+
+// Media variants - different renditions per tenant/device
+export const mediaVariantKind = pgEnum("media_variant_kind", ["original", "hls", "dash", "thumbnail", "preview", "watermarked"]);
+
+export const mediaVariants = pgTable("media_variants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  assetId: varchar("asset_id").notNull().references(() => mediaAssets.id, { onDelete: "cascade" }),
+  tenantId: varchar("tenant_id").references(() => tenants.id, { onDelete: "cascade" }), // null for global variants
+  kind: mediaVariantKind("kind").notNull(),
+  storageKey: varchar("storage_key").notNull(),
+  mimeType: varchar("mime_type"),
+  fileSize: bigint("file_size", { mode: "number" }),
+  quality: varchar("quality"), // 720p, 1080p, etc.
+  drmKeyId: varchar("drm_key_id"), // for encrypted content
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_media_variants_asset").on(table.assetId),
+  index("idx_media_variants_tenant").on(table.tenantId),
+  unique().on(table.assetId, table.tenantId, table.kind),
+]);
 
 // Moderation queue
 export const moderationStatusEnum = pgEnum("moderation_status", ["pending", "approved", "rejected", "escalated", "auto_approved", "auto_rejected"]);
@@ -145,43 +441,253 @@ export const moderationQueue = pgTable("moderation_queue", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Audit logs
-export const auditLogs = pgTable("audit_logs", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  actorId: varchar("actor_id").references(() => users.id), // nullable for system actions
-  action: varchar("action").notNull(),
-  targetType: varchar("target_type").notNull(),
-  targetId: varchar("target_id").notNull(),
-  diffJson: jsonb("diff_json").default({}),
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
-// Payout accounts
-export const payoutAccountStatusEnum = pgEnum("payout_account_status", ["active", "inactive", "suspended"]);
+// ===== ENHANCED COMMERCE SYSTEM =====
+// Multi-tenant subscription and payment infrastructure
+
+// Enhanced subscription plans with tenant support
+export const subscriptionInterval = pgEnum("subscription_interval", ["monthly", "yearly", "lifetime"]);
+
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorProfileId: varchar("creator_profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  tenantId: varchar("tenant_id").references(() => tenants.id, { onDelete: "cascade" }), // null for global plans
+  name: varchar("name").notNull(),
+  description: text("description"),
+  priceCents: integer("price_cents").notNull(),
+  currency: varchar("currency").default("USD").notNull(),
+  interval: subscriptionInterval("interval").default("monthly").notNull(),
+  features: jsonb("features").default({}), // plan features and perks
+  trialDays: integer("trial_days").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_subscription_plans_creator").on(table.creatorProfileId),
+  index("idx_subscription_plans_tenant").on(table.tenantId),
+]);
+
+// Enhanced subscriptions with cross-tenant support
+export const subscriptionStatus = pgEnum("subscription_status", ["active", "canceled", "past_due", "unpaid", "trialing", "incomplete"]);
+
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fanProfileId: varchar("fan_profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  planId: varchar("plan_id").notNull().references(() => subscriptionPlans.id, { onDelete: "cascade" }),
+  tenantId: varchar("tenant_id").references(() => tenants.id), // subscription context
+  status: subscriptionStatus("status").default("active").notNull(),
+  currentPeriodStart: timestamp("current_period_start").notNull(),
+  currentPeriodEnd: timestamp("current_period_end").notNull(),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
+  canceledAt: timestamp("canceled_at"),
+  trialStart: timestamp("trial_start"),
+  trialEnd: timestamp("trial_end"),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_subscriptions_fan").on(table.fanProfileId),
+  index("idx_subscriptions_plan").on(table.planId),
+  index("idx_subscriptions_tenant").on(table.tenantId),
+  index("idx_subscriptions_status").on(table.status),
+]);
+
+// Enhanced purchases (PPV, tips, etc.)
+export const purchaseType = pgEnum("purchase_type", ["ppv", "tip", "subscription", "bundle", "live_stream"]);
+export const purchaseStatus = pgEnum("purchase_status", ["pending", "completed", "failed", "refunded", "disputed"]);
+
+export const purchases = pgTable("purchases", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fanProfileId: varchar("fan_profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  creatorProfileId: varchar("creator_profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  contentId: varchar("content_id").references(() => content.id),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
+  type: purchaseType("type").notNull(),
+  amountCents: integer("amount_cents").notNull(),
+  currency: varchar("currency").default("USD").notNull(),
+  status: purchaseStatus("status").default("pending").notNull(),
+  provider: varchar("provider"), // payment provider
+  providerRef: varchar("provider_ref"), // provider transaction ID
+  platformFeeCents: integer("platform_fee_cents").default(0),
+  creatorEarningsCents: integer("creator_earnings_cents").notNull(),
+  metadata: jsonb("metadata").default({}),
+  refundedAt: timestamp("refunded_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_purchases_fan").on(table.fanProfileId),
+  index("idx_purchases_creator").on(table.creatorProfileId),
+  index("idx_purchases_content").on(table.contentId),
+  index("idx_purchases_tenant").on(table.tenantId),
+  index("idx_purchases_status").on(table.status),
+]);
+
+// Enhanced payout accounts with KYC support
+export const payoutAccountStatus = pgEnum("payout_account_status", ["active", "inactive", "suspended", "pending_verification"]);
 
 export const payoutAccounts = pgTable("payout_accounts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  provider: varchar("provider").notNull(),
-  accountRef: varchar("account_ref").notNull(),
-  status: payoutAccountStatusEnum("status").default("active").notNull(),
+  profileId: varchar("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  provider: varchar("provider").notNull(), // stripe, paypal, wise, etc.
+  externalAccountId: varchar("external_account_id").notNull(),
+  status: payoutAccountStatus("status").default("pending_verification").notNull(),
+  kycStatus: varchar("kyc_status"), // KYC verification status
+  country: varchar("country", { length: 2 }), // ISO country code
+  currency: varchar("currency").default("USD").notNull(),
+  accountType: varchar("account_type"), // individual, business
+  last4: varchar("last4"), // last 4 digits for display
+  metadata: jsonb("metadata").default({}),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_payout_accounts_profile").on(table.profileId),
+  index("idx_payout_accounts_status").on(table.status),
+]);
 
-// Payout requests
-export const payoutStatusEnum = pgEnum("payout_status", ["pending", "processing", "completed", "failed", "cancelled"]);
+// Enhanced payouts with scheduling and batching
+export const payoutStatus = pgEnum("payout_status", ["pending", "processing", "completed", "failed", "cancelled", "scheduled"]);
 
-export const payoutRequests = pgTable("payout_requests", {
+export const payouts = pgTable("payouts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  profileId: varchar("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  payoutAccountId: varchar("payout_account_id").notNull().references(() => payoutAccounts.id),
+  tenantId: varchar("tenant_id").references(() => tenants.id), // which tenant triggered payout
   amountCents: integer("amount_cents").notNull(),
   currency: varchar("currency").default("USD").notNull(),
-  status: payoutStatusEnum("status").default("pending").notNull(),
+  status: payoutStatus("status").default("pending").notNull(),
+  scheduledFor: timestamp("scheduled_for"), // for scheduled payouts
+  provider: varchar("provider"),
+  providerBatchId: varchar("provider_batch_id"), // for batch processing
   providerRef: varchar("provider_ref"),
+  failureReason: text("failure_reason"),
+  metadata: jsonb("metadata").default({}),
+  processedAt: timestamp("processed_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_payouts_profile").on(table.profileId),
+  index("idx_payouts_account").on(table.payoutAccountId),
+  index("idx_payouts_tenant").on(table.tenantId),
+  index("idx_payouts_status").on(table.status),
+  index("idx_payouts_scheduled").on(table.scheduledFor),
+]);
+
+// ===== CROSS-PLATFORM ADVERTISING SYSTEM =====
+// Unified advertising network across all FUN empire brands
+
+// Ad campaign management
+export const adCampaignStatus = pgEnum("ad_campaign_status", ["draft", "active", "paused", "completed", "cancelled"]);
+export const adCampaignType = pgEnum("ad_campaign_type", ["content_promotion", "profile_promotion", "brand_awareness", "cross_platform"]);
+
+export const adCampaigns = pgTable("ad_campaigns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  advertiserProfileId: varchar("advertiser_profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  tenantId: varchar("tenant_id").references(() => tenants.id), // null for cross-platform campaigns
+  name: varchar("name").notNull(),
+  description: text("description"),
+  type: adCampaignType("type").default("content_promotion").notNull(),
+  status: adCampaignStatus("status").default("draft").notNull(),
+  budgetCents: bigint("budget_cents", { mode: "number" }).notNull(),
+  dailyBudgetCents: bigint("daily_budget_cents", { mode: "number" }),
+  currency: varchar("currency").default("USD").notNull(),
+  targeting: jsonb("targeting").default({}), // geo, demographics, interests, tenant filters
+  schedule: jsonb("schedule").default({}), // start/end dates, time restrictions
+  objectives: jsonb("objectives").default({}), // campaign goals and metrics
+  spentCents: bigint("spent_cents", { mode: "number" }).default(0),
+  impressions: bigint("impressions", { mode: "number" }).default(0),
+  clicks: bigint("clicks", { mode: "number" }).default(0),
+  conversions: bigint("conversions", { mode: "number" }).default(0),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_ad_campaigns_advertiser").on(table.advertiserProfileId),
+  index("idx_ad_campaigns_tenant").on(table.tenantId),
+  index("idx_ad_campaigns_status").on(table.status),
+  index("idx_ad_campaigns_type").on(table.type),
+]);
+
+// Ad creatives
+export const adCreativeKind = pgEnum("ad_creative_kind", ["image", "video", "carousel", "story", "native"]);
+export const adCreativeStatus = pgEnum("ad_creative_status", ["pending", "approved", "rejected", "active", "paused"]);
+
+export const adCreatives = pgTable("ad_creatives", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignId: varchar("campaign_id").notNull().references(() => adCampaigns.id, { onDelete: "cascade" }),
+  name: varchar("name").notNull(),
+  kind: adCreativeKind("kind").notNull(),
+  assetUrl: varchar("asset_url"), // media asset URL
+  thumbnailUrl: varchar("thumbnail_url"),
+  title: varchar("title"),
+  description: text("description"),
+  callToAction: varchar("call_to_action"), // "Subscribe", "View Profile", etc.
+  clickUrl: text("click_url").notNull(), // destination URL
+  trackingPixels: jsonb("tracking_pixels").default([]), // tracking/analytics pixels
+  status: adCreativeStatus("status").default("pending").notNull(),
+  policyState: varchar("policy_state"), // compliance review state
+  reviewNotes: text("review_notes"),
+  metrics: jsonb("metrics").default({}), // performance metrics
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_ad_creatives_campaign").on(table.campaignId),
+  index("idx_ad_creatives_status").on(table.status),
+  index("idx_ad_creatives_kind").on(table.kind),
+]);
+
+// Ad placements across tenants
+export const adPlacementType = pgEnum("ad_placement_type", ["feed_top", "feed_inline", "sidebar", "banner", "story", "profile"]);
+
+export const adPlacements = pgTable("ad_placements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
+  slot: varchar("slot").notNull(), // unique slot identifier per tenant
+  type: adPlacementType("type").notNull(),
+  displayName: varchar("display_name").notNull(),
+  description: text("description"),
+  dimensions: jsonb("dimensions").default({}), // width, height, aspect ratio
+  constraints: jsonb("constraints").default({}), // content type restrictions, etc.
+  pricing: jsonb("pricing").default({}), // CPM, CPC rates
+  isActive: boolean("is_active").default(true),
+  settings: jsonb("settings").default({}), // placement-specific settings
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique().on(table.tenantId, table.slot),
+  index("idx_ad_placements_tenant").on(table.tenantId),
+  index("idx_ad_placements_type").on(table.type),
+]);
+
+// Ad impressions and engagement tracking
+export const adImpressions = pgTable("ad_impressions", {
+  id: bigserial("id", { mode: "number" }).primaryKey(),
+  creativeId: varchar("creative_id").notNull().references(() => adCreatives.id, { onDelete: "cascade" }),
+  placementId: varchar("placement_id").notNull().references(() => adPlacements.id, { onDelete: "cascade" }),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
+  profileId: varchar("profile_id").references(() => profiles.id), // viewer profile (nullable for anonymous)
+  requestId: varchar("request_id").notNull(), // unique request identifier
+  sessionId: varchar("session_id"), // user session
+  ipAddress: inet("ip_address"),
+  userAgent: text("user_agent"),
+  deviceInfo: jsonb("device_info").default({}), // device/browser info
+  location: jsonb("location").default({}), // geo data (if consented)
+  priceMicro: integer("price_micro").notNull(), // cost in micro-currency units
+  currency: varchar("currency").default("USD").notNull(),
+  bidData: jsonb("bid_data").default({}), // auction/bidding metadata
+  consent: jsonb("consent").default({}), // privacy consent snapshot
+  viewTime: integer("view_time"), // milliseconds viewed
+  clicked: boolean("clicked").default(false),
+  converted: boolean("converted").default(false),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+}, (table) => [
+  index("idx_ad_impressions_creative").on(table.creativeId),
+  index("idx_ad_impressions_placement").on(table.placementId),
+  index("idx_ad_impressions_tenant").on(table.tenantId),
+  index("idx_ad_impressions_profile").on(table.profileId),
+  index("idx_ad_impressions_timestamp").on(table.timestamp),
+  index("idx_ad_impressions_clicked").on(table.clicked),
+]);
 
 // Webhooks
 export const webhookStatusEnum = pgEnum("webhook_status", ["active", "inactive"]);
@@ -3231,277 +3737,6 @@ export const userActivityLog = pgTable("user_activity_log", {
   index("idx_user_activity_activity").on(table.activity),
 ]);
 
-// ===== ANNOUNCEMENTS MANAGEMENT =====
-export const announcementStatusEnum = pgEnum("announcement_status", ["draft", "scheduled", "published", "paused", "archived"]);
-export const announcementTypeEnum = pgEnum("announcement_type", ["general", "emergency", "maintenance", "promotion", "update"]);
-export const announcementChannelEnum = pgEnum("announcement_channel", ["in_app", "email", "push", "sms", "all"]);
-
-export const announcements = pgTable("announcements", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  title: varchar("title").notNull(),
-  content: text("content").notNull(),
-  richContent: jsonb("rich_content").default({}), // Rich text editor content
-  type: announcementTypeEnum("type").default("general").notNull(),
-  status: announcementStatusEnum("status").default("draft").notNull(),
-  priority: integer("priority").default(1), // 1-5, 5 being highest
-  channels: announcementChannelEnum("channels").array().default(sql`ARRAY['in_app']::announcement_channel[]`),
-  
-  // Scheduling
-  scheduledAt: timestamp("scheduled_at"),
-  publishedAt: timestamp("published_at"),
-  expiresAt: timestamp("expires_at"),
-  
-  // Targeting
-  targetUserRoles: text("target_user_roles").array(), // ["fan", "creator", "admin"]
-  targetUserIds: text("target_user_ids").array(), // Specific user IDs
-  targetCountries: text("target_countries").array(), // Country codes
-  targetSubscriptionTiers: text("target_subscription_tiers").array(),
-  targetingConditions: jsonb("targeting_conditions").default({}), // Complex targeting logic
-  
-  // A/B Testing
-  isAbTest: boolean("is_ab_test").default(false),
-  abTestVariantId: varchar("ab_test_variant_id"),
-  abTestPercentage: integer("ab_test_percentage").default(100), // 1-100
-  
-  // Analytics
-  totalRecipients: integer("total_recipients").default(0),
-  totalSent: integer("total_sent").default(0),
-  totalDelivered: integer("total_delivered").default(0),
-  totalOpened: integer("total_opened").default(0),
-  totalClicked: integer("total_clicked").default(0),
-  
-  // Metadata
-  templateId: varchar("template_id"),
-  mediaUrls: text("media_urls").array(),
-  actionUrl: varchar("action_url"), // CTA link
-  actionText: varchar("action_text"), // CTA button text
-  
-  // Approval workflow
-  requiresApproval: boolean("requires_approval").default(false),
-  approvedBy: varchar("approved_by").references(() => users.id),
-  approvedAt: timestamp("approved_at"),
-  rejectedBy: varchar("rejected_by").references(() => users.id),
-  rejectedAt: timestamp("rejected_at"),
-  rejectionReason: text("rejection_reason"),
-  
-  createdBy: varchar("created_by").notNull().references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("idx_announcements_status").on(table.status),
-  index("idx_announcements_scheduled").on(table.scheduledAt),
-  index("idx_announcements_published").on(table.publishedAt),
-  index("idx_announcements_priority").on(table.priority.desc()),
-  index("idx_announcements_creator").on(table.createdBy),
-]);
-
-export const announcementTemplates = pgTable("announcement_templates", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: varchar("name").notNull(),
-  description: text("description"),
-  type: announcementTypeEnum("type").default("general").notNull(),
-  titleTemplate: varchar("title_template").notNull(),
-  contentTemplate: text("content_template").notNull(),
-  richContentTemplate: jsonb("rich_content_template").default({}),
-  channels: announcementChannelEnum("channels").array().default(sql`ARRAY['in_app']::announcement_channel[]`),
-  personalizationTokens: text("personalization_tokens").array(), // ["{first_name}", "{last_seen}", etc.]
-  defaultTargeting: jsonb("default_targeting").default({}),
-  isActive: boolean("is_active").default(true),
-  usageCount: integer("usage_count").default(0),
-  createdBy: varchar("created_by").notNull().references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("idx_announcement_templates_type").on(table.type),
-  index("idx_announcement_templates_active").on(table.isActive),
-]);
-
-export const announcementDeliveries = pgTable("announcement_deliveries", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  announcementId: varchar("announcement_id").notNull().references(() => announcements.id, { onDelete: "cascade" }),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  channel: announcementChannelEnum("channel").notNull(),
-  status: varchar("status").default("pending").notNull(), // pending, sent, delivered, failed, opened, clicked
-  sentAt: timestamp("sent_at"),
-  deliveredAt: timestamp("delivered_at"),
-  openedAt: timestamp("opened_at"),
-  clickedAt: timestamp("clicked_at"),
-  failureReason: text("failure_reason"),
-  metadata: jsonb("metadata").default({}), // Channel-specific delivery info
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => [
-  index("idx_announcement_deliveries_announcement").on(table.announcementId),
-  index("idx_announcement_deliveries_user").on(table.userId),
-  index("idx_announcement_deliveries_status").on(table.status),
-  index("idx_announcement_deliveries_sent").on(table.sentAt),
-  unique("unique_announcement_user_channel").on(table.announcementId, table.userId, table.channel),
-]);
-
-// ===== PUSH NOTIFICATIONS MANAGEMENT =====
-export const notificationCampaignStatusEnum = pgEnum("notification_campaign_status", ["draft", "scheduled", "sending", "completed", "paused", "cancelled"]);
-export const notificationPlatformEnum = pgEnum("notification_platform", ["ios", "android", "web", "desktop", "all"]);
-export const notificationTriggerTypeEnum = pgEnum("notification_trigger_type", ["manual", "behavioral", "time_based", "event_based"]);
-
-export const notificationCampaigns = pgTable("notification_campaigns", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: varchar("name").notNull(),
-  description: text("description"),
-  status: notificationCampaignStatusEnum("status").default("draft").notNull(),
-  
-  // Content
-  title: varchar("title").notNull(),
-  body: text("body").notNull(),
-  icon: varchar("icon"),
-  image: varchar("image"),
-  badge: varchar("badge"),
-  sound: varchar("sound"),
-  clickAction: varchar("click_action"), // URL or deep link
-  
-  // Targeting
-  platforms: notificationPlatformEnum("platforms").array().default(sql`ARRAY['all']::notification_platform[]`),
-  targetUserRoles: text("target_user_roles").array(),
-  targetUserIds: text("target_user_ids").array(),
-  targetCountries: text("target_countries").array(),
-  targetingConditions: jsonb("targeting_conditions").default({}),
-  
-  // Behavioral targeting
-  engagementLevel: varchar("engagement_level"), // low, medium, high
-  lastSeenDays: integer("last_seen_days"), // Users last seen X days ago
-  subscriptionStatus: varchar("subscription_status"), // active, inactive, trial
-  customEventTrigger: varchar("custom_event_trigger"), // purchase, login, etc.
-  
-  // Scheduling
-  triggerType: notificationTriggerTypeEnum("trigger_type").default("manual").notNull(),
-  scheduledAt: timestamp("scheduled_at"),
-  timeZoneHandling: varchar("timezone_handling").default("user_timezone"), // user_timezone, utc, specific_timezone
-  specificTimezone: varchar("specific_timezone"),
-  
-  // Frequency capping
-  maxSendsPerUser: integer("max_sends_per_user").default(1),
-  cooldownHours: integer("cooldown_hours").default(24),
-  
-  // Analytics
-  totalTargeted: integer("total_targeted").default(0),
-  totalSent: integer("total_sent").default(0),
-  totalDelivered: integer("total_delivered").default(0),
-  totalOpened: integer("total_opened").default(0),
-  totalClicked: integer("total_clicked").default(0),
-  totalDismissed: integer("total_dismissed").default(0),
-  
-  // A/B Testing
-  isAbTest: boolean("is_ab_test").default(false),
-  abTestVariants: jsonb("ab_test_variants").default([]), // Array of variant configs
-  
-  // Template
-  templateId: varchar("template_id"),
-  personalizationData: jsonb("personalization_data").default({}),
-  
-  // GDPR Compliance
-  respectOptOuts: boolean("respect_opt_outs").default(true),
-  legalBasis: varchar("legal_basis"), // consent, legitimate_interest, etc.
-  
-  createdBy: varchar("created_by").notNull().references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("idx_notification_campaigns_status").on(table.status),
-  index("idx_notification_campaigns_scheduled").on(table.scheduledAt),
-  index("idx_notification_campaigns_trigger").on(table.triggerType),
-  index("idx_notification_campaigns_creator").on(table.createdBy),
-]);
-
-export const notificationTemplates = pgTable("notification_templates", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: varchar("name").notNull(),
-  description: text("description"),
-  category: varchar("category").default("general").notNull(), // welcome, reminder, promotion, update
-  titleTemplate: varchar("title_template").notNull(),
-  bodyTemplate: text("body_template").notNull(),
-  platforms: notificationPlatformEnum("platforms").array().default(sql`ARRAY['all']::notification_platform[]`),
-  defaultIcon: varchar("default_icon"),
-  defaultImage: varchar("default_image"),
-  defaultClickAction: varchar("default_click_action"),
-  personalizationTokens: text("personalization_tokens").array(),
-  isActive: boolean("is_active").default(true),
-  usageCount: integer("usage_count").default(0),
-  createdBy: varchar("created_by").notNull().references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("idx_notification_templates_category").on(table.category),
-  index("idx_notification_templates_active").on(table.isActive),
-]);
-
-export const userNotificationPreferences = pgTable("user_notification_preferences", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  
-  // Platform preferences
-  pushEnabled: boolean("push_enabled").default(true),
-  emailEnabled: boolean("email_enabled").default(true),
-  smsEnabled: boolean("sms_enabled").default(false),
-  
-  // Category preferences
-  marketingEnabled: boolean("marketing_enabled").default(true),
-  transactionalEnabled: boolean("transactional_enabled").default(true),
-  securityEnabled: boolean("security_enabled").default(true),
-  socialEnabled: boolean("social_enabled").default(true),
-  
-  // Advanced preferences
-  quietHoursEnabled: boolean("quiet_hours_enabled").default(false),
-  quietHoursStart: varchar("quiet_hours_start").default("22:00"),
-  quietHoursEnd: varchar("quiet_hours_end").default("08:00"),
-  timezone: varchar("timezone").default("UTC"),
-  frequency: varchar("frequency").default("instant"), // instant, hourly, daily, weekly
-  
-  // GDPR
-  consentGiven: boolean("consent_given").default(false),
-  consentAt: timestamp("consent_at"),
-  optOutReason: text("opt_out_reason"),
-  
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  unique("unique_user_notification_prefs").on(table.userId),
-  index("idx_user_notification_prefs_consent").on(table.consentGiven),
-]);
-
-export const notificationDeliveries = pgTable("notification_deliveries", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  campaignId: varchar("campaign_id").notNull().references(() => notificationCampaigns.id, { onDelete: "cascade" }),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  platform: notificationPlatformEnum("platform").notNull(),
-  
-  // Delivery details
-  deviceToken: varchar("device_token"),
-  status: varchar("status").default("pending").notNull(), // pending, sent, delivered, failed, opened, clicked, dismissed
-  sentAt: timestamp("sent_at"),
-  deliveredAt: timestamp("delivered_at"),
-  openedAt: timestamp("opened_at"),
-  clickedAt: timestamp("clicked_at"),
-  dismissedAt: timestamp("dismissed_at"),
-  
-  // Error handling
-  failureReason: text("failure_reason"),
-  retryCount: integer("retry_count").default(0),
-  lastRetryAt: timestamp("last_retry_at"),
-  
-  // Content sent (for analytics)
-  sentTitle: varchar("sent_title"),
-  sentBody: text("sent_body"),
-  sentClickAction: varchar("sent_click_action"),
-  
-  // Provider details
-  providerMessageId: varchar("provider_message_id"),
-  providerResponse: jsonb("provider_response").default({}),
-  
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => [
-  index("idx_notification_deliveries_campaign").on(table.campaignId),
-  index("idx_notification_deliveries_user").on(table.userId),
-  index("idx_notification_deliveries_status").on(table.status),
-  index("idx_notification_deliveries_platform").on(table.platform),
-  index("idx_notification_deliveries_sent").on(table.sentAt),
-]);
 
 // ===== SYSTEM SETTINGS MANAGEMENT =====
 export const systemSettingTypeEnum = pgEnum("system_setting_type", ["string", "number", "boolean", "json", "encrypted"]);
@@ -3779,45 +4014,3 @@ export type InsertKycDocument = z.infer<typeof insertKycDocumentSchema>;
 export type FinancialSetting = typeof financialSettings.$inferSelect;
 export type InsertFinancialSetting = z.infer<typeof insertFinancialSettingSchema>;
 
-// Announcement Insert Schemas
-export const insertAnnouncementSchema = createInsertSchema(announcements).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertAnnouncementTemplateSchema = createInsertSchema(announcementTemplates).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertAnnouncementDeliverySchema = createInsertSchema(announcementDeliveries).omit({ id: true, createdAt: true });
-
-// Push Notification Insert Schemas
-export const insertNotificationCampaignSchema = createInsertSchema(notificationCampaigns).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertNotificationTemplateSchema = createInsertSchema(notificationTemplates).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertUserNotificationPreferencesSchema = createInsertSchema(userNotificationPreferences).omit({ id: true, updatedAt: true });
-export const insertNotificationDeliverySchema = createInsertSchema(notificationDeliveries).omit({ id: true, createdAt: true });
-
-// System Settings Insert Schemas
-export const insertSystemSettingSchema = createInsertSchema(systemSettings).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertSystemSettingHistorySchema = createInsertSchema(systemSettingHistory).omit({ id: true, createdAt: true });
-export const insertMaintenanceScheduleSchema = createInsertSchema(maintenanceSchedule).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertEmailSettingsSchema = createInsertSchema(emailSettings).omit({ id: true, createdAt: true, updatedAt: true });
-
-// New table types
-export type Announcement = typeof announcements.$inferSelect;
-export type InsertAnnouncement = z.infer<typeof insertAnnouncementSchema>;
-export type AnnouncementTemplate = typeof announcementTemplates.$inferSelect;
-export type InsertAnnouncementTemplate = z.infer<typeof insertAnnouncementTemplateSchema>;
-export type AnnouncementDelivery = typeof announcementDeliveries.$inferSelect;
-export type InsertAnnouncementDelivery = z.infer<typeof insertAnnouncementDeliverySchema>;
-
-export type NotificationCampaign = typeof notificationCampaigns.$inferSelect;
-export type InsertNotificationCampaign = z.infer<typeof insertNotificationCampaignSchema>;
-export type NotificationTemplate = typeof notificationTemplates.$inferSelect;
-export type InsertNotificationTemplate = z.infer<typeof insertNotificationTemplateSchema>;
-export type UserNotificationPreferences = typeof userNotificationPreferences.$inferSelect;
-export type InsertUserNotificationPreferences = z.infer<typeof insertUserNotificationPreferencesSchema>;
-export type NotificationDelivery = typeof notificationDeliveries.$inferSelect;
-export type InsertNotificationDelivery = z.infer<typeof insertNotificationDeliverySchema>;
-
-export type SystemSetting = typeof systemSettings.$inferSelect;
-export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
-export type SystemSettingHistory = typeof systemSettingHistory.$inferSelect;
-export type InsertSystemSettingHistory = z.infer<typeof insertSystemSettingHistorySchema>;
-export type MaintenanceSchedule = typeof maintenanceSchedule.$inferSelect;
-export type InsertMaintenanceSchedule = z.infer<typeof insertMaintenanceScheduleSchema>;
-export type EmailSettings = typeof emailSettings.$inferSelect;
-export type InsertEmailSettings = z.infer<typeof insertEmailSettingsSchema>;
