@@ -16,8 +16,8 @@ const router = Router();
 
 // Initialize monitoring service with production configuration
 const defaultMonitoringConfig: MonitoringConfig = {
-  enabled: true,
-  realTimeEnabled: true,
+  enabled: false,
+  realTimeEnabled: false,
   retentionPeriod: 30, // 30 days
   alertThresholds: {
     cpu: 80,
@@ -35,8 +35,8 @@ const defaultMonitoringConfig: MonitoringConfig = {
 
 const monitoringService = new RealTimeMonitoringService(defaultMonitoringConfig);
 
-// Start monitoring service
-monitoringService.start();
+// Start monitoring service - DISABLED to prevent fake alerts spam
+// monitoringService.start();
 
 // Apply admin authentication to all monitoring routes
 router.use(requireAdmin);

@@ -161,9 +161,9 @@ export class ProductionInfrastructureService {
   }
 
   private setupMonitoring() {
-    // Start monitoring all providers
-    const providerIds = Object.keys(PRODUCTION_PROVIDERS);
-    this.monitor.startMonitoring(providerIds);
+    // DISABLED: Start monitoring all providers - was causing fake alert spam
+    // const providerIds = Object.keys(PRODUCTION_PROVIDERS);
+    // this.monitor.startMonitoring(providerIds);
 
     // Set up alert handling
     this.monitor.on('alert', (alert) => {
