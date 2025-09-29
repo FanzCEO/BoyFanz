@@ -1,263 +1,146 @@
-# FANZ Unlimited Network - Complete Ecosystem Backend 🚀
+# BoyFanz-3 - FANZ Ecosystem
 
-**Production-ready backend infrastructure for the FANZ adult content creator platform ecosystem.**
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Security](https://github.com/FanzCEO/BoyFanz-3/workflows/Security/badge.svg)](https://github.com/FanzCEO/BoyFanz-3/security)
+[![WCAG 2.2 AA](https://img.shields.io/badge/Accessibility-WCAG%202.2%20AA-green.svg)](https://www.w3.org/WAI/WCAG22/quickref/)
 
-## 🎯 **Quick Start**
+> **Creator-First. Privacy-First. Innovation-First.**  
+> Part of the FANZ creator economy ecosystem.
 
-### 1. **Setup Development Environment**
+## 🌟 About
+
+BoyFanz-3 is a core component of the FANZ ecosystem, built with our creator-first principles:
+
+- **🎯 Creator Autonomy** - Full control over content and earnings
+- **💰 Maximum Earnings** - Industry-leading creator payouts  
+- **🛡️ Privacy & Safety** - Enterprise-grade security and protection
+- **⚡ State-of-Art Tech** - Modern, accessible, and performant
+
+## 🚀 Quick Start
+
+### Prerequisites
+- **Node.js** 20+ (LTS recommended)
+- **pnpm** 9+ (package manager)
+- **Docker** 24+ (containerization)
+
+### Installation
+
 ```bash
-# Run the comprehensive setup script
-./scripts/dev-setup.sh
+# Clone repository
+git clone https://github.com/FanzCEO/BoyFanz-3.git
+cd BoyFanz-3
+
+# Install dependencies
+pnpm install
+
+# Set up environment
+cp env/.env.example env/.env.local
+
+# Start development
+pnpm dev
 ```
 
-### 2. **Start Development Server**
+### Docker Development
+
 ```bash
-# Start the server (after setup)
-./scripts/start-dev.sh
+# Start services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services  
+docker-compose down
 ```
 
-### 3. **Verify Everything Works**
-```bash
-# Run health checks
-./scripts/health-check.sh
+## 🏗️ Architecture
 
-# Run tests
-./scripts/run-tests.sh
-```
+This service follows FANZ ecosystem standards:
 
-## 🌐 **API Endpoints**
+- **Microservices Architecture** - Scalable, independent services
+- **API-First Design** - RESTful APIs with OpenAPI documentation
+- **Event-Driven Communication** - Real-time updates via event streams
+- **Zero-Trust Security** - Every request authenticated and authorized
+- **Creator-First Features** - All functionality serves creator needs
 
-Once running, access these endpoints at `http://localhost:5000`:
+## 💻 Development
 
-### **Core Services**
-- **API Gateway**: `/api/gateway` - Service mesh management
-- **Mobile Backend**: `/api/mobile/config` - ClubCentral mobile app
-- **Infrastructure**: `/api/infrastructure/health` - Multi-cloud management
-- **Security**: `/api/security/health` - Compliance & DRM
-- **Monitoring**: `/api/monitoring/health` - Real-time analytics
-
-### **Platform Endpoints**
-- **BoyFanz**: `/api/boyfanz/*` (Port 5001)
-- **GirlFanz**: `/api/girlfanz/*` (Port 5002) 
-- **PupFanz**: `/api/pupfanz/*` (Port 5003)
-- **TransFanz**: `/api/transfanz/*` (Port 5004)
-- **TabooFanz**: `/api/taboofanz/*` (Port 5005)
-
-## 📱 **Mobile App Development**
-
-For ClubCentral mobile app integration:
-- **SDK Guide**: [`MOBILE_SDK_GUIDE.md`](./MOBILE_SDK_GUIDE.md)
-- **API Base**: `http://localhost:5000/api/mobile`
-- **WebSocket**: `ws://localhost:3001/mobile`
-
-## 🏗️ **Architecture Overview**
-
-### **Core Infrastructure**
-- ✅ **Multi-Cloud Management** (17 providers)
-- ✅ **API Gateway & Service Mesh** (Rate limiting, circuit breakers)
-- ✅ **Security & Compliance** (DRM, GDPR, ADA, adult industry)
-- ✅ **Real-Time Monitoring** (Metrics, alerts, analytics)
-- ✅ **Mobile Backend** (Push notifications, sync, offline)
-
-### **Payment System**
-- ✅ **Adult-Friendly Gateways** (CCBill, Segpay, Epoch, etc.)
-- ✅ **Global Payment Methods** (Cards, banks, crypto, local)
-- ✅ **Creator Payouts** (Paxum, Wise, crypto, direct deposits)
-- ✅ **Host Merchant Services** (MID management, risk monitoring)
-
-### **Platform Support**
-- ✅ **5 Content Platforms** (BoyFanz, GirlFanz, PupFanz, TransFanz, TabooFanz)
-- ✅ **Unified User Management** (SSO, profiles, preferences)
-- ✅ **Content Management** (Upload, moderation, streaming)
-- ✅ **Creator Tools** (Analytics, payouts, fan management)
-
-## 🛡️ **Security & Compliance**
-
-### **Standards Met**
-- ✅ **GDPR**: Data protection, consent management, deletion rights
-- ✅ **ADA/WCAG 2.1**: Full accessibility compliance
-- ✅ **Adult Industry**: Age verification, content protection, KYC
-- ✅ **PCI DSS**: Payment card industry security
-- ✅ **18 U.S.C. §2257**: Adult content record keeping
-
-### **Security Features**
-- ✅ **DRM Protection**: Content encryption & watermarking
-- ✅ **Geo-blocking**: VPN detection & regional restrictions  
-- ✅ **Rate Limiting**: DoS protection (1000 req/min production)
-- ✅ **Circuit Breakers**: Service fault isolation
-- ✅ **Audit Logging**: Comprehensive activity tracking
-
-## 📊 **Performance & Scale**
-
-### **Expected Capacity**
-- **Users**: 100,000+ concurrent with auto-scaling
-- **Requests**: 1M+ requests/hour with intelligent caching
-- **Content**: 10GB+ uploads/hour with optimization
-- **Push Notifications**: 1M+ daily with targeting
-
-### **Infrastructure**
-- **Auto-Scaling**: 2-100 instances per service
-- **Multi-Cloud**: 17 providers with automatic failover
-- **CDN**: Global content delivery with edge caching
-- **Database**: Read replicas with automatic failover
-
-## 🧪 **Testing**
-
-### **Run All Tests**
-```bash
-npm test
-```
-
-### **Development Tests**
-```bash
-npm run test:watch    # Watch mode
-npm run test:coverage # Coverage report
-```
-
-### **Integration Tests**
-The test suite validates:
-- ✅ All service health endpoints
-- ✅ API Gateway functionality  
-- ✅ Mobile backend APIs
-- ✅ Security compliance
-- ✅ Rate limiting & circuit breakers
-- ✅ WebSocket connections
-- ✅ Cross-service integration
-- ✅ Performance benchmarks
-
-## 🔧 **Development Scripts**
+### Available Scripts
 
 ```bash
-# Environment setup
-./scripts/dev-setup.sh
+# Development
+pnpm dev                    # Start development server
+pnpm build                  # Build for production
+pnpm start                  # Start production server
 
-# Start development server  
-./scripts/start-dev.sh
+# Quality Assurance
+pnpm lint                   # Lint code
+pnpm typecheck             # TypeScript checking
+pnpm test                  # Run tests
+pnpm test:coverage         # Test with coverage
 
-# Health checks
-./scripts/health-check.sh
-
-# Run tests
-./scripts/run-tests.sh
-```
-
-## 📚 **Documentation**
-
-### **Implementation Guides**
-- [`IMPLEMENTATION_STATUS.md`](./IMPLEMENTATION_STATUS.md) - Complete status overview
-- [`API_GATEWAY_STATUS.md`](./API_GATEWAY_STATUS.md) - Service mesh documentation  
-- [`MOBILE_SDK_GUIDE.md`](./MOBILE_SDK_GUIDE.md) - Mobile app integration
-
-### **Technical Details**
-- **Service Architecture**: Microservices with API Gateway routing
-- **Database**: PostgreSQL with Drizzle ORM
-- **Authentication**: JWT with refresh tokens, biometric support
-- **Real-Time**: WebSocket with fallback polling
-- **Caching**: Intelligent multi-layer caching (100MB default)
-
-## 🚀 **Production Deployment**
-
-### **Environment Variables**
-Copy `.env.example` to `.env` and configure:
-```bash
-# Core settings
-NODE_ENV=production
-PORT=5000
-DATABASE_URL=postgresql://...
+# Database
+pnpm db:migrate            # Run migrations
+pnpm db:seed               # Seed development data
 
 # Security
-JWT_SECRET=your-64-character-secret
-SESSION_SECRET=your-32-character-secret
-
-# Service URLs (update for production)
-INFRASTRUCTURE_SERVICE_URL=https://api.boyfanz.com
-SECURITY_SERVICE_URL=https://api.boyfanz.com
-# ... etc
+pnpm audit:security        # Security audit
+pnpm audit:dependencies    # Dependency audit
 ```
 
-### **Production Checklist**
-- [ ] Environment variables configured
-- [ ] Database migrations applied
-- [ ] SSL/TLS certificates installed
-- [ ] Payment gateway accounts setup
-- [ ] DNS configured for all domains
-- [ ] Monitoring alerts configured
-- [ ] Backup systems tested
-- [ ] Security audit completed
+### Code Quality Standards
 
-## 💳 **Payment Integration**
+- **TypeScript** - All new code must be TypeScript
+- **85%+ Test Coverage** - Comprehensive test coverage required
+- **WCAG 2.2 AA** - Full accessibility compliance
+- **Zero Secrets** - No hardcoded secrets or credentials
+- **Creator-First** - All changes must benefit creators
 
-### **Supported Gateways** 
-**Adult-Friendly**: CCBill, Segpay, Epoch, Vendo, Verotel, NetBilling, CommerceGate, RocketGate, CentroBill, Payze, Kolektiva
+## 🔐 Security
 
-**Mainstream**: PayPal (disabled per user rules), Stripe (disabled per user rules)
+Security is paramount in the FANZ ecosystem:
 
-**Global Methods**: Bank transfers, mobile wallets, crypto, local payment methods
+- **TLS 1.3 Encryption** - All data encrypted in transit
+- **AES-256 Encryption** - Data encrypted at rest
+- **Zero-Trust Architecture** - No default network trust
+- **Regular Security Audits** - Continuous vulnerability assessment
 
-### **Creator Payouts**
-**Primary**: Paxum, ePayService, Cosmo Payment
-**Mainstream**: Wise, Payoneer, Skrill, Neteller  
-**Crypto**: BTC, ETH, USDT, USDC
-**Direct**: ACH/SEPA deposits, wire transfers
+See [SECURITY.md](SECURITY.md) for detailed security information.
 
-## 📱 **Mobile App (ClubCentral)**
+## 🤝 Contributing
 
-### **Features**
-- ✅ **Authentication**: JWT with biometric support
-- ✅ **Push Notifications**: APNS/FCM with targeting  
-- ✅ **Real-Time Sync**: Conflict-free data synchronization
-- ✅ **Offline Mode**: Smart caching with 50MB packages
-- ✅ **Multi-Platform**: iOS 13+ and Android API 21+
+We welcome contributions that align with our creator-first mission!
 
-### **SDK Integration**
-See [`MOBILE_SDK_GUIDE.md`](./MOBILE_SDK_GUIDE.md) for complete integration guide with TypeScript examples for iOS and Android.
+1. **Fork** the repository
+2. **Create** a feature branch: `git checkout -b feature/amazing-creator-tool`
+3. **Commit** your changes: `git commit -m 'feat: add creator dashboard'`
+4. **Push** to the branch: `git push origin feature/amazing-creator-tool`
+5. **Submit** a pull request
 
-## 🤝 **Contributing**
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines.
 
-### **Development Workflow**
-1. Run `./scripts/dev-setup.sh` for environment setup
-2. Create feature branch: `git checkout -b feature/your-feature`
-3. Make changes and test: `npm run validate`  
-4. Commit with descriptive message
-5. Push and create pull request
+## 📜 License
 
-### **Code Standards**
-- **TypeScript**: Strict mode enabled
-- **ESLint**: Configured for Node.js and React
-- **Prettier**: Code formatting
-- **Jest**: Unit and integration tests
-- **Git Hooks**: Pre-commit validation
+This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
 
-## 📞 **Support & Resources**
+## 🔗 FANZ Ecosystem
 
-### **Documentation**
-- **API Docs**: [https://docs.boyfanz.com](https://docs.boyfanz.com)
-- **Developer Portal**: [https://developers.boyfanz.com](https://developers.boyfanz.com)
-- **Status Page**: [https://status.boyfanz.com](https://status.boyfanz.com)
+This repository is part of the larger FANZ ecosystem:
 
-### **Contact**
-- **Email**: developers@boyfanz.com
-- **Discord**: [https://discord.gg/fanz-dev](https://discord.gg/fanz-dev)
-- **GitHub**: Issues and discussions
+- **[FANZ Unified Ecosystem](https://github.com/FanzCEO/FANZ-Unified-Ecosystem)** - Main ecosystem repository
+- **[BoyFanz](https://boyfanz.com)** - Male creator platform
+- **[GirlFanz](https://girlfanz.com)** - Female creator platform  
+- **[PupFanz](https://pupfanz.com)** - Pet/furry creator community
+- **[TabooFanz](https://taboofanz.com)** - Adult content platform
+- **[FanzDash](https://github.com/FanzCEO/FanzDash)** - Unified admin dashboard
+
+## 📞 Support
+
+- 💬 **Discord**: [FANZ Creator Community](https://discord.gg/fanz-creators)
+- 📧 **Email**: support@fanz.network
+- 📖 **Docs**: [docs.fanz.network](https://docs.fanz.network)
+- 🔒 **Security**: security@fanz.network
 
 ---
 
-## ✨ **Status: Production Ready** ✅
-
-**The FANZ ecosystem backend is complete and operational with:**
-
-🎯 **13 Core Services** - All implemented and integrated  
-🌐 **5 Platform Backends** - Ready for frontend development  
-📱 **Complete Mobile Backend** - iOS and Android ready  
-💳 **Multi-Rail Payment System** - Adult-industry compliant  
-🛡️ **Enterprise Security** - GDPR, ADA, adult industry standards  
-📊 **Real-Time Analytics** - Comprehensive monitoring and alerting  
-🚀 **Auto-Scaling Infrastructure** - 17 cloud providers integrated  
-🔧 **API Gateway** - Service mesh with intelligent routing  
-
-**Total Implementation**: 25,000+ lines of production code, 100+ API endpoints, enterprise-grade architecture supporting millions of users.
-
----
-
-**Built with ❤️ for the adult content creator economy**  
-**© 2024 FANZ Unlimited Network**
+**Built with ❤️ by the FANZ team for creators worldwide** 🌍
