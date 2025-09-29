@@ -2,6 +2,7 @@ import { Express } from 'express';
 import express from 'express';
 import { storage } from './storage';
 import { registerHelpSupportRoutes } from './routes/helpSupportRoutes';
+import pwaRoutes from './routes/pwaRoutes';
 import { csrfProtection, setupCSRFTokenEndpoint } from './middleware/csrf';
 import { isAuthenticated, requireAdmin } from './middleware/auth';
 import { ObjectStorageService } from './objectStorage';
@@ -5577,6 +5578,9 @@ export function setupAdvancedRoutes(app: Express) {
   // AI-Powered Help & Support System
   registerHelpSupportRoutes(app);
   
+  // Progressive Web App (PWA) Routes
+  app.use('/api/pwa', pwaRoutes);
+  
   // API Gateway & Service Mesh Dashboard (must be first for routing control)
   app.use('/api/gateway', apiGatewayRoutes);
   
@@ -5592,5 +5596,5 @@ export function setupAdvancedRoutes(app: Express) {
   // Real-Time Monitoring & Analytics Dashboard
   app.use('/api/monitoring', monitoringDashboardRoutes);
   
-  console.log('🚀 Advanced features registered: NFT, AI Feeds, Analytics, Age Verification, AI Help & Support System, API Gateway & Service Mesh, Infrastructure Management, Security & Compliance, Mobile Backend (ClubCentral), Real-Time Monitoring');
+  console.log('🚀 Advanced features registered: PWA (Progressive Web App), NFT, AI Feeds, Analytics, Age Verification, AI Help & Support System, API Gateway & Service Mesh, Infrastructure Management, Security & Compliance, Mobile Backend (ClubCentral), Real-Time Monitoring');
 }

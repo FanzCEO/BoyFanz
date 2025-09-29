@@ -4493,3 +4493,7 @@ export const insertSearchAnalyticsSchema = createInsertSchema(searchAnalytics).o
 export type InsertSearchAnalytics = z.infer<typeof insertSearchAnalyticsSchema>;
 export type SearchAnalytics = typeof searchAnalytics.$inferSelect;
 
+// ===== PWA EXTENSIONS =====
+// Import PWA schemas
+export * from './pwaPatch';
+

@@ -10,6 +10,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useWebSocketInit } from "@/hooks/useWebSocketInit";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { pwaManager } from "@/lib/pwa";
+import { offlineStorage } from "@/lib/offlineStorage";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import OfflineIndicator from "@/components/OfflineIndicator";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
 import SocialHome from "@/pages/SocialHome";
@@ -81,6 +85,49 @@ function Router() {
   useTheme(); // Apply active theme
   useWebSocketInit(); // Initialize WebSocket connection
   
+  // PWA Initialization
+  useEffect(() => {
+    // Initialize PWA features when app loads
+    pwaManager.init().catch(error => {
+      console.error('❌ PWA initialization failed:', error);
+    });
+    
+    // Initialize offline storage
+    offlineStorage.initDB().catch(error => {
+      console.error('❌ Offline storage initialization failed:', error);
+    });
+    
+    // Setup network status handling
+    const handleOnline = () => {
+      console.log('🌐 BoyFanz: Back online');
+      document.body.classList.remove('offline');
+      
+      // Trigger sync of queued actions
+      offlineStorage.getPendingActions().then(actions => {
+        console.log(`🔄 BoyFanz: ${actions.length} actions to sync`);
+        // The service worker will handle the actual syncing
+      });
+    };
+    
+    const handleOffline = () => {
+      console.log('📵 BoyFanz: Gone offline');
+      document.body.classList.add('offline');
+    };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    // Set initial state
+    if (!navigator.onLine) {
+      document.body.classList.add('offline');
+    }
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+  
   // Prevent infinite loading
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   
@@ -140,6 +187,10 @@ function Router() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* PWA Components */}
+      <PWAInstallPrompt />
+      <OfflineIndicator />
+      
       <Sidebar user={user} />
       <div className={cn(
         "transition-all duration-300",
