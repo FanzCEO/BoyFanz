@@ -4493,6 +4493,553 @@ export const insertSearchAnalyticsSchema = createInsertSchema(searchAnalytics).o
 export type InsertSearchAnalytics = z.infer<typeof insertSearchAnalyticsSchema>;
 export type SearchAnalytics = typeof searchAnalytics.$inferSelect;
 
+// ===== REFERRAL & AFFILIATE SYSTEM =====
+
+// Referral code status enum
+export const referralCodeStatusEnum = pgEnum("referral_code_status", ["active", "inactive", "expired", "suspended"]);
+
+// Referral codes table - unique codes for each user/creator
+export const referralCodes = pgTable("referral_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  code: varchar("code").unique().notNull(), // Unique referral code (e.g., BOYFANZ123)
+  type: varchar("type").notNull().default("standard"), // standard, campaign, custom
+  status: referralCodeStatusEnum("status").default("active").notNull(),
+  
+  // Configuration
+  description: text("description"), // Optional description
+  maxUses: integer("max_uses"), // null for unlimited
+  currentUses: integer("current_uses").default(0),
+  expiresAt: timestamp("expires_at"), // null for no expiration
+  
+  // Reward configuration
+  rewardType: varchar("reward_type").notNull().default("percentage"), // percentage, fixed, credits
+  rewardValue: decimal("reward_value", { precision: 10, scale: 2 }).notNull(), // Amount or percentage
+  refereeRewardType: varchar("referee_reward_type").default("credits"), // What referred user gets
+  refereeRewardValue: decimal("referee_reward_value", { precision: 10, scale: 2 }).default("0"),
+  
+  // Campaign association
+  campaignId: varchar("campaign_id").references(() => referralCampaigns.id),
+  
+  // Analytics
+  clickCount: integer("click_count").default(0),
+  conversionCount: integer("conversion_count").default(0),
+  totalEarnings: decimal("total_earnings", { precision: 15, scale: 2 }).default("0"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_referral_codes_user").on(table.userId),
+  index("idx_referral_codes_status").on(table.status),
+  index("idx_referral_codes_campaign").on(table.campaignId),
+  index("idx_referral_codes_expires").on(table.expiresAt),
+]);
+
+// Referral campaigns for special promotions
+export const campaignStatusEnum = pgEnum("campaign_status", ["draft", "active", "paused", "completed", "cancelled"]);
+
+export const referralCampaigns = pgTable("referral_campaigns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  slug: varchar("slug").unique().notNull(),
+  status: campaignStatusEnum("status").default("draft").notNull(),
+  
+  // Timing
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  
+  // Targeting
+  targetAudience: varchar("target_audience").default("all"), // all, creators, fans, new_users
+  eligibleUserTypes: text("eligible_user_types").array().default([]), // Array of user types
+  minAccountAge: integer("min_account_age"), // Days
+  excludeExistingReferrers: boolean("exclude_existing_referrers").default(false),
+  
+  // Reward structure
+  rewardStructure: jsonb("reward_structure").default({}), // Complex reward rules
+  tierRewards: jsonb("tier_rewards").default({}), // Different rewards per tier
+  bonusMilestones: jsonb("bonus_milestones").default({}), // Special milestone bonuses
+  
+  // Limits and rules
+  maxParticipants: integer("max_participants"), // null for unlimited
+  maxRewards: decimal("max_rewards", { precision: 15, scale: 2 }), // Total budget cap
+  maxRewardsPerUser: decimal("max_rewards_per_user", { precision: 10, scale: 2 }),
+  
+  // Analytics
+  participantCount: integer("participant_count").default(0),
+  totalRewardsIssued: decimal("total_rewards_issued", { precision: 15, scale: 2 }).default("0"),
+  conversionRate: decimal("conversion_rate", { precision: 5, scale: 2 }).default("0"),
+  
+  // Configuration
+  autoApprove: boolean("auto_approve").default(true),
+  requireManualReview: boolean("require_manual_review").default(false),
+  
+  createdBy: varchar("created_by").notNull().references(() => accounts.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_referral_campaigns_status").on(table.status),
+  index("idx_referral_campaigns_dates").on(table.startDate, table.endDate),
+  index("idx_referral_campaigns_creator").on(table.createdBy),
+]);
+
+// Referral tracking for attribution and analytics
+export const attributionTypeEnum = pgEnum("attribution_type", ["first_click", "last_click", "multi_touch", "time_decay"]);
+export const conversionTypeEnum = pgEnum("conversion_type", ["signup", "purchase", "subscription", "deposit", "content_purchase"]);
+
+export const referralTracking = pgTable("referral_tracking", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  referralCodeId: varchar("referral_code_id").notNull().references(() => referralCodes.id, { onDelete: "cascade" }),
+  referrerId: varchar("referrer_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  
+  // Tracking data
+  clickId: varchar("click_id").unique(), // Unique identifier for this click
+  sourceUrl: text("source_url"), // Where the click came from
+  landingUrl: text("landing_url"), // Where they landed
+  userAgent: text("user_agent"),
+  ipAddress: inet("ip_address"),
+  deviceFingerprint: varchar("device_fingerprint"),
+  
+  // Attribution
+  attributionType: attributionTypeEnum("attribution_type").default("last_click"),
+  attributionWeight: decimal("attribution_weight", { precision: 3, scale: 2 }).default("1.00"),
+  
+  // Conversion data (null until conversion happens)
+  convertedUserId: varchar("converted_user_id").references(() => accounts.id),
+  conversionType: conversionTypeEnum("conversion_type"),
+  conversionValue: decimal("conversion_value", { precision: 15, scale: 2 }),
+  conversionMetadata: jsonb("conversion_metadata").default({}),
+  convertedAt: timestamp("converted_at"),
+  
+  // Geographic and session data
+  country: varchar("country"),
+  region: varchar("region"),
+  city: varchar("city"),
+  sessionId: varchar("session_id"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_referral_tracking_code").on(table.referralCodeId),
+  index("idx_referral_tracking_referrer").on(table.referrerId),
+  index("idx_referral_tracking_converted").on(table.convertedUserId),
+  index("idx_referral_tracking_conversion").on(table.conversionType, table.convertedAt),
+  index("idx_referral_tracking_attribution").on(table.attributionType),
+  index("idx_referral_tracking_ip").on(table.ipAddress),
+  index("idx_referral_tracking_fingerprint").on(table.deviceFingerprint),
+]);
+
+// Referral relationships - parent-child relationships between users
+export const relationshipTypeEnum = pgEnum("relationship_type", ["direct", "indirect"]);
+export const relationshipStatusEnum = pgEnum("relationship_status", ["active", "inactive", "disputed"]);
+
+export const referralRelationships = pgTable("referral_relationships", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  referrerId: varchar("referrer_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  refereeId: varchar("referee_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  
+  // Relationship details
+  type: relationshipTypeEnum("type").default("direct").notNull(),
+  level: integer("level").default(1).notNull(), // 1 = direct, 2 = second level, etc.
+  status: relationshipStatusEnum("status").default("active").notNull(),
+  
+  // Original referral data
+  referralCodeId: varchar("referral_code_id").references(() => referralCodes.id),
+  campaignId: varchar("campaign_id").references(() => referralCampaigns.id),
+  trackingId: varchar("tracking_id").references(() => referralTracking.id),
+  
+  // Earnings tracking
+  totalEarnings: decimal("total_earnings", { precision: 15, scale: 2 }).default("0"),
+  lifetimeValue: decimal("lifetime_value", { precision: 15, scale: 2 }).default("0"),
+  lastActivityAt: timestamp("last_activity_at"),
+  
+  // Fraud detection
+  fraudScore: decimal("fraud_score", { precision: 3, scale: 2 }).default("0"),
+  isVerified: boolean("is_verified").default(false),
+  verifiedAt: timestamp("verified_at"),
+  verifiedBy: varchar("verified_by").references(() => accounts.id),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique().on(table.referrerId, table.refereeId), // Prevent duplicate relationships
+  index("idx_referral_relationships_referrer").on(table.referrerId),
+  index("idx_referral_relationships_referee").on(table.refereeId),
+  index("idx_referral_relationships_level").on(table.level),
+  index("idx_referral_relationships_status").on(table.status),
+  index("idx_referral_relationships_fraud").on(table.fraudScore),
+]);
+
+// Referral earnings and commissions
+export const earningsStatusEnum = pgEnum("earnings_status", ["pending", "approved", "paid", "disputed", "cancelled"]);
+export const earningsTypeEnum = pgEnum("earnings_type", ["signup_bonus", "percentage_commission", "fixed_commission", "milestone_bonus", "tier_bonus", "campaign_bonus"]);
+
+export const referralEarnings = pgTable("referral_earnings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  referrerId: varchar("referrer_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  refereeId: varchar("referee_id").references(() => accounts.id, { onDelete: "set null" }),
+  
+  // Earning details
+  type: earningsTypeEnum("type").notNull(),
+  status: earningsStatusEnum("status").default("pending").notNull(),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+  currency: varchar("currency").default("USD").notNull(),
+  
+  // Source tracking
+  referralCodeId: varchar("referral_code_id").references(() => referralCodes.id),
+  campaignId: varchar("campaign_id").references(() => referralCampaigns.id),
+  relationshipId: varchar("relationship_id").references(() => referralRelationships.id),
+  trackingId: varchar("tracking_id").references(() => referralTracking.id),
+  
+  // Transaction details
+  sourceTransactionId: varchar("source_transaction_id"), // Original transaction that generated this earning
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 4 }), // For percentage commissions
+  sourceAmount: decimal("source_amount", { precision: 15, scale: 2 }), // Original transaction amount
+  
+  // Payout information
+  payoutId: varchar("payout_id"), // Reference to payout batch
+  payoutMethod: varchar("payout_method"), // paypal, stripe, credits, etc.
+  payoutDetails: jsonb("payout_details").default({}),
+  paidAt: timestamp("paid_at"),
+  
+  // Processing
+  processedAt: timestamp("processed_at"),
+  processedBy: varchar("processed_by").references(() => accounts.id),
+  notes: text("notes"),
+  metadata: jsonb("metadata").default({}),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_referral_earnings_referrer").on(table.referrerId),
+  index("idx_referral_earnings_referee").on(table.refereeId),
+  index("idx_referral_earnings_status").on(table.status),
+  index("idx_referral_earnings_type").on(table.type),
+  index("idx_referral_earnings_campaign").on(table.campaignId),
+  index("idx_referral_earnings_payout").on(table.payoutId),
+  index("idx_referral_earnings_created").on(table.createdAt),
+]);
+
+// Affiliate performance metrics and tiers
+export const affiliateTierEnum = pgEnum("affiliate_tier", ["bronze", "silver", "gold", "platinum", "diamond"]);
+export const affiliateStatusEnum = pgEnum("affiliate_status", ["active", "inactive", "suspended", "pending_approval"]);
+
+export const affiliateProfiles = pgTable("affiliate_profiles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").unique().notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  
+  // Affiliate details
+  affiliateId: varchar("affiliate_id").unique().notNull(), // Public affiliate identifier
+  status: affiliateStatusEnum("status").default("pending_approval").notNull(),
+  tier: affiliateTierEnum("tier").default("bronze").notNull(),
+  
+  // Performance metrics
+  totalClicks: integer("total_clicks").default(0),
+  totalConversions: integer("total_conversions").default(0),
+  totalEarnings: decimal("total_earnings", { precision: 15, scale: 2 }).default("0"),
+  conversionRate: decimal("conversion_rate", { precision: 5, scale: 2 }).default("0"),
+  averageOrderValue: decimal("average_order_value", { precision: 10, scale: 2 }).default("0"),
+  
+  // Lifetime metrics
+  lifetimeClicks: integer("lifetime_clicks").default(0),
+  lifetimeConversions: integer("lifetime_conversions").default(0),
+  lifetimeEarnings: decimal("lifetime_earnings", { precision: 15, scale: 2 }).default("0"),
+  
+  // Period performance (current month/quarter)
+  periodStartDate: timestamp("period_start_date"),
+  periodClicks: integer("period_clicks").default(0),
+  periodConversions: integer("period_conversions").default(0),
+  periodEarnings: decimal("period_earnings", { precision: 15, scale: 2 }).default("0"),
+  
+  // Streaks and achievements
+  currentStreak: integer("current_streak").default(0), // Days with activity
+  longestStreak: integer("longest_streak").default(0),
+  achievementBadges: text("achievement_badges").array().default([]),
+  
+  // Preferences and settings
+  payoutThreshold: decimal("payout_threshold", { precision: 10, scale: 2 }).default("50.00"),
+  preferredPayoutMethod: varchar("preferred_payout_method").default("paypal"),
+  payoutSchedule: varchar("payout_schedule").default("monthly"), // weekly, biweekly, monthly
+  notificationPreferences: jsonb("notification_preferences").default({}),
+  
+  // Marketing assets
+  customBrandingEnabled: boolean("custom_branding_enabled").default(false),
+  logoUrl: varchar("logo_url"),
+  websiteUrl: varchar("website_url"),
+  socialMediaLinks: jsonb("social_media_links").default({}),
+  
+  // Approval and verification
+  approvedAt: timestamp("approved_at"),
+  approvedBy: varchar("approved_by").references(() => accounts.id),
+  rejectedAt: timestamp("rejected_at"),
+  rejectionReason: text("rejection_reason"),
+  
+  // Last activity tracking
+  lastActivityAt: timestamp("last_activity_at"),
+  lastLoginAt: timestamp("last_login_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_affiliate_profiles_user").on(table.userId),
+  index("idx_affiliate_profiles_affiliate_id").on(table.affiliateId),
+  index("idx_affiliate_profiles_status").on(table.status),
+  index("idx_affiliate_profiles_tier").on(table.tier),
+  index("idx_affiliate_profiles_performance").on(table.totalEarnings, table.conversionRate),
+]);
+
+// Gamification and achievement system
+export const achievementTypeEnum = pgEnum("achievement_type", ["referral_count", "earnings_milestone", "conversion_rate", "streak", "tier_upgrade", "special_event"]);
+export const achievementStatusEnum = pgEnum("achievement_status", ["locked", "unlocked", "claimed"]);
+
+export const referralAchievements = pgTable("referral_achievements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  
+  // Achievement details
+  achievementType: achievementTypeEnum("achievement_type").notNull(),
+  achievementId: varchar("achievement_id").notNull(), // Predefined achievement identifier
+  status: achievementStatusEnum("status").default("locked").notNull(),
+  
+  // Achievement data
+  title: varchar("title").notNull(),
+  description: text("description"),
+  iconUrl: varchar("icon_url"),
+  badgeUrl: varchar("badge_url"),
+  
+  // Requirements and progress
+  requirement: jsonb("requirement").notNull(), // What needs to be achieved
+  currentProgress: decimal("current_progress", { precision: 10, scale: 2 }).default("0"),
+  targetProgress: decimal("target_progress", { precision: 10, scale: 2 }).notNull(),
+  progressPercentage: decimal("progress_percentage", { precision: 5, scale: 2 }).default("0"),
+  
+  // Rewards
+  rewardType: varchar("reward_type"), // credits, tier_upgrade, special_access, etc.
+  rewardValue: decimal("reward_value", { precision: 10, scale: 2 }),
+  rewardMetadata: jsonb("reward_metadata").default({}),
+  
+  // Timing
+  unlockedAt: timestamp("unlocked_at"),
+  claimedAt: timestamp("claimed_at"),
+  expiresAt: timestamp("expires_at"), // For time-limited achievements
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique().on(table.userId, table.achievementId), // One achievement per user
+  index("idx_referral_achievements_user").on(table.userId),
+  index("idx_referral_achievements_type").on(table.achievementType),
+  index("idx_referral_achievements_status").on(table.status),
+]);
+
+// Fraud detection and prevention
+export const fraudEventTypeEnum = pgEnum("fraud_event_type", ["suspicious_signup", "duplicate_device", "ip_abuse", "rapid_referrals", "unusual_pattern", "self_referral"]);
+export const fraudStatusEnum = pgEnum("fraud_status", ["flagged", "investigating", "confirmed", "false_positive", "resolved"]);
+
+export const referralFraudEvents = pgTable("referral_fraud_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Event details
+  eventType: fraudEventTypeEnum("event_type").notNull(),
+  status: fraudStatusEnum("status").default("flagged").notNull(),
+  severity: varchar("severity").default("medium").notNull(), // low, medium, high, critical
+  
+  // Affected entities
+  referrerId: varchar("referrer_id").references(() => accounts.id),
+  refereeId: varchar("referee_id").references(() => accounts.id),
+  referralCodeId: varchar("referral_code_id").references(() => referralCodes.id),
+  trackingId: varchar("tracking_id").references(() => referralTracking.id),
+  
+  // Detection data
+  detectionReason: text("detection_reason").notNull(),
+  evidenceData: jsonb("evidence_data").default({}), // IP addresses, devices, patterns, etc.
+  riskScore: decimal("risk_score", { precision: 5, scale: 2 }).notNull(),
+  automaticAction: varchar("automatic_action"), // suspend, flag, block, etc.
+  
+  // Investigation
+  investigatedBy: varchar("investigated_by").references(() => accounts.id),
+  investigatedAt: timestamp("investigated_at"),
+  investigationNotes: text("investigation_notes"),
+  resolution: text("resolution"),
+  resolvedAt: timestamp("resolved_at"),
+  
+  // Prevention actions
+  actionTaken: text("action_taken"),
+  appealsAllowed: boolean("appeals_allowed").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_referral_fraud_events_referrer").on(table.referrerId),
+  index("idx_referral_fraud_events_referee").on(table.refereeId),
+  index("idx_referral_fraud_events_type").on(table.eventType),
+  index("idx_referral_fraud_events_status").on(table.status),
+  index("idx_referral_fraud_events_severity").on(table.severity),
+  index("idx_referral_fraud_events_risk").on(table.riskScore),
+]);
+
+// Analytics and reporting tables
+export const analyticsMetricTypeEnum = pgEnum("analytics_metric_type", ["clicks", "conversions", "earnings", "conversion_rate", "lifetime_value", "geographic", "device", "source"]);
+export const analyticsTimeframeEnum = pgEnum("analytics_timeframe", ["hour", "day", "week", "month", "quarter", "year"]);
+
+export const referralAnalytics = pgTable("referral_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Time dimension
+  timeframe: analyticsTimeframeEnum("timeframe").notNull(),
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  
+  // Dimension keys
+  referrerId: varchar("referrer_id").references(() => accounts.id),
+  campaignId: varchar("campaign_id").references(() => referralCampaigns.id),
+  referralCodeId: varchar("referral_code_id").references(() => referralCodes.id),
+  
+  // Geographic dimensions
+  country: varchar("country"),
+  region: varchar("region"),
+  city: varchar("city"),
+  
+  // Technical dimensions
+  deviceType: varchar("device_type"), // mobile, desktop, tablet
+  browserType: varchar("browser_type"),
+  sourceType: varchar("source_type"), // social, email, direct, etc.
+  
+  // Metrics
+  metricType: analyticsMetricTypeEnum("metric_type").notNull(),
+  metricValue: decimal("metric_value", { precision: 15, scale: 4 }).notNull(),
+  metricCount: integer("metric_count").default(0),
+  
+  // Additional data
+  metadata: jsonb("metadata").default({}),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_referral_analytics_timeframe").on(table.timeframe, table.periodStart),
+  index("idx_referral_analytics_referrer").on(table.referrerId),
+  index("idx_referral_analytics_campaign").on(table.campaignId),
+  index("idx_referral_analytics_metric").on(table.metricType),
+  index("idx_referral_analytics_geography").on(table.country, table.region),
+  index("idx_referral_analytics_device").on(table.deviceType),
+]);
+
+// ===== REFERRAL SYSTEM INSERT SCHEMAS =====
+
+// Referral codes
+export const insertReferralCodeSchema = createInsertSchema(referralCodes).omit({
+  id: true,
+  currentUses: true,
+  clickCount: true,
+  conversionCount: true,
+  totalEarnings: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertReferralCode = z.infer<typeof insertReferralCodeSchema>;
+export type ReferralCode = typeof referralCodes.$inferSelect;
+
+// Referral campaigns
+export const insertReferralCampaignSchema = createInsertSchema(referralCampaigns).omit({
+  id: true,
+  participantCount: true,
+  totalRewardsIssued: true,
+  conversionRate: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertReferralCampaign = z.infer<typeof insertReferralCampaignSchema>;
+export type ReferralCampaign = typeof referralCampaigns.$inferSelect;
+
+// Referral tracking
+export const insertReferralTrackingSchema = createInsertSchema(referralTracking).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertReferralTracking = z.infer<typeof insertReferralTrackingSchema>;
+export type ReferralTracking = typeof referralTracking.$inferSelect;
+
+// Referral relationships
+export const insertReferralRelationshipSchema = createInsertSchema(referralRelationships).omit({
+  id: true,
+  totalEarnings: true,
+  lifetimeValue: true,
+  fraudScore: true,
+  isVerified: true,
+  verifiedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertReferralRelationship = z.infer<typeof insertReferralRelationshipSchema>;
+export type ReferralRelationship = typeof referralRelationships.$inferSelect;
+
+// Referral earnings
+export const insertReferralEarningsSchema = createInsertSchema(referralEarnings).omit({
+  id: true,
+  paidAt: true,
+  processedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertReferralEarnings = z.infer<typeof insertReferralEarningsSchema>;
+export type ReferralEarnings = typeof referralEarnings.$inferSelect;
+
+// Affiliate profiles
+export const insertAffiliateProfileSchema = createInsertSchema(affiliateProfiles).omit({
+  id: true,
+  totalClicks: true,
+  totalConversions: true,
+  totalEarnings: true,
+  conversionRate: true,
+  averageOrderValue: true,
+  lifetimeClicks: true,
+  lifetimeConversions: true,
+  lifetimeEarnings: true,
+  periodClicks: true,
+  periodConversions: true,
+  periodEarnings: true,
+  currentStreak: true,
+  longestStreak: true,
+  approvedAt: true,
+  rejectedAt: true,
+  lastActivityAt: true,
+  lastLoginAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertAffiliateProfile = z.infer<typeof insertAffiliateProfileSchema>;
+export type AffiliateProfile = typeof affiliateProfiles.$inferSelect;
+
+// Referral achievements
+export const insertReferralAchievementSchema = createInsertSchema(referralAchievements).omit({
+  id: true,
+  currentProgress: true,
+  progressPercentage: true,
+  unlockedAt: true,
+  claimedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertReferralAchievement = z.infer<typeof insertReferralAchievementSchema>;
+export type ReferralAchievement = typeof referralAchievements.$inferSelect;
+
+// Referral fraud events
+export const insertReferralFraudEventSchema = createInsertSchema(referralFraudEvents).omit({
+  id: true,
+  investigatedAt: true,
+  resolvedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertReferralFraudEvent = z.infer<typeof insertReferralFraudEventSchema>;
+export type ReferralFraudEvent = typeof referralFraudEvents.$inferSelect;
+
+// Referral analytics
+export const insertReferralAnalyticsSchema = createInsertSchema(referralAnalytics).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertReferralAnalytics = z.infer<typeof insertReferralAnalyticsSchema>;
+export type ReferralAnalytics = typeof referralAnalytics.$inferSelect;
+
 // ===== PWA EXTENSIONS =====
 // Import PWA schemas
 export * from './pwaPatch';

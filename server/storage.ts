@@ -191,6 +191,35 @@ import {
   type InsertStorageProviderAlert,
   type StorageProviderFailover,
   type InsertStorageProviderFailover,
+  // Referral & Affiliate System Tables
+  referralCodes,
+  referralCampaigns,
+  referralTracking,
+  referralRelationships,
+  referralEarnings,
+  affiliateProfiles,
+  referralAchievements,
+  referralFraudEvents,
+  referralAnalytics,
+  // Referral & Affiliate System Types
+  type ReferralCode,
+  type InsertReferralCode,
+  type ReferralCampaign,
+  type InsertReferralCampaign,
+  type ReferralTracking,
+  type InsertReferralTracking,
+  type ReferralRelationship,
+  type InsertReferralRelationship,
+  type ReferralEarnings,
+  type InsertReferralEarnings,
+  type AffiliateProfile,
+  type InsertAffiliateProfile,
+  type ReferralAchievement,
+  type InsertReferralAchievement,
+  type ReferralFraudEvent,
+  type InsertReferralFraudEvent,
+  type ReferralAnalytics,
+  type InsertReferralAnalytics,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, count, sql, or, lt, isNull, gte, lte, not, arrayContains, getTableColumns } from "drizzle-orm";
@@ -1041,6 +1070,187 @@ export interface IStorage {
     flaggedContentRate: number;
     userEngagementRate: number;
   }>;
+
+  // ===== REFERRAL & AFFILIATE SYSTEM METHODS =====
+
+  // Referral Code Management
+  createReferralCode(code: InsertReferralCode): Promise<ReferralCode>;
+  getReferralCode(codeId: string): Promise<ReferralCode | undefined>;
+  getReferralCodeByCode(code: string): Promise<ReferralCode | undefined>;
+  getUserReferralCodes(userId: string, status?: string): Promise<ReferralCode[]>;
+  updateReferralCode(codeId: string, updates: Partial<ReferralCode>): Promise<ReferralCode>;
+  deactivateReferralCode(codeId: string): Promise<void>;
+  incrementReferralCodeUsage(codeId: string): Promise<void>;
+  validateReferralCode(code: string): Promise<{ valid: boolean; code?: ReferralCode; reason?: string }>;
+  generateUniqueReferralCode(userId: string, prefix?: string): Promise<string>;
+  
+  // Referral Campaign Management
+  createReferralCampaign(campaign: InsertReferralCampaign): Promise<ReferralCampaign>;
+  getReferralCampaign(campaignId: string): Promise<ReferralCampaign | undefined>;
+  getReferralCampaignBySlug(slug: string): Promise<ReferralCampaign | undefined>;
+  getReferralCampaigns(status?: string, limit?: number): Promise<ReferralCampaign[]>;
+  getActiveCampaigns(): Promise<ReferralCampaign[]>;
+  updateReferralCampaign(campaignId: string, updates: Partial<ReferralCampaign>): Promise<ReferralCampaign>;
+  updateCampaignStats(campaignId: string, stats: { participantCount?: number; totalRewardsIssued?: number; conversionRate?: number }): Promise<void>;
+  
+  // Referral Tracking & Attribution
+  createReferralTracking(tracking: InsertReferralTracking): Promise<ReferralTracking>;
+  getReferralTracking(trackingId: string): Promise<ReferralTracking | undefined>;
+  getReferralTrackingByClickId(clickId: string): Promise<ReferralTracking | undefined>;
+  getTrackingByReferrer(referrerId: string, limit?: number): Promise<ReferralTracking[]>;
+  updateReferralTracking(trackingId: string, updates: Partial<ReferralTracking>): Promise<ReferralTracking>;
+  recordConversion(trackingId: string, conversionData: {
+    convertedUserId: string;
+    conversionType: string;
+    conversionValue?: number;
+    conversionMetadata?: any;
+  }): Promise<void>;
+  getTrackingAnalytics(referrerId: string, timeframe?: { start: Date; end: Date }): Promise<{
+    totalClicks: number;
+    totalConversions: number;
+    conversionRate: number;
+    totalValue: number;
+    topSources: Array<{ source: string; clicks: number; conversions: number }>;
+  }>;
+  
+  // Referral Relationships
+  createReferralRelationship(relationship: InsertReferralRelationship): Promise<ReferralRelationship>;
+  getReferralRelationship(relationshipId: string): Promise<ReferralRelationship | undefined>;
+  getReferrerRelationships(referrerId: string, level?: number): Promise<ReferralRelationship[]>;
+  getRefereeRelationship(refereeId: string): Promise<ReferralRelationship | undefined>;
+  updateReferralRelationship(relationshipId: string, updates: Partial<ReferralRelationship>): Promise<ReferralRelationship>;
+  getReferralNetwork(userId: string, maxLevels?: number): Promise<{
+    levels: Array<{
+      level: number;
+      referrals: Array<ReferralRelationship & { referee: { id: string; displayName: string; avatarUrl?: string } }>;
+    }>;
+    totalEarnings: number;
+    totalReferrals: number;
+  }>;
+  updateRelationshipEarnings(relationshipId: string, amount: number): Promise<void>;
+  
+  // Referral Earnings
+  createReferralEarnings(earnings: InsertReferralEarnings): Promise<ReferralEarnings>;
+  getReferralEarnings(earningsId: string): Promise<ReferralEarnings | undefined>;
+  getReferrerEarnings(referrerId: string, status?: string, limit?: number): Promise<ReferralEarnings[]>;
+  updateReferralEarnings(earningsId: string, updates: Partial<ReferralEarnings>): Promise<ReferralEarnings>;
+  approveEarnings(earningsId: string, approvedBy: string): Promise<void>;
+  processEarningsPayout(earningsIds: string[], payoutId: string, payoutMethod: string): Promise<void>;
+  getReferrerEarningsSummary(referrerId: string, timeframe?: { start: Date; end: Date }): Promise<{
+    totalEarnings: number;
+    pendingEarnings: number;
+    paidEarnings: number;
+    earningsByType: Array<{ type: string; amount: number; count: number }>;
+    recentEarnings: ReferralEarnings[];
+  }>;
+  calculateCommission(sourceAmount: number, commissionRate: number, commissionType: string): Promise<number>;
+  
+  // Affiliate Profile Management
+  createAffiliateProfile(profile: InsertAffiliateProfile): Promise<AffiliateProfile>;
+  getAffiliateProfile(userId: string): Promise<AffiliateProfile | undefined>;
+  getAffiliateProfileByAffiliateId(affiliateId: string): Promise<AffiliateProfile | undefined>;
+  updateAffiliateProfile(userId: string, updates: Partial<AffiliateProfile>): Promise<AffiliateProfile>;
+  updateAffiliateStats(userId: string, stats: {
+    totalClicks?: number;
+    totalConversions?: number;
+    totalEarnings?: number;
+    conversionRate?: number;
+    averageOrderValue?: number;
+  }): Promise<void>;
+  updateAffiliatePeriodStats(userId: string, stats: {
+    periodClicks?: number;
+    periodConversions?: number;
+    periodEarnings?: number;
+  }): Promise<void>;
+  upgradeAffiliateTier(userId: string, newTier: string, upgradedBy: string): Promise<void>;
+  getAffiliateLeaderboard(timeframe: 'week' | 'month' | 'quarter' | 'year', limit?: number): Promise<Array<{
+    affiliate: AffiliateProfile;
+    stats: { earnings: number; conversions: number; conversionRate: number };
+    rank: number;
+  }>>;
+  
+  // Gamification & Achievements
+  createReferralAchievement(achievement: InsertReferralAchievement): Promise<ReferralAchievement>;
+  getReferralAchievement(achievementId: string): Promise<ReferralAchievement | undefined>;
+  getUserAchievements(userId: string, status?: string): Promise<ReferralAchievement[]>;
+  updateAchievementProgress(userId: string, achievementId: string, progress: number): Promise<void>;
+  unlockAchievement(userId: string, achievementId: string): Promise<void>;
+  claimAchievement(achievementId: string, claimedBy: string): Promise<void>;
+  checkAchievementProgress(userId: string): Promise<{
+    newUnlocks: ReferralAchievement[];
+    progressUpdates: Array<{ achievement: ReferralAchievement; oldProgress: number; newProgress: number }>;
+  }>;
+  
+  // Fraud Detection & Prevention
+  createFraudEvent(event: InsertReferralFraudEvent): Promise<ReferralFraudEvent>;
+  getFraudEvent(eventId: string): Promise<ReferralFraudEvent | undefined>;
+  getFraudEvents(filters?: {
+    eventType?: string;
+    status?: string;
+    severity?: string;
+    referrerId?: string;
+    refereeId?: string;
+    minRiskScore?: number;
+  }, limit?: number): Promise<ReferralFraudEvent[]>;
+  updateFraudEvent(eventId: string, updates: Partial<ReferralFraudEvent>): Promise<ReferralFraudEvent>;
+  investigateFraudEvent(eventId: string, investigatedBy: string, notes: string): Promise<void>;
+  resolveFraudEvent(eventId: string, resolvedBy: string, resolution: string, actionTaken?: string): Promise<void>;
+  getFraudScore(userId: string, activityData: any): Promise<number>;
+  checkForFraudPatterns(data: {
+    userId: string;
+    ipAddress?: string;
+    deviceFingerprint?: string;
+    referralData?: any;
+  }): Promise<{ flagged: boolean; patterns: string[]; riskScore: number }>;
+  
+  // Analytics & Reporting
+  createReferralAnalytics(analytics: InsertReferralAnalytics): Promise<ReferralAnalytics>;
+  getReferralAnalytics(filters: {
+    timeframe: string;
+    periodStart: Date;
+    periodEnd: Date;
+    referrerId?: string;
+    campaignId?: string;
+    metricType?: string;
+    country?: string;
+    deviceType?: string;
+  }): Promise<ReferralAnalytics[]>;
+  getAnalyticsSummary(filters: {
+    referrerId?: string;
+    campaignId?: string;
+    timeframe: { start: Date; end: Date };
+  }): Promise<{
+    totalClicks: number;
+    totalConversions: number;
+    totalEarnings: number;
+    conversionRate: number;
+    averageOrderValue: number;
+    topGeolocations: Array<{ country: string; clicks: number; conversions: number }>;
+    deviceBreakdown: Array<{ deviceType: string; percentage: number }>;
+    performanceByDay: Array<{ date: string; clicks: number; conversions: number; earnings: number }>;
+  }>;
+  generatePerformanceReport(userId: string, timeframe: { start: Date; end: Date }): Promise<{
+    overview: { totalEarnings: number; totalReferrals: number; conversionRate: number };
+    earnings: { byType: any[]; byPeriod: any[]; trend: any[] };
+    referrals: { active: number; levels: any[]; recent: any[] };
+    achievements: { unlocked: number; progress: any[]; recent: any[] };
+    leaderboard: { rank: number; percentile: number; peers: any[] };
+  }>;
+  
+  // Admin & Management Operations
+  getSystemReferralStats(): Promise<{
+    totalCodes: number;
+    totalCampaigns: number;
+    totalEarnings: number;
+    totalReferrals: number;
+    conversionRate: number;
+    fraudRate: number;
+    topPerformers: Array<{ userId: string; displayName: string; earnings: number; referrals: number }>;
+  }>;
+  getReferralAuditTrail(entityType: string, entityId: string): Promise<any[]>;
+  bulkProcessEarnings(filters: { status?: string; minAmount?: number; maxAmount?: number }, action: string): Promise<{ processed: number; errors: any[] }>;
+  cleanupExpiredCodes(): Promise<number>;
+  recalculateAffiliateStats(userId?: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
