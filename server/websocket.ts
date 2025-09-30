@@ -53,31 +53,49 @@ class WebSocketManager {
   private heartbeatInterval!: NodeJS.Timeout;
   
   constructor(port: number = 3001) {
-    this.wss = new WebSocketServer({ 
-      port,
-      perMessageDeflate: {
-        zlibDeflateOptions: {
-          chunkSize: 1024,
-          memLevel: 7,
-          level: 3
+    try {
+      this.wss = new WebSocketServer({ 
+        port,
+        perMessageDeflate: {
+          zlibDeflateOptions: {
+            chunkSize: 1024,
+            memLevel: 7,
+            level: 3
+          },
+          zlibInflateOptions: {
+            chunkSize: 10 * 1024
+          },
+          clientNoContextTakeover: true,
+          serverNoContextTakeover: true,
+          serverMaxWindowBits: 10,
+          concurrencyLimit: 10,
+          threshold: 1024
         },
-        zlibInflateOptions: {
-          chunkSize: 10 * 1024
-        },
-        clientNoContextTakeover: true,
-        serverNoContextTakeover: true,
-        serverMaxWindowBits: 10,
-        concurrencyLimit: 10,
-        threshold: 1024
-      },
-      maxPayload: 10 * 1024 * 1024 // 10MB max message size
-    });
-    
-    this.setupWebSocketServer();
-    this.startHeartbeat();
-    this.startMetricsCollection();
-    
-    logger.info(`WebSocket server started on port ${port}`);
+        maxPayload: 10 * 1024 * 1024 // 10MB max message size
+      });
+      
+      this.wss.on('error', (error: any) => {
+        if (error.code === 'EADDRINUSE') {
+          logger.warn(`Port ${port} already in use, WebSocket functionality may be limited during hot reload`);
+        } else {
+          logger.error('WebSocket server error:', error);
+        }
+      });
+      
+      this.setupWebSocketServer();
+      this.startHeartbeat();
+      this.startMetricsCollection();
+      
+      logger.info(`WebSocket server started on port ${port}`);
+    } catch (error: any) {
+      if (error.code === 'EADDRINUSE') {
+        logger.warn(`Port ${port} already in use - WebSocket server not started (likely hot reload)`);
+        // Create a dummy server that does nothing but prevents crashes
+        this.wss = { on: () => {}, close: () => {} } as any;
+      } else {
+        throw error;
+      }
+    }
   }
   
   private setupWebSocketServer() {
