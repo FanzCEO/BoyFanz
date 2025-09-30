@@ -310,7 +310,7 @@ export default function InfinityFeed() {
       >
         {mixedContent.map((item, index) => 
           'type' in item && item.type === 'ad' 
-            ? renderAdBlock(item, index)
+            ? renderAdBlock(item as AdBlock, index)
             : renderPost(item as Post, index)
         )}
       </div>
