@@ -63,6 +63,7 @@ import Messages from "@/pages/Messages";
 import MassMessaging from "@/pages/MassMessaging";
 import PostView from "@/pages/PostView";
 import EarningsPage from "@/pages/Creator/EarningsPage";
+import InfinityFeed from "@/pages/InfinityFeed";
 import Blog from "@/pages/Blog";
 import Contact from "@/pages/Contact";
 import { HelpCenter } from "@/pages/HelpCenter";
