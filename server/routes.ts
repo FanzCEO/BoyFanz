@@ -2333,6 +2333,35 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // ===== INFINITY FEED ROUTE =====
+  
+  // Get infinity scroll feed with mixed content (subscriptions + follows + free posts)
+  app.get('/api/infinity-feed', isAuthenticated, enforceGeoBlocking('content_access'), async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      const page = Number(req.query.page) || 1;
+      const limit = 12; // Posts per page
+      const offset = (page - 1) * limit;
+
+      // Get posts from:
+      // 1. Subscribed creators (all posts)
+      // 2. Followed creators (free posts)
+      // 3. Free-to-view posts from verified creators
+      const posts = await storage.getInfinityFeedPosts(userId, limit, offset);
+      
+      const hasMore = posts.length === limit;
+
+      res.json({ posts, hasMore });
+    } catch (error) {
+      console.error('Infinity feed error:', error);
+      res.status(500).json({ error: 'Failed to load feed' });
+    }
+  });
+
   // ===== AI CREATOR TOOLS ROUTES =====
 
   // Generate auto-captions for video
