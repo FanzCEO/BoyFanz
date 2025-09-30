@@ -1,12 +1,11 @@
 import { useEffect, useState, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Lock, CheckCircle2, Shield, Video, Image as ImageIcon, Play } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 
-const POSTS_PER_PAGE = 12;
 const POSTS_PER_AD = 4;
 
 interface Post {
@@ -42,28 +41,33 @@ interface AdBlock {
 
 export default function InfinityFeed() {
   const { user } = useAuth();
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
   const loader = useRef<HTMLDivElement>(null);
 
-  const { data, isLoading, error } = useQuery<{ posts: Post[]; hasMore: boolean }>({
-    queryKey: ['/api/infinity-feed', page],
-    enabled: hasMore,
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['/api/infinity-feed'],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await fetch(`/api/infinity-feed?page=${pageParam}`);
+      if (!response.ok) throw new Error('Failed to fetch feed');
+      return response.json() as Promise<{ posts: Post[]; hasMore: boolean }>;
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.hasMore ? allPages.length + 1 : undefined;
+    },
+    initialPageParam: 1,
   });
-
-  useEffect(() => {
-    if (data) {
-      setPosts((prev) => [...prev, ...data.posts]);
-      setHasMore(data.hasMore);
-    }
-  }, [data]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !isLoading && hasMore) {
-          setPage((prev) => prev + 1);
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
         }
       },
       { threshold: 0.5 }
@@ -78,7 +82,9 @@ export default function InfinityFeed() {
         observer.unobserve(loader.current);
       }
     };
-  }, [isLoading, hasMore]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const posts = data?.pages.flatMap(page => page.posts) ?? [];
 
   const renderPost = (post: Post, index: number) => {
     const canView = post.isFreeToView || post.isSubscribed;
@@ -317,13 +323,15 @@ export default function InfinityFeed() {
 
       {/* Loading Indicator */}
       <div ref={loader} className="flex justify-center py-8" data-testid="loading-indicator">
-        {isLoading && (
+        {(isLoading || isFetchingNextPage) && (
           <div className="flex items-center gap-3 text-red-500">
             <Loader2 className="w-6 h-6 animate-spin" />
-            <span className="font-bebas text-lg">Loading more content...</span>
+            <span className="font-bebas text-lg">
+              {isLoading ? 'Loading feed...' : 'Loading more content...'}
+            </span>
           </div>
         )}
-        {!hasMore && posts.length > 0 && (
+        {!hasNextPage && posts.length > 0 && !isLoading && (
           <p className="text-muted-foreground font-bebas text-lg" data-testid="end-message">
             You've reached the end of the feed
           </p>
