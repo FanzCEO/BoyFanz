@@ -1,11 +1,20 @@
 import { Router } from "express";
 import { FanzTokenService } from "../services/fanzTokenService";
 import { requireAdmin } from "../middleware/auth";
+import { db } from "../db";
+import { users } from "@shared/schema";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 
 const router = Router();
 const fanzToken = new FanzTokenService();
+
+// Helper to validate user exists
+async function validateUserExists(userId: string): Promise<boolean> {
+  const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  return !!user;
+}
 
 // Token type validation
 const tokenTypeSchema = z.enum(['fanzcoin', 'fanztoken', 'loyalty', 'reward', 'utility']);
@@ -60,11 +69,19 @@ router.post("/mint", requireAdmin, async (req, res) => {
 
     const validated = schema.parse(req.body);
 
+    // Validate user exists
+    if (!(await validateUserExists(validated.userId))) {
+      return res.status(404).json({ error: `User not found: ${validated.userId}` });
+    }
+
     const result = await fanzToken.mintTokens(validated);
 
     if (!result.success) {
       return res.status(400).json({ error: result.error });
     }
+
+    // Audit log: Admin minted tokens
+    console.log(`🔐 Admin ${req.user!.id} minted ${validated.amount} ${validated.tokenType} for user ${validated.userId} - ${validated.reason}`);
 
     res.json(result);
   } catch (error) {
@@ -295,11 +312,19 @@ router.post("/award-loyalty", requireAdmin, async (req, res) => {
 
     const validated = schema.parse(req.body);
 
+    // Validate user exists
+    if (!(await validateUserExists(validated.userId))) {
+      return res.status(404).json({ error: `User not found: ${validated.userId}` });
+    }
+
     const result = await fanzToken.awardLoyaltyTokens(validated);
 
     if (!result.success) {
       return res.status(400).json({ error: result.error });
     }
+
+    // Audit log: Admin awarded loyalty tokens
+    console.log(`🔐 Admin ${req.user!.id} awarded ${validated.amount} loyalty tokens to user ${validated.userId} - ${validated.activityType}: ${validated.reason}`);
 
     res.json(result);
   } catch (error) {
@@ -327,11 +352,19 @@ router.post("/award-reward", requireAdmin, async (req, res) => {
 
     const validated = schema.parse(req.body);
 
+    // Validate user exists
+    if (!(await validateUserExists(validated.userId))) {
+      return res.status(404).json({ error: `User not found: ${validated.userId}` });
+    }
+
     const result = await fanzToken.awardRewardTokens(validated);
 
     if (!result.success) {
       return res.status(400).json({ error: result.error });
     }
+
+    // Audit log: Admin awarded reward tokens
+    console.log(`🔐 Admin ${req.user!.id} awarded ${validated.amount} reward tokens to user ${validated.userId} - ${validated.achievementName} (${validated.achievementId})`);
 
     res.json(result);
   } catch (error) {
