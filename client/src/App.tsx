@@ -144,7 +144,7 @@ function Router() {
   }, [isLoading]);
 
   // Protected routes that require authentication
-  const protectedRoutes = ['/feed', '/messages', '/mass-messaging', '/post', '/earnings', '/media', '/compliance', '/payouts', '/notifications', '/settings', '/admin', '/purchased', '/subscriptions', '/release-forms', '/nearby', '/streams'];
+  const protectedRoutes = ['/feed', '/infinity-feed', '/messages', '/mass-messaging', '/post', '/earnings', '/media', '/compliance', '/payouts', '/notifications', '/settings', '/admin', '/purchased', '/subscriptions', '/release-forms', '/nearby', '/streams'];
   
   // Check if current route is protected
   const isProtectedRoute = protectedRoutes.some(route => location.startsWith(route));
@@ -235,6 +235,7 @@ function Router() {
             <Route path="/settings" component={Settings} />
             <Route path="/creator/:userId" component={CreatorProfile} />
             <Route path="/feed" component={PostsFeed} />
+            <Route path="/infinity-feed" component={InfinityFeed} />
             <Route path="/search" component={SearchCreators} />
             <Route path="/messages" component={Messages} />
             <Route path="/mass-messaging" component={MassMessaging} />

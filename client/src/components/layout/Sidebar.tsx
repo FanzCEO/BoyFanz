@@ -23,6 +23,7 @@ export default function Sidebar({ user }: SidebarProps) {
   
   const navItems = [
     { path: "/", icon: "fas fa-home", label: "Home" },
+    { path: "/infinity-feed", icon: "fas fa-infinity", label: "Infinity Feed" },
     { path: `/creator/${user?.id}`, icon: "fas fa-user", label: "My page" },
     { path: "/dashboard", icon: "fas fa-tachometer-alt", label: "Dashboard" },
     { path: "/purchased", icon: "fas fa-shopping-bag", label: "Purchased" },
