@@ -5596,6 +5596,7 @@ import securityDashboardRoutes from './routes/securityDashboard.js';
 import mobileApiRoutes from './routes/mobileApi.js';
 import monitoringDashboardRoutes from './routes/monitoringDashboard.js';
 import apiGatewayRoutes from './routes/apiGatewayRoutes.js';
+import { registerFanzTrustRoutes } from './routes/fanzTrustRoutes';
 
 export function setupAdvancedRoutes(app: Express) {
   setupNFTRoutes(app);
@@ -5603,6 +5604,9 @@ export function setupAdvancedRoutes(app: Express) {
   setupAgeVerificationRoutes(app);
   setupAnalyticsDashboardRoutes(app);
   setupAIAnalysisRoutes(app);
+  
+  // FanzTrust™ Financial Ledger System
+  registerFanzTrustRoutes(app);
   
   // AI-Powered Help & Support System
   registerHelpSupportRoutes(app);
@@ -5626,4 +5630,5 @@ export function setupAdvancedRoutes(app: Express) {
   app.use('/api/monitoring', monitoringDashboardRoutes);
   
   console.log('🚀 Advanced features registered: PWA (Progressive Web App), NFT, AI Feeds, Analytics, Age Verification, AI Help & Support System, API Gateway & Service Mesh, Infrastructure Management, Security & Compliance, Mobile Backend (ClubCentral), Real-Time Monitoring');
+  console.log('💎 FanzTrust™ Financial Ledger System registered: FanzWallet, FanzLedger, FanzCredit, FanzToken, FanzCard, FanzRevenue');
 }

@@ -1,6 +1,6 @@
 # Overview
 
-BoyFanz is a creator economy platform enabling content creators to upload, monetize, and connect with fans in a compliant and secure environment. Styled with a dark, edgy neon aesthetic featuring vibrant red and golden accents ("Every Man's Playground"), it offers comprehensive tools for media management, payment processing, KYC compliance, moderation, and real-time notifications, built specifically for the Replit ecosystem. The platform aims to provide a robust and engaging experience for both creators and their audience.
+BoyFanz is a comprehensive financial ecosystem empire and creator economy platform featuring FanzTrust™ payment verification system with multiple financial products (FanzPay, FanzRev, FanzToken, FanzCoin, FanzMoney, FanzCredit, FanzCard, FanzMoneyCenter Dashboard). Styled with an underground fight club aesthetic with glassmorphism UI, exact logo-matching colors (#ff0000 bright red neon, #d4a959 warm golden-bronze), and complete creator economy infrastructure. The platform enables content creators to upload, monetize, and connect with fans in a compliant and secure environment, offering state-of-the-art financial tools never before seen in creator platforms.
 
 # User Preferences
 
@@ -42,9 +42,15 @@ Preferred communication style: Simple, everyday language.
 - **Processing**: Server-side image processing with Sharp.js for thumbnails.
 - **Access Control**: Object-level ACLs, metadata-based permissions.
 
-## Payment System
-- **Architecture**: Provider-agnostic adapter pattern.
-- **Features**: Request-based payout system, tax reporting, and audit trail support.
+## Financial Ecosystem - FanzTrust™
+- **FanzWallet**: Multi-currency digital wallets with balance tracking (available, pending, held)
+- **FanzLedger**: Double-entry bookkeeping transaction ledger with full audit trail
+- **FanzCredit**: Credit lines and lending with trust scoring, collateral support, and automated interest
+- **FanzToken & FanzCoin**: Platform token economy (FanzCoin, FanzToken, loyalty, rewards, utility tokens)
+- **FanzCard**: Virtual debit cards with spend controls and merchant category restrictions
+- **FanzRevenue**: Multi-party revenue sharing, collaborative payouts, and automated royalty splits
+- **FanzPay**: Instant settlement payment processing
+- **FanzMoneyCenter**: Unified financial control dashboard with real-time analytics
 
 ## Real-time Features
 - **Components**: WebSocket server, user presence tracking, multi-channel notification system, admin broadcasting.

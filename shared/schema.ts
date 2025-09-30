@@ -7820,6 +7820,421 @@ export type InsertReferralAnalytics = z.infer<
 >;
 export type ReferralAnalytics = typeof referralAnalytics.$inferSelect;
 
+// ===== FANZTRUST™ FINANCIAL LEDGER CORE =====
+// Comprehensive financial ecosystem: wallets, ledger, credit, tokens, cards
+
+// Wallet statuses and types
+export const walletStatusEnum = pgEnum("wallet_status", [
+  "active",
+  "frozen",
+  "suspended",
+  "closed",
+]);
+export const walletTypeEnum = pgEnum("wallet_type", [
+  "standard",
+  "business",
+  "creator",
+  "escrow",
+  "rewards",
+]);
+
+// FanzWallet - User digital wallets with multi-currency support
+export const fanzWallets = pgTable(
+  "fanz_wallets",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: walletTypeEnum("type").default("standard").notNull(),
+    status: walletStatusEnum("status").default("active").notNull(),
+    
+    // Balances in cents
+    availableBalanceCents: bigint("available_balance_cents", { mode: "number" }).default(0),
+    pendingBalanceCents: bigint("pending_balance_cents", { mode: "number" }).default(0),
+    heldBalanceCents: bigint("held_balance_cents", { mode: "number" }).default(0),
+    totalBalanceCents: bigint("total_balance_cents", { mode: "number" }).default(0),
+    
+    currency: varchar("currency").default("USD"),
+    
+    // Limits and compliance
+    dailyLimitCents: bigint("daily_limit_cents", { mode: "number" }).default(100000000),
+    monthlyLimitCents: bigint("monthly_limit_cents", { mode: "number" }).default(500000000),
+    lifetimeLimitCents: bigint("lifetime_limit_cents", { mode: "number" }),
+    
+    // Metadata
+    metadata: jsonb("metadata").default({}),
+    freezeReason: text("freeze_reason"),
+    frozenAt: timestamp("frozen_at"),
+    
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_fanz_wallets_user").on(table.userId),
+    index("idx_fanz_wallets_status").on(table.status),
+    index("idx_fanz_wallets_type").on(table.type),
+  ],
+);
+
+// Ledger entry types
+export const ledgerEntryTypeEnum = pgEnum("ledger_entry_type", [
+  "debit",
+  "credit",
+]);
+export const ledgerTransactionTypeEnum = pgEnum("ledger_transaction_type", [
+  "payment",
+  "refund",
+  "chargeback",
+  "transfer",
+  "fee",
+  "payout",
+  "deposit",
+  "reward",
+  "credit_issued",
+  "credit_repaid",
+  "token_purchase",
+  "token_redemption",
+]);
+
+// FanzLedger - Double-entry transaction ledger
+export const fanzLedger = pgTable(
+  "fanz_ledger",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    
+    // Transaction linking
+    transactionId: varchar("transaction_id").notNull().unique(),
+    parentTransactionId: varchar("parent_transaction_id"),
+    
+    // Wallet and user context
+    walletId: varchar("wallet_id")
+      .notNull()
+      .references(() => fanzWallets.id),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id),
+    
+    // Entry details
+    entryType: ledgerEntryTypeEnum("entry_type").notNull(),
+    transactionType: ledgerTransactionTypeEnum("transaction_type").notNull(),
+    
+    // Amounts in cents
+    amountCents: bigint("amount_cents", { mode: "number" }).notNull(),
+    balanceAfterCents: bigint("balance_after_cents", { mode: "number" }).notNull(),
+    
+    currency: varchar("currency").default("USD"),
+    
+    // References
+    referenceType: varchar("reference_type"), // payment, subscription, tip, etc.
+    referenceId: varchar("reference_id"),
+    
+    // Metadata
+    description: text("description"),
+    metadata: jsonb("metadata").default({}),
+    
+    // Audit
+    ipAddress: inet("ip_address"),
+    userAgent: text("user_agent"),
+    
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_fanz_ledger_wallet").on(table.walletId),
+    index("idx_fanz_ledger_user").on(table.userId),
+    index("idx_fanz_ledger_transaction").on(table.transactionId),
+    index("idx_fanz_ledger_type").on(table.transactionType),
+    index("idx_fanz_ledger_created").on(table.createdAt.desc()),
+  ],
+);
+
+// Credit line statuses
+export const creditLineStatusEnum = pgEnum("credit_line_status", [
+  "pending",
+  "active",
+  "frozen",
+  "defaulted",
+  "closed",
+]);
+
+// FanzCredit - Credit lines and lending
+export const fanzCreditLines = pgTable(
+  "fanz_credit_lines",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    
+    status: creditLineStatusEnum("status").default("pending").notNull(),
+    
+    // Credit limits in cents
+    creditLimitCents: bigint("credit_limit_cents", { mode: "number" }).notNull(),
+    availableCreditCents: bigint("available_credit_cents", { mode: "number" }).notNull(),
+    usedCreditCents: bigint("used_credit_cents", { mode: "number" }).default(0),
+    
+    // Interest and fees
+    interestRateBps: integer("interest_rate_bps").default(0), // basis points (100 = 1%)
+    lateFeePercentBps: integer("late_fee_percent_bps").default(500), // 5%
+    
+    // Trust scoring
+    trustScore: integer("trust_score").default(0),
+    riskTier: varchar("risk_tier").default("standard"), // low, standard, high
+    
+    // Payment terms
+    paymentDueDays: integer("payment_due_days").default(30),
+    gracePeriodDays: integer("grace_period_days").default(7),
+    
+    // Collateral (optional)
+    collateralType: varchar("collateral_type"), // fan_stake, creator_revenue, token_pledge
+    collateralValueCents: bigint("collateral_value_cents", { mode: "number" }),
+    collateralMetadata: jsonb("collateral_metadata").default({}),
+    
+    // Lifecycle
+    approvedAt: timestamp("approved_at"),
+    approvedBy: varchar("approved_by").references(() => users.id),
+    closedAt: timestamp("closed_at"),
+    closedReason: text("closed_reason"),
+    
+    metadata: jsonb("metadata").default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_fanz_credit_lines_user").on(table.userId),
+    index("idx_fanz_credit_lines_status").on(table.status),
+    index("idx_fanz_credit_lines_trust_score").on(table.trustScore),
+  ],
+);
+
+// Token types
+export const tokenTypeEnum = pgEnum("token_type", [
+  "fanzcoin",
+  "fanztoken",
+  "loyalty",
+  "reward",
+  "utility",
+]);
+
+// FanzToken - Platform token economy
+export const fanzTokens = pgTable(
+  "fanz_tokens",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    
+    tokenType: tokenTypeEnum("token_type").notNull(),
+    
+    // Balance
+    balance: bigint("balance", { mode: "number" }).default(0),
+    lockedBalance: bigint("locked_balance", { mode: "number" }).default(0),
+    
+    // Value mapping (cents per token)
+    valueCentsPerToken: integer("value_cents_per_token").default(100), // 1 token = $1 default
+    
+    // Rewards multipliers
+    rewardsMultiplier: decimal("rewards_multiplier", { precision: 5, scale: 2 }).default("1.00"),
+    
+    // Lifecycle
+    expiresAt: timestamp("expires_at"),
+    lastTransactionAt: timestamp("last_transaction_at"),
+    
+    metadata: jsonb("metadata").default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_fanz_tokens_user").on(table.userId),
+    index("idx_fanz_tokens_type").on(table.tokenType),
+    unique().on(table.userId, table.tokenType),
+  ],
+);
+
+// Card statuses
+export const cardStatusEnum = pgEnum("card_status", [
+  "pending",
+  "active",
+  "frozen",
+  "cancelled",
+  "expired",
+]);
+
+// FanzCard - Virtual debit cards
+export const fanzCards = pgTable(
+  "fanz_cards",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    walletId: varchar("wallet_id")
+      .notNull()
+      .references(() => fanzWallets.id),
+    
+    // Card details (encrypted)
+    cardNumberHash: varchar("card_number_hash").notNull(),
+    last4: varchar("last_4").notNull(),
+    expiryMonth: integer("expiry_month").notNull(),
+    expiryYear: integer("expiry_year").notNull(),
+    cvvHash: varchar("cvv_hash").notNull(),
+    
+    // Card branding
+    cardholderName: varchar("cardholder_name").notNull(),
+    cardType: varchar("card_type").default("virtual"), // virtual, physical
+    cardBrand: varchar("card_brand").default("fanzcard"),
+    
+    status: cardStatusEnum("status").default("pending").notNull(),
+    
+    // Limits and controls
+    dailySpendLimitCents: bigint("daily_spend_limit_cents", { mode: "number" }),
+    monthlySpendLimitCents: bigint("monthly_spend_limit_cents", { mode: "number" }),
+    perTransactionLimitCents: bigint("per_transaction_limit_cents", { mode: "number" }),
+    
+    // Usage tracking
+    totalSpentCents: bigint("total_spent_cents", { mode: "number" }).default(0),
+    totalTransactions: integer("total_transactions").default(0),
+    lastUsedAt: timestamp("last_used_at"),
+    
+    // Controls
+    allowedMerchantCategories: text("allowed_merchant_categories").array(),
+    blockedMerchantCategories: text("blocked_merchant_categories").array(),
+    allowedCountries: text("allowed_countries").array(),
+    
+    // Provider integration
+    providerCardId: varchar("provider_card_id"),
+    providerMetadata: jsonb("provider_metadata").default({}),
+    
+    metadata: jsonb("metadata").default({}),
+    activatedAt: timestamp("activated_at"),
+    cancelledAt: timestamp("cancelled_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_fanz_cards_user").on(table.userId),
+    index("idx_fanz_cards_wallet").on(table.walletId),
+    index("idx_fanz_cards_status").on(table.status),
+    index("idx_fanz_cards_last4").on(table.last4),
+  ],
+);
+
+// Revenue split types
+export const revenueSplitTypeEnum = pgEnum("revenue_split_type", [
+  "collaborative",
+  "affiliate",
+  "referral",
+  "platform_fee",
+  "royalty",
+]);
+
+// FanzRevenue - Revenue sharing and collaborative payouts
+export const fanzRevenueShares = pgTable(
+  "fanz_revenue_shares",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    
+    // Content/transaction reference
+    referenceType: varchar("reference_type").notNull(), // post, subscription, product, etc.
+    referenceId: varchar("reference_id").notNull(),
+    
+    splitType: revenueSplitTypeEnum("split_type").notNull(),
+    
+    // Revenue details
+    totalRevenueCents: bigint("total_revenue_cents", { mode: "number" }).notNull(),
+    
+    // Split configuration
+    splits: jsonb("splits").notNull(), // [{ userId, percentage, amountCents }]
+    
+    // Status
+    status: varchar("status").default("pending"), // pending, processing, completed, failed
+    processedAt: timestamp("processed_at"),
+    
+    metadata: jsonb("metadata").default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_fanz_revenue_shares_reference").on(table.referenceType, table.referenceId),
+    index("idx_fanz_revenue_shares_type").on(table.splitType),
+    index("idx_fanz_revenue_shares_status").on(table.status),
+  ],
+);
+
+// Insert schemas
+export const insertFanzWalletSchema = createInsertSchema(fanzWallets).omit({
+  id: true,
+  totalBalanceCents: true,
+  frozenAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFanzLedgerSchema = createInsertSchema(fanzLedger).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertFanzCreditLineSchema = createInsertSchema(fanzCreditLines).omit({
+  id: true,
+  availableCreditCents: true,
+  usedCreditCents: true,
+  approvedAt: true,
+  closedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFanzTokenSchema = createInsertSchema(fanzTokens).omit({
+  id: true,
+  lastTransactionAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFanzCardSchema = createInsertSchema(fanzCards).omit({
+  id: true,
+  totalSpentCents: true,
+  totalTransactions: true,
+  lastUsedAt: true,
+  activatedAt: true,
+  cancelledAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFanzRevenueShareSchema = createInsertSchema(fanzRevenueShares).omit({
+  id: true,
+  processedAt: true,
+  createdAt: true,
+});
+
+// Types
+export type FanzWallet = typeof fanzWallets.$inferSelect;
+export type InsertFanzWallet = z.infer<typeof insertFanzWalletSchema>;
+export type FanzLedger = typeof fanzLedger.$inferSelect;
+export type InsertFanzLedger = z.infer<typeof insertFanzLedgerSchema>;
+export type FanzCreditLine = typeof fanzCreditLines.$inferSelect;
+export type InsertFanzCreditLine = z.infer<typeof insertFanzCreditLineSchema>;
+export type FanzToken = typeof fanzTokens.$inferSelect;
+export type InsertFanzToken = z.infer<typeof insertFanzTokenSchema>;
+export type FanzCard = typeof fanzCards.$inferSelect;
+export type InsertFanzCard = z.infer<typeof insertFanzCardSchema>;
+export type FanzRevenueShare = typeof fanzRevenueShares.$inferSelect;
+export type InsertFanzRevenueShare = z.infer<typeof insertFanzRevenueShareSchema>;
+
 // ===== PWA EXTENSIONS =====
 // Import PWA schemas
 export * from "./pwaPatch";
