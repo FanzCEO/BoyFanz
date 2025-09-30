@@ -44,12 +44,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Financial Ecosystem - FanzTrust™
 - **FanzWallet**: Multi-currency digital wallets with balance tracking (available, pending, held)
-- **FanzLedger**: Double-entry bookkeeping transaction ledger with full audit trail
+- **FanzLedger**: Double-entry bookkeeping transaction ledger with full audit trail (includes 'withdrawal' transaction type)
+- **FanzPay**: Instant settlement payment processing system
+  - **Deposits**: External payment → FanzWallet credit via 16 payment providers
+  - **Withdrawals**: FanzWallet debit → External payout via 7 payout providers
+  - **Instant Transfers**: P2P, fan-to-creator, real-time FanzWallet transfers
+  - **Providers**: 16 payment (8 card, 4 crypto, 2 bank, 2 carrier) + 7 payout (eWallet, bank, crypto)
+  - **Adult-Friendly Processors**: CCBill, Segpay, Epoch, Verotel, VendoServices, CommerceGate, NETbilling, CentroBill, NOWPayments, CoinsPaid, B2BinPay, CoinPayments, ACH, SEPA, Bango, Boku
+  - **Creator Payouts**: Paxum, CosmoPayment, ePayService, iPayout, MassPay, Wise, Payoneer
 - **FanzCredit**: Credit lines and lending with trust scoring, collateral support, and automated interest
 - **FanzToken & FanzCoin**: Platform token economy (FanzCoin, FanzToken, loyalty, rewards, utility tokens)
 - **FanzCard**: Virtual debit cards with spend controls and merchant category restrictions
 - **FanzRevenue**: Multi-party revenue sharing, collaborative payouts, and automated royalty splits
-- **FanzPay**: Instant settlement payment processing
 - **FanzMoneyCenter**: Unified financial control dashboard with real-time analytics
 
 ## Real-time Features

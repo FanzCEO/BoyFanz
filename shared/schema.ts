@@ -7892,6 +7892,7 @@ export const ledgerTransactionTypeEnum = pgEnum("ledger_transaction_type", [
   "fee",
   "payout",
   "deposit",
+  "withdrawal",
   "reward",
   "credit_issued",
   "credit_repaid",

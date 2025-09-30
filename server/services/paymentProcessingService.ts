@@ -1173,6 +1173,76 @@ export class PaymentProcessingService {
       return { success: false, message: 'Payout webhook processing failed' };
     }
   }
+
+  // ===== PROVIDER LISTING METHODS =====
+
+  /**
+   * Get all available payment providers for deposits
+   */
+  getAvailablePaymentProviders(): Array<{
+    id: string;
+    name: string;
+    type: string;
+    currencies: string[];
+    feeBps: number;
+  }> {
+    const providers: Array<{
+      id: string;
+      name: string;
+      type: string;
+      currencies: string[];
+      feeBps: number;
+    }> = [];
+
+    for (const [id, provider] of this.paymentProviders) {
+      providers.push({
+        id,
+        name: provider.name,
+        type: provider.type,
+        currencies: provider.supportedCurrencies,
+        feeBps: provider.processingFeeBps,
+      });
+    }
+
+    return providers;
+  }
+
+  /**
+   * Get all available payout providers for withdrawals
+   */
+  getAvailablePayoutProviders(): Array<{
+    id: string;
+    name: string;
+    type: string;
+    currencies: string[];
+    countries: string[];
+    minimumCents: number;
+    feeBps: number;
+  }> {
+    const providers: Array<{
+      id: string;
+      name: string;
+      type: string;
+      currencies: string[];
+      countries: string[];
+      minimumCents: number;
+      feeBps: number;
+    }> = [];
+
+    for (const [id, provider] of this.payoutProviders) {
+      providers.push({
+        id,
+        name: provider.name,
+        type: provider.type,
+        currencies: provider.supportedCurrencies,
+        countries: provider.supportedCountries,
+        minimumCents: provider.minimumPayoutCents,
+        feeBps: provider.processingFeeBps,
+      });
+    }
+
+    return providers;
+  }
 }
 
 // Type definitions
