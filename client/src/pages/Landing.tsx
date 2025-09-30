@@ -1,20 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Users, Star, LogIn, GraduationCap, MessageSquare, Zap } from "lucide-react";
+import { Users, Star, LogIn, GraduationCap, MessageSquare, Zap, Upload, Shield, DollarSign, TrendingUp, Bolt } from "lucide-react";
 import AIChatBot from "@/components/AIChatBot";
+import { useLocation } from "wouter";
 
 export default function Landing() {
+  const [, setLocation] = useLocation();
+
   const handleLogin = () => {
-    window.location.href = "/auth/login";
+    setLocation("/auth/login");
   };
 
   const handleFanzSignup = () => {
-    window.location.href = "/auth/fanz-signup";
+    setLocation("/auth/fanz-signup");
   };
 
   const handleStarzSignup = () => {
-    window.location.href = "/auth/starz-signup";
+    setLocation("/auth/starz-signup");
   };
 
   return (
@@ -121,7 +124,7 @@ export default function Landing() {
             <Card className="bg-card border-border">
               <CardHeader>
                 <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <i className="fas fa-cloud-upload-alt text-primary text-xl"></i>
+                  <Upload className="text-primary h-6 w-6" />
                 </div>
                 <CardTitle className="seedy-neon-red">Secure Media Upload</CardTitle>
                 <CardDescription className="seedy-neon-white">
@@ -133,7 +136,7 @@ export default function Landing() {
             <Card className="bg-card border-border">
               <CardHeader>
                 <div className="h-12 w-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
-                  <i className="fas fa-shield-alt text-secondary text-xl"></i>
+                  <Shield className="text-secondary h-6 w-6" />
                 </div>
                 <CardTitle className="seedy-neon-blue">KYC Compliance</CardTitle>
                 <CardDescription className="seedy-neon-white">
@@ -145,7 +148,7 @@ export default function Landing() {
             <Card className="bg-card border-border">
               <CardHeader>
                 <div className="h-12 w-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
-                  <i className="fas fa-dollar-sign text-accent text-xl"></i>
+                  <DollarSign className="text-accent h-6 w-6" />
                 </div>
                 <CardTitle className="seedy-neon-golden">Instant Payouts</CardTitle>
                 <CardDescription className="seedy-neon-white">
@@ -157,7 +160,7 @@ export default function Landing() {
             <Card className="bg-card border-border">
               <CardHeader>
                 <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <i className="fas fa-users text-primary text-xl"></i>
+                  <Users className="text-primary h-6 w-6" />
                 </div>
                 <CardTitle className="seedy-neon-red">Fan Management</CardTitle>
                 <CardDescription className="seedy-neon-white">
@@ -169,7 +172,7 @@ export default function Landing() {
             <Card className="bg-card border-border">
               <CardHeader>
                 <div className="h-12 w-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
-                  <i className="fas fa-chart-line text-secondary text-xl"></i>
+                  <TrendingUp className="text-secondary h-6 w-6" />
                 </div>
                 <CardTitle className="seedy-neon-blue">Analytics & Insights</CardTitle>
                 <CardDescription className="seedy-neon-white">
@@ -181,7 +184,7 @@ export default function Landing() {
             <Card className="bg-card border-border">
               <CardHeader>
                 <div className="h-12 w-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
-                  <i className="fas fa-bolt text-accent text-xl"></i>
+                  <Bolt className="text-accent h-6 w-6" />
                 </div>
                 <CardTitle className="seedy-neon-golden">Real-time Updates</CardTitle>
                 <CardDescription className="seedy-neon-white">
