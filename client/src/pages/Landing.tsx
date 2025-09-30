@@ -27,56 +27,60 @@ export default function Landing() {
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
+            {/* Stylized Logo - Neon Text */}
             <div className="flex justify-center mb-12">
-              <img 
-                src="/boyfanz-logo.png" 
-                alt="BoyFanz - Every Man's Playground logo" 
-                className="h-48 md:h-64 w-auto glow-effect rounded-lg transform hover:scale-105 transition-all duration-300"
-                style={{
-                  filter: 'drop-shadow(0 0 20px rgba(255, 0, 0, 0.4)) drop-shadow(0 0 40px rgba(255, 0, 0, 0.2))',
-                  boxShadow: '0 0 30px rgba(255, 0, 0, 0.3), 0 0 60px rgba(255, 0, 0, 0.1)'
-                }}
-                role="img"
+              <div 
+                className="glass-neon-red rounded-2xl px-8 py-6 transform hover:scale-105 transition-all duration-300"
                 data-testid="boyfanz-logo-enhanced"
-              />
+              >
+                <h1 className="text-8xl md:text-9xl neon-display font-black mb-2 logo-flicker">
+                  BOYFANZ
+                </h1>
+                <div className="h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-70 mb-3"></div>
+                <p className="text-2xl md:text-3xl neon-display-gold tracking-widest">
+                  EVERY MAN'S PLAYGROUND
+                </p>
+              </div>
             </div>
             <p className="text-2xl mb-8 max-w-2xl mx-auto">
               <span className="text-5xl font-display font-black seedy-neon-golden block mb-3 tracking-wide uppercase">Every Man's Playground</span>
               <span className="font-body seedy-neon-white">The ultimate creator economy platform. Upload, monetize, and connect with your fans 
               while maintaining full compliance and security.</span>
             </p>
-            {/* Dual Sign-Up Sections */}
+            {/* Dual Sign-Up Sections - Glass Morphism */}
             <div className="flex flex-col md:flex-row gap-6 justify-center items-center mb-8">
-              {/* Fan Sign Up - Blood Red */}
-              <div className="text-center p-6 rounded-lg bg-card/40 border border-red-500/30 glow-effect hover:bg-card/60 transition-all duration-300">
-                <Users className="h-8 w-8 text-red-500 mx-auto mb-3" />
-                <h3 className="text-xl font-display seedy-neon-red mb-2">JOIN AS A FAN</h3>
-                <p className="text-sm seedy-neon-white mb-4 max-w-xs">
+              {/* Fan Sign Up - Blood Red Glass */}
+              <div className="text-center p-8 rounded-2xl glass-neon-red hover:glass-card transition-all duration-300 min-w-[320px]">
+                <Users className="h-10 w-10 text-red-500 mx-auto mb-4" style={{
+                  filter: 'drop-shadow(0 0 8px rgba(255, 0, 0, 0.6))'
+                }} />
+                <h3 className="text-2xl font-display seedy-neon-red mb-3 tracking-wider">JOIN AS A FAN</h3>
+                <p className="text-sm seedy-neon-white mb-6 max-w-xs mx-auto leading-relaxed">
                   Discover and support your favorite creators. Access exclusive content and connect with the community.
                 </p>
                 <Button 
                   onClick={handleFanzSignup}
                   size="lg"
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold neon-button"
+                  className="w-full glass-button text-red-400 font-semibold text-lg"
                   data-testid="fan-signup-button"
                 >
                   Fan Sign Up
                 </Button>
               </div>
 
-              {/* Star Sign Up - Gold */}
-              <div className="text-center p-6 rounded-lg bg-card/40 border border-yellow-500/30 hover:bg-card/60 transition-all duration-300" style={{
-                boxShadow: '0 0 15px rgba(212, 175, 55, 0.2)'
-              }}>
-                <Star className="h-8 w-8 text-yellow-500 mx-auto mb-3" />
-                <h3 className="text-xl font-display seedy-neon-golden mb-2">BECOME A STAR</h3>
-                <p className="text-sm seedy-neon-white mb-4 max-w-xs">
+              {/* Star Sign Up - Gold Glass */}
+              <div className="text-center p-8 rounded-2xl glass-neon-gold hover:glass-card transition-all duration-300 min-w-[320px]">
+                <Star className="h-10 w-10 text-yellow-500 mx-auto mb-4" style={{
+                  filter: 'drop-shadow(0 0 8px rgba(212, 175, 55, 0.6))'
+                }} />
+                <h3 className="text-2xl font-display seedy-neon-golden mb-3 tracking-wider">BECOME A STAR</h3>
+                <p className="text-sm seedy-neon-white mb-6 max-w-xs mx-auto leading-relaxed">
                   Monetize your content and build your empire. Professional tools for serious creators.
                 </p>
                 <Button 
                   onClick={handleStarzSignup}
                   size="lg"
-                  className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-black font-semibold gold-button"
+                  className="w-full glass-button border-yellow-500/50 text-yellow-400 font-semibold text-lg"
                   data-testid="star-signup-button"
                 >
                   Star Sign Up
@@ -84,16 +88,16 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* Dedicated Login Area */}
+            {/* Dedicated Login Area - Glass */}
             <div className="flex justify-center">
               <Button 
                 onClick={handleLogin}
                 variant="outline"
                 size="lg"
-                className="border-red-500/50 hover:bg-red-500/10 text-red-400 hover:text-red-300 font-semibold px-8 py-3 transition-all duration-300"
+                className="glass-panel border-red-500/50 hover:glass-card text-red-400 hover:text-red-300 font-semibold px-10 py-4 text-lg transition-all duration-300"
                 data-testid="login-button"
               >
-                <LogIn className="h-5 w-5 mr-2" />
+                <LogIn className="h-6 w-6 mr-3" />
                 Already Have An Account? Login
               </Button>
             </div>

@@ -35,7 +35,7 @@ const gatewayConfig = GatewayConfigSchema.parse({
     enabled: true,
     algorithm: 'round_robin',
     healthCheck: {
-      enabled: true,
+      enabled: false, // DISABLED: Fake services causing spam logs
       endpoint: '/health',
       interval: 30, // seconds
       timeout: 5, // seconds

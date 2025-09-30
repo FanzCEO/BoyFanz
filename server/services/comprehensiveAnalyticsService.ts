@@ -130,9 +130,10 @@ class ComprehensiveAnalyticsService {
   private lastAlerts = new Map<string, Date>();
 
   constructor() {
-    this.initializeDefaultAlerts();
-    this.startPerformanceMonitoring();
-    this.startEventProcessing();
+    // DISABLED: Fake monitoring service causing spam alerts and database errors
+    // this.initializeDefaultAlerts();
+    // this.startPerformanceMonitoring();
+    // this.startEventProcessing();
   }
 
   // ===== EVENT TRACKING =====
