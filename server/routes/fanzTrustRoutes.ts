@@ -1,5 +1,6 @@
 import { Express, Request, Response } from 'express';
 import { fanzTrustService } from '../services/fanzTrustService';
+import { fanzCard } from '../services/fanzCardService';
 import { isAuthenticated } from '../middleware/auth';
 import { z } from 'zod';
 
@@ -313,6 +314,13 @@ export function registerFanzTrustRoutes(app: Express) {
         })
       );
       
+      // Get credit lines
+      const creditLines = await fanzTrustService.getUserCreditLines(userId);
+      
+      // Get virtual cards
+      const cardsResult = await fanzCard.getUserCards(userId);
+      const cards = cardsResult.success ? cardsResult.cards : [];
+      
       res.json({
         wallet: {
           ...wallet,
@@ -325,6 +333,22 @@ export function registerFanzTrustRoutes(app: Express) {
         stats,
         recentTransactions: transactions,
         tokens,
+        creditLines: creditLines.map(cl => ({
+          ...cl,
+          creditLimitCents: Number(cl.creditLimitCents),
+          balanceCents: Number(cl.balanceCents),
+          availableCreditCents: Number(cl.availableCreditCents),
+        })),
+        cards: cards.map(card => ({
+          id: card.id,
+          lastFour: card.lastFour,
+          status: card.status,
+          nickname: card.nickname,
+          perTransactionLimitCents: Number(card.perTransactionLimitCents),
+          dailyLimitCents: Number(card.dailyLimitCents),
+          monthlyLimitCents: Number(card.monthlyLimitCents),
+          createdAt: card.createdAt,
+        })),
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });

@@ -1,10 +1,9 @@
 import { Router } from "express";
-import { FanzCardService } from "../services/fanzCardService";
+import { fanzCard } from "../services/fanzCardService";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 
 const router = Router();
-const fanzCard = new FanzCardService();
 
 /**
  * Authorize a transaction (webhook endpoint for card processor)

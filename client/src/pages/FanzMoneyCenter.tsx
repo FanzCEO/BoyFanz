@@ -42,7 +42,7 @@ export default function FanzMoneyCenter() {
     );
   }
 
-  const { wallet, balance, stats, recentTransactions, tokens } = dashboardData || {};
+  const { wallet, balance, stats, recentTransactions, tokens, creditLines, cards } = dashboardData || {};
 
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -345,12 +345,78 @@ export default function FanzMoneyCenter() {
                   <Shield className="w-5 h-5 text-[#ff0000]" />
                   FanzCredit
                 </CardTitle>
-                <CardDescription>Credit lines and lending</CardDescription>
+                <CardDescription>Your credit lines and lending</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-12 text-zinc-500">
-                  Credit management coming soon...
-                </div>
+              <CardContent className="space-y-4">
+                {creditLines && creditLines.length > 0 ? (
+                  <>
+                    {creditLines.map((credit: any) => (
+                      <div key={credit.id} className="p-4 rounded-lg border border-zinc-800 bg-zinc-900/30">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <div className="text-sm text-zinc-400">Credit Line</div>
+                            <div className="text-xl font-bold text-white mt-1">
+                              {formatCurrency(credit.creditLimitCents)}
+                            </div>
+                          </div>
+                          <Badge 
+                            variant="secondary" 
+                            className={`${
+                              credit.status === 'active' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                              credit.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' :
+                              'bg-red-500/20 text-red-400 border-red-500/30'
+                            }`}
+                            data-testid={`credit-status-${credit.id}`}
+                          >
+                            {credit.status}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 text-sm">
+                          <div>
+                            <div className="text-zinc-500">Available</div>
+                            <div className="font-semibold text-green-400">
+                              {formatCurrency(Number(credit.availableCreditCents))}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-zinc-500">Used</div>
+                            <div className="font-semibold text-red-400">
+                              {formatCurrency(Number(credit.balanceCents))}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-zinc-500">APR</div>
+                            <div className="font-semibold text-zinc-300">{credit.interestRateApr}%</div>
+                          </div>
+                        </div>
+                        {credit.collateralType && (
+                          <div className="mt-3 pt-3 border-t border-zinc-800 text-xs text-zinc-500">
+                            Collateral: {credit.collateralType} ({formatCurrency(Number(credit.collateralValueCents) || 0)})
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    <Button 
+                      className="w-full bg-[#ff0000] hover:bg-[#cc0000] text-white"
+                      data-testid="button-apply-credit"
+                    >
+                      <Shield className="w-4 h-4 mr-2" />
+                      Apply for Credit
+                    </Button>
+                  </>
+                ) : (
+                  <div className="text-center py-12">
+                    <Shield className="w-12 h-12 mx-auto mb-4 text-zinc-600" />
+                    <p className="text-zinc-500 mb-4">No credit lines yet</p>
+                    <Button 
+                      className="bg-[#ff0000] hover:bg-[#cc0000] text-white"
+                      data-testid="button-apply-credit-empty"
+                    >
+                      <Shield className="w-4 h-4 mr-2" />
+                      Apply for Credit
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -363,12 +429,73 @@ export default function FanzMoneyCenter() {
                   <CreditCard className="w-5 h-5 text-[#d4a959]" />
                   FanzCard
                 </CardTitle>
-                <CardDescription>Virtual debit cards</CardDescription>
+                <CardDescription>Your virtual debit cards</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-12 text-zinc-500">
-                  Card management coming soon...
-                </div>
+              <CardContent className="space-y-4">
+                {cards && cards.length > 0 ? (
+                  <>
+                    {cards.map((card: any) => (
+                      <div key={card.id} className="relative overflow-hidden p-6 rounded-2xl bg-gradient-to-br from-[#ff0000]/20 via-zinc-900 to-[#d4a959]/20 border border-[#ff0000]/30">
+                        <div className="relative z-10">
+                          <div className="flex justify-between items-start mb-6">
+                            <div>
+                              <div className="text-xs text-zinc-400 uppercase tracking-wider mb-1">FanzCard</div>
+                              <div className="text-sm text-zinc-500">{card.nickname || 'Virtual Debit Card'}</div>
+                            </div>
+                            <Badge 
+                              variant="secondary" 
+                              className={`${
+                                card.status === 'active' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                                card.status === 'frozen' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
+                                'bg-red-500/20 text-red-400 border-red-500/30'
+                              }`}
+                              data-testid={`card-status-${card.id}`}
+                            >
+                              {card.status}
+                            </Badge>
+                          </div>
+                          <div className="text-2xl font-['Courier_New'] tracking-widest text-white mb-6">
+                            •••• •••• •••• {card.lastFour}
+                          </div>
+                          <div className="grid grid-cols-3 gap-4 text-xs">
+                            <div>
+                              <div className="text-zinc-500 mb-1">Per Transaction</div>
+                              <div className="text-white font-semibold">{formatCurrency(card.perTransactionLimitCents)}</div>
+                            </div>
+                            <div>
+                              <div className="text-zinc-500 mb-1">Daily Limit</div>
+                              <div className="text-white font-semibold">{formatCurrency(card.dailyLimitCents)}</div>
+                            </div>
+                            <div>
+                              <div className="text-zinc-500 mb-1">Monthly Limit</div>
+                              <div className="text-white font-semibold">{formatCurrency(card.monthlyLimitCents)}</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#ff0000]/10 to-transparent rounded-full blur-3xl"></div>
+                      </div>
+                    ))}
+                    <Button 
+                      className="w-full bg-[#d4a959] hover:bg-[#b8925e] text-white"
+                      data-testid="button-create-card"
+                    >
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Create New Card
+                    </Button>
+                  </>
+                ) : (
+                  <div className="text-center py-12">
+                    <CreditCard className="w-12 h-12 mx-auto mb-4 text-zinc-600" />
+                    <p className="text-zinc-500 mb-4">No virtual cards yet</p>
+                    <Button 
+                      className="bg-[#d4a959] hover:bg-[#b8925e] text-white"
+                      data-testid="button-create-card-empty"
+                    >
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Create Your First Card
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

@@ -656,3 +656,6 @@ export class FanzCardService {
     };
   }
 }
+
+// Export singleton instance
+export const fanzCard = new FanzCardService();
