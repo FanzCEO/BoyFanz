@@ -5599,6 +5599,7 @@ import apiGatewayRoutes from './routes/apiGatewayRoutes.js';
 import { registerFanzTrustRoutes } from './routes/fanzTrustRoutes';
 import fanzPayRoutes from './routes/fanzPayRoutes';
 import fanzCreditRoutes from './routes/fanzCreditRoutes';
+import fanzTokenRoutes from './routes/fanzTokenRoutes';
 
 export function setupAdvancedRoutes(app: Express) {
   setupNFTRoutes(app);
@@ -5615,6 +5616,9 @@ export function setupAdvancedRoutes(app: Express) {
   
   // FanzCredit - Credit Lines & Trust Scoring
   app.use('/api/fanz-credit', isAuthenticated, fanzCreditRoutes);
+  
+  // FanzToken - Platform Token Economy
+  app.use('/api/fanz-token', isAuthenticated, fanzTokenRoutes);
   
   // AI-Powered Help & Support System
   registerHelpSupportRoutes(app);
@@ -5641,4 +5645,5 @@ export function setupAdvancedRoutes(app: Express) {
   console.log('💎 FanzTrust™ Financial Ledger System registered: FanzWallet, FanzLedger, FanzCredit, FanzToken, FanzCard, FanzRevenue');
   console.log('💳 FanzPay Payment Processing System registered: Deposits, Withdrawals, Instant Transfers, 12+ Providers');
   console.log('💰 FanzCredit System registered: Credit Lines, Trust Scoring, Automated Approvals, Collateral Management');
+  console.log('🪙 FanzToken & FanzCoin Economy registered: Mint/Burn, Transfers, Token Locking, Fiat Conversion, Loyalty Rewards');
 }
