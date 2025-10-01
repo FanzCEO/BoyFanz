@@ -53,6 +53,15 @@ Preferred communication style: Simple, everyday language.
   - **Adult-Friendly Processors**: CCBill, Segpay, Epoch, Verotel, VendoServices, CommerceGate, NETbilling, CentroBill, NOWPayments, CoinsPaid, B2BinPay, CoinPayments, ACH, SEPA, Bango, Boku
   - **Creator Payouts**: Paxum, CosmoPayment, ePayService, iPayout, MassPay, Wise, Payoneer
 - **FanzCredit**: Credit lines and lending with trust scoring, collateral support, and automated interest
+- **Fan-to-Creator Loans**: P2P microlending system with interest calculation, repayment schedules, FanzWallet integration
+  - **Loan Types**: Instant microloan, equipment financing, content production funding
+  - **Trust-Based Interest**: Risk tiers with interest rates from 800 bps (high trust) to 2400 bps (low trust)
+  - **Repayment Schedules**: Automated installment calculations based on term (30/60/90/180 days)
+  - **Collateral Support**: Optional collateral backing for higher loan amounts
+  - **FanzWallet Integration**: Direct disbursement and automated repayment deduction
+  - **Transaction Safety**: Row locking (SELECT FOR UPDATE) to prevent race conditions in concurrent repayments
+  - **Production Ready**: Repayment dates use actual disbursedAt timestamp (not null defaults)
+  - **Pending Integration**: FanzLedger double-entry bookkeeping (marked as TODO for audit trail)
 - **FanzToken & FanzCoin**: Platform token economy (FanzCoin, FanzToken, loyalty, rewards, utility tokens)
 - **FanzCard**: Virtual debit cards with spend controls and merchant category restrictions
 - **FanzRevenue**: Multi-party revenue sharing, collaborative payouts, and automated royalty splits

@@ -1751,6 +1751,112 @@ export const likes = pgTable(
   }),
 );
 
+// ===== DEEPFAKE DETECTION SYSTEM =====
+
+// Verification status enum
+export const verificationStatusEnum = pgEnum("verification_status", [
+  "pending",
+  "verified",
+  "suspicious",
+  "deepfake",
+  "rejected",
+]);
+
+// Deepfake report status
+export const deepfakeReportStatusEnum = pgEnum("deepfake_report_status", [
+  "reported",
+  "under_review",
+  "confirmed",
+  "false_positive",
+  "resolved",
+]);
+
+// Verified Content - Creator's authentic content fingerprints
+export const verifiedContent = pgTable(
+  "verified_content",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    creatorId: varchar("creator_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    mediaUrl: varchar("media_url").notNull(),
+    mediaType: varchar("media_type").notNull(), // image, video, audio
+    contentHash: varchar("content_hash").notNull().unique(), // SHA-256 hash
+    perceptualHash: varchar("perceptual_hash"), // pHash for visual similarity
+    aiFingerprint: jsonb("ai_fingerprint"), // AI-generated fingerprint features
+    metadata: jsonb("metadata").default({}), // resolution, duration, codec, etc.
+    verifiedAt: timestamp("verified_at").defaultNow(),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => ({
+    creatorIdIdx: index("idx_verified_content_creator").on(table.creatorId),
+    contentHashIdx: index("idx_verified_content_hash").on(table.contentHash),
+  }),
+);
+
+// Content Verification - AI analysis results
+export const contentVerification = pgTable(
+  "content_verification",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    contentUrl: varchar("content_url").notNull(),
+    contentType: varchar("content_type").notNull(),
+    creatorId: varchar("creator_id").references(() => users.id),
+    status: verificationStatusEnum("status").default("pending").notNull(),
+    confidenceScore: decimal("confidence_score", { precision: 5, scale: 2 }), // 0.00 to 100.00
+    aiAnalysis: jsonb("ai_analysis").default({}), // OpenAI vision analysis results
+    matchedVerifiedContentId: varchar("matched_verified_content_id").references(() => verifiedContent.id),
+    similarityScore: decimal("similarity_score", { precision: 5, scale: 2 }), // 0.00 to 100.00
+    detectionMethod: varchar("detection_method"), // ai_vision, perceptual_hash, content_hash
+    flags: jsonb("flags").default([]), // specific deepfake indicators
+    reviewedBy: varchar("reviewed_by").references(() => users.id),
+    reviewedAt: timestamp("reviewed_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    contentUrlIdx: index("idx_verification_content_url").on(table.contentUrl),
+    statusIdx: index("idx_verification_status").on(table.status),
+    creatorIdIdx: index("idx_verification_creator").on(table.creatorId),
+  }),
+);
+
+// Deepfake Reports - User-reported and system-detected deepfakes
+export const deepfakeReports = pgTable(
+  "deepfake_reports",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    reportedContentUrl: varchar("reported_content_url").notNull(),
+    reportedContentType: varchar("reported_content_type").notNull(),
+    impersonatedCreatorId: varchar("impersonated_creator_id")
+      .notNull()
+      .references(() => users.id),
+    reportedBy: varchar("reported_by").references(() => users.id), // null if system-detected
+    reportSource: varchar("report_source").notNull(), // user, system, ai_detection
+    status: deepfakeReportStatusEnum("status").default("reported").notNull(),
+    verificationId: varchar("verification_id").references(() => contentVerification.id),
+    description: text("description"),
+    evidence: jsonb("evidence").default({}), // screenshots, URLs, analysis
+    actionTaken: varchar("action_taken"), // content_removed, user_warned, dmca_filed
+    assignedTo: varchar("assigned_to").references(() => users.id),
+    resolvedBy: varchar("resolved_by").references(() => users.id),
+    resolvedAt: timestamp("resolved_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    impersonatedCreatorIdx: index("idx_deepfake_reports_creator").on(table.impersonatedCreatorId),
+    statusIdx: index("idx_deepfake_reports_status").on(table.status),
+    reportSourceIdx: index("idx_deepfake_reports_source").on(table.reportSource),
+  }),
+);
+
 // Messages
 export const messageTypeEnum = pgEnum("message_type", [
   "text",

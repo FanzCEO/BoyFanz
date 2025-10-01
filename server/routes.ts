@@ -5684,6 +5684,10 @@ export async function setupAdvancedRoutes(app: Express) {
   const { fanCreatorLoanRoutes } = await import('./routes/fanCreatorLoanRoutes');
   app.use('/api/loans', fanCreatorLoanRoutes);
   
+  // Deepfake Detection Routes
+  const { deepfakeDetectionRoutes } = await import('./routes/deepfakeDetectionRoutes');
+  app.use('/api/deepfake', deepfakeDetectionRoutes);
+  
   // Progressive Web App (PWA) Routes
   app.use('/api/pwa', pwaRoutes);
   
