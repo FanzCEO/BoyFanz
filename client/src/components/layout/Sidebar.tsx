@@ -35,9 +35,13 @@ export default function Sidebar({ user }: SidebarProps) {
     { path: "/nearby", icon: "fas fa-map-marker-alt", label: "Near by me" },
   ] as Array<{ path: string; icon: string; label: string; dot?: boolean; badge?: string }>;
 
-  // Add streaming item to main nav for easy access
+  // Add streaming and events items to main nav for easy access
   if (user?.role === 'creator' || user?.role === 'admin' || user?.role === 'moderator') {
     navItems.splice(2, 0, { path: "/streams", icon: "fas fa-broadcast-tower", label: "Live Streams" });
+    navItems.splice(3, 0, { path: "/events", icon: "fas fa-calendar-star", label: "Live Events" });
+  } else {
+    // Fans can view events too
+    navItems.splice(2, 0, { path: "/events", icon: "fas fa-calendar-star", label: "Live Events" });
   }
 
   const adminItems = [
@@ -147,6 +151,20 @@ export default function Sidebar({ user }: SidebarProps) {
               >
                 <i className="fas fa-video w-5 h-5 md:w-4 md:h-4"></i>
                 Create Stream
+              </Link>
+              <Link 
+                href="/events/host"
+                onClick={isMobile ? handleMobileLinkClick : undefined}
+                className={cn(
+                  "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                  isActive("/events/host")
+                    ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+                data-testid="nav-host-event"
+              >
+                <i className="fas fa-calendar-plus w-5 h-5 md:w-4 md:h-4"></i>
+                Host Event
               </Link>
               <Link 
                 href="/earnings"

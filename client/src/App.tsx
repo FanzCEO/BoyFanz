@@ -81,6 +81,10 @@ import StreamDashboard from "@/pages/StreamDashboard";
 import LiveViewer from "@/pages/LiveViewer";
 import StreamAnalytics from "@/pages/StreamAnalytics";
 import StreamsHome from "@/pages/StreamsHome";
+import EventsHome from "@/pages/EventsHome";
+import EventDetails from "@/pages/EventDetails";
+import EventHost from "@/pages/EventHost";
+import EventLive from "@/pages/EventLive";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -258,6 +262,11 @@ function Router() {
             <Route path="/streams/:id/analytics">
               {(params) => <StreamAnalytics streamId={params.id} />}
             </Route>
+            {/* Mixed-Reality Live Events Routes */}
+            <Route path="/events" component={EventsHome} />
+            <Route path="/events/host" component={EventHost} />
+            <Route path="/events/:eventId" component={EventDetails} />
+            <Route path="/events/:eventId/live" component={EventLive} />
             {/* Help Center Routes */}
             <Route path="/help" component={HelpCenter} />
             <Route path="/help/wiki" component={WikiPage} />
