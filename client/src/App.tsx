@@ -50,7 +50,14 @@ import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
-// Auth pages
+// Auth pages (Email/Password)
+import Register from "@/pages/auth/Register";
+import LoginNew from "@/pages/auth/LoginNew";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
+import ResetPasswordNew from "@/pages/auth/ResetPasswordNew";
+import VerifyEmail from "@/pages/auth/VerifyEmail";
+import ResendVerification from "@/pages/auth/ResendVerification";
+// Legacy auth pages (to be removed)
 import StarzSignup from "@/pages/auth/StarzSignup";
 import FanzSignup from "@/pages/auth/FanzSignup";
 import Login from "@/pages/auth/Login";
@@ -179,10 +186,18 @@ function Router() {
     return (
       <Switch>
         <Route path="/" component={Landing} />
+        {/* Email/Password Authentication */}
+        <Route path="/auth/register" component={Register} />
+        <Route path="/auth/login" component={LoginNew} />
+        <Route path="/auth/forgot-password" component={ForgotPassword} />
+        <Route path="/auth/reset-password" component={ResetPasswordNew} />
+        <Route path="/auth/verify-email" component={VerifyEmail} />
+        <Route path="/auth/resend-verification" component={ResendVerification} />
+        {/* Legacy routes (deprecated) */}
         <Route path="/auth/starz-signup" component={StarzSignup} />
         <Route path="/auth/fanz-signup" component={FanzSignup} />
-        <Route path="/auth/login" component={Login} />
-        <Route path="/auth/reset-password" component={ResetPassword} />
+        <Route path="/auth/login-old" component={Login} />
+        <Route path="/auth/reset-password-old" component={ResetPassword} />
         {/* Public pages for discovery */}
         <Route path="/creator/:userId" component={CreatorProfile} />
         <Route path="/search" component={SearchCreators} />

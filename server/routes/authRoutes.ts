@@ -33,16 +33,12 @@ const forgotPasswordSchema = z.object({
 
 const resetPasswordSchema = z.object({
   token: z.string().min(1, "Token is required"),
-  newPassword: z
+  password: z
     .string()
     .min(8, "Password must be at least 8 characters")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
     .regex(/[0-9]/, "Password must contain at least one number"),
-  confirmPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
 });
 
 const verifyEmailSchema = z.object({
@@ -70,14 +66,12 @@ router.post("/register", async (req, res) => {
     const result = await authService.register(data.email, data.password);
 
     // TODO: Send verification email with result.verificationToken
-    // For now, return it in response (REMOVE IN PRODUCTION)
+    // Email service integration pending (Task 3)
+    console.log(`[DEV ONLY] Verification token: ${result.verificationToken}`);
     
     res.json({
       success: true,
       message: "Registration successful! Please check your email to verify your account.",
-      accountId: result.accountId,
-      // TODO: Remove verificationToken from response once email is working
-      verificationToken: result.verificationToken,
     });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
@@ -117,7 +111,6 @@ router.post("/login", async (req, res) => {
       return res.status(403).json({
         success: false,
         error: "Please verify your email before logging in",
-        accountId: result.accountId,
         emailVerified: false,
       });
     }
@@ -295,7 +288,7 @@ router.post("/reset-password", async (req, res) => {
     const data = resetPasswordSchema.parse(req.body);
 
     // Reset password
-    await authService.resetPassword(data.token, data.newPassword);
+    await authService.resetPassword(data.token, data.password);
 
     res.json({
       success: true,
