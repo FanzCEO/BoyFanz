@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { authService } from "../services/authService";
+import { emailService } from "../services/emailService";
 
 const router = Router();
 
@@ -65,9 +66,8 @@ router.post("/register", async (req, res) => {
     // Register account
     const result = await authService.register(data.email, data.password);
 
-    // TODO: Send verification email with result.verificationToken
-    // Email service integration pending (Task 3)
-    console.log(`[DEV ONLY] Verification token: ${result.verificationToken}`);
+    // Send verification email
+    await emailService.sendVerificationEmail(data.email, result.verificationToken);
     
     res.json({
       success: true,
@@ -216,13 +216,12 @@ router.post("/resend-verification", async (req, res) => {
     // Resend verification
     const result = await authService.resendVerification(data.email);
 
-    // TODO: Send verification email with result.verificationToken
+    // Send verification email
+    await emailService.sendVerificationEmail(data.email, result.verificationToken);
     
     res.json({
       success: true,
       message: "Verification email sent! Please check your inbox.",
-      // TODO: Remove verificationToken from response once email is working
-      verificationToken: result.verificationToken,
     });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
@@ -252,14 +251,15 @@ router.post("/forgot-password", async (req, res) => {
     // Initiate password reset
     const result = await authService.initiatePasswordReset(data.email);
 
-    // TODO: Send password reset email with result.resetToken
+    // Send password reset email if account exists
+    if (result.resetToken) {
+      await emailService.sendPasswordResetEmail(data.email, result.resetToken);
+    }
     
     // Always return success to prevent email enumeration
     res.json({
       success: true,
       message: "If an account exists with that email, a password reset link has been sent.",
-      // TODO: Remove resetToken from response once email is working
-      resetToken: result.resetToken || undefined,
     });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
