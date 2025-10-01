@@ -6,7 +6,6 @@ import { setupVite, serveStatic, log } from "./vite";
 import { logger, requestIdMiddleware, requestLoggingMiddleware } from "./logger";
 import { setupHealthEndpoints, setupGracefulShutdown } from "./health";
 import { setupCSRFTokenEndpoint } from "./middleware/csrf";
-import { setupSocialAuth } from "./socialAuth";
 
 const app = express();
 
@@ -63,6 +62,10 @@ app.use(requestLoggingMiddleware);
 
 // Cookie parsing for CSRF tokens
 app.use(cookieParser());
+
+// Session management for email/password authentication
+import { sessionMiddleware } from "./session";
+app.use(sessionMiddleware);
 
 // Body parsing
 // Register GetStream webhook BEFORE global JSON parser to preserve raw body
@@ -123,17 +126,8 @@ setupHealthEndpoints(app);
 setupCSRFTokenEndpoint(app);
 
 (async () => {
-  // CRITICAL: Setup authentication BEFORE registering routes
-  // Import and setup Replit OAuth authentication
-  const { setupAuth } = await import('./replitAuth');
-  await setupAuth(app);
-  
-  // Import and setup local authentication
-  const { setupLocalAuth } = await import('./auth');
-  setupLocalAuth(app);
-  
-  // Setup social OAuth authentication
-  setupSocialAuth(app);
+  // Email/Password authentication is handled via API routes (server/routes/authRoutes.ts)
+  // Session management is configured in server/routes.ts
   
   await registerRoutes(app);
   
