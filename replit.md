@@ -78,6 +78,17 @@ Preferred communication style: Simple, everyday language.
   - Upgrade to creator link on completion
 - **UX Principles**: Progress bars, step navigation, brand-differentiated colors (#ff0000 creator, #d4a959 fan), glassmorphism UI, cross-navigation between roles
 
+## Revenue Quests - AI-Collaborative Revenue Sharing
+- **Gamified Revenue Goals**: Creators set revenue targets with fan participation and content unlocks
+- **Fan Underwriting**: Early supporters get bonus rewards (10% bonus for first 10% of goal)
+- **Dynamic Revenue Sharing**: Contributors earn percentage of quest revenue when completed
+- **Quest Types**: Revenue goal, fan contribution, content unlock, collaborative project
+- **AI Suggestions**: Mock AI recommendations for optimal quest goals based on creator performance
+- **Milestone System**: Progressive unlocks as quest hits funding milestones
+- **Reward Types**: Exclusive content, NFT, experience, exclusive access
+- **Real-Time Tracking**: Live progress bars, contributor count, completion percentage
+- **Integrated Ledger**: Full FanzTrust integration with wallet deductions, held funds, and automated payouts
+
 # External Dependencies
 
 ## Core Infrastructure

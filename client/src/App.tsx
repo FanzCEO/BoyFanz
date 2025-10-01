@@ -65,6 +65,7 @@ import PostView from "@/pages/PostView";
 import EarningsPage from "@/pages/Creator/EarningsPage";
 import InfinityFeed from "@/pages/InfinityFeed";
 import FanzMoneyCenter from "@/pages/FanzMoneyCenter";
+import RevenueQuests from "@/pages/RevenueQuests";
 import Blog from "@/pages/Blog";
 import Contact from "@/pages/Contact";
 import { HelpCenter } from "@/pages/HelpCenter";
@@ -145,7 +146,7 @@ function Router() {
   }, [isLoading]);
 
   // Protected routes that require authentication
-  const protectedRoutes = ['/feed', '/infinity-feed', '/messages', '/mass-messaging', '/post', '/earnings', '/media', '/compliance', '/payouts', '/notifications', '/settings', '/admin', '/purchased', '/subscriptions', '/release-forms', '/nearby', '/streams'];
+  const protectedRoutes = ['/feed', '/infinity-feed', '/messages', '/mass-messaging', '/post', '/earnings', '/media', '/compliance', '/payouts', '/notifications', '/settings', '/admin', '/purchased', '/subscriptions', '/release-forms', '/nearby', '/streams', '/revenue-quests', '/fanz-money-center'];
   
   // Check if current route is protected
   const isProtectedRoute = protectedRoutes.some(route => location.startsWith(route));
@@ -238,6 +239,7 @@ function Router() {
             <Route path="/feed" component={PostsFeed} />
             <Route path="/infinity-feed" component={InfinityFeed} />
             <Route path="/fanz-money-center" component={FanzMoneyCenter} />
+            <Route path="/revenue-quests" component={RevenueQuests} />
             <Route path="/search" component={SearchCreators} />
             <Route path="/messages" component={Messages} />
             <Route path="/mass-messaging" component={MassMessaging} />

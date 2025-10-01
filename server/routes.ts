@@ -5602,6 +5602,7 @@ import fanzCreditRoutes from './routes/fanzCreditRoutes';
 import fanzTokenRoutes from './routes/fanzTokenRoutes';
 import fanzCardRoutes from './routes/fanzCardRoutes';
 import fanzCardWebhooks from './routes/fanzCardWebhooks';
+import revenueQuestRoutes from './routes/revenueQuestRoutes';
 
 export function setupAdvancedRoutes(app: Express) {
   setupNFTRoutes(app);
@@ -5627,6 +5628,9 @@ export function setupAdvancedRoutes(app: Express) {
   
   // FanzCard Webhooks (no auth - for external card processors)
   app.use('/api/fanz-card-webhooks', fanzCardWebhooks);
+  
+  // Revenue Quests - AI-Collaborative Revenue Sharing
+  app.use('/api/revenue-quests', isAuthenticated, revenueQuestRoutes);
   
   // AI-Powered Help & Support System
   registerHelpSupportRoutes(app);

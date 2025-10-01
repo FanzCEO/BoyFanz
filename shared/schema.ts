@@ -8131,6 +8131,149 @@ export const fanzCards = pgTable(
   ],
 );
 
+// Quest status types
+export const questStatusEnum = pgEnum("quest_status", [
+  "draft",
+  "active",
+  "completed",
+  "failed",
+  "cancelled",
+]);
+
+// Quest types
+export const questTypeEnum = pgEnum("quest_type", [
+  "revenue_goal",
+  "fan_contribution",
+  "content_unlock",
+  "collaborative_project",
+]);
+
+// Revenue Quests - AI-powered gamified revenue goals
+export const revenueQuests = pgTable(
+  "revenue_quests",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    creatorId: varchar("creator_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    
+    // Quest details
+    title: varchar("title").notNull(),
+    description: text("description"),
+    questType: questTypeEnum("quest_type").notNull(),
+    status: questStatusEnum("status").default("draft").notNull(),
+    
+    // Financial goals
+    goalAmountCents: bigint("goal_amount_cents", { mode: "number" }).notNull(),
+    currentAmountCents: bigint("current_amount_cents", { mode: "number" }).default(0),
+    minContributionCents: bigint("min_contribution_cents", { mode: "number" }).default(100), // $1 minimum
+    
+    // Timing
+    startDate: timestamp("start_date"),
+    endDate: timestamp("end_date"),
+    
+    // Rewards and unlocks
+    rewardType: varchar("reward_type"), // content, nft, experience, exclusive_access
+    rewardMetadata: jsonb("reward_metadata").default({}), // content URLs, NFT details, etc.
+    contentUnlockId: varchar("content_unlock_id"), // reference to unlockable content
+    
+    // Revenue sharing for contributors
+    contributorSharePercentage: integer("contributor_share_percentage").default(0), // 0-100
+    
+    // AI recommendations
+    aiSuggestedGoal: bigint("ai_suggested_goal", { mode: "number" }),
+    aiConfidenceScore: integer("ai_confidence_score"), // 0-100
+    aiInsights: jsonb("ai_insights").default({}),
+    
+    // Stats
+    totalContributors: integer("total_contributors").default(0),
+    completionPercentage: integer("completion_percentage").default(0),
+    rewardsDistributed: boolean("rewards_distributed").default(false),
+    
+    metadata: jsonb("metadata").default({}),
+    completedAt: timestamp("completed_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_revenue_quests_creator").on(table.creatorId),
+    index("idx_revenue_quests_status").on(table.status),
+    index("idx_revenue_quests_type").on(table.questType),
+    index("idx_revenue_quests_end_date").on(table.endDate),
+  ],
+);
+
+// Quest participants - fan underwriting and contributions
+export const questParticipants = pgTable(
+  "quest_participants",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    questId: varchar("quest_id")
+      .notNull()
+      .references(() => revenueQuests.id, { onDelete: "cascade" }),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    
+    // Contribution details
+    contributedAmountCents: bigint("contributed_amount_cents", { mode: "number" }).notNull(),
+    sharePercentage: decimal("share_percentage", { precision: 5, scale: 2 }), // 0.00-100.00
+    
+    // Earnings from quest
+    earnedAmountCents: bigint("earned_amount_cents", { mode: "number" }).default(0),
+    
+    // Underwriting info
+    isUnderwriter: boolean("is_underwriter").default(false), // early supporter bonus
+    underwriterBonusPercentage: integer("underwriter_bonus_percentage").default(0),
+    
+    // Transaction reference
+    transactionId: varchar("transaction_id"), // link to FanzLedger transaction
+    
+    metadata: jsonb("metadata").default({}),
+    contributedAt: timestamp("contributed_at").defaultNow(),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_quest_participants_quest").on(table.questId),
+    index("idx_quest_participants_user").on(table.userId),
+    unique().on(table.questId, table.userId),
+  ],
+);
+
+// Quest milestones and unlocks
+export const questMilestones = pgTable(
+  "quest_milestones",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    questId: varchar("quest_id")
+      .notNull()
+      .references(() => revenueQuests.id, { onDelete: "cascade" }),
+    
+    // Milestone details
+    title: varchar("title").notNull(),
+    targetAmountCents: bigint("target_amount_cents", { mode: "number" }).notNull(),
+    
+    // Unlock details
+    unlockType: varchar("unlock_type"), // content, badge, bonus, feature
+    unlockData: jsonb("unlock_data").default({}),
+    
+    // Status
+    isReached: boolean("is_reached").default(false),
+    reachedAt: timestamp("reached_at"),
+    
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_quest_milestones_quest").on(table.questId),
+  ],
+);
+
 // Revenue split types
 export const revenueSplitTypeEnum = pgEnum("revenue_split_type", [
   "collaborative",
@@ -8235,6 +8378,39 @@ export type FanzCard = typeof fanzCards.$inferSelect;
 export type InsertFanzCard = z.infer<typeof insertFanzCardSchema>;
 export type FanzRevenueShare = typeof fanzRevenueShares.$inferSelect;
 export type InsertFanzRevenueShare = z.infer<typeof insertFanzRevenueShareSchema>;
+
+// Quest schemas
+export const insertRevenueQuestSchema = createInsertSchema(revenueQuests).omit({
+  id: true,
+  currentAmountCents: true,
+  totalContributors: true,
+  completionPercentage: true,
+  completedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertQuestParticipantSchema = createInsertSchema(questParticipants).omit({
+  id: true,
+  earnedAmountCents: true,
+  contributedAt: true,
+  createdAt: true,
+});
+
+export const insertQuestMilestoneSchema = createInsertSchema(questMilestones).omit({
+  id: true,
+  isReached: true,
+  reachedAt: true,
+  createdAt: true,
+});
+
+// Quest types
+export type RevenueQuest = typeof revenueQuests.$inferSelect;
+export type InsertRevenueQuest = z.infer<typeof insertRevenueQuestSchema>;
+export type QuestParticipant = typeof questParticipants.$inferSelect;
+export type InsertQuestParticipant = z.infer<typeof insertQuestParticipantSchema>;
+export type QuestMilestone = typeof questMilestones.$inferSelect;
+export type InsertQuestMilestone = z.infer<typeof insertQuestMilestoneSchema>;
 
 // ===== PWA EXTENSIONS =====
 // Import PWA schemas
