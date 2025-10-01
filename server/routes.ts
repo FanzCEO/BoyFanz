@@ -5603,6 +5603,7 @@ import fanzTokenRoutes from './routes/fanzTokenRoutes';
 import fanzCardRoutes from './routes/fanzCardRoutes';
 import fanzCardWebhooks from './routes/fanzCardWebhooks';
 import revenueQuestRoutes from './routes/revenueQuestRoutes';
+import { trustScoringRoutes } from './routes/trustScoringRoutes';
 
 export function setupAdvancedRoutes(app: Express) {
   setupNFTRoutes(app);
@@ -5631,6 +5632,9 @@ export function setupAdvancedRoutes(app: Express) {
   
   // Revenue Quests - AI-Collaborative Revenue Sharing
   app.use('/api/revenue-quests', isAuthenticated, revenueQuestRoutes);
+  
+  // Trust Tiering & Reputation System
+  app.use('/api/trust', trustScoringRoutes);
   
   // AI-Powered Help & Support System
   registerHelpSupportRoutes(app);
