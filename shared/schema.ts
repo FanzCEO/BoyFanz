@@ -8843,6 +8843,104 @@ export const eventTips = pgTable(
 );
 
 // NFT souvenirs minted for event attendees
+// ============================================================
+// EMAIL/PASSWORD AUTHENTICATION SYSTEM
+// ============================================================
+
+// Email verification tokens
+export const authEmailVerificationTokens = pgTable(
+  "auth_email_verification_tokens",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    accountId: varchar("account_id")
+      .notNull()
+      .references(() => accounts.id, { onDelete: "cascade" }),
+    tokenHash: varchar("token_hash").notNull().unique(),
+    purpose: varchar("purpose").notNull().default("verify_email"),
+    expiresAt: timestamp("expires_at").notNull(),
+    consumedAt: timestamp("consumed_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_email_verify_token").on(table.tokenHash),
+    index("idx_email_verify_account").on(table.accountId),
+    index("idx_email_verify_expires").on(table.expiresAt),
+  ]
+);
+
+// Password reset tokens
+export const authPasswordResetTokens = pgTable(
+  "auth_password_reset_tokens",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    accountId: varchar("account_id")
+      .notNull()
+      .references(() => accounts.id, { onDelete: "cascade" }),
+    tokenHash: varchar("token_hash").notNull().unique(),
+    purpose: varchar("purpose").notNull().default("reset_password"),
+    expiresAt: timestamp("expires_at").notNull(),
+    consumedAt: timestamp("consumed_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_password_reset_token").on(table.tokenHash),
+    index("idx_password_reset_account").on(table.accountId),
+    index("idx_password_reset_expires").on(table.expiresAt),
+  ]
+);
+
+// Email recovery tokens (for forgot email flow)
+export const authEmailRecoveryTokens = pgTable(
+  "auth_email_recovery_tokens",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    accountId: varchar("account_id")
+      .notNull()
+      .references(() => accounts.id, { onDelete: "cascade" }),
+    tokenHash: varchar("token_hash").notNull().unique(),
+    purpose: varchar("purpose").notNull().default("recover_email"),
+    recoveryHint: jsonb("recovery_hint"), // phone, security question, etc.
+    expiresAt: timestamp("expires_at").notNull(),
+    consumedAt: timestamp("consumed_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_email_recovery_token").on(table.tokenHash),
+    index("idx_email_recovery_account").on(table.accountId),
+    index("idx_email_recovery_expires").on(table.expiresAt),
+  ]
+);
+
+// Login attempts throttling (brute force protection)
+export const authLoginAttempts = pgTable(
+  "auth_login_attempts",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    accountId: varchar("account_id"), // nullable - track before account is identified
+    ipAddress: varchar("ip_address").notNull(),
+    email: varchar("email"), // for tracking failed attempts
+    windowStart: timestamp("window_start").notNull(),
+    attemptCount: integer("attempt_count").default(1).notNull(),
+    blockedUntil: timestamp("blocked_until"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_login_attempts_ip").on(table.ipAddress),
+    index("idx_login_attempts_account").on(table.accountId),
+    index("idx_login_attempts_email").on(table.email),
+    index("idx_login_attempts_blocked").on(table.blockedUntil),
+  ]
+);
+
 export const eventNftSouvenirs = pgTable(
   "event_nft_souvenirs",
   {
