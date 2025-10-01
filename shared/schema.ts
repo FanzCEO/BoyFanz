@@ -9575,6 +9575,188 @@ export type InsertVoiceMessage = z.infer<typeof insertVoiceMessageSchema>;
 export type VoiceMessageTemplate = typeof voiceMessageTemplates.$inferSelect;
 export type InsertVoiceMessageTemplate = z.infer<typeof insertVoiceMessageTemplateSchema>;
 
+// ===== FAN-TO-CREATOR LOANS (PEER-TO-PEER MICROLENDING) =====
+
+// Loan statuses
+export const loanStatusEnum = pgEnum("loan_status", [
+  "pending",      // Loan request created, awaiting approval
+  "approved",     // Loan approved, awaiting disbursement
+  "active",       // Loan disbursed, repayment in progress
+  "completed",    // Loan fully repaid
+  "defaulted",    // Loan defaulted (missed payments)
+  "cancelled",    // Loan cancelled before disbursement
+]);
+
+// Repayment statuses
+export const repaymentStatusEnum = pgEnum("repayment_status", [
+  "pending",
+  "paid",
+  "overdue",
+  "waived",
+]);
+
+// Fan-to-Creator Loans (P2P microlending)
+export const fanCreatorLoans = pgTable(
+  "fan_creator_loans",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    
+    // Parties
+    lenderId: varchar("lender_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }), // Fan
+    borrowerId: varchar("borrower_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }), // Creator
+    
+    // Loan terms
+    principalCents: bigint("principal_cents", { mode: "number" }).notNull(),
+    interestRateBps: integer("interest_rate_bps").notNull(), // basis points (based on trust score)
+    termDays: integer("term_days").notNull(), // loan duration
+    totalDueCents: bigint("total_due_cents", { mode: "number" }).notNull(), // principal + interest
+    
+    // Status
+    status: loanStatusEnum("status").default("pending").notNull(),
+    
+    // Payment schedule
+    installmentCount: integer("installment_count").default(1), // number of payments
+    installmentFrequency: varchar("installment_frequency").default("monthly"), // weekly, monthly, one-time
+    
+    // Collateral (optional)
+    collateralType: varchar("collateral_type"), // content_revenue, future_earnings, token_pledge
+    collateralValueCents: bigint("collateral_value_cents", { mode: "number" }),
+    collateralMetadata: jsonb("collateral_metadata").default({}),
+    
+    // Risk assessment
+    trustScore: integer("trust_score").default(0), // borrower's trust score at time of loan
+    riskTier: varchar("risk_tier").default("standard"), // low, standard, high
+    
+    // Wallet references
+    lenderWalletId: varchar("lender_wallet_id"),
+    borrowerWalletId: varchar("borrower_wallet_id"),
+    
+    // Lifecycle dates
+    requestedAt: timestamp("requested_at").defaultNow(),
+    approvedAt: timestamp("approved_at"),
+    approvedBy: varchar("approved_by"), // can be auto-approved or admin
+    disbursedAt: timestamp("disbursed_at"),
+    dueDate: timestamp("due_date"),
+    completedAt: timestamp("completed_at"),
+    defaultedAt: timestamp("defaulted_at"),
+    
+    // Repayment tracking
+    amountPaidCents: bigint("amount_paid_cents", { mode: "number" }).default(0),
+    amountOutstandingCents: bigint("amount_outstanding_cents", { mode: "number" }),
+    lastPaymentAt: timestamp("last_payment_at"),
+    
+    // Notes and metadata
+    purpose: text("purpose"), // why creator needs the loan
+    notes: text("notes"),
+    metadata: jsonb("metadata").default({}),
+    
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_fan_creator_loans_lender").on(table.lenderId),
+    index("idx_fan_creator_loans_borrower").on(table.borrowerId),
+    index("idx_fan_creator_loans_status").on(table.status),
+    index("idx_fan_creator_loans_trust_score").on(table.trustScore),
+    index("idx_fan_creator_loans_due_date").on(table.dueDate),
+  ],
+);
+
+// Loan repayments (installments)
+export const loanRepayments = pgTable(
+  "loan_repayments",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    loanId: varchar("loan_id")
+      .notNull()
+      .references(() => fanCreatorLoans.id, { onDelete: "cascade" }),
+    
+    // Repayment details
+    installmentNumber: integer("installment_number").notNull(),
+    amountDueCents: bigint("amount_due_cents", { mode: "number" }).notNull(),
+    amountPaidCents: bigint("amount_paid_cents", { mode: "number" }).default(0),
+    
+    // Dates
+    dueDate: timestamp("due_date").notNull(),
+    paidAt: timestamp("paid_at"),
+    
+    // Status
+    status: repaymentStatusEnum("status").default("pending").notNull(),
+    
+    // Late fees
+    lateFeeAppliedCents: bigint("late_fee_applied_cents", { mode: "number" }).default(0),
+    
+    // Transaction reference
+    transactionId: varchar("transaction_id"), // FanzLedger transaction ID
+    
+    metadata: jsonb("metadata").default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_loan_repayments_loan").on(table.loanId),
+    index("idx_loan_repayments_due_date").on(table.dueDate),
+    index("idx_loan_repayments_status").on(table.status),
+  ],
+);
+
+// Relations
+export const fanCreatorLoansRelations = relations(fanCreatorLoans, ({ one, many }) => ({
+  lender: one(users, {
+    fields: [fanCreatorLoans.lenderId],
+    references: [users.id],
+  }),
+  borrower: one(users, {
+    fields: [fanCreatorLoans.borrowerId],
+    references: [users.id],
+  }),
+  repayments: many(loanRepayments),
+}));
+
+export const loanRepaymentsRelations = relations(loanRepayments, ({ one }) => ({
+  loan: one(fanCreatorLoans, {
+    fields: [loanRepayments.loanId],
+    references: [fanCreatorLoans.id],
+  }),
+}));
+
+// Zod Schemas
+export const insertFanCreatorLoanSchema = createInsertSchema(fanCreatorLoans).omit({
+  id: true,
+  status: true,
+  approvedAt: true,
+  approvedBy: true,
+  disbursedAt: true,
+  completedAt: true,
+  defaultedAt: true,
+  amountPaidCents: true,
+  lastPaymentAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertLoanRepaymentSchema = createInsertSchema(loanRepayments).omit({
+  id: true,
+  amountPaidCents: true,
+  paidAt: true,
+  status: true,
+  lateFeeAppliedCents: true,
+  createdAt: true,
+});
+
+// Types
+export type FanCreatorLoan = typeof fanCreatorLoans.$inferSelect;
+export type InsertFanCreatorLoan = z.infer<typeof insertFanCreatorLoanSchema>;
+export type LoanRepayment = typeof loanRepayments.$inferSelect;
+export type InsertLoanRepayment = z.infer<typeof insertLoanRepaymentSchema>;
+
 // ===== PWA EXTENSIONS =====
 // Import PWA schemas
 export * from "./pwaPatch";

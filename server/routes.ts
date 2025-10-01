@@ -5680,6 +5680,10 @@ export async function setupAdvancedRoutes(app: Express) {
   const { emotionalAIRoutes } = await import('./routes/emotionalAIRoutes');
   app.use('/api/emotional-ai', emotionalAIRoutes);
   
+  // Fan-to-Creator Loan Routes
+  const { fanCreatorLoanRoutes } = await import('./routes/fanCreatorLoanRoutes');
+  app.use('/api/loans', fanCreatorLoanRoutes);
+  
   // Progressive Web App (PWA) Routes
   app.use('/api/pwa', pwaRoutes);
   
