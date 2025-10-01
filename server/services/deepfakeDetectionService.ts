@@ -41,10 +41,16 @@ export interface DeepfakeReportRequest {
 export class DeepfakeDetectionService {
   /**
    * Calculate content hash for fingerprinting
+   * TODO: Production implementation should:
+   * 1. Fetch the actual media file from contentUrl
+   * 2. Compute SHA-256 hash of the binary content (not just URL)
+   * 3. Handle cache-busting params to prevent URL manipulation
+   * 4. Reject unverifiable/inaccessible sources
+   * Current limitation: URL-only hashing allows attackers to swap media at same URL
    */
   private async calculateContentHash(contentUrl: string): Promise<string> {
-    // In production, fetch the content and hash it
-    // For now, use URL-based hash
+    // FIXME: This hashes the URL string, not the actual media payload
+    // Proper implementation needs HTTP fetch + binary hashing
     return crypto
       .createHash('sha256')
       .update(contentUrl)
@@ -346,6 +352,7 @@ Respond with a JSON object containing:
 
   /**
    * Get all pending reports (admin)
+   * Returns reports in actionable statuses: reported, under_review, confirmed
    */
   async getPendingReports(): Promise<any[]> {
     const reports = await db
@@ -367,10 +374,7 @@ Respond with a JSON object containing:
         eq(deepfakeReports.impersonatedCreatorId, users.id)
       )
       .where(
-        and(
-          eq(deepfakeReports.status, 'reported'),
-          sql`${deepfakeReports.status} != 'resolved'`
-        )
+        sql`${deepfakeReports.status} IN ('reported', 'under_review', 'confirmed')`
       )
       .orderBy(desc(deepfakeReports.createdAt));
 
