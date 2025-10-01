@@ -5668,6 +5668,10 @@ export async function setupAdvancedRoutes(app: Express) {
   const { dynamicPricingRoutes } = await import('./routes/dynamicPricingRoutes');
   app.use('/api/pricing', dynamicPricingRoutes);
   
+  // AI Voice Cloning Routes
+  const { voiceCloningRoutes } = await import('./routes/voiceCloningRoutes');
+  app.use('/api/voice', voiceCloningRoutes);
+  
   // Progressive Web App (PWA) Routes
   app.use('/api/pwa', pwaRoutes);
   

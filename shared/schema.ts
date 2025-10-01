@@ -9206,6 +9206,199 @@ export type InsertEventTip = z.infer<typeof insertEventTipSchema>;
 export type EventNftSouvenir = typeof eventNftSouvenirs.$inferSelect;
 export type InsertEventNftSouvenir = z.infer<typeof insertEventNftSouvenirSchema>;
 
+// ===== AI VOICE CLONING SYSTEM =====
+// Voice profiles for personalized messages and DMs
+export const voiceProfileStatusEnum = pgEnum("voice_profile_status", [
+  "pending", // Uploading/processing
+  "cloning", // Cloning in progress
+  "active", // Ready to use
+  "failed", // Cloning failed
+  "disabled", // Manually disabled
+]);
+
+export const voiceProfiles = pgTable(
+  "voice_profiles",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: varchar("name").notNull(), // "Professional Voice", "Casual Voice", etc.
+    description: text("description"),
+    
+    // ElevenLabs Integration
+    voiceId: varchar("voice_id"), // ElevenLabs voice ID (null until cloned)
+    provider: varchar("provider").default("elevenlabs").notNull(), // Future-proof for multiple providers
+    
+    // Audio Samples
+    audioSampleUrls: text("audio_sample_urls").array().default([]), // S3 URLs of training samples
+    sampleDuration: integer("sample_duration"), // Total duration in seconds
+    
+    // Status & Metadata
+    status: voiceProfileStatusEnum("status").default("pending").notNull(),
+    errorMessage: text("error_message"), // If cloning failed
+    quality: integer("quality"), // 1-10 quality score from ElevenLabs
+    
+    // Voice Settings
+    stability: decimal("stability", { precision: 3, scale: 2 }).default("0.75"), // 0.0-1.0
+    similarityBoost: decimal("similarity_boost", { precision: 3, scale: 2 }).default("0.75"), // 0.0-1.0
+    style: decimal("style", { precision: 3, scale: 2 }).default("0.0"), // 0.0-1.0 (emotion/expressiveness)
+    useSpeakerBoost: boolean("use_speaker_boost").default(true),
+    
+    metadata: jsonb("metadata").default({}), // Additional provider-specific data
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_voice_profiles_user").on(table.userId),
+    index("idx_voice_profiles_status").on(table.status),
+    index("idx_voice_profiles_voice_id").on(table.voiceId),
+  ]
+);
+
+// Generated voice messages for fans
+export const voiceMessageStatusEnum = pgEnum("voice_message_status", [
+  "pending", // Queued for generation
+  "generating", // TTS in progress
+  "completed", // Ready to send
+  "failed", // Generation failed
+  "sent", // Delivered to recipient
+]);
+
+export const voiceMessages = pgTable(
+  "voice_messages",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    voiceProfileId: varchar("voice_profile_id")
+      .notNull()
+      .references(() => voiceProfiles.id, { onDelete: "cascade" }),
+    senderId: varchar("sender_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    recipientId: varchar("recipient_id")
+      .references(() => users.id, { onDelete: "set null" }), // null for bulk messages
+    
+    // Message Content
+    text: text("text").notNull(), // Text to convert to speech
+    audioUrl: varchar("audio_url"), // S3 URL of generated audio (null until generated)
+    duration: integer("duration"), // Audio duration in milliseconds
+    
+    // Generation Details
+    status: voiceMessageStatusEnum("status").default("pending").notNull(),
+    errorMessage: text("error_message"),
+    model: varchar("model").default("eleven_multilingual_v2"), // ElevenLabs model used
+    
+    // Analytics
+    listenCount: integer("listen_count").default(0),
+    lastListenedAt: timestamp("last_listened_at"),
+    
+    metadata: jsonb("metadata").default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_voice_messages_profile").on(table.voiceProfileId),
+    index("idx_voice_messages_sender").on(table.senderId),
+    index("idx_voice_messages_recipient").on(table.recipientId),
+    index("idx_voice_messages_status").on(table.status),
+  ]
+);
+
+// Voice message templates for quick generation
+export const voiceMessageTemplates = pgTable(
+  "voice_message_templates",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: varchar("name").notNull(), // "Welcome Message", "Thank You", etc.
+    text: text("text").notNull(), // Template text with {{variables}}
+    category: varchar("category"), // "greeting", "thank_you", "promotion", etc.
+    useCount: integer("use_count").default(0),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_voice_templates_user").on(table.userId),
+  ]
+);
+
+// Relations
+export const voiceProfilesRelations = relations(voiceProfiles, ({ one, many }) => ({
+  user: one(users, {
+    fields: [voiceProfiles.userId],
+    references: [users.id],
+  }),
+  messages: many(voiceMessages),
+}));
+
+export const voiceMessagesRelations = relations(voiceMessages, ({ one }) => ({
+  voiceProfile: one(voiceProfiles, {
+    fields: [voiceMessages.voiceProfileId],
+    references: [voiceProfiles.id],
+  }),
+  sender: one(users, {
+    fields: [voiceMessages.senderId],
+    references: [users.id],
+  }),
+  recipient: one(users, {
+    fields: [voiceMessages.recipientId],
+    references: [users.id],
+  }),
+}));
+
+export const voiceMessageTemplatesRelations = relations(voiceMessageTemplates, ({ one }) => ({
+  user: one(users, {
+    fields: [voiceMessageTemplates.userId],
+    references: [users.id],
+  }),
+}));
+
+// Zod Schemas
+export const insertVoiceProfileSchema = createInsertSchema(voiceProfiles).omit({
+  id: true,
+  voiceId: true,
+  status: true,
+  errorMessage: true,
+  quality: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertVoiceMessageSchema = createInsertSchema(voiceMessages).omit({
+  id: true,
+  audioUrl: true,
+  duration: true,
+  status: true,
+  errorMessage: true,
+  listenCount: true,
+  lastListenedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertVoiceMessageTemplateSchema = createInsertSchema(voiceMessageTemplates).omit({
+  id: true,
+  useCount: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Types
+export type VoiceProfile = typeof voiceProfiles.$inferSelect;
+export type InsertVoiceProfile = z.infer<typeof insertVoiceProfileSchema>;
+export type VoiceMessage = typeof voiceMessages.$inferSelect;
+export type InsertVoiceMessage = z.infer<typeof insertVoiceMessageSchema>;
+export type VoiceMessageTemplate = typeof voiceMessageTemplates.$inferSelect;
+export type InsertVoiceMessageTemplate = z.infer<typeof insertVoiceMessageTemplateSchema>;
+
 // ===== PWA EXTENSIONS =====
 // Import PWA schemas
 export * from "./pwaPatch";
