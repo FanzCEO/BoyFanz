@@ -5676,6 +5676,10 @@ export async function setupAdvancedRoutes(app: Express) {
   const { nftContentRoutes } = await import('./routes/nftContentRoutes');
   app.use('/api/nft', nftContentRoutes);
   
+  // Emotional AI Routes
+  const { emotionalAIRoutes } = await import('./routes/emotionalAIRoutes');
+  app.use('/api/emotional-ai', emotionalAIRoutes);
+  
   // Progressive Web App (PWA) Routes
   app.use('/api/pwa', pwaRoutes);
   
