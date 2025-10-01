@@ -8650,6 +8650,297 @@ export type InsertTrustProof = z.infer<typeof insertTrustProofSchema>;
 export type DisputeCase = typeof disputeCases.$inferSelect;
 export type InsertDisputeCase = z.infer<typeof insertDisputeCaseSchema>;
 
+// ===== MIXED-REALITY LIVE EVENTS =====
+// Immersive virtual meetups with tipping, private shows, and NFT souvenirs
+
+export const eventTypeEnum = pgEnum("event_type", [
+  "public_meetup",
+  "private_show",
+  "vip_experience",
+  "fan_meetup",
+  "exclusive_stream",
+]);
+
+export const eventStatusEnum = pgEnum("event_status", [
+  "scheduled",
+  "live",
+  "ended",
+  "cancelled",
+]);
+
+export const eventAccessEnum = pgEnum("event_access", [
+  "free",
+  "ticketed",
+  "subscription_only",
+  "tier_gated",
+]);
+
+// Live events created by creators
+export const liveEvents = pgTable(
+  "live_events",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    creatorId: varchar("creator_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    
+    // Event details
+    title: varchar("title").notNull(),
+    description: text("description"),
+    eventType: eventTypeEnum("event_type").notNull(),
+    status: eventStatusEnum("status").default("scheduled").notNull(),
+    accessType: eventAccessEnum("access_type").default("free").notNull(),
+    
+    // Scheduling
+    scheduledStartAt: timestamp("scheduled_start_at").notNull(),
+    scheduledEndAt: timestamp("scheduled_end_at").notNull(),
+    actualStartAt: timestamp("actual_start_at"),
+    actualEndAt: timestamp("actual_end_at"),
+    
+    // Ticketing
+    ticketPriceCents: bigint("ticket_price_cents", { mode: "number" }).default(0),
+    maxAttendees: integer("max_attendees"),
+    
+    // Mixed-reality features
+    virtualRoomUrl: varchar("virtual_room_url"), // 3D space URL
+    backgroundAssetUrl: varchar("background_asset_url"),
+    avatarEnabled: boolean("avatar_enabled").default(true),
+    spatialAudioEnabled: boolean("spatial_audio_enabled").default(true),
+    
+    // NFT souvenirs
+    nftSouvenirEnabled: boolean("nft_souvenir_enabled").default(false),
+    nftSouvenirName: varchar("nft_souvenir_name"),
+    nftSouvenirDescription: text("nft_souvenir_description"),
+    nftSouvenirImageUrl: varchar("nft_souvenir_image_url"),
+    
+    // Engagement tracking
+    totalRevenueCents: bigint("total_revenue_cents", { mode: "number" }).default(0),
+    totalTipsCents: bigint("total_tips_cents", { mode: "number" }).default(0),
+    totalAttendees: integer("total_attendees").default(0),
+    peakConcurrentViewers: integer("peak_concurrent_viewers").default(0),
+    
+    metadata: jsonb("metadata").default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_live_events_creator").on(table.creatorId),
+    index("idx_live_events_status").on(table.status),
+    index("idx_live_events_type").on(table.eventType),
+    index("idx_live_events_scheduled_start").on(table.scheduledStartAt),
+  ],
+);
+
+// Event tickets purchased by fans
+export const eventTickets = pgTable(
+  "event_tickets",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    eventId: varchar("event_id")
+      .notNull()
+      .references(() => liveEvents.id, { onDelete: "cascade" }),
+    fanId: varchar("fan_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    
+    // Purchase details
+    pricePaidCents: bigint("price_paid_cents", { mode: "number" }).notNull(),
+    paymentMethod: varchar("payment_method"), // fanzwallet, card, crypto
+    transactionId: varchar("transaction_id").references(() => fanzLedger.id),
+    
+    // Ticket status
+    purchasedAt: timestamp("purchased_at").defaultNow(),
+    usedAt: timestamp("used_at"),
+    refundedAt: timestamp("refunded_at"),
+    
+    metadata: jsonb("metadata").default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    unique().on(table.eventId, table.fanId),
+    index("idx_event_tickets_event").on(table.eventId),
+    index("idx_event_tickets_fan").on(table.fanId),
+  ],
+);
+
+// Real-time event attendance tracking
+export const eventAttendance = pgTable(
+  "event_attendance",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    eventId: varchar("event_id")
+      .notNull()
+      .references(() => liveEvents.id, { onDelete: "cascade" }),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    
+    // Attendance tracking
+    joinedAt: timestamp("joined_at").defaultNow(),
+    leftAt: timestamp("left_at"),
+    durationSeconds: integer("duration_seconds").default(0),
+    
+    // Mixed-reality presence
+    avatarUrl: varchar("avatar_url"),
+    positionX: decimal("position_x"),
+    positionY: decimal("position_y"),
+    positionZ: decimal("position_z"),
+    isActive: boolean("is_active").default(true),
+    
+    metadata: jsonb("metadata").default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_event_attendance_event").on(table.eventId),
+    index("idx_event_attendance_user").on(table.userId),
+    index("idx_event_attendance_active").on(table.isActive),
+  ],
+);
+
+// Live tips during events
+export const eventTips = pgTable(
+  "event_tips",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    eventId: varchar("event_id")
+      .notNull()
+      .references(() => liveEvents.id, { onDelete: "cascade" }),
+    fromUserId: varchar("from_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    toUserId: varchar("to_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    
+    // Tip details
+    amountCents: bigint("amount_cents", { mode: "number" }).notNull(),
+    message: text("message"),
+    isAnonymous: boolean("is_anonymous").default(false),
+    
+    // Transaction
+    transactionId: varchar("transaction_id").references(() => fanzLedger.id),
+    
+    // Display options
+    showOnScreen: boolean("show_on_screen").default(true), // Display in live event UI
+    highlightColor: varchar("highlight_color"),
+    
+    tippedAt: timestamp("tipped_at").defaultNow(),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_event_tips_event").on(table.eventId),
+    index("idx_event_tips_from").on(table.fromUserId),
+    index("idx_event_tips_to").on(table.toUserId),
+  ],
+);
+
+// NFT souvenirs minted for event attendees
+export const eventNftSouvenirs = pgTable(
+  "event_nft_souvenirs",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    eventId: varchar("event_id")
+      .notNull()
+      .references(() => liveEvents.id, { onDelete: "cascade" }),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    
+    // NFT details
+    tokenId: varchar("token_id").unique(), // Blockchain token ID
+    name: varchar("name").notNull(),
+    description: text("description"),
+    imageUrl: varchar("image_url").notNull(),
+    
+    // Attributes
+    attributes: jsonb("attributes").default({}), // NFT metadata
+    rarity: varchar("rarity"), // common, rare, epic, legendary
+    serialNumber: integer("serial_number"), // 1 of 100
+    
+    // Blockchain info (blockchain-agnostic)
+    chainId: varchar("chain_id"), // ethereum, polygon, etc.
+    contractAddress: varchar("contract_address"),
+    transactionHash: varchar("transaction_hash"),
+    
+    // Minting
+    mintedAt: timestamp("minted_at").defaultNow(),
+    claimedAt: timestamp("claimed_at"),
+    
+    metadata: jsonb("metadata").default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    unique().on(table.eventId, table.userId),
+    index("idx_event_nft_event").on(table.eventId),
+    index("idx_event_nft_user").on(table.userId),
+    index("idx_event_nft_token").on(table.tokenId),
+  ],
+);
+
+// Insert schemas
+export const insertLiveEventSchema = createInsertSchema(liveEvents).omit({
+  id: true,
+  actualStartAt: true,
+  actualEndAt: true,
+  totalRevenueCents: true,
+  totalTipsCents: true,
+  totalAttendees: true,
+  peakConcurrentViewers: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertEventTicketSchema = createInsertSchema(eventTickets).omit({
+  id: true,
+  usedAt: true,
+  refundedAt: true,
+  purchasedAt: true,
+  createdAt: true,
+});
+
+export const insertEventAttendanceSchema = createInsertSchema(eventAttendance).omit({
+  id: true,
+  leftAt: true,
+  durationSeconds: true,
+  joinedAt: true,
+  createdAt: true,
+});
+
+export const insertEventTipSchema = createInsertSchema(eventTips).omit({
+  id: true,
+  tippedAt: true,
+  createdAt: true,
+});
+
+export const insertEventNftSouvenirSchema = createInsertSchema(eventNftSouvenirs).omit({
+  id: true,
+  mintedAt: true,
+  claimedAt: true,
+  createdAt: true,
+});
+
+// Types
+export type LiveEvent = typeof liveEvents.$inferSelect;
+export type InsertLiveEvent = z.infer<typeof insertLiveEventSchema>;
+export type EventTicket = typeof eventTickets.$inferSelect;
+export type InsertEventTicket = z.infer<typeof insertEventTicketSchema>;
+export type EventAttendance = typeof eventAttendance.$inferSelect;
+export type InsertEventAttendance = z.infer<typeof insertEventAttendanceSchema>;
+export type EventTip = typeof eventTips.$inferSelect;
+export type InsertEventTip = z.infer<typeof insertEventTipSchema>;
+export type EventNftSouvenir = typeof eventNftSouvenirs.$inferSelect;
+export type InsertEventNftSouvenir = z.infer<typeof insertEventNftSouvenirSchema>;
+
 // ===== PWA EXTENSIONS =====
 // Import PWA schemas
 export * from "./pwaPatch";
