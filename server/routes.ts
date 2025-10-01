@@ -5672,6 +5672,10 @@ export async function setupAdvancedRoutes(app: Express) {
   const { voiceCloningRoutes } = await import('./routes/voiceCloningRoutes');
   app.use('/api/voice', voiceCloningRoutes);
   
+  // NFT Content Ownership Routes
+  const { nftContentRoutes } = await import('./routes/nftContentRoutes');
+  app.use('/api/nft', nftContentRoutes);
+  
   // Progressive Web App (PWA) Routes
   app.use('/api/pwa', pwaRoutes);
   
