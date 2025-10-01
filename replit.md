@@ -64,6 +64,20 @@ Preferred communication style: Simple, everyday language.
 ## AI Integration
 - **Features**: AI-assisted tutorials (AI Chat Support, Interactive Guides), floating AI chatbot for platform support.
 
+## Dual Sign-Up Flows
+- **Creator (Starz) Onboarding**: 6-step premium flow (Welcome → Account → Profile → Verification → Monetization → Complete)
+  - Empowering tone with "Claim Your Star Power" messaging
+  - Niche selection with multi-select badges
+  - Payout method setup (PayPal, Bank, Crypto, Paxum)
+  - 100% earnings highlight throughout
+  - ID verification placeholder for compliance
+- **Fan (Fanz) Onboarding**: 5-step welcoming flow (Welcome → Account → Personalization → Payment (optional) → Complete)
+  - Discovery-driven tone with "Discover. Connect. Support." messaging
+  - Interest-based personalization quiz (minimum 3 selections)
+  - Skippable payment setup for instant tipping/subscriptions
+  - Upgrade to creator link on completion
+- **UX Principles**: Progress bars, step navigation, brand-differentiated colors (#ff0000 creator, #d4a959 fan), glassmorphism UI, cross-navigation between roles
+
 # External Dependencies
 
 ## Core Infrastructure
