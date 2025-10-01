@@ -5605,6 +5605,7 @@ import fanzCardWebhooks from './routes/fanzCardWebhooks';
 import revenueQuestRoutes from './routes/revenueQuestRoutes';
 import { trustScoringRoutes } from './routes/trustScoringRoutes';
 import platformPrivilegesRoutes from './routes/platformPrivilegesRoutes';
+import liveEventsRoutes from './routes/liveEventsRoutes';
 
 export function setupAdvancedRoutes(app: Express) {
   setupNFTRoutes(app);
@@ -5639,6 +5640,9 @@ export function setupAdvancedRoutes(app: Express) {
   
   // Platform Privileges - Trust-Tier-Based Access Control
   app.use('/api/privileges', platformPrivilegesRoutes);
+  
+  // Mixed-Reality Live Events - Immersive Virtual Meetups
+  app.use('/api/events', isAuthenticated, liveEventsRoutes);
   
   // AI-Powered Help & Support System
   registerHelpSupportRoutes(app);

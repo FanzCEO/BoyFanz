@@ -110,6 +110,35 @@ Preferred communication style: Simple, everyday language.
 - **Trust Dashboard UI**: Score visualization, tier progress, proof submission/history, dispute filing/resolution
 - **Admin Controls**: Proof verification interface, dispute case management, trust score recalculation, tier statistics
 
+## Mixed-Reality Live Events
+- **Immersive Virtual Meetups**: Creators host live events with spatial audio and 3D positioning
+- **Event Types**: Public meetup, private show, VIP experience, fan meetup, exclusive stream
+- **Ticketing System**: 
+  - FanzWallet integration with double-entry ledger
+  - Access control (free, ticketed, subscription-only, tier-gated)
+  - Automatic refunds on cancellation with ledger reversal
+  - Capacity management with atomic checks
+- **Real-Time Features**:
+  - Live attendance tracking (join/leave with duration calculation)
+  - Active viewer count with peak tracking
+  - 3D spatial positioning for avatars
+- **Live Tipping**:
+  - Instant FanzWallet transfers during events
+  - Anonymous tipping support
+  - Live tip display with highlight colors
+  - Full transaction integrity (SELECT FOR UPDATE locks, rows-affected validation)
+- **NFT Souvenirs**:
+  - Blockchain-agnostic commemorative NFTs for attendees
+  - Serial numbering with rarity tiers (legendary, epic, common)
+  - Automatic minting for event participants
+  - Event metadata preservation in NFT attributes
+- **Financial Safety**:
+  - Pre-flight fund checks before all wallet updates
+  - Wallet row locking (SELECT FOR UPDATE) to prevent race conditions
+  - Verified debit/credit with rows-affected checks
+  - Pre-calculated balanceAfterCents for accurate ledger entries
+  - Complete refund automation on event cancellation
+
 # External Dependencies
 
 ## Core Infrastructure
