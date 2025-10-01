@@ -119,6 +119,28 @@ Preferred communication style: Simple, everyday language.
 - **Trust Dashboard UI**: Score visualization, tier progress, proof submission/history, dispute filing/resolution
 - **Admin Controls**: Proof verification interface, dispute case management, trust score recalculation, tier statistics
 
+## Deepfake Detection - Content Authenticity Protection
+- **AI-Powered Verification**: OpenAI Vision API analysis for deepfake detection (graceful degradation when API key unavailable)
+- **Hash-Based Verification**: SHA-256 content fingerprinting for verified creator content (known limitation: URL-only hashing, production requires binary hashing)
+- **Automated Detection**: System-generated reports when AI detects deepfake content
+- **User Reporting**: Fan and creator reporting interface for suspicious content
+- **Admin Triage System**: 
+  - Pending reports queue (reported, under_review, confirmed statuses)
+  - Status workflow management (reported → under_review → confirmed/false_positive → resolved)
+  - Action tracking (content_removed, user_warned, dmca_filed)
+  - Evidence collection and assignment system
+- **Verification Database**: 
+  - Verified content registry with creator fingerprints
+  - Content verification results with confidence scores
+  - Deepfake reports with impersonation tracking
+  - Detection methods: ai_vision, perceptual_hash, content_hash
+- **Protection Features**:
+  - Automatic deepfake flagging based on AI analysis
+  - Similarity scoring against verified creator content
+  - Multi-method detection (hash matching, AI vision analysis)
+  - Complete audit trail for all reports and verifications
+- **Production TODO**: Implement binary content hashing (fetch actual media, not URL-only), perceptual hashing for visual similarity
+
 ## Mixed-Reality Live Events - COMPLETE ✅
 - **Immersive Virtual Meetups**: Creators host live events with spatial audio and 3D positioning
 - **Event Types**: Public meetup, private show, VIP experience, fan meetup, exclusive stream

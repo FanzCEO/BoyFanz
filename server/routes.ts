@@ -5689,6 +5689,10 @@ export async function setupAdvancedRoutes(app: Express) {
   const { deepfakeDetectionRoutes } = await import('./routes/deepfakeDetectionRoutes');
   app.use('/api/deepfake', deepfakeDetectionRoutes);
   
+  // Holographic Streaming Routes
+  const { holographicStreamingRoutes } = await import('./routes/holographicStreamingRoutes');
+  app.use('/api/holographic', holographicStreamingRoutes);
+  
   // Progressive Web App (PWA) Routes
   app.use('/api/pwa', pwaRoutes);
   

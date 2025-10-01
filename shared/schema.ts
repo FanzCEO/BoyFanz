@@ -2034,6 +2034,161 @@ export const streamViewers = pgTable("stream_viewers", {
   leftAt: timestamp("left_at"),
 });
 
+// ===== HOLOGRAPHIC STREAMING (WebXR/VR/AR) =====
+
+// Holographic stream mode enum
+export const holographicModeEnum = pgEnum("holographic_mode", [
+  "vr",           // Full VR headset
+  "ar",           // AR overlay
+  "mixed",        // Mixed reality
+  "360",          // 360-degree video
+  "spatial",      // Spatial audio only
+]);
+
+// Holographic render quality
+export const holographicQualityEnum = pgEnum("holographic_quality", [
+  "low",          // Mobile/low-power devices
+  "medium",       // Standard VR
+  "high",         // High-end VR
+  "ultra",        // Professional/PC VR
+]);
+
+// Holographic Streams - WebXR-enabled live streams
+export const holographicStreams = pgTable(
+  "holographic_streams",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    liveStreamId: varchar("live_stream_id")
+      .notNull()
+      .unique()
+      .references(() => liveStreams.id, { onDelete: "cascade" }),
+    mode: holographicModeEnum("mode").default("vr").notNull(),
+    quality: holographicQualityEnum("quality").default("medium").notNull(),
+    
+    // WebXR session details
+    webxrSessionId: varchar("webxr_session_id"),
+    spatialAudioEnabled: boolean("spatial_audio_enabled").default(true),
+    handTrackingEnabled: boolean("hand_tracking_enabled").default(false),
+    eyeTrackingEnabled: boolean("eye_tracking_enabled").default(false),
+    
+    // Virtual environment
+    environmentPreset: varchar("environment_preset").default("studio"), // studio, stage, nature, space, custom
+    customEnvironmentUrl: varchar("custom_environment_url"),
+    lightingPreset: varchar("lighting_preset").default("balanced"),
+    
+    // Performance settings
+    maxConcurrentViewers: integer("max_concurrent_viewers").default(50),
+    minFrameRate: integer("min_frame_rate").default(60),
+    adaptiveQuality: boolean("adaptive_quality").default(true),
+    
+    // Holographic features
+    avatarInteractionEnabled: boolean("avatar_interaction_enabled").default(true),
+    gestureControlsEnabled: boolean("gesture_controls_enabled").default(true),
+    voiceCommandsEnabled: boolean("voice_commands_enabled").default(false),
+    
+    metadata: jsonb("metadata").default({}), // custom WebXR settings
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    liveStreamIdx: index("idx_holographic_live_stream").on(table.liveStreamId),
+    modeIdx: index("idx_holographic_mode").on(table.mode),
+  }),
+);
+
+// Holographic Sessions - Active VR/AR viewer sessions
+export const holographicSessions = pgTable(
+  "holographic_sessions",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    holographicStreamId: varchar("holographic_stream_id")
+      .notNull()
+      .references(() => holographicStreams.id, { onDelete: "cascade" }),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    
+    // Device & browser info
+    deviceType: varchar("device_type"), // oculus_quest, vive, hololens, etc.
+    browserAgent: varchar("browser_agent"),
+    webxrMode: varchar("webxr_mode"), // immersive-vr, immersive-ar, inline
+    
+    // Session state
+    isActive: boolean("is_active").default(true),
+    renderQuality: holographicQualityEnum("render_quality").default("medium"),
+    currentFrameRate: integer("current_frame_rate"),
+    latencyMs: integer("latency_ms"),
+    
+    // Spatial positioning
+    avatarPosition: jsonb("avatar_position"), // {x, y, z}
+    avatarRotation: jsonb("avatar_rotation"), // {x, y, z, w} quaternion
+    viewDirection: jsonb("view_direction"), // {x, y, z}
+    
+    // Interaction state
+    handsTracked: boolean("hands_tracked").default(false),
+    eyeGazeTracked: boolean("eye_gaze_tracked").default(false),
+    gestureData: jsonb("gesture_data").default({}),
+    
+    joinedAt: timestamp("joined_at").defaultNow(),
+    lastActivityAt: timestamp("last_activity_at").defaultNow(),
+    leftAt: timestamp("left_at"),
+  },
+  (table) => ({
+    streamUserIdx: index("idx_holographic_sessions_stream_user").on(
+      table.holographicStreamId,
+      table.userId,
+    ),
+    activeSessionsIdx: index("idx_holographic_active_sessions").on(
+      table.holographicStreamId,
+      table.isActive,
+    ),
+  }),
+);
+
+// Holographic Avatars - 3D avatar customization
+export const holographicAvatars = pgTable(
+  "holographic_avatars",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    userId: varchar("user_id")
+      .notNull()
+      .unique()
+      .references(() => users.id, { onDelete: "cascade" }),
+    
+    // Avatar model
+    modelType: varchar("model_type").default("humanoid"), // humanoid, cartoon, abstract
+    modelUrl: varchar("model_url"), // 3D model URL (glTF/GLB)
+    textureUrl: varchar("texture_url"),
+    
+    // Customization
+    bodyPreset: varchar("body_preset"),
+    facePreset: varchar("face_preset"),
+    colorScheme: jsonb("color_scheme").default({}), // primary, secondary, accent colors
+    accessories: jsonb("accessories").default([]), // hats, glasses, clothing
+    
+    // Animation settings
+    idleAnimation: varchar("idle_animation").default("standing"),
+    gestureAnimations: jsonb("gesture_animations").default({}),
+    emotionAnimations: jsonb("emotion_animations").default({}),
+    
+    // Voice avatar (for spatial audio)
+    voiceProfileUrl: varchar("voice_profile_url"),
+    spatialAudioSettings: jsonb("spatial_audio_settings").default({}),
+    
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    userIdx: index("idx_holographic_avatars_user").on(table.userId),
+  }),
+);
+
 // Lovense Device Integration
 export const lovenseDeviceStatusEnum = pgEnum("lovense_device_status", [
   "connected",
