@@ -5608,7 +5608,7 @@ import { trustScoringRoutes } from './routes/trustScoringRoutes';
 import platformPrivilegesRoutes from './routes/platformPrivilegesRoutes';
 import liveEventsRoutes from './routes/liveEventsRoutes';
 
-export function setupAdvancedRoutes(app: Express) {
+export async function setupAdvancedRoutes(app: Express) {
   setupNFTRoutes(app);
   setupAIFeedRoutes(app);
   setupAgeVerificationRoutes(app);
@@ -5663,6 +5663,10 @@ export function setupAdvancedRoutes(app: Express) {
   
   // Email/Password Authentication Routes (NO auth middleware - public)
   app.use('/api/auth', authRoutes);
+  
+  // Dynamic Pricing AI Routes
+  const { dynamicPricingRoutes } = await import('./routes/dynamicPricingRoutes');
+  app.use('/api/pricing', dynamicPricingRoutes);
   
   // Progressive Web App (PWA) Routes
   app.use('/api/pwa', pwaRoutes);

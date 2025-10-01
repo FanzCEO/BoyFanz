@@ -925,6 +925,173 @@ export const payouts = pgTable(
   ],
 );
 
+// ===== DYNAMIC PRICING AI SYSTEM =====
+// Real-time AI-powered price optimization based on demand, engagement, and market conditions
+
+export const pricingStrategyEnum = pgEnum("pricing_strategy", [
+  "fixed",           // Static pricing
+  "dynamic",         // AI-optimized real-time pricing
+  "tiered",          // Volume-based tiered pricing
+  "auction",         // Bid-based pricing
+  "time_decay",      // Price decreases over time
+  "demand_based",    // Adjusts based on demand signals
+  "competitive",     // Mirrors competitor pricing
+]);
+
+export const pricingRuleStatus = pgEnum("pricing_rule_status", [
+  "active",
+  "paused",
+  "testing",
+  "archived",
+]);
+
+// Pricing rules - Define AI pricing strategies for content and subscriptions
+export const pricingRules = pgTable(
+  "pricing_rules",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    creatorProfileId: varchar("creator_profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    contentId: varchar("content_id").references(() => content.id, { onDelete: "cascade" }), // null = applies to subscriptions
+    planId: varchar("plan_id").references(() => subscriptionPlans.id, { onDelete: "cascade" }), // null = applies to content
+    
+    name: varchar("name").notNull(),
+    strategy: pricingStrategyEnum("strategy").default("dynamic").notNull(),
+    status: pricingRuleStatus("status").default("active").notNull(),
+    
+    // Pricing bounds
+    basePriceCents: integer("base_price_cents").notNull(), // Starting/minimum price
+    minPriceCents: integer("min_price_cents").notNull(), // Floor price
+    maxPriceCents: integer("max_price_cents").notNull(), // Ceiling price
+    currentPriceCents: integer("current_price_cents").notNull(), // Active price
+    
+    // AI optimization parameters
+    aiModel: varchar("ai_model").default("gpt-4o-mini"), // OpenAI model for price optimization
+    optimizationGoal: varchar("optimization_goal").default("revenue"), // revenue, engagement, subscribers
+    demandElasticity: decimal("demand_elasticity", { precision: 5, scale: 2 }).default("0.00"), // -1.0 to 1.0
+    
+    // Market signals and triggers
+    triggers: jsonb("triggers").default({}), // Conditions that trigger price adjustments
+    constraints: jsonb("constraints").default({}), // Business rules and limits
+    metadata: jsonb("metadata").default({}), // Additional configuration
+    
+    // Performance tracking
+    totalRevenueCents: bigint("total_revenue_cents", { mode: "number" }).default(0),
+    totalSales: integer("total_sales").default(0),
+    conversionRate: decimal("conversion_rate", { precision: 5, scale: 2 }).default("0.00"),
+    avgTransactionCents: integer("avg_transaction_cents").default(0),
+    
+    lastOptimizedAt: timestamp("last_optimized_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_pricing_rules_creator").on(table.creatorProfileId),
+    index("idx_pricing_rules_content").on(table.contentId),
+    index("idx_pricing_rules_plan").on(table.planId),
+    index("idx_pricing_rules_status").on(table.status),
+  ],
+);
+
+// Pricing history - Track all price changes and their impact
+export const pricingHistory = pgTable(
+  "pricing_history",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    ruleId: varchar("rule_id")
+      .notNull()
+      .references(() => pricingRules.id, { onDelete: "cascade" }),
+    
+    previousPriceCents: integer("previous_price_cents").notNull(),
+    newPriceCents: integer("new_price_cents").notNull(),
+    changePercent: decimal("change_percent", { precision: 5, scale: 2 }).notNull(),
+    
+    reason: varchar("reason").notNull(), // ai_optimization, manual_override, demand_spike, etc.
+    triggerData: jsonb("trigger_data").default({}), // What triggered the change
+    aiRationale: text("ai_rationale"), // AI's explanation for the change
+    
+    // Impact metrics (measured after price change)
+    salesBefore: integer("sales_before").default(0),
+    salesAfter: integer("sales_after").default(0),
+    revenueBefore: bigint("revenue_before", { mode: "number" }).default(0),
+    revenueAfter: bigint("revenue_after", { mode: "number" }).default(0),
+    impactScore: decimal("impact_score", { precision: 5, scale: 2 }), // -100 to 100
+    
+    effectiveFrom: timestamp("effective_from").notNull(),
+    effectiveUntil: timestamp("effective_until"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_pricing_history_rule").on(table.ruleId),
+    index("idx_pricing_history_effective").on(table.effectiveFrom),
+  ],
+);
+
+// Pricing insights - AI-generated recommendations and market analysis
+export const insightType = pgEnum("insight_type", [
+  "price_recommendation",
+  "demand_forecast",
+  "competitor_analysis",
+  "revenue_optimization",
+  "engagement_trend",
+  "seasonal_pattern",
+]);
+
+export const insightPriority = pgEnum("insight_priority", [
+  "low",
+  "medium",
+  "high",
+  "critical",
+]);
+
+export const pricingInsights = pgTable(
+  "pricing_insights",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    creatorProfileId: varchar("creator_profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    ruleId: varchar("rule_id").references(() => pricingRules.id, { onDelete: "cascade" }),
+    
+    type: insightType("type").notNull(),
+    priority: insightPriority("priority").default("medium").notNull(),
+    
+    title: varchar("title").notNull(),
+    description: text("description").notNull(),
+    recommendation: text("recommendation"), // Action to take
+    
+    // AI analysis
+    aiModel: varchar("ai_model").notNull(),
+    confidence: decimal("confidence", { precision: 5, scale: 2 }).notNull(), // 0-100
+    dataPoints: jsonb("data_points").default({}), // Supporting data
+    predictedImpact: jsonb("predicted_impact").default({}), // Expected outcomes
+    
+    // Actionable data
+    suggestedPriceCents: integer("suggested_price_cents"),
+    expectedRevenueIncrease: decimal("expected_revenue_increase", { precision: 5, scale: 2 }),
+    
+    actionTaken: boolean("action_taken").default(false),
+    actionTakenAt: timestamp("action_taken_at"),
+    actualImpact: jsonb("actual_impact").default({}), // Measured results
+    
+    expiresAt: timestamp("expires_at"), // Insights have shelf life
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_pricing_insights_creator").on(table.creatorProfileId),
+    index("idx_pricing_insights_rule").on(table.ruleId),
+    index("idx_pricing_insights_type").on(table.type),
+    index("idx_pricing_insights_priority").on(table.priority),
+  ],
+);
+
 // ===== CROSS-PLATFORM ADVERTISING SYSTEM =====
 // Unified advertising network across all FANZ empire brands
 

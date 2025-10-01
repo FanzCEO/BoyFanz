@@ -15,10 +15,7 @@ export const authRateLimit = rateLimit({
     error: "Too many authentication attempts. Please try again in 15 minutes."
   },
   skipSuccessfulRequests: false,
-  keyGenerator: (req: Request) => {
-    // Use X-Forwarded-For for proxied requests (load balancer)
-    return req.ip || req.headers['x-forwarded-for'] as string || 'unknown';
-  },
+  // Default keyGenerator uses req.ip which handles IPv6 correctly
   handler: (req: Request, res: Response) => {
     res.status(429).json({
       success: false,
