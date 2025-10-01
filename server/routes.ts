@@ -5642,6 +5642,19 @@ export function setupAdvancedRoutes(app: Express) {
   app.use('/api/privileges', platformPrivilegesRoutes);
   
   // Mixed-Reality Live Events - Immersive Virtual Meetups
+  // Public event browsing (no auth required)
+  app.get('/api/events', async (req, res) => {
+    try {
+      const { LiveEventsService } = await import('./services/liveEventsService');
+      const liveEventsService = new LiveEventsService();
+      const events = await liveEventsService.getAllEvents(req.query.status as any);
+      res.json(events);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || "Failed to get events" });
+    }
+  });
+  
+  // Protected event actions (auth required)
   app.use('/api/events', isAuthenticated, liveEventsRoutes);
   
   // AI-Powered Help & Support System
