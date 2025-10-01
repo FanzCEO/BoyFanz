@@ -2,6 +2,8 @@ import { db } from "../db";
 import { fanzCreditLines, users, FanzCreditLine } from "@shared/schema";
 import { eq, and, sql, desc } from "drizzle-orm";
 import { FanzTrustService } from "./fanzTrustService";
+import { TrustScoringService } from "./trustScoringService";
+import { PlatformPrivilegesService } from "./platformPrivilegesService";
 import { nanoid } from "nanoid";
 
 /**
@@ -16,9 +18,13 @@ import { nanoid } from "nanoid";
  */
 export class FanzCreditService {
   private fanzTrust: FanzTrustService;
+  private trustScoring: TrustScoringService;
+  private platformPrivileges: PlatformPrivilegesService;
 
   constructor() {
     this.fanzTrust = new FanzTrustService();
+    this.trustScoring = new TrustScoringService();
+    this.platformPrivileges = new PlatformPrivilegesService();
   }
 
   // ===== CREDIT LINE MANAGEMENT =====
@@ -37,17 +43,30 @@ export class FanzCreditService {
 
     console.log(`💳 FanzCredit: Processing credit application for user ${userId} - ${requestedCreditCents / 100} USD`);
 
-    // Calculate trust score
+    // Get platform privileges based on trust tier
+    const privileges = await this.platformPrivileges.getUserPrivileges(userId);
+
+    // Calculate trust score (using fresh calculation)
     const trustScore = await this.calculateTrustScore(userId);
     const riskTier = this.getRiskTier(trustScore);
-    const interestRateBps = this.getInterestRate(riskTier, collateralType);
+    
+    // Calculate base interest rate
+    let interestRateBps = this.getInterestRate(riskTier, collateralType);
+    
+    // Enforce maximum interest rate from platform privileges (trust tier)
+    // This ensures diamond-tier users get 3% APR as promised (capped, not floored)
+    interestRateBps = Math.min(interestRateBps, privileges.maxInterestRateBps);
 
-    // Determine credit limit (may be less than requested based on trust score)
-    const approvedCreditCents = this.calculateApprovedCredit(
+    // Calculate approved credit based on trust score
+    let approvedCreditCents = this.calculateApprovedCredit(
       requestedCreditCents,
       trustScore,
       collateralValueCents
     );
+    
+    // Enforce maximum credit limit from platform privileges (trust tier)
+    // This caps credit at tier-specific limits ($100 → $50,000)
+    approvedCreditCents = Math.min(approvedCreditCents, privileges.maxCreditLimitCents);
 
     // Create credit line
     const [creditLine] = await db.insert(fanzCreditLines).values({
@@ -65,11 +84,11 @@ export class FanzCreditService {
       approvedAt: new Date(),
       metadata: {
         requestedCreditCents,
-        approvalReason: `Trust score: ${trustScore}, Risk tier: ${riskTier}`,
+        approvalReason: `Trust score: ${trustScore}, Risk tier: ${riskTier}, Trust tier: ${(await this.trustScoring.getOrCreateTrustScore(userId)).currentTier}`,
       },
     }).returning();
 
-    console.log(`✅ FanzCredit: Credit line approved - ${creditLine.id} (${approvedCreditCents / 100} USD @ ${interestRateBps / 100}% APR)`);
+    console.log(`✅ FanzCredit: Credit line approved - ${creditLine.id} (${approvedCreditCents / 100} USD @ ${interestRateBps / 100}% APR, Tier: ${(await this.trustScoring.getOrCreateTrustScore(userId)).currentTier})`);
 
     return creditLine;
   }
@@ -135,7 +154,7 @@ export class FanzCreditService {
         .update(fanzCreditLines)
         .set({
           availableCreditCents: creditLine.availableCreditCents - amountCents,
-          usedCreditCents: creditLine.usedCreditCents + amountCents,
+          usedCreditCents: (creditLine.usedCreditCents || 0) + amountCents,
           updatedAt: new Date(),
         })
         .where(eq(fanzCreditLines.id, creditLineId));
@@ -188,7 +207,9 @@ export class FanzCreditService {
       }
 
       // Validate repayment amount - cannot exceed outstanding balance
-      if (creditLine.usedCreditCents === 0) {
+      const usedCredit = creditLine.usedCreditCents || 0;
+      
+      if (usedCredit === 0) {
         return { 
           success: false, 
           error: 'No outstanding balance to repay',
@@ -196,11 +217,11 @@ export class FanzCreditService {
         };
       }
 
-      if (amountCents > creditLine.usedCreditCents) {
+      if (amountCents > usedCredit) {
         return { 
           success: false, 
-          error: `Payment amount (${amountCents / 100} USD) exceeds outstanding balance (${creditLine.usedCreditCents / 100} USD)`,
-          remainingBalance: creditLine.usedCreditCents
+          error: `Payment amount (${amountCents / 100} USD) exceeds outstanding balance (${usedCredit / 100} USD)`,
+          remainingBalance: usedCredit
         };
       }
 
@@ -221,7 +242,7 @@ export class FanzCreditService {
       });
 
       // Update credit line balances
-      const newUsedCredit = creditLine.usedCreditCents - amountCents;
+      const newUsedCredit = (creditLine.usedCreditCents || 0) - amountCents;
 
       await db
         .update(fanzCreditLines)
@@ -280,35 +301,20 @@ export class FanzCreditService {
   // ===== TRUST SCORING =====
 
   /**
-   * Calculate trust score based on platform activity
-   * Score range: 0-1000 (higher is better)
+   * Calculate trust score using the FanzTrust tier system
+   * Score range: 0-1000 (mapped from trust tier points)
    */
   async calculateTrustScore(userId: string): Promise<number> {
-    // Get user wallet and transaction history
-    const wallet = await this.fanzTrust.getOrCreateWallet(userId);
-    const transactions = await this.fanzTrust.getTransactionHistory(userId, { limit: 100 });
+    // Get FRESH trust score from TrustScoringService (recalculated based on current activity)
+    const trustScore = await this.trustScoring.calculateTrustScore(userId);
+    
+    // Map trust tier points (0-10000+) to credit score (0-1000)
+    // This gives higher credit scores to users with verified trust proofs
+    const creditScore = Math.min(1000, Math.floor(trustScore.scorePoints / 10));
 
-    // Scoring factors
-    let score = 300; // Base score
+    console.log(`📊 FanzCredit: Trust score calculated for user ${userId} - ${creditScore}/1000 (Tier: ${trustScore.currentTier}, Points: ${trustScore.scorePoints})`);
 
-    // Wallet balance factor (up to 200 points)
-    const balanceScore = Math.min(200, Math.floor(wallet.availableBalanceCents / 10000));
-    score += balanceScore;
-
-    // Transaction history factor (up to 300 points)
-    const transactionCount = transactions.length;
-    const transactionScore = Math.min(300, transactionCount * 3);
-    score += transactionScore;
-
-    // Account age factor (up to 200 points) - simplified for now
-    score += 100; // TODO: Calculate based on actual account age
-
-    // Cap at 1000
-    score = Math.min(1000, score);
-
-    console.log(`📊 FanzCredit: Trust score calculated for user ${userId} - ${score}/1000`);
-
-    return score;
+    return creditScore;
   }
 
   /**
@@ -412,7 +418,7 @@ export class FanzCreditService {
       throw new Error('Credit line not found');
     }
 
-    if (creditLine.usedCreditCents > 0) {
+    if ((creditLine.usedCreditCents || 0) > 0) {
       throw new Error('Cannot close credit line with outstanding balance');
     }
 

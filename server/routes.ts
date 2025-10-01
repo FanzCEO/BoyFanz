@@ -5604,6 +5604,7 @@ import fanzCardRoutes from './routes/fanzCardRoutes';
 import fanzCardWebhooks from './routes/fanzCardWebhooks';
 import revenueQuestRoutes from './routes/revenueQuestRoutes';
 import { trustScoringRoutes } from './routes/trustScoringRoutes';
+import platformPrivilegesRoutes from './routes/platformPrivilegesRoutes';
 
 export function setupAdvancedRoutes(app: Express) {
   setupNFTRoutes(app);
@@ -5635,6 +5636,9 @@ export function setupAdvancedRoutes(app: Express) {
   
   // Trust Tiering & Reputation System
   app.use('/api/trust', trustScoringRoutes);
+  
+  // Platform Privileges - Trust-Tier-Based Access Control
+  app.use('/api/privileges', platformPrivilegesRoutes);
   
   // AI-Powered Help & Support System
   registerHelpSupportRoutes(app);

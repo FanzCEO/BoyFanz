@@ -33,7 +33,7 @@ const PROOF_POINT_VALUES = {
   bank_statement: 150,
 };
 
-class TrustScoringService {
+export class TrustScoringService {
   // Get or create trust score for user
   async getOrCreateTrustScore(userId: string): Promise<TrustScore> {
     let [score] = await db

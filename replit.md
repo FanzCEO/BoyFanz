@@ -94,6 +94,22 @@ Preferred communication style: Simple, everyday language.
   - **Concurrency Safety**: Serialized contributions prevent double-counting and data corruption
   - **Held Fund Flow**: Contribution → held balance → released on payout (creator/contributors)
 
+## Trust Tiering System - FanzTrust Proof Graph
+- **5-Tier Trust System**: Unverified → Bronze → Silver → Gold → Platinum → Diamond (0 → 10,000+ points)
+- **Proof Verification**: ID, address, payment history, social media, employment, bank statements (50-200 pts each)
+- **Automated Scoring**: Transaction volume, account age, disputes won/lost, consecutive good standing days
+- **Dispute Resolution**: AI-assisted analysis with admin review, points awarded/deducted based on outcome
+- **Credit Integration**: Trust tiers directly influence credit limits (Unverified: $100 → Diamond: $50,000)
+- **Interest Rate Tiers**: Trust-based APR (Unverified: 24% → Diamond: 3%)
+- **Platform Privileges**: Progressive feature unlocks based on trust tier
+  - **Content Limits**: File upload size (50MB → 5GB), files per post (5 → 100), video length (5min → 4hr)
+  - **Financial Limits**: Daily withdrawal caps ($500 → $50,000), transaction fees (3% → 0.5%)
+  - **Feature Access**: Revenue quests, virtual cards, priority support, advanced analytics, premium streams, token creation
+  - **Processing Priority**: Proof verification (low → instant), dispute resolution (low → instant), withdrawal processing (72hr → 1hr)
+  - **Visibility Boost**: Profile ranking multiplier (1.0x → 5.0x), featured content eligibility, verified badges
+- **Trust Dashboard UI**: Score visualization, tier progress, proof submission/history, dispute filing/resolution
+- **Admin Controls**: Proof verification interface, dispute case management, trust score recalculation, tier statistics
+
 # External Dependencies
 
 ## Core Infrastructure
