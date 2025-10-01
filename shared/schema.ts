@@ -8317,6 +8317,190 @@ export const fanzRevenueShares = pgTable(
   ],
 );
 
+// ===== TRUST TIERING & REPUTATION SYSTEM =====
+// FanzTrust proof graph, reputation scoring, and automated dispute resolution
+
+// Trust tier levels
+export const trustTierEnum = pgEnum("trust_tier", [
+  "unverified",
+  "bronze",
+  "silver",
+  "gold",
+  "platinum",
+  "diamond",
+]);
+
+// Proof submission status
+export const proofStatusEnum = pgEnum("proof_status", [
+  "pending",
+  "under_review",
+  "approved",
+  "rejected",
+  "expired",
+]);
+
+// Dispute case status
+export const disputeStatusEnum = pgEnum("dispute_status", [
+  "open",
+  "investigating",
+  "resolved",
+  "closed",
+  "escalated",
+]);
+
+// Trust scores - user reputation and tier assignments
+export const trustScores = pgTable(
+  "trust_scores",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    userId: varchar("user_id")
+      .notNull()
+      .unique()
+      .references(() => users.id, { onDelete: "cascade" }),
+    
+    // Trust metrics
+    currentTier: trustTierEnum("current_tier").default("unverified").notNull(),
+    scorePoints: integer("score_points").default(0).notNull(), // 0-10000
+    
+    // Proof verification counts
+    proofsSubmitted: integer("proofs_submitted").default(0),
+    proofsApproved: integer("proofs_approved").default(0),
+    proofsRejected: integer("proofs_rejected").default(0),
+    
+    // Behavioral metrics
+    transactionCount: integer("transaction_count").default(0),
+    totalTransactionVolumeCents: bigint("total_transaction_volume_cents", { mode: "number" }).default(0),
+    successfulDisputesWon: integer("successful_disputes_won").default(0),
+    disputesLost: integer("disputes_lost").default(0),
+    
+    // Platform activity
+    accountAgeDays: integer("account_age_days").default(0),
+    consecutiveGoodStandingDays: integer("consecutive_good_standing_days").default(0),
+    
+    // Score modifiers
+    bonusPoints: integer("bonus_points").default(0), // manual admin adjustments
+    penaltyPoints: integer("penalty_points").default(0),
+    
+    // Status
+    lastCalculatedAt: timestamp("last_calculated_at"),
+    nextReviewAt: timestamp("next_review_at"),
+    
+    metadata: jsonb("metadata").default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_trust_scores_user").on(table.userId),
+    index("idx_trust_scores_tier").on(table.currentTier),
+    index("idx_trust_scores_points").on(table.scorePoints),
+  ],
+);
+
+// Trust proofs - submitted evidence for trust verification
+export const trustProofs = pgTable(
+  "trust_proofs",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    
+    // Proof details
+    proofType: varchar("proof_type").notNull(), // id_verification, address, payment_history, social_media, etc.
+    status: proofStatusEnum("status").default("pending").notNull(),
+    
+    // Document references
+    documentUrls: text("document_urls").array().default([]), // uploaded proof documents
+    documentHashes: text("document_hashes").array().default([]), // SHA-256 hashes for integrity
+    
+    // Verification details
+    verifiedBy: varchar("verified_by").references(() => users.id), // admin/reviewer
+    verifiedAt: timestamp("verified_at"),
+    rejectionReason: text("rejection_reason"),
+    
+    // Expiry (for time-sensitive proofs)
+    expiresAt: timestamp("expires_at"),
+    
+    // Score impact
+    scorePointsAwarded: integer("score_points_awarded").default(0),
+    
+    metadata: jsonb("metadata").default({}),
+    submittedAt: timestamp("submitted_at").defaultNow(),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_trust_proofs_user").on(table.userId),
+    index("idx_trust_proofs_status").on(table.status),
+    index("idx_trust_proofs_type").on(table.proofType),
+    index("idx_trust_proofs_verified_by").on(table.verifiedBy),
+  ],
+);
+
+// Dispute cases - automated resolution and case management
+export const disputeCases = pgTable(
+  "dispute_cases",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    
+    // Parties involved
+    filedBy: varchar("filed_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    againstUser: varchar("against_user")
+      .references(() => users.id, { onDelete: "cascade" }),
+    
+    // Dispute details
+    disputeType: varchar("dispute_type").notNull(), // transaction, content, harassment, fraud, etc.
+    status: disputeStatusEnum("status").default("open").notNull(),
+    
+    // Case information
+    title: varchar("title").notNull(),
+    description: text("description").notNull(),
+    
+    // Evidence and references
+    evidenceUrls: text("evidence_urls").array().default([]),
+    relatedTransactionIds: text("related_transaction_ids").array().default([]),
+    relatedContentIds: text("related_content_ids").array().default([]),
+    
+    // Resolution
+    assignedTo: varchar("assigned_to").references(() => users.id), // admin/mediator
+    resolution: text("resolution"),
+    resolvedAt: timestamp("resolved_at"),
+    
+    // Outcome
+    rulingInFavorOf: varchar("ruling_in_favor_of").references(() => users.id),
+    compensationAmountCents: bigint("compensation_amount_cents", { mode: "number" }),
+    
+    // AI-assisted resolution
+    aiRecommendedAction: varchar("ai_recommended_action"),
+    aiConfidenceScore: integer("ai_confidence_score"), // 0-100
+    aiReasoning: jsonb("ai_reasoning").default({}),
+    
+    // Automation
+    autoResolved: boolean("auto_resolved").default(false),
+    escalatedToHuman: boolean("escalated_to_human").default(false),
+    
+    metadata: jsonb("metadata").default({}),
+    filedAt: timestamp("filed_at").defaultNow(),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_dispute_cases_filed_by").on(table.filedBy),
+    index("idx_dispute_cases_against").on(table.againstUser),
+    index("idx_dispute_cases_status").on(table.status),
+    index("idx_dispute_cases_type").on(table.disputeType),
+    index("idx_dispute_cases_assigned").on(table.assignedTo),
+  ],
+);
+
 // Insert schemas
 export const insertFanzWalletSchema = createInsertSchema(fanzWallets).omit({
   id: true,
@@ -8411,6 +8595,60 @@ export type QuestParticipant = typeof questParticipants.$inferSelect;
 export type InsertQuestParticipant = z.infer<typeof insertQuestParticipantSchema>;
 export type QuestMilestone = typeof questMilestones.$inferSelect;
 export type InsertQuestMilestone = z.infer<typeof insertQuestMilestoneSchema>;
+
+// Trust scoring schemas
+export const insertTrustScoreSchema = createInsertSchema(trustScores).omit({
+  id: true,
+  proofsSubmitted: true,
+  proofsApproved: true,
+  proofsRejected: true,
+  transactionCount: true,
+  totalTransactionVolumeCents: true,
+  successfulDisputesWon: true,
+  disputesLost: true,
+  accountAgeDays: true,
+  consecutiveGoodStandingDays: true,
+  lastCalculatedAt: true,
+  nextReviewAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTrustProofSchema = createInsertSchema(trustProofs).omit({
+  id: true,
+  verifiedBy: true,
+  verifiedAt: true,
+  rejectionReason: true,
+  scorePointsAwarded: true,
+  submittedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertDisputeCaseSchema = createInsertSchema(disputeCases).omit({
+  id: true,
+  assignedTo: true,
+  resolution: true,
+  resolvedAt: true,
+  rulingInFavorOf: true,
+  compensationAmountCents: true,
+  aiRecommendedAction: true,
+  aiConfidenceScore: true,
+  aiReasoning: true,
+  autoResolved: true,
+  escalatedToHuman: true,
+  filedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Trust scoring types
+export type TrustScore = typeof trustScores.$inferSelect;
+export type InsertTrustScore = z.infer<typeof insertTrustScoreSchema>;
+export type TrustProof = typeof trustProofs.$inferSelect;
+export type InsertTrustProof = z.infer<typeof insertTrustProofSchema>;
+export type DisputeCase = typeof disputeCases.$inferSelect;
+export type InsertDisputeCase = z.infer<typeof insertDisputeCaseSchema>;
 
 // ===== PWA EXTENSIONS =====
 // Import PWA schemas

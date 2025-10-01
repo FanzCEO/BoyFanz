@@ -80,14 +80,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Revenue Quests - AI-Collaborative Revenue Sharing
 - **Gamified Revenue Goals**: Creators set revenue targets with fan participation and content unlocks
-- **Fan Underwriting**: Early supporters get bonus rewards (10% bonus for first 10% of goal)
-- **Dynamic Revenue Sharing**: Contributors earn percentage of quest revenue when completed
+- **Dynamic Revenue Sharing**: Contributors earn proportional share when completed (zero-sum accounting)
 - **Quest Types**: Revenue goal, fan contribution, content unlock, collaborative project
 - **AI Suggestions**: Mock AI recommendations for optimal quest goals based on creator performance
-- **Milestone System**: Progressive unlocks as quest hits funding milestones
+- **Milestone System**: Progressive unlocks as quest hits funding milestones (25%, 50%, 75%, 100%)
 - **Reward Types**: Exclusive content, NFT, experience, exclusive access
 - **Real-Time Tracking**: Live progress bars, contributor count, completion percentage
 - **Integrated Ledger**: Full FanzTrust integration with wallet deductions, held funds, and automated payouts
+- **Production Features**:
+  - **Transaction Integrity**: SELECT FOR UPDATE row locking prevents contribute-after-completion race
+  - **Idempotency Guards**: Atomic rewardsDistributed flag prevents double payouts
+  - **Zero-Sum Enforcement**: Creator + contributor pool = total amount (exact rounding reconciliation)
+  - **Concurrency Safety**: Serialized contributions prevent double-counting and data corruption
+  - **Held Fund Flow**: Contribution → held balance → released on payout (creator/contributors)
 
 # External Dependencies
 
