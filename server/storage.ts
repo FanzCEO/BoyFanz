@@ -2835,7 +2835,7 @@ export class DatabaseStorage implements IStorage {
     // Get privacy preferences from audit log since field doesn't exist in profiles
     const privacyLogs = await db.select().from(auditLogs)
       .where(and(
-        eq(auditLogs.actorId, userId),
+        eq(auditLogs.actorAccountId, userId),
         eq(auditLogs.action, 'PRIVACY_PREFERENCES_UPDATED')
       ))
       .orderBy(desc(auditLogs.createdAt))
@@ -2863,17 +2863,18 @@ export class DatabaseStorage implements IStorage {
     userAgent?: string;
   }): Promise<void> {
     // Create audit log for consent
-    await this.createAuditLog({
-      actorId: consent.userId ?? null,
+    await db.insert(auditLogs).values({
+      actorAccountId: consent.userId ?? null,
       action: 'CONSENT_RECORDED',
-      targetType: 'consent',
-      targetId: consent.sessionId,
-      diffJson: {
-        sessionId: consent.sessionId,
+      subjectTable: 'consent',
+      subjectId: consent.sessionId,
+      sessionId: consent.sessionId,
+      metadata: {
         consents: consent.consents,
         ipAddress: consent.ipAddress,
         userAgent: consent.userAgent
-      }
+      },
+      timestamp: consent.timestamp
     });
   }
 
@@ -2884,14 +2885,14 @@ export class DatabaseStorage implements IStorage {
     const logs = await db.select().from(auditLogs)
       .where(and(
         eq(auditLogs.action, 'CONSENT_RECORDED'),
-        eq(auditLogs.targetId, sessionId)
+        eq(auditLogs.subjectId, sessionId)
       ))
-      .orderBy(desc(auditLogs.createdAt))
+      .orderBy(desc(auditLogs.timestamp))
       .limit(1);
     
     if (logs.length > 0) {
-      const diffJson = logs[0].diffJson as any;
-      return { consents: diffJson.consents };
+      const metadata = logs[0].metadata as any;
+      return { consents: metadata.consents };
     }
     
     return undefined;
