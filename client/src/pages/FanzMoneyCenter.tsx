@@ -356,7 +356,7 @@ export default function FanzMoneyCenter() {
                           <div>
                             <div className="text-sm text-zinc-400">Credit Line</div>
                             <div className="text-xl font-bold text-white mt-1">
-                              {formatCurrency(credit.creditLimitCents)}
+                              {formatCurrency(Number(credit.creditLimitCents))}
                             </div>
                           </div>
                           <Badge 
@@ -460,15 +460,15 @@ export default function FanzMoneyCenter() {
                           <div className="grid grid-cols-3 gap-4 text-xs">
                             <div>
                               <div className="text-zinc-500 mb-1">Per Transaction</div>
-                              <div className="text-white font-semibold">{formatCurrency(card.perTransactionLimitCents)}</div>
+                              <div className="text-white font-semibold">{formatCurrency(Number(card.perTransactionLimitCents))}</div>
                             </div>
                             <div>
                               <div className="text-zinc-500 mb-1">Daily Limit</div>
-                              <div className="text-white font-semibold">{formatCurrency(card.dailyLimitCents)}</div>
+                              <div className="text-white font-semibold">{formatCurrency(Number(card.dailyLimitCents))}</div>
                             </div>
                             <div>
                               <div className="text-zinc-500 mb-1">Monthly Limit</div>
-                              <div className="text-white font-semibold">{formatCurrency(card.monthlyLimitCents)}</div>
+                              <div className="text-white font-semibold">{formatCurrency(Number(card.monthlyLimitCents))}</div>
                             </div>
                           </div>
                         </div>
