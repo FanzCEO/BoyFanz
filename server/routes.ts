@@ -3,6 +3,7 @@ import express from 'express';
 import { storage } from './storage';
 import { registerHelpSupportRoutes } from './routes/helpSupportRoutes';
 import pwaRoutes from './routes/pwaRoutes';
+import authRoutes from './routes/authRoutes';
 import { csrfProtection, setupCSRFTokenEndpoint } from './middleware/csrf';
 import { isAuthenticated, requireAdmin } from './middleware/auth';
 import { ObjectStorageService } from './objectStorage';
@@ -5659,6 +5660,9 @@ export function setupAdvancedRoutes(app: Express) {
   
   // AI-Powered Help & Support System
   registerHelpSupportRoutes(app);
+  
+  // Email/Password Authentication Routes (NO auth middleware - public)
+  app.use('/api/auth', authRoutes);
   
   // Progressive Web App (PWA) Routes
   app.use('/api/pwa', pwaRoutes);
