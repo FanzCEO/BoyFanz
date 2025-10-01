@@ -3658,21 +3658,202 @@ export const nftAssets = pgTable("nft_assets", {
   mediaAssetId: varchar("media_asset_id")
     .notNull()
     .references(() => mediaAssets.id, { onDelete: "cascade" }),
+  creatorId: varchar("creator_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }), // Original creator
   ownerId: varchar("owner_id")
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+    .references(() => users.id, { onDelete: "cascade" }), // Current owner
   tokenId: varchar("token_id"),
   contractAddress: varchar("contract_address"),
   blockchain: blockchainEnum("blockchain").notNull(),
   metadataUri: text("metadata_uri"),
   ipfsHash: varchar("ipfs_hash"),
   status: nftStatusEnum("status").default("minting").notNull(),
+  
+  // Pricing & Royalties
+  mintPriceCents: integer("mint_price_cents").default(0), // Initial sale price
+  currentPriceCents: integer("current_price_cents"), // Current market price (nullable)
   royaltyPercentage: integer("royalty_percentage").default(1000), // 10% = 1000 basis points
+  
+  // Content Access Control
+  isExclusive: boolean("is_exclusive").default(true), // NFT required to access content
+  unlockableContentUrl: varchar("unlockable_content_url"), // Extra content for NFT holders
+  accessDuration: integer("access_duration"), // null = lifetime, or seconds for time-limited
+  
+  // Blockchain & Minting
   transactionHash: varchar("transaction_hash"),
   forensicSignature: text("forensic_signature"),
+  mintedBy: varchar("minted_by").default("crossmint"), // "crossmint", "nftport", "manual"
+  
+  // Resale tracking
+  totalResales: integer("total_resales").default(0),
+  totalRoyaltiesCents: integer("total_royalties_cents").default(0),
+  lastSaleAt: timestamp("last_sale_at"),
+  
+  metadata: jsonb("metadata").default({}), // Additional NFT attributes
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_nft_assets_creator").on(table.creatorId),
+  index("idx_nft_assets_owner").on(table.ownerId),
+  index("idx_nft_assets_media").on(table.mediaAssetId),
+  index("idx_nft_assets_status").on(table.status),
+]);
+
+// NFT Sales & Transfers (track ownership history + royalties)
+export const nftTransactionTypeEnum = pgEnum("nft_transaction_type", [
+  "mint", // Initial creation
+  "sale", // Purchase from another user
+  "transfer", // Free transfer
+  "burn", // Destroyed
+]);
+
+export const nftTransactions = pgTable("nft_transactions", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  nftAssetId: varchar("nft_asset_id")
+    .notNull()
+    .references(() => nftAssets.id, { onDelete: "cascade" }),
+  type: nftTransactionTypeEnum("type").notNull(),
+  
+  // Participants
+  fromUserId: varchar("from_user_id").references(() => users.id, { onDelete: "set null" }),
+  toUserId: varchar("to_user_id").references(() => users.id, { onDelete: "set null" }),
+  
+  // Transaction Details
+  priceCents: integer("price_cents").default(0), // Sale price (0 for free transfers)
+  royaltyCents: integer("royalty_cents").default(0), // Royalty paid to creator
+  platformFeeCents: integer("platform_fee_cents").default(0),
+  
+  // Blockchain
+  transactionHash: varchar("transaction_hash"),
+  blockchain: blockchainEnum("blockchain").notNull(),
+  blockNumber: varchar("block_number"),
+  gasFeeCents: integer("gas_fee_cents"),
+  
+  // Payment Integration (if fiat purchase)
+  fanzWalletTransactionId: varchar("fanz_wallet_transaction_id"), // Link to FanzWallet payment
+  
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_nft_transactions_asset").on(table.nftAssetId),
+  index("idx_nft_transactions_from").on(table.fromUserId),
+  index("idx_nft_transactions_to").on(table.toUserId),
+  index("idx_nft_transactions_type").on(table.type),
+]);
+
+// NFT Collections (group NFTs together)
+export const nftCollections = pgTable("nft_collections", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  
+  name: varchar("name").notNull(),
+  description: text("description"),
+  coverImageUrl: varchar("cover_image_url"),
+  
+  // Collection Settings
+  contractAddress: varchar("contract_address"),
+  blockchain: blockchainEnum("blockchain").notNull(),
+  maxSupply: integer("max_supply"), // null = unlimited
+  currentSupply: integer("current_supply").default(0),
+  
+  // Royalty Settings (applied to all NFTs in collection)
+  defaultRoyaltyPercentage: integer("default_royalty_percentage").default(1000), // 10%
+  
+  // Visibility & Status
+  isPublic: boolean("is_public").default(true),
+  isVerified: boolean("is_verified").default(false),
+  
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_nft_collections_creator").on(table.creatorId),
+]);
+
+// NFT Relations
+export const nftAssetsRelations = relations(nftAssets, ({ one, many }) => ({
+  mediaAsset: one(mediaAssets, {
+    fields: [nftAssets.mediaAssetId],
+    references: [mediaAssets.id],
+  }),
+  creator: one(users, {
+    fields: [nftAssets.creatorId],
+    references: [users.id],
+    relationName: "nft_creator",
+  }),
+  owner: one(users, {
+    fields: [nftAssets.ownerId],
+    references: [users.id],
+    relationName: "nft_owner",
+  }),
+  transactions: many(nftTransactions),
+}));
+
+export const nftTransactionsRelations = relations(nftTransactions, ({ one }) => ({
+  nftAsset: one(nftAssets, {
+    fields: [nftTransactions.nftAssetId],
+    references: [nftAssets.id],
+  }),
+  fromUser: one(users, {
+    fields: [nftTransactions.fromUserId],
+    references: [users.id],
+    relationName: "nft_transaction_from",
+  }),
+  toUser: one(users, {
+    fields: [nftTransactions.toUserId],
+    references: [users.id],
+    relationName: "nft_transaction_to",
+  }),
+}));
+
+export const nftCollectionsRelations = relations(nftCollections, ({ one }) => ({
+  creator: one(users, {
+    fields: [nftCollections.creatorId],
+    references: [users.id],
+  }),
+}));
+
+// NFT Zod Schemas
+export const insertNftAssetSchema = createInsertSchema(nftAssets).omit({
+  id: true,
+  tokenId: true,
+  transactionHash: true,
+  status: true,
+  totalResales: true,
+  totalRoyaltiesCents: true,
+  lastSaleAt: true,
+  createdAt: true,
+  updatedAt: true,
 });
+
+export const insertNftTransactionSchema = createInsertSchema(nftTransactions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertNftCollectionSchema = createInsertSchema(nftCollections).omit({
+  id: true,
+  currentSupply: true,
+  isVerified: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// NFT Types
+export type NftAsset = typeof nftAssets.$inferSelect;
+export type InsertNftAsset = z.infer<typeof insertNftAssetSchema>;
+export type NftTransaction = typeof nftTransactions.$inferSelect;
+export type InsertNftTransaction = z.infer<typeof insertNftTransactionSchema>;
+export type NftCollection = typeof nftCollections.$inferSelect;
+export type InsertNftCollection = z.infer<typeof insertNftCollectionSchema>;
 
 // Analytics Events for Real-time Dashboards
 export const analyticsEventTypeEnum = pgEnum("analytics_event_type", [
@@ -3843,11 +4024,6 @@ export const ageVerifications = pgTable("age_verifications", {
 });
 
 // Insert schemas for new tables
-export const insertNftAssetSchema = createInsertSchema(nftAssets).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
 export const insertAnalyticsEventSchema = createInsertSchema(
   analyticsEvents,
 ).omit({ id: true, createdAt: true });
