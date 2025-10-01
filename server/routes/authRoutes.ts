@@ -1,7 +1,9 @@
-import { Router } from "express";
+import { Router, type Request, type Response } from "express";
 import { z } from "zod";
 import { authService } from "../services/authService";
 import { emailService } from "../services/emailService";
+import { trackLoginAttempt, checkBruteForce, bruteForceMiddleware } from "../middleware/bruteForceProtection";
+import { authRateLimit } from "../middleware/rateLimitingAdvanced";
 
 const router = Router();
 
@@ -93,7 +95,7 @@ router.post("/register", async (req, res) => {
  * POST /api/auth/login
  * Login with email and password
  */
-router.post("/login", async (req, res) => {
+router.post("/login", authRateLimit, async (req, res) => {
   try {
     // Validate input
     const data = loginSchema.parse(req.body);
@@ -102,6 +104,26 @@ router.post("/login", async (req, res) => {
     const ipAddress = (req.headers["x-forwarded-for"] as string)?.split(",")[0] || 
                      req.socket.remoteAddress || 
                      "unknown";
+
+    // Check for brute force attacks by IP
+    const bruteCheck = checkBruteForce(ipAddress);
+    if (bruteCheck.blocked) {
+      return res.status(429).json({
+        success: false,
+        error: bruteCheck.message,
+        retryAfter: bruteCheck.retryAfterMs,
+      });
+    }
+
+    // Check for brute force attacks by email
+    const emailBruteCheck = checkBruteForce(`email:${data.email.toLowerCase()}`);
+    if (emailBruteCheck.blocked) {
+      return res.status(429).json({
+        success: false,
+        error: emailBruteCheck.message,
+        retryAfter: emailBruteCheck.retryAfterMs,
+      });
+    }
 
     // Login
     const result = await authService.login(data.email, data.password, ipAddress);
@@ -128,6 +150,13 @@ router.post("/login", async (req, res) => {
         });
       }
 
+      // Track successful login (clears brute force tracking)
+      const ipAddress = (req.headers["x-forwarded-for"] as string)?.split(",")[0] || 
+                       req.socket.remoteAddress || 
+                       "unknown";
+      trackLoginAttempt(ipAddress, true);
+      trackLoginAttempt(`email:${data.email.toLowerCase()}`, true);
+
       res.json({
         success: true,
         message: "Login successful",
@@ -135,6 +164,19 @@ router.post("/login", async (req, res) => {
       });
     });
   } catch (error: any) {
+    // Track failed login attempt for brute force protection
+    const ipAddress = (req.headers["x-forwarded-for"] as string)?.split(",")[0] || 
+                     req.socket.remoteAddress || 
+                     "unknown";
+    const email = req.body?.email?.toLowerCase();
+    
+    if (ipAddress) {
+      trackLoginAttempt(ipAddress, false);
+    }
+    if (email) {
+      trackLoginAttempt(`email:${email}`, false);
+    }
+
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
