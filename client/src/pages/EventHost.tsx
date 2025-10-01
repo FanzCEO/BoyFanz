@@ -140,14 +140,14 @@ export default function EventHost() {
   const pastEvents = myEvents?.filter((e) => e.status === "ended") || [];
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="container mx-auto px-4 py-4 md:py-8 max-w-7xl">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-4xl font-bold text-white mb-2 font-bebas tracking-wide">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
+        <div className="flex-1">
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 font-bebas tracking-wide">
             EVENT HOSTING DASHBOARD
           </h1>
-          <p className="text-gray-400">Create and manage your virtual events</p>
+          <p className="text-sm md:text-base text-gray-400">Create and manage your virtual events</p>
         </div>
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
           <DialogTrigger asChild>
@@ -481,9 +481,9 @@ export default function EventHost() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
         <Card className="bg-white/5 backdrop-blur-md border-white/10">
-          <CardContent className="p-4">
+          <CardContent className="p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Live Events</p>

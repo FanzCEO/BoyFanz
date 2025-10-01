@@ -56,6 +56,50 @@ export class LiveEventsService {
   }
 
   /**
+   * Get all events (public)
+   */
+  async getAllEvents(
+    status?: "scheduled" | "live" | "ended" | "cancelled"
+  ): Promise<LiveEvent[]> {
+    const conditions = [];
+    
+    if (status) {
+      conditions.push(eq(liveEvents.status, status));
+    }
+    
+    const events = await db
+      .select()
+      .from(liveEvents)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(liveEvents.scheduledStartAt))
+      .limit(100);
+    
+    // Join with creator info
+    const eventsWithCreators = await Promise.all(
+      events.map(async (event) => {
+        const [creator] = await db
+          .select({
+            id: users.id,
+            username: users.username,
+            displayName: profiles.displayName,
+            avatarUrl: profiles.avatarUrl,
+          })
+          .from(users)
+          .leftJoin(profiles, eq(users.id, profiles.userId))
+          .where(eq(users.id, event.creatorId))
+          .limit(1);
+        
+        return {
+          ...event,
+          creator,
+        };
+      })
+    );
+    
+    return eventsWithCreators;
+  }
+
+  /**
    * Get events for a creator
    */
   async getCreatorEvents(

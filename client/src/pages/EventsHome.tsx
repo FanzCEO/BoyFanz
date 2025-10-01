@@ -55,15 +55,15 @@ export default function EventsHome() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="container mx-auto px-4 py-4 md:py-8 max-w-7xl">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-4xl font-bold text-white mb-2 font-bebas tracking-wide">
+      <div className="mb-6 md:mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+          <div className="flex-1">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 font-bebas tracking-wide">
               LIVE EVENTS
             </h1>
-            <p className="text-gray-400">
+            <p className="text-sm md:text-base text-gray-400">
               Immersive virtual meetups with your favorite creators
             </p>
           </div>
@@ -81,9 +81,9 @@ export default function EventsHome() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-6">
           <Card className="bg-white/5 backdrop-blur-md border-white/10">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-400">Live Now</p>
@@ -120,15 +120,15 @@ export default function EventsHome() {
 
       {/* Tabs */}
       <Tabs defaultValue="live" className="w-full">
-        <TabsList className="bg-white/5 backdrop-blur-md border-white/10 mb-6">
-          <TabsTrigger value="live" data-testid="tab-live-events">
-            Live Now ({liveEvents.length})
+        <TabsList className="bg-white/5 backdrop-blur-md border-white/10 mb-4 md:mb-6 w-full grid grid-cols-3">
+          <TabsTrigger value="live" data-testid="tab-live-events" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">Live Now </span>({liveEvents.length})
           </TabsTrigger>
-          <TabsTrigger value="upcoming" data-testid="tab-upcoming-events">
-            Upcoming ({upcomingEvents.length})
+          <TabsTrigger value="upcoming" data-testid="tab-upcoming-events" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">Upcoming </span>({upcomingEvents.length})
           </TabsTrigger>
-          <TabsTrigger value="ended" data-testid="tab-ended-events">
-            Past Events ({endedEvents.length})
+          <TabsTrigger value="ended" data-testid="tab-ended-events" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">Past </span>({endedEvents.length})
           </TabsTrigger>
         </TabsList>
 

@@ -100,12 +100,12 @@ export default function EventDetails() {
     (!event.maxAttendees || event.totalAttendees < event.maxAttendees);
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto px-4 py-4 md:py-8 max-w-6xl">
       {/* Back button */}
       <Link href="/events">
         <Button
           variant="ghost"
-          className="mb-4 text-gray-400 hover:text-white"
+          className="mb-3 md:mb-4 text-gray-400 hover:text-white text-sm md:text-base"
           data-testid="button-back-events"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -113,7 +113,7 @@ export default function EventDetails() {
         </Button>
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Main content */}
         <div className="lg:col-span-2 space-y-6">
           <Card className="bg-white/5 backdrop-blur-md border-white/10">
@@ -151,7 +151,7 @@ export default function EventDetails() {
                   </Badge>
                 )}
               </div>
-              <CardTitle className="text-3xl text-white mb-2" data-testid="text-event-title">
+              <CardTitle className="text-2xl md:text-3xl text-white mb-2" data-testid="text-event-title">
                 {event.title}
               </CardTitle>
               <CardDescription className="text-gray-300 text-base">

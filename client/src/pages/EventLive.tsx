@@ -208,50 +208,48 @@ export default function EventLive() {
   return (
     <div className="min-h-screen bg-[#050505] flex flex-col">
       {/* Header */}
-      <div className="bg-black/80 backdrop-blur-md border-b border-white/10 px-4 py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <div className="bg-black/80 backdrop-blur-md border-b border-white/10 px-3 md:px-4 py-2 md:py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate(`/events/${eventId}`)}
-              className="text-gray-400 hover:text-white"
+              className="text-gray-400 hover:text-white shrink-0"
               data-testid="button-leave-event"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 mb-1">
-                <Badge className="bg-fanz-red text-white animate-pulse">
+                <Badge className="bg-fanz-red text-white animate-pulse text-xs shrink-0">
                   🔴 LIVE
                 </Badge>
-                <h1 className="text-white font-bold text-lg" data-testid="text-event-title">
+                <h1 className="text-white font-bold text-sm md:text-lg truncate" data-testid="text-event-title">
                   {event.title}
                 </h1>
               </div>
-              <p className="text-sm text-gray-400">
+              <p className="text-xs md:text-sm text-gray-400 truncate">
                 Hosted by {event.creator?.displayName || event.creator?.username}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-white">
-              <Users className="h-5 w-5 text-fanz-gold" />
-              <span className="font-semibold" data-testid="text-viewer-count">
-                {liveAttendees}
-              </span>
-              <span className="text-gray-400 text-sm">viewers</span>
-            </div>
+          <div className="flex items-center gap-1 md:gap-2 text-white shrink-0">
+            <Users className="h-4 w-4 md:h-5 md:w-5 text-fanz-gold" />
+            <span className="font-semibold text-sm md:text-base" data-testid="text-viewer-count">
+              {liveAttendees}
+            </span>
+            <span className="text-gray-400 text-xs md:text-sm hidden sm:inline">viewers</span>
           </div>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Video/Stream area */}
-        <div className="flex-1 flex items-center justify-center bg-black/50 p-8">
-          <div className="text-center max-w-2xl">
-            <div className="bg-gradient-to-br from-fanz-red/20 to-fanz-gold/20 rounded-2xl p-12 border border-white/10 backdrop-blur-md">
+        <div className="flex-1 flex items-center justify-center bg-black/50 p-4 md:p-8">
+          <div className="text-center max-w-2xl w-full">
+            <div className="bg-gradient-to-br from-fanz-red/20 to-fanz-gold/20 rounded-xl md:rounded-2xl p-6 md:p-12 border border-white/10 backdrop-blur-md">
               <Sparkles className="h-24 w-24 mx-auto mb-6 text-fanz-gold animate-pulse" />
               <h2 className="text-3xl font-bold text-white mb-4 font-bebas tracking-wide">
                 IMMERSIVE VIRTUAL EXPERIENCE
@@ -290,11 +288,11 @@ export default function EventLive() {
         </div>
 
         {/* Live tips sidebar */}
-        <div className="w-80 bg-black/80 backdrop-blur-md border-l border-white/10 flex flex-col">
+        <div className="w-full lg:w-80 bg-black/80 backdrop-blur-md border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col max-h-[40vh] lg:max-h-none">
           {/* Tips header */}
-          <div className="p-4 border-b border-white/10">
-            <h3 className="text-white font-semibold flex items-center gap-2">
-              <Heart className="h-5 w-5 text-fanz-red" />
+          <div className="p-3 md:p-4 border-b border-white/10">
+            <h3 className="text-white font-semibold flex items-center gap-2 text-sm md:text-base">
+              <Heart className="h-4 w-4 md:h-5 md:w-5 text-fanz-red" />
               Live Tips
             </h3>
           </div>

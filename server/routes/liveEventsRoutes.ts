@@ -19,6 +19,21 @@ const liveEventsService = new LiveEventsService();
  * IMPORTANT: Specific routes MUST come before /:eventId to avoid path collisions
  */
 
+// Get all events (public - no auth required for browsing)
+router.get("/", async (req, res) => {
+  try {
+    const { status } = req.query;
+    
+    const events = await liveEventsService.getAllEvents(status as any);
+    
+    res.json(events);
+  } catch (error: any) {
+    res.status(500).json({
+      error: error.message || "Failed to get events",
+    });
+  }
+});
+
 // Create new event (creators only)
 router.post("/", isAuthenticated, async (req, res) => {
   try {
