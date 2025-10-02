@@ -5607,6 +5607,7 @@ import revenueQuestRoutes from './routes/revenueQuestRoutes';
 import { trustScoringRoutes } from './routes/trustScoringRoutes';
 import platformPrivilegesRoutes from './routes/platformPrivilegesRoutes';
 import liveEventsRoutes from './routes/liveEventsRoutes';
+import analyticsIntelligenceRoutes from './routes/analyticsIntelligence.js';
 
 export async function setupAdvancedRoutes(app: Express) {
   setupNFTRoutes(app);
@@ -5706,7 +5707,10 @@ export async function setupAdvancedRoutes(app: Express) {
   // Real-Time Monitoring & Analytics Dashboard
   app.use('/api/monitoring', monitoringDashboardRoutes);
   
-  console.log('🚀 Advanced features registered: PWA (Progressive Web App), NFT, AI Feeds, Analytics, Age Verification, AI Help & Support System, API Gateway & Service Mesh, Infrastructure Management, Security & Compliance, Mobile Backend (ClubCentral), Real-Time Monitoring');
+  // Revolutionary Analytics & Intelligence Engine
+  app.use('/api/analytics', analyticsIntelligenceRoutes);
+  
+  console.log('🚀 Advanced features registered: PWA (Progressive Web App), NFT, AI Feeds, Analytics, Age Verification, AI Help & Support System, API Gateway & Service Mesh, Infrastructure Management, Security & Compliance, Mobile Backend (ClubCentral), Real-Time Monitoring, Revolutionary Analytics & Intelligence Engine');
   console.log('💎 FanzTrust™ Financial Ledger System registered: FanzWallet, FanzLedger, FanzCredit, FanzToken, FanzCard, FanzRevenue');
   console.log('💳 FanzPay Payment Processing System registered: Deposits, Withdrawals, Instant Transfers, 12+ Providers');
   console.log('💰 FanzCredit System registered: Credit Lines, Trust Scoring, Automated Approvals, Collateral Management');
