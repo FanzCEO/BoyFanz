@@ -66,8 +66,8 @@ export default function GooglePayButton({
           tokenizationSpecification: {
             type: 'PAYMENT_GATEWAY',
             parameters: {
-              gateway: 'stripe',
-              gatewayMerchantId: import.meta.env.VITE_STRIPE_MERCHANT_ID || ''
+              gateway: 'ccbill',
+              gatewayMerchantId: import.meta.env.VITE_CCBILL_MERCHANT_ID || ''
             }
           }
         }]
@@ -106,8 +106,8 @@ export default function GooglePayButton({
           tokenizationSpecification: {
             type: 'PAYMENT_GATEWAY',
             parameters: {
-              gateway: 'stripe',
-              gatewayMerchantId: import.meta.env.VITE_STRIPE_MERCHANT_ID || ''
+              gateway: 'ccbill',
+              gatewayMerchantId: import.meta.env.VITE_CCBILL_MERCHANT_ID || ''
             }
           }
         }],

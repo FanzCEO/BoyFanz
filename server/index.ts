@@ -1,3 +1,6 @@
+// CRITICAL: Load environment variables FIRST before any other imports
+import './env';
+
 import express, { type Request, Response, NextFunction } from "express";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
