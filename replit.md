@@ -2,6 +2,10 @@
 
 BoyFanz is a financial ecosystem and creator economy platform with an underground fight club aesthetic. It features the FanzTrust™ payment verification system and a suite of financial products (FanzPay, FanzRev, FanzToken, FanzCoin, FanzMoney, FanzCredit, FanzCard, FanzMoneyCenter). The platform empowers content creators to monetize content and connect with fans securely, offering advanced financial tools within a compliant environment.
 
+## Domain Configuration
+- **Testing Domain**: fanz.boyfanz.com
+- **Production Domain**: BoyFanz.com
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
