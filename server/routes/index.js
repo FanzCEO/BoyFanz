@@ -9,6 +9,8 @@ import paymentRoutes from './payment.js';
 import analyticsRoutes from './analytics.js';
 import mobileApiRoutes from './mobileApi.js';
 import revolutionarySocialRoutes from './revolutionarySocial.js';
+import advancedMonetizationRoutes from './advancedMonetization.js';
+import creatorEconomyDashboardRoutes from './creatorEconomyDashboard.js';
 
 const router = express.Router();
 
@@ -30,6 +32,8 @@ router.use('/payments', paymentRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/mobile', mobileApiRoutes);
 router.use('/social', revolutionarySocialRoutes);
+router.use('/monetization', advancedMonetizationRoutes);
+router.use('/dashboard', creatorEconomyDashboardRoutes);
 
 // 404 handler for unknown routes
 router.use('*', (req, res) => {
