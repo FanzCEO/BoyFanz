@@ -1,7 +1,7 @@
 // FANZ Immersive Content Delivery Engine
 // Revolutionary VR/AR/3D content streaming with haptic feedback and neural interfaces
 
-import { storage, getProfile, updateProfile, createContent, getContent } from '../storage.js';
+import { storage } from '../storage.js';
 
 class ImmersiveContentEngine {
   constructor() {

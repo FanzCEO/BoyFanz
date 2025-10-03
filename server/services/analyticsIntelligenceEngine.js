@@ -1,7 +1,7 @@
 // FANZ Revolutionary Analytics & Intelligence Engine
 // Real-time dashboards, predictive modeling, competitor analysis, social sentiment tracking, revenue optimization
 
-import { storage, getProfile, updateProfile, createContent, getContent } from '../storage.js';
+import { storage } from '../storage.js';
 
 class AnalyticsIntelligenceEngine {
   constructor() {

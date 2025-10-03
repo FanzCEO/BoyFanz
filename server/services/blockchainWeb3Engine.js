@@ -1,7 +1,7 @@
 // FANZ Revolutionary Blockchain & Web3 Integration Engine
 // NFT marketplace, DeFi protocols, smart contracts, tokenized creator economy, decentralized identity
 
-import { storage, getProfile, updateProfile, createContent, getContent } from '../storage.js';
+import { storage } from '../storage.js';
 
 class BlockchainWeb3Engine {
   constructor() {

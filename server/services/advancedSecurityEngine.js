@@ -2,7 +2,7 @@
 // Zero-knowledge proofs, homomorphic encryption, quantum-resistant algorithms, 
 // biometric verification, forensic watermarking, behavioral analysis
 
-import { storage, getProfile, updateProfile, createContent, getContent } from '../storage.js';
+import { storage } from '../storage.js';
 
 class AdvancedSecurityEngine {
   constructor() {
