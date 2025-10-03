@@ -48,7 +48,7 @@ Fanz should feel welcome, safe, and instantly connected.
 ⸻
 
 🔄 Unified UX Principles
-	•	Consistent branding: Both flows should feel FUN-branded but tone-shifted → Stars get bold/empowering vibes, Fanz get playful/discovery-driven vibes.
+	•	Consistent branding: Both flows should feel FANZ-branded but tone-shifted → Stars get bold/empowering vibes, Fanz get playful/discovery-driven vibes.
 	•	Seamless cross-navigation: Single account system → a user could upgrade from Fanz → Creator with just a few clicks.
 	•	Progressive onboarding: Don’t overwhelm. Unlock features as users explore (e.g., unlock fan tiers after first follow, unlock advanced analytics after first 5 posts).
 

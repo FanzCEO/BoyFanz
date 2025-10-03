@@ -214,7 +214,7 @@ For security-related changes and advisories, please see our [Security Policy](SE
    - Verify ledger accuracy after migration
 
 3. **Branding Updates**
-   - Update all references from FUN to FANZ
+   - Update all references from FANZ to FANZ
    - Replace FusionGenius with FanzSocial
    - Update domain configurations
 

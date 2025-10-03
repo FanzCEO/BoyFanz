@@ -152,7 +152,7 @@ class RevolutionarySocialEngine {
           name: 'Interactive Games',
           duration: 20,
           type: 'GAMING',
-          description: 'Fun social games and challenges'
+          description: 'FANZ social games and challenges'
         },
         {
           name: 'Personal Meet & Greet',

@@ -138,6 +138,20 @@ setupCSRFTokenEndpoint(app);
   const { setupAdvancedRoutes } = await import('./routes');
   setupAdvancedRoutes(app);
   
+// Initialize Service Orchestration Engine
+  const ServiceRegistry = (await import('./orchestration/serviceRegistry.js')).default;
+  const serviceRegistry = new ServiceRegistry();
+  
+  try {
+    const orchestrationEngine = await serviceRegistry.initialize();
+    app.locals.orchestrationEngine = orchestrationEngine;
+    app.locals.serviceRegistry = serviceRegistry;
+    logger.info('Service Orchestration Engine initialized successfully');
+  } catch (error) {
+    logger.error('Failed to initialize Service Orchestration Engine:', error);
+    // Continue startup but with reduced functionality
+  }
+  
   // Setup API Gateway middleware (after routes are registered)
   const { setupGatewayMiddleware } = await import('./middleware/gatewayMiddleware.js');
   setupGatewayMiddleware(app);
@@ -205,6 +219,31 @@ setupCSRFTokenEndpoint(app);
     log(`serving on port ${port}`);
   });
 
-  // Setup graceful shutdown handling
-  setupGracefulShutdown(server);
+  // Setup graceful shutdown handling with service orchestration cleanup
+  const originalShutdown = setupGracefulShutdown(server);
+  
+  // Extend shutdown to include service orchestration cleanup
+  process.on('SIGTERM', async () => {
+    logger.info('SIGTERM received, shutting down gracefully');
+    try {
+      if (app.locals.serviceRegistry) {
+        await app.locals.serviceRegistry.shutdown();
+      }
+    } catch (error) {
+      logger.error('Error during service registry shutdown:', error);
+    }
+    process.exit(0);
+  });
+  
+  process.on('SIGINT', async () => {
+    logger.info('SIGINT received, shutting down gracefully');
+    try {
+      if (app.locals.serviceRegistry) {
+        await app.locals.serviceRegistry.shutdown();
+      }
+    } catch (error) {
+      logger.error('Error during service registry shutdown:', error);
+    }
+    process.exit(0);
+  });
 })();

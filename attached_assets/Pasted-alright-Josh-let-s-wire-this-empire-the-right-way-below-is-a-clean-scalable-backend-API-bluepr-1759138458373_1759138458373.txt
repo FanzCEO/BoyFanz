@@ -268,7 +268,7 @@ Event contracts (CloudEvents-style; emitted to Kafka/NATS)
 
 // profile.created
 {
-  "type": "fun.profile.created",
+  "type": "FANZ.profile.created",
   "source": "iam",
   "id": "evt_...",
   "time": "2025-09-29T00:00:00Z",
@@ -277,14 +277,14 @@ Event contracts (CloudEvents-style; emitted to Kafka/NATS)
 
 // content.published
 {
-  "type": "fun.content.published",
+  "type": "FANZ.content.published",
   "source": "content",
   "data": { "contentId":"...", "creatorId":"...", "tenantId":"girlfanz" }
 }
 
 // content.crossposted
 {
-  "type": "fun.content.crossposted",
+  "type": "FANZ.content.crossposted",
   "source": "content",
   "data": { "contentId":"...", "fromTenant":"girlfanz", "toTenants":["pupfanz","daddyfanz"] }
 }
@@ -292,9 +292,9 @@ Event contracts (CloudEvents-style; emitted to Kafka/NATS)
 // media.fingerprint.ready / moderation.flagged / payout.processed / ad.impression
 
 Seamless cross-login (SSO)
-	•	Core OIDC issuer: auth.fun.com.
+	•	Core OIDC issuer: auth.FANZ.com.
 	•	Tenants are OIDC clients with 1st-party trust; apps call /auth/token/exchange to get tenant-scoped JWT when hopping sites.
-	•	Optionally share a parent-domain cookie .fun.com and do silent prompt=none OIDC flow for no-click sign-in.
+	•	Optionally share a parent-domain cookie .FANZ.com and do silent prompt=none OIDC flow for no-click sign-in.
 
 Forensic Signature Flow (ingest → trace)
 	1.	Client uploads to pre-signed URL (/media/ingest:init).

@@ -961,20 +961,20 @@ import okhttp3.Response
 
 interface FanzAPI {
     @POST("auth/login")
-    suspend fun login(@Body credentials: LoginRequest): LoginResponse
+    suspend FANZ login(@Body credentials: LoginRequest): LoginResponse
     
     @GET("profile/{userId}")
-    suspend fun getUserProfile(@Path("userId") userId: String): ProfileResponse
+    suspend FANZ getUserProfile(@Path("userId") userId: String): ProfileResponse
     
     @PUT("profile/{userId}/preferences")
-    suspend fun updatePreferences(
+    suspend FANZ updatePreferences(
         @Path("userId") userId: String,
         @Body preferences: UserPreferences
     ): PreferencesResponse
 }
 
 class TokenInterceptor(private val tokenManager: TokenManager) : Interceptor {
-    override fun intercept(chain: Interceptor.Chain): Response {
+    override FANZ intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
         val token = tokenManager.getValidToken()
         

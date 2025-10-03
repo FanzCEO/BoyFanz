@@ -10,7 +10,7 @@ Here’s a next-gen platform flow blueprint for what you’re describing — ful
 ⸻
 
 2. Content Creation Options
-	•	Film with FUN Tools: Use built-in camera suite with pro features (filters, lighting adjust, stabilization).
+	•	Film with FANZ Tools: Use built-in camera suite with pro features (filters, lighting adjust, stabilization).
 	•	Upload Existing Content: Drag-and-drop or mobile upload for creators who already shot on their phone or camera.
 	•	Live Stream: Co-star verification checks → stream goes live → AI records and auto-edits highlights in real time.
 
@@ -30,7 +30,7 @@ Here’s a next-gen platform flow blueprint for what you’re describing — ful
 ⸻
 
 4. Distribution & Marketing
-	•	Social Media Auto-Sync: Creator opts in → FUN pushes trailers, GIFs, and promos directly to Instagram, TikTok, Twitter (X), Snapchat, etc.
+	•	Social Media Auto-Sync: Creator opts in → FANZ pushes trailers, GIFs, and promos directly to Instagram, TikTok, Twitter (X), Snapchat, etc.
 	•	QR Codes & Smart Links:
 	•	Creator shares one QR code or smart link
 	•	Fan scans/clicks → instantly lands on the content or subscription funnel
@@ -39,7 +39,7 @@ Here’s a next-gen platform flow blueprint for what you’re describing — ful
 ⸻
 
 5. Monetization & Engagement
-	•	Automatic Paywalls: Creator sets price (or uses AI-suggested sweet spot) → FUN handles the rest.
+	•	Automatic Paywalls: Creator sets price (or uses AI-suggested sweet spot) → FANZ handles the rest.
 	•	Live Stream Monetization: Tips, pay-per-view entry, or gifts system directly in the stream.
 	•	Fan Retargeting: AI tracks fans who click but don’t buy, then auto-sends reminders, discounts, or trailers.
 
@@ -50,7 +50,7 @@ Here’s a next-gen platform flow blueprint for what you’re describing — ful
 	•	Optional Manual Overrides: Creators who want more control can adjust edits, approve trailers, or tweak social captions.
 	•	Backend Dashboards:
 	•	Analytics (engagement, conversion, fan heatmaps)
-	•	Earnings breakdown (100% to creator, FUN just takes hosting/tech fee)
+	•	Earnings breakdown (100% to creator, FANZ just takes hosting/tech fee)
 
 ⸻
 

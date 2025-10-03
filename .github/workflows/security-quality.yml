@@ -176,9 +176,9 @@ jobs:
       - name: 🎨 FANZ Branding Check
         run: |
           echo "Validating FANZ branding consistency..."
-          # Ensure no FUN references remain
-          grep -r "\\bFUN\\b" . --exclude-dir=node_modules --exclude-dir=.git || echo "No FUN branding found - Good!"
-          grep -r "\\bfun-" . --exclude-dir=node_modules --exclude-dir=.git || echo "No fun- prefixes found - Good!"
+          # Ensure no FANZ references remain
+          grep -r "\\bFUN\\b" . --exclude-dir=node_modules --exclude-dir=.git || echo "No FANZ branding found - Good!"
+          grep -r "\\bfun-" . --exclude-dir=node_modules --exclude-dir=.git || echo "No FANZ- prefixes found - Good!"
 
   vulnerability-management:
     name: 🚨 Vulnerability Management
