@@ -11,6 +11,7 @@ import mobileApiRoutes from './mobileApi.js';
 import revolutionarySocialRoutes from './revolutionarySocial.js';
 import advancedMonetizationRoutes from './advancedMonetization.js';
 import creatorEconomyDashboardRoutes from './creatorEconomyDashboard.js';
+import fanEngagementToolsRoutes from './fanEngagementTools.js';
 
 const router = express.Router();
 
@@ -34,6 +35,7 @@ router.use('/mobile', mobileApiRoutes);
 router.use('/social', revolutionarySocialRoutes);
 router.use('/monetization', advancedMonetizationRoutes);
 router.use('/dashboard', creatorEconomyDashboardRoutes);
+router.use('/fan-engagement', fanEngagementToolsRoutes);
 
 // 404 handler for unknown routes
 router.use('*', (req, res) => {

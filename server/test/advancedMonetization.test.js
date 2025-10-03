@@ -435,7 +435,7 @@ async function testMerchandiseStore() {
         ]
       },
       payment: {
-        acceptedMethods: ['CREDIT_CARD', 'PAYPAL', 'CRYPTO', 'APPLE_PAY'],
+        acceptedMethods: ['CREDIT_CARD', 'CRYPTO', 'APPLE_PAY'],
         currency: 'USD',
         taxHandling: 'AUTOMATIC'
       }
