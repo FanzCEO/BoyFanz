@@ -302,7 +302,7 @@ class RevenueOptimizationAI {
           confidence: Math.min(1.0, data.count / 10)
         });
       }
-    });
+    }
     
     return optimalTimes.sort((a, b) => b.score - a.score).slice(0, 5);
   }
