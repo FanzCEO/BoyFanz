@@ -5608,6 +5608,12 @@ import { trustScoringRoutes } from './routes/trustScoringRoutes';
 import platformPrivilegesRoutes from './routes/platformPrivilegesRoutes';
 import liveEventsRoutes from './routes/liveEventsRoutes';
 import analyticsIntelligenceRoutes from './routes/analyticsIntelligence.js';
+import orchestrationRoutes from './routes/orchestrationRoutes.js';
+import unifiedDataRoutes from './routes/unifiedDataRoutes.js';
+import pipelineIntegrationRoutes from './routes/pipelineIntegrationRoutes.js';
+import enterpriseCommandCenterRoutes from './routes/enterpriseCommandCenterRoutes.js';
+import automatedWorkflowRoutes from './routes/automatedWorkflowRoutes.js';
+import serviceDiscoveryRoutes from './routes/serviceDiscoveryRoutes.js';
 
 export async function setupAdvancedRoutes(app: Express) {
   setupNFTRoutes(app);
@@ -5714,7 +5720,31 @@ export async function setupAdvancedRoutes(app: Express) {
   // Revolutionary Analytics & Intelligence Engine
   app.use('/api/analytics', analyticsIntelligenceRoutes);
   
+  // Service Orchestration Engine
+  app.use('/api/orchestration', orchestrationRoutes);
+  
+  // Unified Data Pipeline
+  app.use('/api/data-pipeline', unifiedDataRoutes);
+  
+  // Data Pipeline Integration & Cross-Service Analytics
+  app.use('/api/pipeline', pipelineIntegrationRoutes);
+  
+  // Enterprise Command Center Dashboard
+  app.use('/api/command-center', enterpriseCommandCenterRoutes);
+  
+  // Automated Workflow Engine
+  app.use('/api/workflows', automatedWorkflowRoutes);
+  
+  // Service Discovery & Health Monitoring
+  app.use('/api/service-discovery', serviceDiscoveryRoutes);
+  
   console.log('🚀 Advanced features registered: PWA (Progressive Web App), NFT, AI Feeds, Analytics, Age Verification, AI Help & Support System, API Gateway & Service Mesh, Infrastructure Management, Security & Compliance, Mobile Backend (ClubCentral), Real-Time Monitoring, Revolutionary Analytics & Intelligence Engine');
+  console.log('⚙️ Service Orchestration Engine registered: Workflow Management, Service Registry, Health Monitoring, Circuit Breakers, Rollback Support');
+  console.log('🌊 Unified Data Pipeline registered: Stream Processing, Real-Time Analytics, Event Aggregation, Alert Management, Background Processing');
+  console.log('🔗 Data Pipeline Integration registered: Cross-Service Analytics, Automatic Stream Registration, Real-Time Insights, Performance Monitoring');
+  console.log('🏢 Enterprise Command Center registered: Real-Time Dashboard, Alert Management, Performance Tracking, Service Discovery, Business Intelligence');
+  console.log('🤖 Automated Workflow Engine registered: Rule-Based Automation, Cross-Service Actions, Intelligent Triggers, Revenue Optimization, Content Strategy Automation');
+  console.log('🔍 Service Discovery & Health Monitoring registered: Service Registry, Auto-Discovery, Health Checks, Circuit Breakers, Dependency Mapping, Automated Failover');
   console.log('💎 FanzTrust™ Financial Ledger System registered: FanzWallet, FanzLedger, FanzCredit, FanzToken, FanzCard, FanzRevenue');
   console.log('💳 FanzPay Payment Processing System registered: Deposits, Withdrawals, Instant Transfers, 12+ Providers');
   console.log('💰 FanzCredit System registered: Credit Lines, Trust Scoring, Automated Approvals, Collateral Management');

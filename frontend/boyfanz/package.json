@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "security:audit": "npm audit --audit-level=high",
+    "security:fix": "npm audit fix",
+    "security:scan": "echo \"Running security scan...\" && npm run security:audit"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.2",

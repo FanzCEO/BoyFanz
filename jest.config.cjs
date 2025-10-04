@@ -7,8 +7,8 @@ module.exports = {
   
   // Test file patterns
   testMatch: [
-    '<rootDir>/test/**/*.test.js',
-    '<rootDir>/test/**/*.test.ts',
+    '<rootDir>/server/tests/**/*.test.js',
+    '<rootDir>/server/tests/**/*.test.ts',
     '<rootDir>/**/__tests__/**/*.(js|ts)',
     '<rootDir>/**/(*.)+(spec|test).(js|ts)'
   ],
@@ -50,9 +50,7 @@ module.exports = {
   },
   
   // Setup files
-  setupFilesAfterEnv: [
-    '<rootDir>/test/setup.js'
-  ],
+  setupFilesAfterEnv: [],
   
   // Module path mapping
   moduleNameMapping: {

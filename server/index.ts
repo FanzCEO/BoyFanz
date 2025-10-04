@@ -147,6 +147,58 @@ setupCSRFTokenEndpoint(app);
     app.locals.orchestrationEngine = orchestrationEngine;
     app.locals.serviceRegistry = serviceRegistry;
     logger.info('Service Orchestration Engine initialized successfully');
+    
+    // Initialize Pipeline Integration
+    try {
+      const PipelineIntegration = (await import('./pipeline/pipelineIntegration.js')).default;
+      const pipelineIntegration = new PipelineIntegration(orchestrationEngine);
+      await pipelineIntegration.initialize();
+      app.locals.pipelineIntegration = pipelineIntegration;
+      logger.info('Pipeline Integration initialized successfully');
+      
+      // Initialize Enterprise Command Center
+      try {
+        const EnterpriseCommandCenter = (await import('./services/enterpriseCommandCenter.js')).default;
+        const commandCenter = new EnterpriseCommandCenter(orchestrationEngine, pipelineIntegration);
+        await commandCenter.initialize();
+        app.locals.commandCenter = commandCenter;
+        logger.info('Enterprise Command Center initialized successfully');
+        
+        // Initialize Automated Workflow Engine
+        try {
+          const AutomatedWorkflowEngine = (await import('./services/automatedWorkflowEngine.js')).default;
+          const workflowEngine = new AutomatedWorkflowEngine(orchestrationEngine, pipelineIntegration, commandCenter);
+          await workflowEngine.initialize();
+          app.locals.workflowEngine = workflowEngine;
+          logger.info('Automated Workflow Engine initialized successfully');
+          
+          // Initialize Service Discovery & Health Monitoring
+          try {
+            const ServiceDiscoveryHealth = (await import('./services/serviceDiscoveryHealth.js')).default;
+            const serviceDiscovery = new ServiceDiscoveryHealth(orchestrationEngine, commandCenter, workflowEngine);
+            await serviceDiscovery.initialize();
+            app.locals.serviceDiscovery = serviceDiscovery;
+            logger.info('Service Discovery & Health Monitoring System initialized successfully');
+          } catch (serviceDiscoveryError) {
+            logger.error('Failed to initialize Service Discovery & Health Monitoring System:', serviceDiscoveryError);
+            // Continue startup but with reduced service monitoring functionality
+          }
+          
+        } catch (workflowError) {
+          logger.error('Failed to initialize Automated Workflow Engine:', workflowError);
+          // Continue startup but with reduced automation functionality
+        }
+        
+      } catch (commandCenterError) {
+        logger.error('Failed to initialize Enterprise Command Center:', commandCenterError);
+        // Continue startup but with reduced dashboard functionality
+      }
+      
+    } catch (pipelineError) {
+      logger.error('Failed to initialize Pipeline Integration:', pipelineError);
+      // Continue startup but with reduced analytics functionality
+    }
+    
   } catch (error) {
     logger.error('Failed to initialize Service Orchestration Engine:', error);
     // Continue startup but with reduced functionality
@@ -222,15 +274,27 @@ setupCSRFTokenEndpoint(app);
   // Setup graceful shutdown handling with service orchestration cleanup
   const originalShutdown = setupGracefulShutdown(server);
   
-  // Extend shutdown to include service orchestration cleanup
+  // Extend shutdown to include all enterprise services cleanup
   process.on('SIGTERM', async () => {
     logger.info('SIGTERM received, shutting down gracefully');
     try {
+      if (app.locals.serviceDiscovery) {
+        await app.locals.serviceDiscovery.shutdown();
+      }
+      if (app.locals.workflowEngine) {
+        await app.locals.workflowEngine.shutdown();
+      }
+      if (app.locals.commandCenter) {
+        await app.locals.commandCenter.shutdown();
+      }
+      if (app.locals.pipelineIntegration) {
+        await app.locals.pipelineIntegration.shutdown();
+      }
       if (app.locals.serviceRegistry) {
         await app.locals.serviceRegistry.shutdown();
       }
     } catch (error) {
-      logger.error('Error during service registry shutdown:', error);
+      logger.error('Error during graceful shutdown:', error);
     }
     process.exit(0);
   });
@@ -238,11 +302,17 @@ setupCSRFTokenEndpoint(app);
   process.on('SIGINT', async () => {
     logger.info('SIGINT received, shutting down gracefully');
     try {
+      if (app.locals.commandCenter) {
+        await app.locals.commandCenter.shutdown();
+      }
+      if (app.locals.pipelineIntegration) {
+        await app.locals.pipelineIntegration.shutdown();
+      }
       if (app.locals.serviceRegistry) {
         await app.locals.serviceRegistry.shutdown();
       }
     } catch (error) {
-      logger.error('Error during service registry shutdown:', error);
+      logger.error('Error during graceful shutdown:', error);
     }
     process.exit(0);
   });
