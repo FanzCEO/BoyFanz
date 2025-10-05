@@ -5608,14 +5608,15 @@ import { trustScoringRoutes } from './routes/trustScoringRoutes';
 import platformPrivilegesRoutes from './routes/platformPrivilegesRoutes';
 import liveEventsRoutes from './routes/liveEventsRoutes';
 import analyticsIntelligenceRoutes from './routes/analyticsIntelligence.js';
-import orchestrationRoutes from './routes/orchestrationRoutes.js';
-import unifiedDataRoutes from './routes/unifiedDataRoutes.js';
+// import orchestrationRoutes from './routes/orchestrationRoutes.js';
+// import unifiedDataRoutes from './routes/unifiedDataRoutes.js';
 import pipelineIntegrationRoutes from './routes/pipelineIntegrationRoutes.js';
 import enterpriseCommandCenterRoutes from './routes/enterpriseCommandCenterRoutes.js';
-import automatedWorkflowRoutes from './routes/automatedWorkflowRoutes.js';
-import serviceDiscoveryRoutes from './routes/serviceDiscoveryRoutes.js';
 
 export async function setupAdvancedRoutes(app: Express) {
+  // Dynamic imports for CommonJS routes
+  const automatedWorkflowRoutes = (await import('./routes/automatedWorkflowRoutes.js')).default;
+  const serviceDiscoveryRoutes = (await import('./routes/serviceDiscoveryRoutes.js')).default;
   setupNFTRoutes(app);
   setupAIFeedRoutes(app);
   setupAgeVerificationRoutes(app);
@@ -5721,10 +5722,10 @@ export async function setupAdvancedRoutes(app: Express) {
   app.use('/api/analytics', analyticsIntelligenceRoutes);
   
   // Service Orchestration Engine
-  app.use('/api/orchestration', orchestrationRoutes);
+  // app.use('/api/orchestration', orchestrationRoutes);
   
   // Unified Data Pipeline
-  app.use('/api/data-pipeline', unifiedDataRoutes);
+  // app.use('/api/data-pipeline', unifiedDataRoutes);
   
   // Data Pipeline Integration & Cross-Service Analytics
   app.use('/api/pipeline', pipelineIntegrationRoutes);
