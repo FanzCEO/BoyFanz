@@ -63,6 +63,12 @@ export class DynamicPricingService {
     context: PricingContext,
     constraints: PricingConstraints
   ): Promise<PricingRecommendation> {
+    // Check if OpenAI is available
+    if (!process.env.OPENAI_API_KEY) {
+      console.warn('⚠️ OPENAI_API_KEY not configured - using rule-based pricing fallback');
+      return this.getRuleBasedRecommendation(context, constraints);
+    }
+    
     // Build data-driven prompt
     const prompt = this.buildPricingPrompt(context, constraints);
     
@@ -177,6 +183,57 @@ Return your recommendation in JSON format:
     parts.push('5. Stays within the allowed price range');
 
     return parts.join('\n');
+  }
+
+  /**
+   * Rule-based pricing recommendation (fallback when AI unavailable)
+   */
+  private getRuleBasedRecommendation(
+    context: PricingContext,
+    constraints: PricingConstraints
+  ): PricingRecommendation {
+    let suggestedPrice = context.currentPriceCents;
+    const triggers: string[] = ['rule_based_fallback'];
+    let rationale = 'Using rule-based pricing (AI unavailable). ';
+
+    // Apply demand-based adjustment if we have conversion data
+    if (context.conversionRate !== undefined) {
+      if (context.conversionRate > 0.1) {
+        // High conversion rate (>10%) - increase price
+        suggestedPrice = Math.round(suggestedPrice * 1.15);
+        triggers.push('high_conversion');
+        rationale += 'High conversion rate detected. ';
+      } else if (context.conversionRate < 0.02) {
+        // Low conversion rate (<2%) - decrease price
+        suggestedPrice = Math.round(suggestedPrice * 0.85);
+        triggers.push('low_conversion');
+        rationale += 'Low conversion rate detected. ';
+      }
+    }
+
+    // Apply time decay if content is aging
+    if (context.contentAge !== undefined && context.contentAge > 7) {
+      const decayFactor = Math.max(0.7, 1 - (context.contentAge * 0.02));
+      suggestedPrice = Math.round(suggestedPrice * decayFactor);
+      triggers.push('content_aging');
+      rationale += `Content is ${context.contentAge} days old. `;
+    }
+
+    // Enforce constraints
+    suggestedPrice = Math.max(
+      constraints.minPriceCents,
+      Math.min(constraints.maxPriceCents, suggestedPrice)
+    );
+
+    const priceChange = ((suggestedPrice - context.currentPriceCents) / context.currentPriceCents) * 100;
+
+    return {
+      suggestedPriceCents: suggestedPrice,
+      confidence: 60,
+      rationale: rationale.trim(),
+      expectedImpactPercent: Math.round(priceChange),
+      triggers
+    };
   }
 
   /**
