@@ -224,3 +224,50 @@ The platform supports deployment across 17 cloud providers with automatic failov
 - Social media auto-posting (Instagram, TikTok, Twitter, Snapchat)
 - QR code generation for marketing
 - Smart link generation for content promotion
+
+## Recent Changes
+
+### Build & Deployment Fixes (Current Session)
+- **Fixed Build Process**: Resolved all import/export mismatches and CommonJS/ESM compatibility issues
+- **Service Registry**: Simplified to only register available services with graceful error handling
+- **AI Services**: Added fallback mechanisms for when API keys are missing (OpenAI, ElevenLabs, Crossmint)
+- **Dependencies**: Node.js 20.19.3 installed and configured
+- **Build Status**: ✅ Application builds successfully without errors
+
+### Required Environment Variables for Full Features
+- `SESSION_SECRET` - **CRITICAL** (enforced in production)
+- `DATABASE_URL` - PostgreSQL connection (already configured)
+- `OPENAI_API_KEY` - For AI content analysis, dynamic pricing, emotional AI
+- `ELEVENLABS_API_KEY` - For voice cloning features
+- `CROSSMINT_API_KEY` - For NFT minting and blockchain features
+
+### Deployment Configuration
+
+**Build Command** (to be configured in Replit deployment settings):
+```
+build = ["sh", "-c", "npm install --legacy-peer-deps && npm run build"]
+```
+
+**Run Command**:
+```
+npm run start
+```
+
+**Environment**: 
+- Node.js 20+ required
+- PostgreSQL database required
+- Port 5000 for frontend
+
+### Domain Setup (Post-Deployment)
+1. Deploy app on Replit first
+2. Configure custom domain DNS:
+   - Testing: `fanz.boyfanz.com`
+   - Production: `BoyFanz.com`
+   - Add A record pointing to Replit server IP
+   - Add TXT record for domain verification
+
+### Known Limitations & Future Enhancements
+- Service orchestration engine simplified - advanced workflows can be added later
+- Some advanced features require API keys to function (graceful degradation implemented)
+- Cross-platform SSO ready but requires configuration
+- Advanced monitoring dashboards available but optional
