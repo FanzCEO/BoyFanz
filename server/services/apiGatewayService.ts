@@ -1146,6 +1146,14 @@ export const GatewayConfigSchema = z.object({
 export type GatewayConfigInput = z.infer<typeof GatewayConfigSchema>;
 
 // Create and export a default instance with default config
-const defaultGatewayConfig = GatewayConfigSchema.parse({});
+const defaultGatewayConfig = GatewayConfigSchema.parse({
+  rateLimiting: {},
+  authentication: {},
+  loadBalancing: { healthCheck: {} },
+  circuitBreaker: {},
+  logging: {},
+  caching: {},
+  monitoring: {}
+});
 const apiGatewayService = new APIGatewayService(defaultGatewayConfig);
 export default apiGatewayService;
