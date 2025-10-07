@@ -4,7 +4,7 @@
  * Phase 13 - Enterprise Integration
  */
 
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
 /**
@@ -517,4 +517,4 @@ router.get('/health', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

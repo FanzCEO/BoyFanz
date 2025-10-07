@@ -4,7 +4,7 @@
  * Phase 14 - Enterprise Integration
  */
 
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
 /**
@@ -749,4 +749,4 @@ router.get('/events', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
