@@ -330,6 +330,8 @@ jobs:
   # Job 9: Compliance Check
   compliance:
     name: 📋 Compliance Check
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: 📋 Checkout code
