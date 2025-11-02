@@ -51,7 +51,7 @@ COPY --from=frontend-builder /app/dist/client ./dist/client
 COPY --from=backend-builder /app/dist ./dist
 
 # Copy necessary runtime files
-COPY server/public ./server/public
+# COPY server/public ./server/public  # Commented out - directory doesn't exist
 COPY shared ./shared
 
 # Create non-root user
