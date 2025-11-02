@@ -1,10 +1,17 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// ✅ FIX: Conditionally create Resend client only if API key exists
+let resend: Resend | null = null;
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
+  console.log('✅ Email service initialized with Resend');
+} else {
+  console.warn('⚠️  Email service not configured (RESEND_API_KEY missing). Emails will be logged only.');
+}
 
 const FROM_EMAIL = 'BoyFanz <onboarding@resend.dev>'; // Change to your verified domain
-const APP_URL = process.env.REPLIT_DEV_DOMAIN 
-  ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+const APP_URL = process.env.REPLIT_DEV_DOMAIN
+  ? `https://${process.env.REPLIT_DEV_DOMAIN}`
   : 'http://localhost:5000';
 
 interface EmailTemplate {
@@ -16,7 +23,14 @@ interface EmailTemplate {
 export class EmailService {
   async sendVerificationEmail(email: string, token: string): Promise<void> {
     const verificationUrl = `${APP_URL}/auth/verify-email?token=${token}`;
-    
+
+    // Gracefully handle when email service is not configured
+    if (!resend) {
+      console.warn(`⚠️  Email service not available. Would have sent verification email to ${email}`);
+      console.warn(`   Verification URL: ${verificationUrl}`);
+      return; // Skip sending, but don't crash the application
+    }
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -107,7 +121,14 @@ export class EmailService {
 
   async sendPasswordResetEmail(email: string, token: string): Promise<void> {
     const resetUrl = `${APP_URL}/auth/reset-password?token=${token}`;
-    
+
+    // Gracefully handle when email service is not configured
+    if (!resend) {
+      console.warn(`⚠️  Email service not available. Would have sent password reset email to ${email}`);
+      console.warn(`   Reset URL: ${resetUrl}`);
+      return; // Skip sending, but don't crash the application
+    }
+
     const html = `
       <!DOCTYPE html>
       <html>
