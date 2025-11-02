@@ -810,7 +810,7 @@ export default function BillingManagement() {
                         fill="#8884d8"
                         dataKey="count"
                       >
-                        {analytics.paymentCycleDistribution?.map((entry, index) => (
+                        {analytics.paymentCycleDistribution?.map((entry: any, index: number) => (
                           <Cell key={`cell-${index}`} fill={CYCLE_COLORS[entry.cycle as keyof typeof CYCLE_COLORS]} />
                         ))}
                       </Pie>

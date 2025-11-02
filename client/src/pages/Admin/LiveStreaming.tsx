@@ -17,13 +17,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { 
-  Video, Users, Search, Filter, MoreHorizontal, AlertTriangle, Download, 
-  Upload, CheckCircle, XCircle, Eye, EyeOff, Calendar, Activity, Star, 
+  Video, Users, Search, Filter, MoreHorizontal, AlertTriangle, Download,
+  Upload, CheckCircle, XCircle, Eye, EyeOff, Calendar, Activity, Star,
   Trash2, Edit, Flag, Play, Pause, StopCircle, Settings, Shield,
   TrendingUp, BarChart3, PieChart, Clock, DollarSign, MessageSquare,
   RefreshCw, Zap, Wifi, WifiOff, Signal, Globe, Monitor, Camera,
   Volume2, VolumeX, Maximize, Minimize, RotateCcw, MapPin, Timer,
-  Gauge, Archive, FileVideo, Radio, Broadcast, PhoneCall, VideoOff
+  Gauge, Archive, FileVideo, Radio, PhoneCall, VideoOff
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { format } from "date-fns";

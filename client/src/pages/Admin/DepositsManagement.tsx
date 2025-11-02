@@ -724,7 +724,7 @@ export default function DepositsManagement() {
                         fill="#8884d8"
                         dataKey="volume"
                       >
-                        {analytics.methodDistribution?.map((entry, index) => (
+                        {analytics.methodDistribution?.map((entry: any, index: number) => (
                           <Cell key={`cell-${index}`} fill={['#8884d8', '#82ca9d', '#ffc658', '#ff7300'][index % 4]} />
                         ))}
                       </Pie>

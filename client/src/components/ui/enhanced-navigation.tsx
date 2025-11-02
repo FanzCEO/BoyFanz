@@ -191,7 +191,7 @@ export function EnhancedNavigation({ user, className }: NavigationProps) {
                 href={item.href}
               >
                 <Button
-                  variant={item.variant || "ghost"}
+                  variant={(item.variant === "primary" ? "default" : item.variant) || "ghost"}
                   size="sm"
                   className="flex items-center space-x-2"
                   data-testid={item.testId}
