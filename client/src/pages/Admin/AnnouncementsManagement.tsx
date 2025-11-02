@@ -30,7 +30,11 @@ import {
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { format } from "date-fns";
-import type { Announcement, AnnouncementTemplate, InsertAnnouncement } from "@shared/schema";
+import type { SelectAnnouncement, InsertAnnouncement } from "@shared/schema";
+
+// Type aliases for compatibility
+type Announcement = SelectAnnouncement;
+type AnnouncementTemplate = SelectAnnouncement;
 
 interface AnnouncementAnalytics {
   totalAnnouncements: number;
