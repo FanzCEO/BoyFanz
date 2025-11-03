@@ -10,7 +10,8 @@ RUN npm ci --only=production
 
 # Copy application files
 COPY server/ ./server/
-COPY public/ ./public/ 2>/dev/null || true
+COPY shared/ ./shared/
+COPY client/ ./client/
 
 # Set default port (Render will override with PORT env var if needed)
 ENV PORT=10000
