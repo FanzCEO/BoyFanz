@@ -5,11 +5,37 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 
 const app = express();
 const PORT = process.env.PORT || 5178;
 
+// Simple logger that respects NODE_ENV
+const logger = {
+  log: (...args) => {
+    if (process.env.NODE_ENV !== 'test') {
+      console.log(...args);
+    }
+  },
+  error: (...args) => {
+    if (process.env.NODE_ENV !== 'test') {
+      console.error(...args);
+    }
+  }
+};
+
 // Middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"]
+    }
+  }
+}));
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
@@ -87,13 +113,13 @@ app.get('/api/status', (req, res) => {
 
 // Start server - listen on all interfaces for Render deployment
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🏳️‍🌈 BoyFanz Platform running on port ${PORT}`);
-  console.log(`🌐 Access at: http://0.0.0.0:${PORT}`);
-  console.log(`🚀 Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.log(`🏳️‍🌈 BoyFanz Platform running on port ${PORT}`);
+  logger.log(`🌐 Access at: http://0.0.0.0:${PORT}`);
+  logger.log(`🚀 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('🏳️‍🌈 BoyFanz Platform shutting down...');
+  logger.log('🏳️‍🌈 BoyFanz Platform shutting down...');
   process.exit(0);
 });
