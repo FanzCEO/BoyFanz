@@ -5,16 +5,25 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production --legacy-peer-deps
+# Install ALL dependencies (including devDependencies for build)
+RUN npm ci --legacy-peer-deps
 
 # Copy application files
 COPY server/ ./server/
 COPY shared/ ./shared/
 COPY client/ ./client/
+COPY vite.config.ts ./
+COPY tsconfig.json ./
+
+# Build the application
+RUN npm run build
+
+# Remove devDependencies to reduce image size
+RUN npm prune --production --legacy-peer-deps
 
 # Set default port (Render will override with PORT env var if needed)
 ENV PORT=10000
+ENV NODE_ENV=production
 
 # Expose port
 EXPOSE 10000
@@ -24,5 +33,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "const port = process.env.PORT || 10000; require('http').get('http://localhost:' + port + '/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Start the application
-CMD ["node", "server/index.js"]
+CMD ["node", "dist/index.js"]
 
