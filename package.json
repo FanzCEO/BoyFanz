@@ -14,9 +14,9 @@
     "dotenv": "^16.3.1"
   },
   "devDependencies": {
-    "tsx": "^3.12.7",
-    "esbuild": "^0.19.2",
-    "vite": "^4.4.9"
+    "tsx": "^3.14.0",
+    "esbuild": "^0.25.12",
+    "vite": "^7.1.12"
   },
   "keywords": ["fanz", "creator-platform", "adult-content", "boyfanz"],
   "author": "FANZ Team",
