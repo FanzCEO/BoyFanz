@@ -18,9 +18,6 @@ COPY tsconfig.json ./
 # Build the application
 RUN npm run build
 
-# Remove devDependencies to reduce image size
-RUN npm prune --production --legacy-peer-deps
-
 # Set default port (Render will override with PORT env var if needed)
 ENV PORT=10000
 ENV NODE_ENV=production
