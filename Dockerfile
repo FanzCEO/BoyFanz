@@ -12,12 +12,15 @@ RUN npm ci --only=production
 COPY server/ ./server/
 COPY public/ ./public/ 2>/dev/null || true
 
-# Expose port (Render will set PORT env var dynamically)
+# Set default port (Render will override with PORT env var if needed)
+ENV PORT=10000
+
+# Expose port
 EXPOSE 10000
 
-# Health check (Render uses port 10000 for Docker services)
+# Health check (uses PORT env var, defaults to 10000)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:10000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD sh -c 'PORT=${PORT:-10000} && node -e "require(\"http\").get(`http://localhost:${PORT}/health`, (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"'
 
 # Start the application
 CMD ["node", "server/index.js"]
