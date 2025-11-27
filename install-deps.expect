@@ -1,0 +1,45 @@
+#!/usr/bin/expect -f
+set timeout 600
+
+spawn ssh -o StrictHostKeyChecking=no boyzapp@67.217.54.66
+
+expect {
+    "password:" {
+        send "Bama@11061990\r"
+    }
+    "Password:" {
+        send "Bama@11061990\r"
+    }
+}
+
+expect "$"
+send "cd /home/boyzapp/boyfanz-deploy\r"
+
+expect "$"
+send "echo '=== Installing dependencies ==='\r"
+
+expect "$"
+send "npm install --production\r"
+
+expect "$"
+send "echo '=== Starting app with PM2 ==='\r"
+
+expect "$"
+send "pm2 start index.js --name boyfanz --env production\r"
+
+expect "$"
+send "pm2 save\r"
+
+expect "$"
+send "echo '=== Checking status ==='\r"
+
+expect "$"
+send "pm2 status\r"
+
+expect "$"
+send "echo '=== Deployment complete ==='\r"
+
+expect "$"
+send "exit\r"
+
+expect eof

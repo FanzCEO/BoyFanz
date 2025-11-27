@@ -1,0 +1,102 @@
+spawn ssh -o StrictHostKeyChecking=no root@67.217.54.66
+root@67.217.54.66's password: 
+Last failed login: Mon Nov 17 01:42:13 AST 2025 from 159.89.26.183 on ssh:notty
+There were 540 failed login attempts since the last successful login.
+Last login: Sun Nov 16 16:28:17 2025 from 66.45.228.251
+]0;root@67-217-54-66:~[?2004h[root@67-217-54-66 ~]# echo '=== Installing Node.js 18.x ===' && curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
+[?2004l=== Installing Node.js 18.x ===
+[1;31m2025-11-17 03:44:22 - 
+===============================================================================
+                            DEPRECATION WARNING                            
+===============================================================================
+Node.js 18.x is no longer actively supported!
+You will not receive security or critical stability updates for this version.
+
+You should migrate to a supported version of Node.js as soon as possible.
+
+Please see https://nodesource.com/products/distributions for details about which
+version may be appropriate for you.
+
+The NodeSource Node.js distributions site contains
+information both about supported versions of Node.js and N|Solid supported Linux
+distributions. To learn more about usage, see:
+https://nodesource.com/products/distributions
+
+===============================================================================
+
+Continuing in 10 seconds ...
+[0m
+[38;5;79m2025-11-17 03:44:32 - Cleaning up old repositories...[0m
+[38;5;79m2025-11-17 03:44:32 - Old repositories removed[0m
+[38;5;79m2025-11-17 03:44:32 - Supported architecture: x86_64[0m
+[38;5;79m2025-11-17 03:44:32 - Added N|Solid repository for LTS version: 18.x[0m
+[38;5;79m2025-11-17 03:44:32 - dnf available, updating...[0m
+Node.js Packages for     [===                 ] ---  B/s |   0  B     --:-- ETANode.js Packages for Linux RPM based distros -   15 MB/s | 1.0 MB     00:00    
+Last metadata expiration check: 0:00:01 ago on Mon 17 Nov 2025 03:44:32 AM AST.
+Metadata cache created.
+N|Solid Packages for     [===                 ] ---  B/s |   0  B     --:-- ETAN|Solid Packages for Linux RPM based distros -   12 MB/s | 692 kB     00:00    
+Metadata cache created.
+[38;5;79m2025-11-17 03:44:33 - Repository is configured and updated.[0m
+[38;5;79m2025-11-17 03:44:33 - You can use N|solid Runtime as a node.js alternative[0m
+[1;32m2025-11-17 03:44:33 - To install N|solid Runtime, run: dnf install nsolid -y[0m
+[38;5;79m2025-11-17 03:44:33 - Run 'dnf install nodejs -y' to complete the installation.[0m
+]0;root@67-217-54-66:~[?2004h[root@67-217-54-66 ~]# yum install nodejs -y
+[?2004lDependencies resolved.
+================================================================================
+ Package    Arch       Version                      Repository             Size
+================================================================================
+Installing:
+ [1m[32mnodejs    (B[m x86_64     2:18.20.8-1nodesource        nodesource-nodejs      34 M
+
+Transaction Summary
+================================================================================
+Install  1 Package
+
+Total download size: 34 M
+Installed size: 98 M
+Downloading Packages:
+nodejs-18.20.8-1node  0% [                    ] ---  B/s |   0  B     --:-- ETAnodejs-18.20.8-1node 89% [=================-  ] 101 MB/s |  30 MB     00:00 ETAnodejs-18.20.8-1nodesource.x86_64.rpm            88 MB/s |  34 MB     00:00    
+--------------------------------------------------------------------------------
+Total                                            87 MB/s |  34 MB     00:00     
+Node.js Packages for     [===                 ] ---  B/s |   0  B     --:-- ETANode.js Packages for Linux RPM based distros -  143 kB/s | 3.1 kB     00:00    
+Importing GPG key 0x3AF28A14:
+ Userid     : "Nodesource Operations <operations@nodesource.com>"
+ Fingerprint: 242B 8138 31AF 0956 2B6C 46F7 6B88 DA4E 3AF2 8A14
+ From       : https://rpm.nodesource.com/gpgkey/ns-operations-public.key
+Key imported successfully
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1 
+  Running scriptlet: nodejs-2:18.20.8-1nodesource.x86_64                    1/1 
+  Installing       : nodejs-2:18.20.8-1nodesou [                          ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [=                         ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [==                        ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [===                       ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [====                      ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [=====                     ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [======                    ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [=======                   ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [========                  ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [=========                 ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [==========                ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [===========               ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [============              ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [=============             ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [==============            ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [===============           ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [================          ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [=================         ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [==================        ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [===================       ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [====================      ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [=====================     ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [======================    ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [=======================   ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [========================  ] 1/1  Installing       : nodejs-2:18.20.8-1nodesou [========================= ] 1/1  Installing       : nodejs-2:18.20.8-1nodesource.x86_64                    1/1 
+  Running scriptlet: nodejs-2:18.20.8-1nodesource.x86_64                    1/1 
+  Verifying        : nodejs-2:18.20.8-1nodesource.x86_64                    1/1 
+
+Installed:
+  nodejs-2:18.20.8-1nodesource.x86_64                                           
+
+Complete!
+]0;root@67-217-54-66:~[?2004h[root@67-217-54-66 ~]# echo '=== Installing PM2 ===' && npm install -g pm2
+[?2004l=== Installing PM2 ===
+[1G[0K⠙[1G[0K⠹[1G[0K⠸[1G[0K⠼[1G[0K⠴[1G[0K⠦[1G[0K⠧[1G[0K⠇[1G[0K⠏[1G[0K⠋[1G[0K⠙[1G[0K⠹[1G[0K⠸[1G[0K⠼[1G[0K⠴[1G[0K⠦[1G[0K⠧[1G[0K⠇[1G[0K⠏[1G[0K⠋[1G[0K
+added 133 packages in 2s
+[1G[0K⠋[1G[0K
+[1G[0K⠋[1G[0K13 packages are looking for funding
+[1G[0K⠋[1G[0K  run `npm fund` for details
+[1G[0K⠋[1G[0K[1mnpm[22m [96mnotice[39m
+[1mnpm[22m [96mnotice[39m New [31mmajor[39m version of npm available! [31m10.8.2[39m -> [34m11.6.2[39m
+[1mnpm[22m [96mnotice[39m Changelog: [34mhttps://github.com/npm/cli/releases/tag/v11.6.2[39m
+[1mnpm[22m [96mnotice[39m To update run: [4mnpm install -g npm@11.6.2[24m
+[1mnpm[22m [96mnotice[39m
+[1G[0K⠋[1G[0K]0;root@67-217-54-66:~[?2004h[root@67-217-54-66 ~]# echo '=== Verifying ===' && node --version && npm --version
+[?2004l=== Verifying ===
+v18.20.8
+10.8.2
+[1G[0K]0;root@67-217-54-66:~[?2004h[root@67-217-54-66 ~]# echo '=== Installation Complete ==='
+[?2004l=== Installation Complete ===
+]0;root@67-217-54-66:~[?2004h[root@67-217-54-66 ~]# exit
+[?2004llogout
+Connection to 67.217.54.66 closed.

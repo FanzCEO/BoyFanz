@@ -1,0 +1,54 @@
+#!/usr/bin/expect -f
+set timeout 60
+
+spawn ssh -o StrictHostKeyChecking=no root@67.217.54.66
+
+expect {
+    "password:" {
+        send "Bama@11061990\r"
+    }
+    "Password:" {
+        send "Bama@11061990\r"
+    }
+}
+
+expect "#"
+send "echo '=== Creating Apache userdata directory ==='\r"
+
+expect "#"
+send "mkdir -p /etc/apache2/conf.d/userdata/std/2_4/boyzapp/boyzapp.com\r"
+
+expect "#"
+send "echo '=== Creating proxy configuration ==='\r"
+
+expect "#"
+send "cat > /etc/apache2/conf.d/userdata/std/2_4/boyzapp/boyzapp.com/nodejs.conf << 'EOFCONF'\n<IfModule mod_proxy.c>\n    ProxyRequests Off\n    ProxyPreserveHost On\n    ProxyPass / http://localhost:3000/\n    ProxyPassReverse / http://localhost:3000/\n</IfModule>\nEOFCONF\n\r"
+
+expect "#"
+send "echo '=== Rebuilding Apache configuration ==='\r"
+
+expect "#"
+send "/scripts/ensure_vhost_includes --user=boyzapp\r"
+
+expect "#"
+send "/scripts/rebuildhttpdconf\r"
+
+expect "#"
+send "echo '=== Restarting Apache ==='\r"
+
+expect "#"
+send "/scripts/restartsrv_httpd\r"
+
+expect "#"
+send "echo '=== Testing configuration ==='\r"
+
+expect "#"
+send "curl -s http://localhost:3000 | head -10\r"
+
+expect "#"
+send "echo '=== DONE ==='\r"
+
+expect "#"
+send "exit\r"
+
+expect eof

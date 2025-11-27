@@ -1,0 +1,16 @@
+#!/usr/bin/expect -f
+set timeout 30
+
+spawn ssh -o StrictHostKeyChecking=no root@67.217.54.66 "cat /etc/redhat-release && uname -a"
+
+expect {
+    "password:" {
+        send "Bama@11061990\r"
+        exp_continue
+    }
+    "Password:" {
+        send "Bama@11061990\r"
+        exp_continue
+    }
+    eof
+}

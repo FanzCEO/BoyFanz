@@ -1,0 +1,21 @@
+#!/usr/bin/expect -f
+set timeout 600
+spawn ssh boyzapp@67.217.54.66
+expect "password:"
+send "Bama@11061990\r"
+
+expect "$ "
+send "cd /home/boyzapp\r"
+
+expect "$ "
+send "tar -xzf boyfanz-deploy-20251116-194255.tar.gz\r"
+
+expect "$ "
+send "cd boyfanz-deploy\r"
+
+expect "$ "
+send "ls -la\r"
+
+expect "$ "
+send "exit\r"
+expect eof

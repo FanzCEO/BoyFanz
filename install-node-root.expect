@@ -1,0 +1,33 @@
+#!/usr/bin/expect -f
+set timeout 600
+
+spawn ssh -o StrictHostKeyChecking=no root@67.217.54.66
+
+expect {
+    "password:" {
+        send "Bama@11061990\r"
+    }
+    "Password:" {
+        send "Bama@11061990\r"
+    }
+}
+
+expect "#"
+send "echo '=== Installing Node.js 18.x ===' && curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -\r"
+
+expect "#"
+send "yum install nodejs -y\r"
+
+expect "#"
+send "echo '=== Installing PM2 ===' && npm install -g pm2\r"
+
+expect "#"
+send "echo '=== Verifying ===' && node --version && npm --version\r"
+
+expect "#"
+send "echo '=== Installation Complete ==='\r"
+
+expect "#"
+send "exit\r"
+
+expect eof

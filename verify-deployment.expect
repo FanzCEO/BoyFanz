@@ -1,0 +1,42 @@
+#!/usr/bin/expect -f
+set timeout 30
+
+spawn ssh -o StrictHostKeyChecking=no boyzapp@67.217.54.66
+
+expect {
+    "password:" {
+        send "Bama@11061990\r"
+    }
+    "Password:" {
+        send "Bama@11061990\r"
+    }
+}
+
+expect "$"
+send "echo '=== Checking PM2 Status ==='\r"
+
+expect "$"
+send "pm2 status\r"
+
+expect "$"
+send "echo '=== Checking App Logs ==='\r"
+
+expect "$"
+send "pm2 logs boyfanz --lines 30 --nostream\r"
+
+expect "$"
+send "echo '=== Testing App Locally ==='\r"
+
+expect "$"
+send "curl -s http://localhost:3000 | head -20\r"
+
+expect "$"
+send "echo '=== Checking Process ==='\r"
+
+expect "$"
+send "ps aux | grep node | grep -v grep\r"
+
+expect "$"
+send "exit\r"
+
+expect eof

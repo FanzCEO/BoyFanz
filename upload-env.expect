@@ -1,0 +1,14 @@
+#!/usr/bin/expect -f
+set timeout 60
+spawn scp boyfanz-deploy/.env boyzapp@67.217.54.66:/home/boyzapp/boyfanz-deploy/
+expect {
+    "password:" {
+        send "Bama@11061990\r"
+        exp_continue
+    }
+    "Are you sure you want to continue connecting" {
+        send "yes\r"
+        exp_continue
+    }
+    eof
+}

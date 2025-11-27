@@ -1,0 +1,108 @@
+================================================================================
+  BOYFANZ v1 - CPANEL DEPLOYMENT QUICK REFERENCE
+================================================================================
+
+SERVER INFO
+-----------
+Domain:      boyzapp.com
+IP:          67.217.54.66
+cPanel:      https://67.217.54.66:2083
+User:        boyzapp
+Password:    Bama@11061990
+Email:       Josh@fanzunlimited.com
+
+DEPLOYMENT IN 5 STEPS
+---------------------
+
+1. CREATE PACKAGE (on local machine)
+   cd /Users/joshuastone/FANZ-Unified-Ecosystem/boyfanz
+   ./create-deployment-package.sh
+
+2. UPLOAD TO SERVER
+   scp boyfanz-deploy-*.tar.gz boyzapp@67.217.54.66:/home/boyzapp/
+
+3. SSH & EXTRACT
+   ssh boyzapp@67.217.54.66
+   cd /home/boyzapp
+   tar -xzf boyfanz-deploy-*.tar.gz
+   cd boyfanz-deploy
+
+4. SETUP DATABASE (in cPanel first!)
+   # cPanel > Databases > PostgreSQL Databases
+   # Create: boyzapp_db
+   # Create User: boyzapp_user
+   # Grant Privileges
+
+   psql -U boyzapp_user -d boyzapp_db -f database/init-cpanel-database.sql
+
+5. CONFIGURE & START
+   cp .env.example .env
+   nano .env  # Update DB credentials, secrets
+   npm install --production
+   ./start.sh
+
+IMPORTANT ENV VARIABLES
+-----------------------
+DATABASE_URL=postgresql://boyzapp_user:PASSWORD@localhost:5432/boyzapp_db
+JWT_SECRET=$(openssl rand -hex 32)
+SESSION_SECRET=$(openssl rand -hex 32)
+WEB_APP_URL=https://boyzapp.com
+DOMAIN=boyzapp.com
+
+START APPLICATION
+-----------------
+Option 1 (cPanel): Software > Setup Node.js App > Create
+  - App Root: /home/boyzapp/boyfanz-deploy
+  - Startup File: dist/index.js
+  - URL: boyzapp.com
+
+Option 2 (PM2):
+  pm2 start dist/index.js --name boyfanz
+  pm2 save
+  pm2 startup
+
+Option 3 (Script):
+  ./start.sh
+
+VERIFY DEPLOYMENT
+-----------------
+curl http://localhost:3000
+curl https://boyzapp.com
+curl https://boyzapp.com/api/health
+
+TROUBLESHOOTING
+---------------
+View Logs:        pm2 logs boyfanz
+                  tail -f ~/logs/nodejs.log
+
+Restart App:      pm2 restart boyfanz
+
+Check DB:         psql -U boyzapp_user -d boyzapp_db
+
+Port Issues:      lsof -i :3000
+                  kill -9 <PID>
+
+AFTER DEPLOYMENT
+----------------
+☐ Change admin password (Josh@fanzunlimited.com / admin123)
+☐ Install SSL certificate (cPanel > SSL/TLS)
+☐ Setup email (noreply@boyzapp.com)
+☐ Configure cron jobs (backups, cleanup)
+☐ Test all features
+☐ Configure payment gateways
+
+DOCUMENTATION
+-------------
+Full Guide:      CPANEL_DEPLOYMENT_GUIDE.md (20 pages)
+Quick Summary:   CPANEL_DEPLOYMENT_SUMMARY.md
+Database Info:   database/README.md
+Installation:    INSTALL.txt
+
+SUPPORT
+-------
+Email:           Josh@fanzunlimited.com
+Server:          67.217.54.66
+
+================================================================================
+Generated: 2025-11-16 | Status: ✅ READY FOR DEPLOYMENT
+================================================================================

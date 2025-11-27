@@ -1,0 +1,54 @@
+#!/usr/bin/expect -f
+set timeout 600
+
+spawn ssh -o StrictHostKeyChecking=no root@67.217.54.66
+
+expect {
+    "password:" {
+        send "Bama@11061990\r"
+    }
+    "Password:" {
+        send "Bama@11061990\r"
+    }
+}
+
+expect "#"
+send "echo '=== Installing Passenger for Apache ===' && yum install -y epel-release pygpgme curl\r"
+
+expect "#"
+send "curl --fail -sSLo /etc/yum.repos.d/passenger.repo https://oss-binaries.phusionpassenger.com/yum/definitions/el-passenger.repo\r"
+
+expect "#"
+send "yum install -y ea-apache24-mod-passenger 2>&1 || yum install -y mod_passenger 2>&1\r"
+
+expect "#"
+send "echo '=== Rebuilding Apache Configuration ==='\r"
+
+expect "#"
+send "/scripts/rebuildhttpdconf\r"
+
+expect "#"
+send "echo '=== Restarting Apache ==='\r"
+
+expect "#"
+send "/scripts/restartsrv_httpd\r"
+
+expect "#"
+send "echo '=== Restarting cPanel ==='\r"
+
+expect "#"
+send "/scripts/restartsrv_cpsrvd\r"
+
+expect "#"
+send "echo '=== Verifying Passenger ==='\r"
+
+expect "#"
+send "httpd -M 2>&1 | grep -i passenger\r"
+
+expect "#"
+send "echo '=== COMPLETE ==='\r"
+
+expect "#"
+send "exit\r"
+
+expect eof

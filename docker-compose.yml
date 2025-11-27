@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  boyfanz:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: boyfanz-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=sqlite:/app/data/fanz_db.sqlite
+      - JWT_SECRET=${JWT_SECRET}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY:-}
+      - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY:-}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    networks:
+      - boyfanz-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  boyfanz-network:
+    driver: bridge
+
+volumes:
+  boyfanz-data:
+  boyfanz-uploads:
+  boyfanz-logs:

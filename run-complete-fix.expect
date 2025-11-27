@@ -1,0 +1,48 @@
+#!/usr/bin/expect -f
+set timeout 600
+
+# Upload the fix script
+spawn scp -o StrictHostKeyChecking=no /Users/joshuastone/FANZ-Unified-Ecosystem/boyfanz/COMPLETE_FIX.sh boyzapp@67.217.54.66:/home/boyzapp/
+
+expect {
+    "password:" {
+        send "Bama@11061990\r"
+    }
+    "Password:" {
+        send "Bama@11061990\r"
+    }
+}
+
+expect eof
+
+# Now SSH and run it
+spawn ssh -o StrictHostKeyChecking=no boyzapp@67.217.54.66
+
+expect {
+    "password:" {
+        send "Bama@11061990\r"
+    }
+    "Password:" {
+        send "Bama@11061990\r"
+    }
+}
+
+expect "$"
+send "chmod +x COMPLETE_FIX.sh\r"
+
+expect "$"
+send "./COMPLETE_FIX.sh\r"
+
+expect {
+    "SUCCESS! App is responding" {
+        send "exit\r"
+    }
+    "App not responding" {
+        send "exit\r"
+    }
+    timeout {
+        send "exit\r"
+    }
+}
+
+expect eof

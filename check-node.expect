@@ -1,0 +1,16 @@
+#!/usr/bin/expect -f
+set timeout 30
+
+spawn ssh -o StrictHostKeyChecking=no boyzapp@67.217.54.66 "node --version 2>&1 && npm --version 2>&1 && which node 2>&1 && echo '---SEPARATOR---' && ls -la /home/boyzapp/boyfanz-deploy/ 2>&1"
+
+expect {
+    "password:" {
+        send "Bama@11061990\r"
+        exp_continue
+    }
+    "Password:" {
+        send "Bama@11061990\r"
+        exp_continue
+    }
+    eof
+}

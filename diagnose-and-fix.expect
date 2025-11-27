@@ -1,0 +1,57 @@
+#!/usr/bin/expect -f
+set timeout 60
+
+spawn ssh -o StrictHostKeyChecking=no boyzapp@67.217.54.66
+
+expect {
+    "password:" {
+        send "Bama@11061990\r"
+    }
+    "Password:" {
+        send "Bama@11061990\r"
+    }
+}
+
+expect "$"
+send "cd /home/boyzapp/boyfanz-deploy\r"
+
+expect "$"
+send "echo '=== Checking file structure ==='\r"
+
+expect "$"
+send "ls -lah | head -20\r"
+
+expect "$"
+send "echo '=== Checking for index.js ==='\r"
+
+expect "$"
+send "test -f index.js && echo 'index.js EXISTS' || echo 'index.js NOT FOUND'\r"
+
+expect "$"
+send "test -f dist/index.js && echo 'dist/index.js EXISTS' || echo 'dist/index.js NOT FOUND'\r"
+
+expect "$"
+send "echo '=== Checking PM2 status ==='\r"
+
+expect "$"
+send "pm2 list\r"
+
+expect "$"
+send "echo '=== Checking PM2 logs ==='\r"
+
+expect "$"
+send "pm2 logs boyfanz --lines 50 --nostream\r"
+
+expect "$"
+send "echo '=== Checking node_modules ==='\r"
+
+expect "$"
+send "test -d node_modules && echo 'node_modules EXISTS' || echo 'node_modules NOT FOUND - NEED TO RUN npm install'\r"
+
+expect "$"
+send "echo '=== DIAGNOSIS COMPLETE ==='\r"
+
+expect "$"
+send "exit\r"
+
+expect eof

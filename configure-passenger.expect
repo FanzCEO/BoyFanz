@@ -1,0 +1,51 @@
+#!/usr/bin/expect -f
+set timeout 120
+
+spawn ssh -o StrictHostKeyChecking=no root@67.217.54.66
+
+expect {
+    "password:" {
+        send "Bama@11061990\r"
+    }
+    "Password:" {
+        send "Bama@11061990\r"
+    }
+}
+
+expect "#"
+send "echo '=== Creating Passenger Node.js configuration ==='\r"
+
+expect "#"
+send "cat > /etc/cpanel/ea4/passenger.d/nodejs.conf << 'EOFCONF'\n# Node.js Passenger Configuration\nPassengerNodejs /usr/bin/node\nPassengerAppEnv production\nPassengerMaxPoolSize 6\nPassengerMinInstances 1\nEOFCONF\n\r"
+
+expect "#"
+send "echo '=== Verifying Passenger module ==='\r"
+
+expect "#"
+send "httpd -M 2>&1 | grep -i passenger\r"
+
+expect "#"
+send "echo '=== Checking Node.js path ==='\r"
+
+expect "#"
+send "which node\r"
+
+expect "#"
+send "node --version\r"
+
+expect "#"
+send "echo '=== Rebuilding Apache ==='\r"
+
+expect "#"
+send "/scripts/rebuildhttpdconf\r"
+
+expect "#"
+send "/scripts/restartsrv_httpd\r"
+
+expect "#"
+send "echo '=== CONFIGURATION COMPLETE ==='\r"
+
+expect "#"
+send "exit\r"
+
+expect eof

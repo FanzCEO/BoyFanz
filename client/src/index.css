@@ -1,0 +1,780 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;900&family=Teko:wght@400;500;600;700&family=Russo+One&family=Righteous&family=Anton&family=Barlow+Condensed:wght@700;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* UNDERGROUND FIGHT RING - BLOOD RED & SHADOW */
+  --background: hsl(0, 0%, 0%); /* Pure black - fight ring darkness */
+  --foreground: hsl(0, 0%, 95%);
+  --card: hsl(0, 5%, 4%); /* Blood-tinted darkness */
+  --card-foreground: hsl(0, 0%, 92%);
+  --popover: hsl(0, 0%, 2%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --primary: hsl(0, 100%, 50%); /* BLOOD RED #ff0000 */
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(40, 80%, 60%); /* Aggressive gold */
+  --secondary-foreground: hsl(0, 0%, 0%);
+  --muted: hsl(0, 0%, 10%);
+  --muted-foreground: hsl(0, 0%, 70%);
+  --accent: hsl(40, 80%, 60%);
+  --accent-foreground: hsl(0, 0%, 0%);
+  --destructive: hsl(0, 100%, 45%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(0, 10%, 18%); /* Slightly red-tinted borders */
+  --input: hsl(0, 5%, 6%);
+  --ring: hsl(0, 100%, 50%);
+  --radius: 0.125rem; /* Sharp edges - industrial */
+
+  /* FIGHT RING PALETTE - AGGRESSIVE NEON */
+  --blood-red: #ff0000;
+  --deep-red: #cc0000;
+  --dark-red: #990000;
+  --neon-red: #ff0000;
+  --neon-red-bright: #ff3333;
+  --fight-gold: hsl(45, 90%, 60%);
+  --steel-gray: hsl(0, 0%, 25%);
+  --iron-dark: hsl(0, 0%, 12%);
+  --cage-wire: hsl(0, 0%, 30%);
+  --shadow-black: hsl(0, 0%, 0%);
+
+  /* Chart colors */
+  --chart-1: hsl(0, 100%, 50%);
+  --chart-2: hsl(0, 0%, 80%);
+  --chart-3: hsl(45, 90%, 60%);
+  --chart-4: hsl(0, 0%, 40%);
+  --chart-5: hsl(0, 100%, 40%);
+
+  /* Sidebar */
+  --sidebar: hsl(0, 0%, 0%);
+  --sidebar-foreground: hsl(0, 0%, 98%);
+  --sidebar-primary: hsl(0, 100%, 50%);
+  --sidebar-primary-foreground: hsl(0, 0%, 98%);
+  --sidebar-accent: hsl(0, 5%, 8%);
+  --sidebar-accent-foreground: hsl(0, 0%, 80%);
+  --sidebar-border: hsl(0, 10%, 18%);
+  --sidebar-ring: hsl(0, 0%, 90%);
+}
+
+.light {
+  /* Keep light theme minimal */
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(0, 0%, 10%);
+  --card: hsl(0, 0%, 98%);
+  --card-foreground: hsl(0, 0%, 10%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(0, 0%, 10%);
+  --primary: hsl(0, 100%, 50%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(43, 74%, 49%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(0, 0%, 96%);
+  --muted-foreground: hsl(0, 0%, 45%);
+  --accent: hsl(43, 74%, 49%);
+  --accent-foreground: hsl(0, 0%, 0%);
+  --destructive: hsl(0, 80%, 50%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(0, 0%, 90%);
+  --input: hsl(0, 0%, 95%);
+  --ring: hsl(0, 100%, 50%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: "Inter", sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    position: relative;
+    min-height: 100vh;
+    background-color: #000000;
+  }
+
+  /* FIGHT RING CAGE PATTERN - CHAIN LINK FENCE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+      repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.015) 10px, rgba(255, 255, 255, 0.015) 11px),
+      repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.015) 10px, rgba(255, 255, 255, 0.015) 11px),
+      linear-gradient(0deg, rgba(0, 0, 0, 0.95), rgba(10, 0, 0, 0.9));
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* AGGRESSIVE RED VIGNETTE - BLOOD-TINTED SHADOWS */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(10, 0, 0, 0.3) 0%,
+      rgba(0, 0, 0, 0.9) 70%,
+      rgba(0, 0, 0, 1) 100%
+    );
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* FIGHT RING TYPOGRAPHY - AGGRESSIVE, INDUSTRIAL */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Bebas Neue", "Teko", sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: hsl(0, 0%, 98%);
+    text-shadow:
+      0 0 20px rgba(255, 0, 0, 0.6),
+      0 0 40px rgba(255, 0, 0, 0.4),
+      0 2px 4px rgba(0, 0, 0, 0.8);
+  }
+
+  .font-display {
+    font-family: "Bebas Neue", "Teko", sans-serif !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase;
+  }
+
+  .font-body {
+    font-family: "Inter", sans-serif !important;
+    font-weight: 400;
+  }
+
+  .font-industrial {
+    font-family: "Anton", "Barlow Condensed", sans-serif !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+}
+
+@layer components {
+  /* AGGRESSIVE NEON GLOW - FULL INTENSITY FIGHT RING LIGHTS */
+  .glow-effect {
+    box-shadow:
+      0 0 10px rgba(255, 0, 0, 0.6),
+      0 0 20px rgba(255, 0, 0, 0.4),
+      0 0 30px rgba(255, 0, 0, 0.3),
+      0 0 40px rgba(255, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .glow-effect:hover {
+    box-shadow:
+      0 0 15px rgba(255, 0, 0, 0.8),
+      0 0 30px rgba(255, 0, 0, 0.6),
+      0 0 45px rgba(255, 0, 0, 0.4),
+      0 0 60px rgba(255, 0, 0, 0.2);
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  /* BLOOD RED NEON - AGGRESSIVE UNDERGROUND LIGHTING */
+  .neon-text, .neon-sign {
+    color: #ff0000;
+    text-shadow:
+      0 0 5px rgba(255, 255, 255, 0.9),
+      0 0 10px rgba(255, 0, 0, 1),
+      0 0 20px rgba(255, 0, 0, 0.8),
+      0 0 30px rgba(255, 0, 0, 0.6),
+      0 0 40px rgba(255, 0, 0, 0.4),
+      0 2px 6px rgba(0, 0, 0, 0.9);
+    animation: aggressive-pulse 3s ease-in-out infinite;
+  }
+
+  /* FIGHT GOLD NEON - AGGRESSIVE GOLD */
+  .neon-sign-golden {
+    color: hsl(45, 90%, 60%);
+    text-shadow:
+      0 0 5px rgba(255, 255, 255, 0.8),
+      0 0 10px rgba(255, 215, 0, 0.9),
+      0 0 20px rgba(255, 215, 0, 0.7),
+      0 0 30px rgba(255, 215, 0, 0.5),
+      0 0 40px rgba(255, 215, 0, 0.3),
+      0 2px 6px rgba(0, 0, 0, 0.9);
+  }
+  
+  /* INDUSTRIAL CARD STYLING - STEEL AND SHADOW */
+  .card {
+    background: linear-gradient(135deg, rgba(12, 12, 12, 0.95) 0%, rgba(8, 8, 8, 0.98) 100%);
+    border: 1px solid rgba(255, 0, 0, 0.2);
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.9),
+      0 0 15px rgba(255, 0, 0, 0.1),
+      inset 0 0 20px rgba(0, 0, 0, 0.5);
+  }
+
+  /* BLOOD RED NEON BUTTON - AGGRESSIVE */
+  .neon-button {
+    background: linear-gradient(135deg, rgba(20, 0, 0, 0.4) 0%, rgba(10, 0, 0, 0.6) 100%);
+    border: 2px solid var(--blood-red);
+    color: var(--blood-red);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-shadow:
+      0 0 10px rgba(255, 0, 0, 0.8),
+      0 0 20px rgba(255, 0, 0, 0.5);
+    box-shadow:
+      0 0 15px rgba(255, 0, 0, 0.4),
+      0 0 30px rgba(255, 0, 0, 0.2),
+      inset 0 0 10px rgba(255, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .neon-button:hover {
+    background: linear-gradient(135deg, rgba(30, 0, 0, 0.6) 0%, rgba(15, 0, 0, 0.8) 100%);
+    border-color: var(--neon-red-bright);
+    text-shadow:
+      0 0 15px rgba(255, 0, 0, 1),
+      0 0 30px rgba(255, 0, 0, 0.7),
+      0 0 45px rgba(255, 0, 0, 0.4);
+    box-shadow:
+      0 0 25px rgba(255, 0, 0, 0.6),
+      0 0 50px rgba(255, 0, 0, 0.3),
+      inset 0 0 15px rgba(255, 0, 0, 0.2);
+    transform: translateY(-2px) scale(1.05);
+  }
+
+  /* FIGHT GOLD BUTTON - AGGRESSIVE GOLD */
+  .gold-button {
+    background: linear-gradient(135deg, rgba(20, 15, 0, 0.4) 0%, rgba(10, 8, 0, 0.6) 100%);
+    border: 2px solid var(--fight-gold);
+    color: var(--fight-gold);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-shadow:
+      0 0 10px rgba(255, 215, 0, 0.8),
+      0 0 20px rgba(255, 215, 0, 0.5);
+    box-shadow:
+      0 0 15px rgba(255, 215, 0, 0.3),
+      0 0 30px rgba(255, 215, 0, 0.15),
+      inset 0 0 10px rgba(255, 215, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .gold-button:hover {
+    background: linear-gradient(135deg, rgba(30, 25, 0, 0.6) 0%, rgba(15, 12, 0, 0.8) 100%);
+    text-shadow:
+      0 0 15px rgba(255, 215, 0, 1),
+      0 0 30px rgba(255, 215, 0, 0.7),
+      0 0 45px rgba(255, 215, 0, 0.4);
+    box-shadow:
+      0 0 25px rgba(255, 215, 0, 0.5),
+      0 0 50px rgba(255, 215, 0, 0.25),
+      inset 0 0 15px rgba(255, 215, 0, 0.15);
+    transform: translateY(-2px) scale(1.05);
+  }
+  
+  /* INDUSTRIAL INPUT STYLING */
+  .club-input {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid rgba(255, 0, 0, 0.3);
+    color: hsl(0, 0%, 98%);
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.8),
+      0 0 5px rgba(255, 0, 0, 0.1);
+  }
+
+  .club-input:focus {
+    border-color: var(--blood-red);
+    background: rgba(10, 0, 0, 0.9);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.9),
+      0 0 20px rgba(255, 0, 0, 0.4),
+      0 0 40px rgba(255, 0, 0, 0.2);
+    outline: none;
+  }
+
+  .club-input::placeholder {
+    color: hsl(0, 0%, 45%);
+    font-weight: 400;
+  }
+
+  /* AGGRESSIVE NEON BORDER */
+  .neon-border {
+    border: 2px solid var(--blood-red);
+    box-shadow:
+      0 0 15px rgba(255, 0, 0, 0.5),
+      0 0 30px rgba(255, 0, 0, 0.3),
+      inset 0 0 10px rgba(255, 0, 0, 0.1);
+  }
+
+  /* FIGHT RING ACCENT TEXT */
+  .text-accent {
+    color: var(--fight-gold);
+    text-shadow:
+      0 0 10px rgba(255, 215, 0, 0.6),
+      0 0 20px rgba(255, 215, 0, 0.3);
+  }
+  
+  /* FIGHT RING NEON TYPOGRAPHY - MAXIMUM IMPACT */
+
+  /* Blood Red Display - Main Headings */
+  .fight-heading-red, .neon-heading-red {
+    font-family: 'Bebas Neue', 'Teko', sans-serif;
+    color: #ff0000;
+    font-weight: 700;
+    text-shadow:
+      0 0 5px #fff,
+      0 0 10px #fff,
+      0 0 20px rgba(255, 0, 0, 1),
+      0 0 40px rgba(255, 0, 0, 0.8),
+      0 0 60px rgba(255, 0, 0, 0.6),
+      0 0 80px rgba(255, 0, 0, 0.4),
+      0 4px 8px rgba(0, 0, 0, 0.9);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Fight Gold Display */
+  .fight-heading-gold, .neon-heading-golden {
+    font-family: 'Bebas Neue', 'Teko', sans-serif;
+    color: hsl(45, 90%, 60%);
+    font-weight: 700;
+    text-shadow:
+      0 0 5px #fff,
+      0 0 10px #fff,
+      0 0 20px rgba(255, 215, 0, 1),
+      0 0 40px rgba(255, 215, 0, 0.8),
+      0 0 60px rgba(255, 215, 0, 0.5),
+      0 0 80px rgba(255, 215, 0, 0.3),
+      0 4px 8px rgba(0, 0, 0, 0.9);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Industrial Subheading */
+  .fight-subheading, .neon-subheading {
+    font-family: 'Bebas Neue', sans-serif;
+    color: hsl(0, 0%, 95%);
+    font-weight: 600;
+    text-shadow:
+      0 0 10px rgba(255, 255, 255, 0.8),
+      0 0 20px rgba(255, 255, 255, 0.5),
+      0 0 30px rgba(255, 0, 0, 0.3),
+      0 2px 4px rgba(0, 0, 0, 0.9);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* Body Text - Clean and Readable */
+  .fight-body-text, .neon-body-text {
+    font-family: 'Inter', sans-serif;
+    color: hsl(0, 0%, 90%);
+    font-weight: 400;
+    line-height: 1.7;
+  }
+
+  /* All Neon Text Defaults to Blood Red */
+  .neon-red, .neon-crimson {
+    color: var(--blood-red);
+    text-shadow:
+      0 0 10px rgba(255, 0, 0, 0.8),
+      0 0 20px rgba(255, 0, 0, 0.6),
+      0 0 30px rgba(255, 0, 0, 0.4);
+  }
+}
+
+/* FIGHT RING ANIMATIONS - AGGRESSIVE AND INTENSE */
+
+/* Aggressive Neon Pulse */
+@keyframes aggressive-pulse {
+  0%, 100% {
+    opacity: 1;
+    text-shadow:
+      0 0 5px #fff,
+      0 0 10px rgba(255, 0, 0, 1),
+      0 0 20px rgba(255, 0, 0, 0.8),
+      0 0 30px rgba(255, 0, 0, 0.6),
+      0 0 40px rgba(255, 0, 0, 0.4);
+  }
+  50% {
+    opacity: 0.92;
+    text-shadow:
+      0 0 8px #fff,
+      0 0 15px rgba(255, 0, 0, 1),
+      0 0 30px rgba(255, 0, 0, 0.9),
+      0 0 45px rgba(255, 0, 0, 0.7),
+      0 0 60px rgba(255, 0, 0, 0.5);
+  }
+}
+
+/* Neon Flicker - Underground Sign Effect */
+@keyframes neon-flicker {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% {
+    opacity: 1;
+    text-shadow:
+      0 0 5px #fff,
+      0 0 10px rgba(255, 0, 0, 1),
+      0 0 20px rgba(255, 0, 0, 0.8);
+  }
+  20%, 24%, 55% {
+    opacity: 0.7;
+    text-shadow:
+      0 0 3px #fff,
+      0 0 7px rgba(255, 0, 0, 0.6);
+  }
+}
+
+/* Fight Ring Glow Pulse */
+@keyframes fight-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 15px rgba(255, 0, 0, 0.5),
+      0 0 30px rgba(255, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 25px rgba(255, 0, 0, 0.7),
+      0 0 50px rgba(255, 0, 0, 0.4),
+      0 0 75px rgba(255, 0, 0, 0.2);
+  }
+}
+
+/* Logo Animations */
+.logo-pulse {
+  animation: aggressive-pulse 2.5s ease-in-out infinite;
+}
+
+.logo-flicker {
+  animation: neon-flicker 8s ease-in-out infinite;
+}
+
+/* SCROLLBAR STYLING */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--neon-red-dark) var(--charcoal-dark);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--charcoal-dark);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--neon-red-dark);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-red);
+}
+
+/* UTILITY CLASSES */
+.smoky-bg {
+  background: var(--charcoal-black);
+}
+
+.retro-border {
+  border: 1px solid var(--neon-red-dark);
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.1);
+}
+
+.gritty-texture {
+  background-image: 
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 100px,
+      rgba(255, 255, 255, 0.01) 100px,
+      rgba(255, 255, 255, 0.01) 101px
+    );
+}
+
+.club-button {
+  background: linear-gradient(135deg, 
+    rgba(26, 26, 26, 0.9) 0%, 
+    rgba(10, 10, 10, 0.95) 100%
+  );
+  border: 1px solid var(--neon-red-dark);
+  color: var(--neon-red);
+  box-shadow: 0 2px 10px rgba(255, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.club-button:hover {
+  box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
+  transform: translateY(-1px);
+}
+
+.homepage-bg {
+  background: var(--charcoal-black);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* ACCESSIBILITY */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+:focus {
+  outline: 2px solid var(--neon-red);
+  outline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--neon-red);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 10px;
+  background: var(--charcoal-black);
+  color: hsl(0, 0%, 95%);
+  padding: 8px 12px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 9999;
+}
+
+.skip-link:focus {
+  top: 10px;
+}
+
+/* Ensure content is above overlays */
+.homepage-bg .relative {
+  position: relative;
+  z-index: 10;
+}
+
+/* Remove all unused animation keyframes */
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -10%); }
+  20% { transform: translate(-15%, 5%); }
+  30% { transform: translate(7%, -25%); }
+  40% { transform: translate(-5%, 25%); }
+  50% { transform: translate(-15%, 10%); }
+  60% { transform: translate(15%, 0%); }
+  70% { transform: translate(0%, 15%); }
+  80% { transform: translate(3%, 35%); }
+  90% { transform: translate(-10%, 10%); }
+}
+
+/* Clean simple notification dot */
+.notification-dot {
+  animation: subtle-pulse 2s ease-in-out infinite;
+}
+
+/* Touch targets for mobile */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Sidebar link transitions */
+.sidebar-link {
+  transition: all 0.2s ease;
+}
+
+.sidebar-link.active {
+  background: rgba(255, 0, 0, 0.1);
+  border-right: 2px solid var(--neon-red);
+}
+
+/* FIGHT RING GLASS EFFECTS - INDUSTRIAL STEEL AND NEON */
+
+/* Base Glass - Industrial Steel */
+.glass-effect {
+  background: rgba(5, 5, 5, 0.7);
+  backdrop-filter: blur(15px) saturate(150%);
+  -webkit-backdrop-filter: blur(15px) saturate(150%);
+  border: 1px solid rgba(255, 0, 0, 0.15);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.8),
+    0 0 15px rgba(255, 0, 0, 0.1),
+    inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Glass Card - Fight Ring Surface */
+.glass-card {
+  background: rgba(8, 8, 8, 0.85);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 2px solid rgba(255, 0, 0, 0.25);
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.9),
+    0 0 25px rgba(255, 0, 0, 0.2),
+    inset 0 0 30px rgba(0, 0, 0, 0.6);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  background: rgba(12, 12, 12, 0.9);
+  border: 2px solid rgba(255, 0, 0, 0.4);
+  box-shadow:
+    0 12px 50px rgba(0, 0, 0, 0.95),
+    0 0 40px rgba(255, 0, 0, 0.3),
+    inset 0 0 35px rgba(0, 0, 0, 0.7);
+  transform: translateY(-3px) scale(1.02);
+}
+
+/* Glass Panel - Transparent Overlay */
+.glass-panel {
+  background: rgba(5, 5, 5, 0.5);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.7),
+    inset 0 0 15px rgba(255, 0, 0, 0.05);
+}
+
+/* Glass Button - Interactive Neon */
+.glass-button {
+  background: rgba(20, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 2px solid rgba(255, 0, 0, 0.4);
+  box-shadow:
+    0 6px 20px rgba(255, 0, 0, 0.3),
+    0 0 15px rgba(255, 0, 0, 0.2),
+    inset 0 0 12px rgba(255, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.glass-button:hover {
+  background: rgba(30, 0, 0, 0.8);
+  border: 2px solid rgba(255, 0, 0, 0.7);
+  box-shadow:
+    0 8px 30px rgba(255, 0, 0, 0.5),
+    0 0 30px rgba(255, 0, 0, 0.4),
+    inset 0 0 18px rgba(255, 0, 0, 0.2);
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* Frosted Steel */
+.frosted-glass {
+  background: rgba(5, 5, 5, 0.4);
+  backdrop-filter: blur(25px) saturate(170%);
+  -webkit-backdrop-filter: blur(25px) saturate(170%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Blood Red Neon Glass */
+.glass-neon-red {
+  background: rgba(10, 0, 0, 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 2px solid rgba(255, 0, 0, 0.5);
+  box-shadow:
+    0 0 25px rgba(255, 0, 0, 0.3),
+    0 0 50px rgba(255, 0, 0, 0.15),
+    inset 0 0 20px rgba(255, 0, 0, 0.1);
+}
+
+/* Fight Gold Glass */
+.glass-neon-gold {
+  background: rgba(10, 8, 0, 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  box-shadow:
+    0 0 25px rgba(255, 215, 0, 0.25),
+    0 0 50px rgba(255, 215, 0, 0.12),
+    inset 0 0 20px rgba(255, 215, 0, 0.08);
+}
+
+/* MASSIVE FIGHT RING DISPLAYS - MAXIMUM NEON IMPACT */
+
+/* Blood Red Display - Hero Text */
+.neon-display, .fight-display {
+  font-family: "Bebas Neue", "Teko", sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #ff0000;
+  text-shadow:
+    0 0 5px #fff,
+    0 0 15px #fff,
+    0 0 30px rgba(255, 0, 0, 1),
+    0 0 50px rgba(255, 0, 0, 0.9),
+    0 0 70px rgba(255, 0, 0, 0.7),
+    0 0 100px rgba(255, 0, 0, 0.5),
+    0 6px 12px rgba(0, 0, 0, 1);
+  animation: neon-flicker 10s ease-in-out infinite;
+}
+
+/* Fight Gold Display */
+.neon-display-gold, .fight-display-gold {
+  font-family: "Bebas Neue", "Teko", sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: hsl(45, 90%, 60%);
+  text-shadow:
+    0 0 5px #fff,
+    0 0 15px #fff,
+    0 0 30px rgba(255, 215, 0, 1),
+    0 0 50px rgba(255, 215, 0, 0.8),
+    0 0 70px rgba(255, 215, 0, 0.6),
+    0 0 100px rgba(255, 215, 0, 0.4),
+    0 6px 12px rgba(0, 0, 0, 1);
+}
+
+/* Glowing Outline - Cage Wire Effect */
+.text-outline-glow {
+  -webkit-text-stroke: 2px rgba(255, 0, 0, 0.7);
+  text-stroke: 2px rgba(255, 0, 0, 0.7);
+  text-shadow:
+    0 0 10px rgba(255, 0, 0, 1),
+    0 0 20px rgba(255, 0, 0, 0.8),
+    0 0 30px rgba(255, 0, 0, 0.6);
+}
+
+/* Fight Ring Atmosphere */
+.fight-atmosphere {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(20, 0, 0, 0.95) 30%,
+    rgba(10, 0, 0, 0.98) 50%,
+    rgba(20, 0, 0, 0.95) 70%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  box-shadow:
+    inset 0 0 100px rgba(255, 0, 0, 0.15),
+    inset 0 0 200px rgba(0, 0, 0, 0.95);
+}
+
+/* Cage Wire Pattern Overlay */
+.cage-pattern {
+  position: relative;
+}
+
+.cage-pattern::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg, transparent, transparent 12px, rgba(255, 0, 0, 0.03) 12px, rgba(255, 0, 0, 0.03) 13px),
+    repeating-linear-gradient(-45deg, transparent, transparent 12px, rgba(255, 0, 0, 0.03) 12px, rgba(255, 0, 0, 0.03) 13px);
+  pointer-events: none;
+  z-index: 1;
+}

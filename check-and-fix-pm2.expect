@@ -1,0 +1,63 @@
+#!/usr/bin/expect -f
+set timeout 120
+
+spawn ssh -o StrictHostKeyChecking=no boyzapp@67.217.54.66
+
+expect {
+    "password:" {
+        send "Bama@11061990\r"
+    }
+    "Password:" {
+        send "Bama@11061990\r"
+    }
+}
+
+expect "$"
+send "echo '=== Checking PM2 Status ==='\r"
+
+expect "$"
+send "pm2 list\r"
+
+expect "$"
+send "echo '=== Checking if index.js exists ==='\r"
+
+expect "$"
+send "ls -lh /home/boyzapp/boyfanz-deploy/index.js\r"
+
+expect "$"
+send "echo '=== Checking node_modules ==='\r"
+
+expect "$"
+send "ls -d /home/boyzapp/boyfanz-deploy/node_modules 2>&1\r"
+
+expect "$"
+send "echo '=== Stopping any existing PM2 processes ==='\r"
+
+expect "$"
+send "pm2 delete all 2>&1 || true\r"
+
+expect "$"
+send "echo '=== Starting app ==='\r"
+
+expect "$"
+send "cd /home/boyzapp/boyfanz-deploy && pm2 start index.js --name boyfanz --env production\r"
+
+expect "$"
+send "sleep 3\r"
+
+expect "$"
+send "echo '=== Checking logs ==='\r"
+
+expect "$"
+send "pm2 logs boyfanz --lines 50 --nostream\r"
+
+expect "$"
+send "echo '=== PM2 Status ==='\r"
+
+expect "$"
+send "pm2 status\r"
+
+expect "$"
+send "exit\r"
+
+expect eof
