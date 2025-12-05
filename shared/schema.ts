@@ -2653,16 +2653,16 @@ export const insertProfileSchema = createInsertSchema(profiles).pick({
   displayName: true,
   bio: true,
   avatarUrl: true,
-  publicFlags: true,
+  flags: true,
 });
 
 export const insertMediaAssetSchema = createInsertSchema(mediaAssets).pick({
   title: true,
   description: true,
-  s3Key: true,
+  storageKey: true,
   mimeType: true,
-  size: true,
-  checksum: true,
+  fileSize: true,
+  checksumSha256: true,
 });
 
 export const insertPayoutRequestSchema = createInsertSchema(payouts).pick({
@@ -2762,14 +2762,8 @@ export const insertCreatorProfileSchema = createInsertSchema(
 
 export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
   id: true,
-  fanId: true,
-  creatorId: true,
-  stripeSubscriptionId: true,
   status: true,
-  monthlyPriceCents: true,
-  currentPeriodStart: true,
-  currentPeriodEnd: true,
-  cancelledAt: true,
+  canceledAt: true,
   createdAt: true,
   updatedAt: true,
 });
@@ -3033,7 +3027,6 @@ export const insertSubscriptionPlanSchema = createInsertSchema(
   id: true,
   createdAt: true,
   updatedAt: true,
-  currentSubscribers: true,
 });
 export type InsertSubscriptionPlanType = z.infer<
   typeof insertSubscriptionPlanSchema
@@ -6189,6 +6182,8 @@ export const storageProviderEnum = pgEnum("storage_provider", [
   "wasabi",
   "backblaze_b2",
   "vultr_object_storage",
+  "pcloud",
+  "fanzcloud",
   "pushr",
 ]);
 
@@ -6458,6 +6453,264 @@ export const storageProviderFailover = pgTable(
     ),
     index("idx_failover_active").on(table.isActive),
     index("idx_failover_primary").on(table.primaryProviderId),
+  ],
+);
+
+// ===== 6.1 FANZCLOUD STORAGE SYSTEM =====
+// FanzCloud - pCloud-powered cloud storage for creators
+
+export const fanzCloudFileStatusEnum = pgEnum("fanzcloud_file_status", [
+  "uploading",
+  "processing",
+  "active",
+  "deleted",
+  "archived",
+]);
+
+export const fanzCloudContentTypeEnum = pgEnum("fanzcloud_content_type", [
+  "photos",
+  "videos",
+  "audio",
+  "documents",
+  "other",
+]);
+
+// Creator vaults - dedicated storage space for each creator
+export const fanzCloudCreatorVaults = pgTable(
+  "fanzcloud_creator_vaults",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    creatorId: varchar("creator_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+
+    // pCloud folder information
+    pcloudFolderId: bigint("pcloud_folder_id", { mode: "number" }),
+    pcloudPath: varchar("pcloud_path"), // /FanzCloud/creators/{creatorId}
+
+    // Vault metadata
+    vaultName: varchar("vault_name").notNull(),
+    description: text("description"),
+    isEncrypted: boolean("is_encrypted").default(false),
+
+    // Storage stats
+    totalSizeBytes: bigint("total_size_bytes", { mode: "number" }).default(0),
+    fileCount: integer("file_count").default(0),
+    quotaBytes: bigint("quota_bytes", { mode: "number" }), // Optional quota limit
+
+    // Status
+    isActive: boolean("is_active").default(true),
+    lastAccessedAt: timestamp("last_accessed_at"),
+
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    unique("unique_creator_vault").on(table.creatorId),
+    index("idx_fanzcloud_vault_creator").on(table.creatorId),
+    index("idx_fanzcloud_vault_pcloud").on(table.pcloudFolderId),
+  ],
+);
+
+// FanzCloud files - individual files stored in creator vaults
+export const fanzCloudFiles = pgTable(
+  "fanzcloud_files",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    vaultId: varchar("vault_id")
+      .notNull()
+      .references(() => fanzCloudCreatorVaults.id, { onDelete: "cascade" }),
+    creatorId: varchar("creator_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+
+    // pCloud file information
+    pcloudFileId: bigint("pcloud_file_id", { mode: "number" }),
+    pcloudPath: varchar("pcloud_path"),
+    pcloudHash: varchar("pcloud_hash"), // For integrity verification
+
+    // File metadata
+    filename: varchar("filename").notNull(),
+    originalFilename: varchar("original_filename").notNull(),
+    mimeType: varchar("mime_type"),
+    contentType: fanzCloudContentTypeEnum("content_type").default("other"),
+    sizeBytes: bigint("size_bytes", { mode: "number" }).notNull(),
+
+    // Processing metadata
+    status: fanzCloudFileStatusEnum("status").default("uploading"),
+    isProcessed: boolean("is_processed").default(false),
+    processingMetadata: jsonb("processing_metadata").default({}),
+
+    // Media metadata (for videos/images)
+    width: integer("width"),
+    height: integer("height"),
+    durationSeconds: integer("duration_seconds"),
+    thumbnailUrl: varchar("thumbnail_url"),
+
+    // Public link info
+    publicLinkId: bigint("public_link_id", { mode: "number" }),
+    publicLinkCode: varchar("public_link_code"),
+    publicLinkUrl: varchar("public_link_url"),
+    publicLinkExpires: timestamp("public_link_expires"),
+
+    // Streaming info
+    hlsUrl: varchar("hls_url"),
+    streamingEnabled: boolean("streaming_enabled").default(false),
+
+    // Audit
+    uploadedBy: varchar("uploaded_by").references(() => users.id),
+    deletedAt: timestamp("deleted_at"),
+    archivedAt: timestamp("archived_at"),
+
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_fanzcloud_files_vault").on(table.vaultId),
+    index("idx_fanzcloud_files_creator").on(table.creatorId),
+    index("idx_fanzcloud_files_pcloud").on(table.pcloudFileId),
+    index("idx_fanzcloud_files_status").on(table.status),
+    index("idx_fanzcloud_files_content_type").on(table.contentType),
+  ],
+);
+
+// FanzCloud shared links - manage public/upload links
+export const fanzCloudSharedLinks = pgTable(
+  "fanzcloud_shared_links",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    creatorId: varchar("creator_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    fileId: varchar("file_id").references(() => fanzCloudFiles.id, { onDelete: "cascade" }),
+    vaultId: varchar("vault_id").references(() => fanzCloudCreatorVaults.id, { onDelete: "cascade" }),
+
+    // pCloud link info
+    pcloudLinkId: bigint("pcloud_link_id", { mode: "number" }),
+    linkType: varchar("link_type").notNull(), // 'public' or 'upload'
+    linkCode: varchar("link_code"),
+    linkUrl: varchar("link_url").notNull(),
+
+    // Link settings
+    expiresAt: timestamp("expires_at"),
+    maxDownloads: integer("max_downloads"),
+    maxTraffic: bigint("max_traffic", { mode: "number" }),
+    maxSpace: bigint("max_space", { mode: "number" }), // For upload links
+    maxFiles: integer("max_files"), // For upload links
+    password: varchar("password"), // Encrypted
+
+    // Usage stats
+    downloadCount: integer("download_count").default(0),
+    trafficUsed: bigint("traffic_used", { mode: "number" }).default(0),
+    uploadCount: integer("upload_count").default(0), // For upload links
+
+    // Status
+    isActive: boolean("is_active").default(true),
+    comment: text("comment"),
+
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_fanzcloud_links_creator").on(table.creatorId),
+    index("idx_fanzcloud_links_file").on(table.fileId),
+    index("idx_fanzcloud_links_type").on(table.linkType),
+    index("idx_fanzcloud_links_active").on(table.isActive),
+    index("idx_fanzcloud_links_code").on(table.linkCode),
+  ],
+);
+
+// FanzCloud backups - track creator content backups
+export const fanzCloudBackups = pgTable(
+  "fanzcloud_backups",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    creatorId: varchar("creator_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    vaultId: varchar("vault_id")
+      .notNull()
+      .references(() => fanzCloudCreatorVaults.id, { onDelete: "cascade" }),
+
+    // Backup info
+    backupType: varchar("backup_type").notNull(), // 'full', 'incremental', 'snapshot'
+    status: varchar("status").notNull().default("pending"), // 'pending', 'in_progress', 'completed', 'failed'
+
+    // pCloud archive info
+    pcloudArchiveFileId: bigint("pcloud_archive_file_id", { mode: "number" }),
+    pcloudArchivePath: varchar("pcloud_archive_path"),
+    archiveSizeBytes: bigint("archive_size_bytes", { mode: "number" }),
+
+    // Progress tracking
+    filesProcessed: integer("files_processed").default(0),
+    totalFiles: integer("total_files").default(0),
+    bytesProcessed: bigint("bytes_processed", { mode: "number" }).default(0),
+    totalBytes: bigint("total_bytes", { mode: "number" }).default(0),
+    progressPercent: decimal("progress_percent", { precision: 5, scale: 2 }),
+
+    // Timing
+    startedAt: timestamp("started_at"),
+    completedAt: timestamp("completed_at"),
+    expiresAt: timestamp("expires_at"), // When backup will be auto-deleted
+
+    // Error handling
+    errorMessage: text("error_message"),
+    retryCount: integer("retry_count").default(0),
+
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_fanzcloud_backups_creator").on(table.creatorId),
+    index("idx_fanzcloud_backups_vault").on(table.vaultId),
+    index("idx_fanzcloud_backups_status").on(table.status),
+  ],
+);
+
+// FanzCloud activity log - track all storage operations
+export const fanzCloudActivityLog = pgTable(
+  "fanzcloud_activity_log",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    creatorId: varchar("creator_id").references(() => users.id),
+    fileId: varchar("file_id").references(() => fanzCloudFiles.id, { onDelete: "set null" }),
+    vaultId: varchar("vault_id").references(() => fanzCloudCreatorVaults.id, { onDelete: "set null" }),
+
+    // Activity info
+    action: varchar("action").notNull(), // 'upload', 'download', 'delete', 'share', 'stream', etc.
+    resourceType: varchar("resource_type").notNull(), // 'file', 'folder', 'link', 'backup'
+    resourceId: varchar("resource_id"),
+    resourcePath: varchar("resource_path"),
+
+    // Details
+    details: jsonb("details").default({}),
+    sizeBytes: bigint("size_bytes", { mode: "number" }),
+
+    // Request info
+    ipAddress: inet("ip_address"),
+    userAgent: text("user_agent"),
+
+    // Status
+    success: boolean("success").default(true),
+    errorMessage: text("error_message"),
+
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_fanzcloud_activity_creator").on(table.creatorId),
+    index("idx_fanzcloud_activity_file").on(table.fileId),
+    index("idx_fanzcloud_activity_action").on(table.action),
+    index("idx_fanzcloud_activity_created").on(table.createdAt),
   ],
 );
 
@@ -6761,6 +7014,42 @@ export const insertStorageProviderFailoverSchema = createInsertSchema(
   updatedAt: true,
 });
 
+// FanzCloud Insert Schemas
+export const insertFanzCloudCreatorVaultSchema = createInsertSchema(
+  fanzCloudCreatorVaults,
+).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertFanzCloudFileSchema = createInsertSchema(
+  fanzCloudFiles,
+).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertFanzCloudSharedLinkSchema = createInsertSchema(
+  fanzCloudSharedLinks,
+).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertFanzCloudBackupSchema = createInsertSchema(
+  fanzCloudBackups,
+).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertFanzCloudActivityLogSchema = createInsertSchema(
+  fanzCloudActivityLog,
+).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Insert schemas for new tables
 export const insertLeaderboardSchema = createInsertSchema(leaderboards).omit({
   id: true,
@@ -6955,6 +7244,24 @@ export type StorageProviderFailover =
   typeof storageProviderFailover.$inferSelect;
 export type InsertStorageProviderFailover = z.infer<
   typeof insertStorageProviderFailoverSchema
+>;
+
+// FanzCloud Types
+export type FanzCloudCreatorVault = typeof fanzCloudCreatorVaults.$inferSelect;
+export type InsertFanzCloudCreatorVault = z.infer<
+  typeof insertFanzCloudCreatorVaultSchema
+>;
+export type FanzCloudFile = typeof fanzCloudFiles.$inferSelect;
+export type InsertFanzCloudFile = z.infer<typeof insertFanzCloudFileSchema>;
+export type FanzCloudSharedLink = typeof fanzCloudSharedLinks.$inferSelect;
+export type InsertFanzCloudSharedLink = z.infer<
+  typeof insertFanzCloudSharedLinkSchema
+>;
+export type FanzCloudBackup = typeof fanzCloudBackups.$inferSelect;
+export type InsertFanzCloudBackup = z.infer<typeof insertFanzCloudBackupSchema>;
+export type FanzCloudActivityLog = typeof fanzCloudActivityLog.$inferSelect;
+export type InsertFanzCloudActivityLog = z.infer<
+  typeof insertFanzCloudActivityLogSchema
 >;
 
 // Financial Admin Types
@@ -10017,6 +10324,332 @@ export type FanCreatorLoan = typeof fanCreatorLoans.$inferSelect;
 export type InsertFanCreatorLoan = z.infer<typeof insertFanCreatorLoanSchema>;
 export type LoanRepayment = typeof loanRepayments.$inferSelect;
 export type InsertLoanRepayment = z.infer<typeof insertLoanRepaymentSchema>;
+
+// ===== CO-STAR VERIFICATION SYSTEM =====
+// Comprehensive 2257 compliance for performers appearing in creator content
+
+export const coStarInvitationStatusEnum = pgEnum("costar_invitation_status", [
+  "pending",      // Invitation sent, awaiting co-star response
+  "viewed",       // Co-star has viewed the invitation
+  "in_progress",  // Co-star started filling out verification
+  "completed",    // Verification form completed and signed
+  "expired",      // Invitation expired (30 days default)
+  "revoked",      // Creator revoked the invitation
+]);
+
+export const coStarInvitations = pgTable(
+  "costar_invitations",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+
+    // Creator who initiated the invitation
+    creatorId: varchar("creator_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    creatorProfileId: varchar("creator_profile_id")
+      .references(() => profiles.id),
+
+    // Tenant/platform
+    tenantId: varchar("tenant_id")
+      .references(() => tenants.id),
+
+    // Invitation details
+    coStarName: varchar("costar_name").notNull(),
+    coStarEmail: varchar("costar_email"),
+    coStarPhone: varchar("costar_phone"),
+
+    // Unique invitation token for secure link
+    inviteToken: varchar("invite_token").unique().notNull(),
+
+    // QR code data URL (stored for quick access)
+    qrCodeDataUrl: text("qr_code_data_url"),
+
+    // Status tracking
+    status: coStarInvitationStatusEnum("status").default("pending").notNull(),
+
+    // Once co-star completes verification, link to their profile
+    coStarUserId: varchar("costar_user_id")
+      .references(() => users.id),
+    coStarProfileId: varchar("costar_profile_id")
+      .references(() => profiles.id),
+    coStarHandle: varchar("costar_handle"), // Their chosen username for tagging
+
+    // Expiration
+    expiresAt: timestamp("expires_at").notNull(),
+
+    // Tracking
+    viewedAt: timestamp("viewed_at"),
+    startedAt: timestamp("started_at"),
+    completedAt: timestamp("completed_at"),
+
+    // Notification tracking
+    emailSentAt: timestamp("email_sent_at"),
+    smsSentAt: timestamp("sms_sent_at"),
+    remindersSent: integer("reminders_sent").default(0),
+
+    metadata: jsonb("metadata").default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_costar_invitations_creator").on(table.creatorId),
+    index("idx_costar_invitations_token").on(table.inviteToken),
+    index("idx_costar_invitations_status").on(table.status),
+    index("idx_costar_invitations_costar_profile").on(table.coStarProfileId),
+    index("idx_costar_invitations_expires").on(table.expiresAt),
+  ],
+);
+
+// Co-Star 2257 Verification Records
+export const coStar2257Verifications = pgTable(
+  "costar_2257_verifications",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+
+    // Link to invitation
+    invitationId: varchar("invitation_id")
+      .notNull()
+      .references(() => coStarInvitations.id, { onDelete: "cascade" }),
+
+    // Personal Information (encrypted at rest)
+    legalFirstName: varchar("legal_first_name").notNull(),
+    legalLastName: varchar("legal_last_name").notNull(),
+    stageName: varchar("stage_name"),
+    dateOfBirth: timestamp("date_of_birth").notNull(),
+    pronouns: varchar("pronouns"),
+
+    // Contact Information
+    email: varchar("email").notNull(),
+    phone: varchar("phone"),
+
+    // Address
+    streetAddress: varchar("street_address").notNull(),
+    city: varchar("city").notNull(),
+    stateProvince: varchar("state_province").notNull(),
+    postalCode: varchar("postal_code").notNull(),
+    country: varchar("country").notNull(),
+
+    // ID Verification
+    idType: varchar("id_type").notNull(), // drivers_license, passport, national_id, other
+    idNumber: varchar("id_number").notNull(), // Encrypted
+    idIssuingAuthority: varchar("id_issuing_authority").notNull(),
+    idExpirationDate: timestamp("id_expiration_date"),
+
+    // Document uploads (S3 keys)
+    idFrontImageKey: varchar("id_front_image_key"),
+    idBackImageKey: varchar("id_back_image_key"),
+    selfieImageKey: varchar("selfie_image_key"),
+
+    // Biometric verification status
+    biometricVerified: boolean("biometric_verified").default(false),
+    biometricScore: decimal("biometric_score", { precision: 5, scale: 2 }),
+    biometricVendor: varchar("biometric_vendor"), // verifymy, jumio, onfido
+    biometricResult: jsonb("biometric_result").default({}),
+
+    // Legal agreements
+    termsAccepted: boolean("terms_accepted").default(false),
+    termsAcceptedAt: timestamp("terms_accepted_at"),
+    privacyAccepted: boolean("privacy_accepted").default(false),
+    privacyAcceptedAt: timestamp("privacy_accepted_at"),
+    releaseAccepted: boolean("release_accepted").default(false),
+    releaseAcceptedAt: timestamp("release_accepted_at"),
+
+    // Digital signature
+    digitalSignature: text("digital_signature"), // Base64 signature image
+    signedAt: timestamp("signed_at"),
+    signerIpAddress: varchar("signer_ip_address"),
+    signerUserAgent: text("signer_user_agent"),
+
+    // 2257 Compliance
+    is2257Compliant: boolean("is_2257_compliant").default(false),
+    complianceVerifiedAt: timestamp("compliance_verified_at"),
+    complianceOfficer: varchar("compliance_officer"),
+    complianceNotes: text("compliance_notes"),
+
+    // Record retention
+    retentionPeriodYears: integer("retention_period_years").default(7),
+    scheduledDeletionAt: timestamp("scheduled_deletion_at"),
+
+    metadata: jsonb("metadata").default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_costar_2257_invitation").on(table.invitationId),
+    index("idx_costar_2257_email").on(table.email),
+    index("idx_costar_2257_compliance").on(table.is2257Compliant),
+  ],
+);
+
+// Creator-CoStar tagging permissions
+// Only the creator who invited a co-star can tag them
+export const coStarTagPermissions = pgTable(
+  "costar_tag_permissions",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+
+    // The creator who has permission to tag
+    creatorId: varchar("creator_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+
+    // The co-star who can be tagged
+    coStarProfileId: varchar("costar_profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+
+    // Co-star's taggable handle
+    coStarHandle: varchar("costar_handle").notNull(),
+
+    // Link to the original invitation/verification
+    invitationId: varchar("invitation_id")
+      .notNull()
+      .references(() => coStarInvitations.id, { onDelete: "cascade" }),
+
+    // Permission status
+    isActive: boolean("is_active").default(true),
+    revokedAt: timestamp("revoked_at"),
+    revokedReason: text("revoked_reason"),
+
+    // Usage tracking
+    timesUsed: integer("times_used").default(0),
+    lastUsedAt: timestamp("last_used_at"),
+
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    unique().on(table.creatorId, table.coStarProfileId),
+    index("idx_costar_tag_perm_creator").on(table.creatorId),
+    index("idx_costar_tag_perm_costar").on(table.coStarProfileId),
+    index("idx_costar_tag_perm_handle").on(table.coStarHandle),
+  ],
+);
+
+// Content co-star tags (when a creator tags a co-star in their media)
+export const contentCoStarTags = pgTable(
+  "content_costar_tags",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+
+    // The content being tagged
+    contentType: varchar("content_type").notNull(), // post, media, stream
+    contentId: varchar("content_id").notNull(),
+
+    // Who is tagging
+    creatorId: varchar("creator_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+
+    // Who is being tagged
+    coStarProfileId: varchar("costar_profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    coStarHandle: varchar("costar_handle").notNull(),
+
+    // Verification link (proves 2257 compliance for this content)
+    verificationId: varchar("verification_id")
+      .references(() => coStar2257Verifications.id),
+
+    // Optional: revenue share percentage for this content
+    revenueSharePercent: decimal("revenue_share_percent", { precision: 5, scale: 2 }),
+
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    unique().on(table.contentType, table.contentId, table.coStarProfileId),
+    index("idx_content_costar_tags_content").on(table.contentType, table.contentId),
+    index("idx_content_costar_tags_creator").on(table.creatorId),
+    index("idx_content_costar_tags_costar").on(table.coStarProfileId),
+  ],
+);
+
+// Relations
+export const coStarInvitationsRelations = relations(coStarInvitations, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [coStarInvitations.creatorId],
+    references: [users.id],
+  }),
+  creatorProfile: one(profiles, {
+    fields: [coStarInvitations.creatorProfileId],
+    references: [profiles.id],
+  }),
+  coStarProfile: one(profiles, {
+    fields: [coStarInvitations.coStarProfileId],
+    references: [profiles.id],
+  }),
+  verification: one(coStar2257Verifications),
+  tagPermissions: many(coStarTagPermissions),
+}));
+
+export const coStar2257VerificationsRelations = relations(coStar2257Verifications, ({ one }) => ({
+  invitation: one(coStarInvitations, {
+    fields: [coStar2257Verifications.invitationId],
+    references: [coStarInvitations.id],
+  }),
+}));
+
+export const coStarTagPermissionsRelations = relations(coStarTagPermissions, ({ one }) => ({
+  creator: one(users, {
+    fields: [coStarTagPermissions.creatorId],
+    references: [users.id],
+  }),
+  coStarProfile: one(profiles, {
+    fields: [coStarTagPermissions.coStarProfileId],
+    references: [profiles.id],
+  }),
+  invitation: one(coStarInvitations, {
+    fields: [coStarTagPermissions.invitationId],
+    references: [coStarInvitations.id],
+  }),
+}));
+
+// Zod Schemas
+export const insertCoStarInvitationSchema = createInsertSchema(coStarInvitations).omit({
+  id: true,
+  inviteToken: true,
+  qrCodeDataUrl: true,
+  status: true,
+  coStarUserId: true,
+  coStarProfileId: true,
+  coStarHandle: true,
+  viewedAt: true,
+  startedAt: true,
+  completedAt: true,
+  emailSentAt: true,
+  smsSentAt: true,
+  remindersSent: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCoStar2257VerificationSchema = createInsertSchema(coStar2257Verifications).omit({
+  id: true,
+  biometricVerified: true,
+  biometricScore: true,
+  biometricResult: true,
+  is2257Compliant: true,
+  complianceVerifiedAt: true,
+  complianceOfficer: true,
+  scheduledDeletionAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Types
+export type CoStarInvitation = typeof coStarInvitations.$inferSelect;
+export type InsertCoStarInvitation = z.infer<typeof insertCoStarInvitationSchema>;
+export type CoStar2257Verification = typeof coStar2257Verifications.$inferSelect;
+export type InsertCoStar2257Verification = z.infer<typeof insertCoStar2257VerificationSchema>;
+export type CoStarTagPermission = typeof coStarTagPermissions.$inferSelect;
+export type ContentCoStarTag = typeof contentCoStarTags.$inferSelect;
 
 // ===== PWA EXTENSIONS =====
 // Import PWA schemas

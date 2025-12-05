@@ -4,6 +4,8 @@ import { storage } from './storage';
 import { registerHelpSupportRoutes } from './routes/helpSupportRoutes';
 import pwaRoutes from './routes/pwaRoutes';
 import authRoutes from './routes/authRoutes';
+import costarRoutes from './routes/costarRoutes';
+import socialAuthRoutes, { initializeSocialStrategies } from './routes/socialAuthRoutes';
 import { csrfProtection, setupCSRFTokenEndpoint } from './middleware/csrf';
 import { isAuthenticated, requireAdmin } from './middleware/auth';
 import { ObjectStorageService } from './objectStorage';
@@ -5607,6 +5609,7 @@ import revenueQuestRoutes from './routes/revenueQuestRoutes';
 import { trustScoringRoutes } from './routes/trustScoringRoutes';
 import platformPrivilegesRoutes from './routes/platformPrivilegesRoutes';
 import liveEventsRoutes from './routes/liveEventsRoutes';
+import fanzCloudRoutes from './routes/fanzCloudRoutes';
 import analyticsIntelligenceRoutes from './routes/analyticsIntelligence.js';
 // import orchestrationRoutes from './routes/orchestrationRoutes.js';
 // import unifiedDataRoutes from './routes/unifiedDataRoutes.js';
@@ -5640,7 +5643,10 @@ export async function setupAdvancedRoutes(app: Express) {
   
   // FanzCard Webhooks (no auth - for external card processors)
   app.use('/api/fanz-card-webhooks', fanzCardWebhooks);
-  
+
+  // FanzCloud - Cloud Storage powered by pCloud
+  app.use('/api/fanzcloud', fanzCloudRoutes);
+
   // Revenue Quests - AI-Collaborative Revenue Sharing
   app.use('/api/revenue-quests', isAuthenticated, revenueQuestRoutes);
   
@@ -5671,6 +5677,13 @@ export async function setupAdvancedRoutes(app: Express) {
   
   // Email/Password Authentication Routes (NO auth middleware - public)
   app.use('/api/auth', authRoutes);
+
+  // Co-Star 2257 Verification System
+  app.use('/api/costar', costarRoutes);
+
+  // Social OAuth Authentication (Google, GitHub, Facebook, Twitter, Discord)
+  initializeSocialStrategies();
+  app.use('/auth', socialAuthRoutes);
   
   // Dynamic Pricing AI Routes
   const { dynamicPricingRoutes } = await import('./routes/dynamicPricingRoutes');
@@ -5751,4 +5764,5 @@ export async function setupAdvancedRoutes(app: Express) {
   console.log('💰 FanzCredit System registered: Credit Lines, Trust Scoring, Automated Approvals, Collateral Management');
   console.log('🪙 FanzToken & FanzCoin Economy registered: Mint/Burn, Transfers, Token Locking, Fiat Conversion, Loyalty Rewards');
   console.log('💳 FanzCard Virtual Card Program registered: Instant Funding, Spend Controls, Merchant Restrictions, Real-Time Authorization');
+  console.log('☁️ FanzCloud Storage registered: pCloud Integration, File Upload/Download, Video/Audio Streaming, Public Links, Creator Vaults, Backups');
 }

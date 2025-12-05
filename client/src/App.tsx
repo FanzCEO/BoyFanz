@@ -92,6 +92,8 @@ import EventsHome from "@/pages/EventsHome";
 import EventDetails from "@/pages/EventDetails";
 import EventHost from "@/pages/EventHost";
 import EventLive from "@/pages/EventLive";
+// Co-Star Verification (public page)
+import CoStarVerify from "@/pages/CoStarVerify";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -203,6 +205,8 @@ function Router() {
         <Route path="/search" component={SearchCreators} />
         <Route path="/blog" component={Blog} />
         <Route path="/contact" component={Contact} />
+        {/* Co-Star Verification (public - doesn't require login) */}
+        <Route path="/costar/verify/:token" component={CoStarVerify} />
         <Route component={NotFound} />
       </Switch>
     );
@@ -294,6 +298,8 @@ function Router() {
             <Route path="/help/chat" component={ChatPage} />
             <Route path="/blog" component={Blog} />
             <Route path="/contact" component={Contact} />
+            {/* Co-Star Verification (accessible when logged in too) */}
+            <Route path="/costar/verify/:token" component={CoStarVerify} />
             <Route component={NotFound} />
           </Switch>
         </main>

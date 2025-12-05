@@ -1,0 +1,395 @@
+@import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   SOUTHERNFANZ THEME - COUNTRY OUTLAW / WESTERN
+   Country. Unfiltered. Creator-owned.
+   Gritty, warm, confident, inclusive
+   ============================================ */
+
+:root {
+  /* CORE SOUTHERNFANZ PALETTE */
+  --background: hsl(25, 10%, 6%); /* Deep charcoal with warm undertone */
+  --foreground: hsl(30, 15%, 92%);
+  --card: hsl(25, 15%, 10%); /* Dark warm gray/brown */
+  --card-foreground: hsl(30, 10%, 90%);
+  --popover: hsl(25, 12%, 8%);
+  --popover-foreground: hsl(30, 10%, 95%);
+  --primary: hsl(40, 80%, 50%); /* Warm gold / whiskey amber */
+  --primary-foreground: hsl(25, 20%, 10%);
+  --secondary: hsl(25, 60%, 45%); /* Muted orange/burnished copper */
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(25, 10%, 15%);
+  --muted-foreground: hsl(30, 10%, 55%);
+  --accent: hsl(40, 80%, 50%); /* Whiskey amber accent */
+  --accent-foreground: hsl(25, 20%, 10%);
+  --destructive: hsl(0, 65%, 45%); /* Controlled red */
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(25, 8%, 22%); /* Soft desaturated line color */
+  --input: hsl(25, 12%, 10%);
+  --ring: hsl(40, 80%, 50%);
+  --radius: 0.375rem;
+
+  /* SOUTHERNFANZ SIGNATURE COLORS */
+  --sfz-bg: hsl(25, 10%, 6%); /* Deep charcoal */
+  --sfz-surface: hsl(25, 15%, 12%); /* Dark warm gray/brown */
+  --sfz-whiskey: hsl(40, 80%, 50%); /* Warm gold / whiskey amber */
+  --sfz-whiskey-glow: hsl(40, 75%, 45%);
+  --sfz-whiskey-light: hsl(45, 85%, 60%); /* Lighter golden highlight */
+  --sfz-copper: hsl(25, 60%, 45%); /* Burnished copper */
+  --sfz-copper-dark: hsl(20, 50%, 35%); /* Darker copper shadow */
+  --sfz-rust: hsl(15, 55%, 40%); /* Rust accent */
+  --sfz-cream: hsl(40, 30%, 85%); /* Cream text highlight */
+  --sfz-leather: hsl(20, 40%, 20%); /* Leather brown */
+  --sfz-denim: hsl(210, 30%, 25%); /* Faded denim blue */
+
+  /* Chart colors - SouthernFanz palette */
+  --chart-1: hsl(40, 80%, 50%);
+  --chart-2: hsl(25, 60%, 45%);
+  --chart-3: hsl(15, 55%, 40%);
+  --chart-4: hsl(45, 85%, 60%);
+  --chart-5: hsl(0, 65%, 45%);
+
+  /* Sidebar colors */
+  --sidebar: hsl(25, 10%, 5%);
+  --sidebar-foreground: hsl(40, 20%, 95%);
+  --sidebar-primary: hsl(40, 80%, 50%);
+  --sidebar-primary-foreground: hsl(25, 20%, 10%);
+  --sidebar-accent: hsl(25, 15%, 12%);
+  --sidebar-accent-foreground: hsl(40, 20%, 75%);
+  --sidebar-border: hsl(25, 8%, 18%);
+  --sidebar-ring: hsl(40, 80%, 50%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: "Inter", sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    position: relative;
+    min-height: 100vh;
+  }
+
+  /* SOUTHERNFANZ ATMOSPHERE - RUSTIC HONKY-TONK */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(180, 130, 50, 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 80%, rgba(150, 80, 40, 0.04) 0%, transparent 50%);
+    opacity: 0.8;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* WARM VIGNETTE - BARN WOOD AESTHETIC */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center,
+      rgba(30, 20, 15, 0.3) 0%,
+      rgba(10, 8, 6, 0.95) 100%
+    );
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* TYPOGRAPHY - WESTERN DISPLAY */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Alfa Slab One", serif;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: hsl(40, 20%, 95%);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .font-display {
+    font-family: "Alfa Slab One", serif !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  .font-body {
+    font-family: "Inter", sans-serif !important;
+  }
+}
+
+@layer components {
+  /* SOUTHERNFANZ GLOW EFFECTS - WARM AMBER */
+  .glow-effect {
+    box-shadow:
+      0 0 5px rgba(200, 150, 50, 0.15),
+      0 0 10px rgba(200, 150, 50, 0.08),
+      0 0 20px rgba(200, 150, 50, 0.04);
+    transition: all 0.3s ease;
+  }
+
+  .glow-effect:hover {
+    box-shadow:
+      0 0 10px rgba(200, 150, 50, 0.25),
+      0 0 20px rgba(200, 150, 50, 0.15),
+      0 0 40px rgba(200, 150, 50, 0.08);
+    transform: translateY(-2px);
+  }
+
+  /* WHISKEY AMBER TEXT */
+  .neon-text, .neon-sign {
+    color: var(--sfz-whiskey);
+    text-shadow:
+      0 0 5px rgba(200, 150, 50, 0.4),
+      0 0 10px rgba(200, 150, 50, 0.25),
+      0 0 20px rgba(200, 150, 50, 0.15);
+    animation: warm-pulse 4s ease-in-out infinite;
+  }
+
+  /* COPPER TEXT */
+  .neon-sign-copper {
+    color: var(--sfz-copper);
+    text-shadow:
+      0 0 5px rgba(180, 100, 50, 0.35),
+      0 0 10px rgba(180, 100, 50, 0.2),
+      0 0 20px rgba(180, 100, 50, 0.1);
+  }
+
+  /* RUST TEXT */
+  .neon-sign-rust {
+    color: var(--sfz-rust);
+    text-shadow:
+      0 0 5px rgba(160, 80, 50, 0.35),
+      0 0 10px rgba(160, 80, 50, 0.2),
+      0 0 20px rgba(160, 80, 50, 0.1);
+  }
+
+  /* GLASS MORPHISM - WARM BARN WOOD */
+  .glass-card {
+    background: rgba(40, 30, 20, 0.6);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid rgba(200, 150, 50, 0.15);
+    box-shadow:
+      0 8px 32px 0 rgba(0, 0, 0, 0.5),
+      0 0 20px rgba(200, 150, 50, 0.08);
+    transition: all 0.3s ease;
+  }
+
+  .glass-card:hover {
+    background: rgba(50, 35, 25, 0.7);
+    border: 1px solid rgba(200, 150, 50, 0.25);
+    box-shadow:
+      0 8px 32px 0 rgba(0, 0, 0, 0.6),
+      0 0 30px rgba(200, 150, 50, 0.12);
+    transform: translateY(-2px);
+  }
+
+  /* SOUTHERNFANZ BUTTONS */
+  .neon-button {
+    background: linear-gradient(135deg,
+      rgba(200, 150, 50, 0.15) 0%,
+      rgba(180, 100, 50, 0.1) 100%
+    );
+    border: 1px solid var(--sfz-whiskey);
+    color: var(--sfz-whiskey);
+    text-shadow: 0 0 3px rgba(200, 150, 50, 0.2);
+    box-shadow:
+      0 0 5px rgba(200, 150, 50, 0.1),
+      inset 0 0 3px rgba(200, 150, 50, 0.03);
+    transition: all 0.3s ease;
+  }
+
+  .neon-button:hover {
+    background: linear-gradient(135deg,
+      rgba(200, 150, 50, 0.25) 0%,
+      rgba(180, 100, 50, 0.2) 100%
+    );
+    text-shadow: 0 0 5px rgba(200, 150, 50, 0.35);
+    box-shadow:
+      0 0 15px rgba(200, 150, 50, 0.2),
+      inset 0 0 5px rgba(200, 150, 50, 0.05);
+    transform: translateY(-1px);
+  }
+
+  /* COPPER BUTTON VARIANT */
+  .copper-button {
+    background: linear-gradient(135deg,
+      rgba(180, 100, 50, 0.15) 0%,
+      rgba(160, 80, 40, 0.1) 100%
+    );
+    border: 1px solid var(--sfz-copper);
+    color: var(--sfz-copper);
+    text-shadow: 0 0 3px rgba(180, 100, 50, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .copper-button:hover {
+    background: linear-gradient(135deg,
+      rgba(180, 100, 50, 0.25) 0%,
+      rgba(160, 80, 40, 0.2) 100%
+    );
+    box-shadow: 0 0 15px rgba(180, 100, 50, 0.2);
+    transform: translateY(-1px);
+  }
+
+  /* INPUT STYLING */
+  .club-input {
+    background: var(--sfz-bg);
+    border: 1px solid rgba(200, 150, 50, 0.2);
+    color: hsl(40, 20%, 95%);
+    transition: all 0.3s ease;
+  }
+
+  .club-input:focus {
+    border-color: var(--sfz-whiskey);
+    box-shadow: 0 0 15px rgba(200, 150, 50, 0.15);
+    background: var(--sfz-surface);
+  }
+
+  /* SOUTHERN REGION BADGE */
+  .region-badge {
+    background: rgba(200, 150, 50, 0.15);
+    border: 1px solid var(--sfz-whiskey);
+    color: var(--sfz-whiskey);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* WESTERN STAR BADGE */
+  .star-badge {
+    position: relative;
+    background: linear-gradient(135deg, var(--sfz-whiskey), var(--sfz-copper));
+    padding: 6px 16px;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  }
+}
+
+/* ANIMATIONS */
+
+/* Warm pulse - like firelight */
+@keyframes warm-pulse {
+  0%, 100% {
+    opacity: 1;
+    text-shadow:
+      0 0 5px rgba(200, 150, 50, 0.5),
+      0 0 10px rgba(200, 150, 50, 0.3),
+      0 0 20px rgba(200, 150, 50, 0.2);
+  }
+  50% {
+    opacity: 0.95;
+    text-shadow:
+      0 0 8px rgba(200, 150, 50, 0.6),
+      0 0 15px rgba(200, 150, 50, 0.4),
+      0 0 25px rgba(200, 150, 50, 0.3);
+  }
+}
+
+/* Flicker - like neon bar sign */
+@keyframes southern-flicker {
+  0%, 19.999%, 22%, 62.999%, 64%, 100% {
+    opacity: 1;
+  }
+  20%, 21.999%, 63%, 63.999% {
+    opacity: 0.85;
+  }
+}
+
+.bar-sign {
+  animation: southern-flicker 8s ease-in-out infinite;
+}
+
+/* SCROLLBAR STYLING */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sfz-whiskey) var(--sfz-bg);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--sfz-bg);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--sfz-whiskey);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--sfz-copper);
+}
+
+/* UTILITY CLASSES */
+.southern-bg {
+  background: var(--sfz-bg);
+}
+
+.southern-surface {
+  background: var(--sfz-surface);
+}
+
+.southern-border {
+  border: 1px solid rgba(200, 150, 50, 0.2);
+  box-shadow: 0 0 10px rgba(200, 150, 50, 0.08);
+}
+
+/* LEATHER TEXTURE */
+.leather-texture {
+  background:
+    linear-gradient(135deg,
+      rgba(60, 40, 30, 0.9) 0%,
+      rgba(40, 25, 20, 0.95) 100%
+    );
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* DENIM ACCENT */
+.denim-accent {
+  background: var(--sfz-denim);
+  border: 1px solid rgba(100, 130, 160, 0.2);
+}
+
+/* RODEO PATCH STYLE TAG */
+.rodeo-tag {
+  background: linear-gradient(135deg, var(--sfz-leather), var(--sfz-surface));
+  border: 2px solid var(--sfz-whiskey);
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ACCESSIBILITY */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+:focus {
+  outline: 2px solid var(--sfz-whiskey);
+  outline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--sfz-copper);
+  outline-offset: 2px;
+}

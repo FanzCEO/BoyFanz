@@ -1,0 +1,436 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   TABOOFANZ THEME - NEON NOIR / CYBER FETISH / GOTH CLUB
+   The Shadow Network - Dark, Rebellious, Consent-First
+   ============================================ */
+
+:root {
+  /* CORE TABOOFANZ PALETTE */
+  --background: hsl(270, 15%, 4%); /* Ultra-dark charcoal with violet undertone */
+  --foreground: hsl(0, 0%, 92%);
+  --card: hsl(270, 20%, 8%); /* Deep violet/midnight plum */
+  --card-foreground: hsl(0, 0%, 90%);
+  --popover: hsl(270, 18%, 6%);
+  --popover-foreground: hsl(0, 0%, 95%);
+  --primary: hsl(320, 100%, 50%); /* Neon magenta */
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(190, 100%, 50%); /* Electric cyan */
+  --secondary-foreground: hsl(0, 0%, 0%);
+  --muted: hsl(270, 10%, 15%);
+  --muted-foreground: hsl(0, 0%, 60%);
+  --accent: hsl(190, 100%, 50%); /* Electric cyan accent */
+  --accent-foreground: hsl(0, 0%, 0%);
+  --destructive: hsl(0, 100%, 50%); /* Hot red */
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(270, 10%, 20%); /* Muted cool gray */
+  --input: hsl(270, 15%, 10%);
+  --ring: hsl(320, 100%, 50%);
+  --radius: 0.25rem;
+
+  /* TABOOFANZ SIGNATURE COLORS */
+  --taboo-bg: hsl(270, 15%, 4%); /* Ultra-dark charcoal */
+  --taboo-surface: hsl(270, 25%, 12%); /* Deep violet/midnight plum */
+  --taboo-magenta: hsl(320, 100%, 50%); /* Neon magenta primary */
+  --taboo-magenta-glow: hsl(320, 100%, 45%);
+  --taboo-cyan: hsl(190, 100%, 50%); /* Electric cyan / glitch blue */
+  --taboo-cyan-glow: hsl(190, 100%, 40%);
+  --taboo-toxic-green: hsl(120, 100%, 50%); /* Acid/toxic green for success */
+  --taboo-hot-red: hsl(0, 100%, 50%); /* Danger/alerts */
+  --taboo-violet: hsl(270, 60%, 50%); /* Deep violet accent */
+  --taboo-plum: hsl(300, 40%, 20%); /* Midnight plum surface */
+
+  /* Chart colors - TabooFanz palette */
+  --chart-1: hsl(320, 100%, 50%);
+  --chart-2: hsl(190, 100%, 50%);
+  --chart-3: hsl(120, 100%, 50%);
+  --chart-4: hsl(270, 60%, 50%);
+  --chart-5: hsl(0, 100%, 50%);
+
+  /* Sidebar colors */
+  --sidebar: hsl(270, 15%, 3%);
+  --sidebar-foreground: hsl(0, 0%, 98%);
+  --sidebar-primary: hsl(320, 100%, 50%);
+  --sidebar-primary-foreground: hsl(0, 0%, 98%);
+  --sidebar-accent: hsl(270, 20%, 12%);
+  --sidebar-accent-foreground: hsl(0, 0%, 78%);
+  --sidebar-border: hsl(270, 10%, 18%);
+  --sidebar-ring: hsl(320, 100%, 50%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: "Inter", sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    position: relative;
+    min-height: 100vh;
+  }
+
+  /* TABOOFANZ DARK ATMOSPHERE - CYBER DUNGEON AESTHETIC */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+      linear-gradient(180deg,
+        rgba(50, 0, 50, 0.1) 0%,
+        transparent 30%,
+        transparent 70%,
+        rgba(0, 50, 50, 0.1) 100%
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255, 0, 255, 0.02) 2px,
+        rgba(255, 0, 255, 0.02) 4px
+      );
+    opacity: 0.6;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* GLITCH SCANLINE OVERLAY */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center,
+      rgba(50, 0, 80, 0.2) 0%,
+      rgba(0, 0, 0, 0.9) 100%
+    );
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* TYPOGRAPHY - FUTURISTIC/GOTHIC HYBRID */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Orbitron", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: hsl(0, 0%, 95%);
+    text-shadow: 0 0 3px rgba(255, 0, 255, 0.15);
+  }
+
+  .font-display {
+    font-family: "Orbitron", sans-serif !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase;
+  }
+
+  .font-body {
+    font-family: "Inter", sans-serif !important;
+  }
+}
+
+@layer components {
+  /* TABOOFANZ NEON GLOW EFFECTS */
+  .glow-effect {
+    box-shadow:
+      0 0 5px rgba(255, 0, 255, 0.15),
+      0 0 10px rgba(255, 0, 255, 0.08),
+      0 0 20px rgba(255, 0, 255, 0.04);
+    transition: all 0.3s ease;
+  }
+
+  .glow-effect:hover {
+    box-shadow:
+      0 0 10px rgba(255, 0, 255, 0.25),
+      0 0 20px rgba(255, 0, 255, 0.15),
+      0 0 40px rgba(255, 0, 255, 0.08);
+    transform: translateY(-2px);
+  }
+
+  /* NEON MAGENTA TEXT */
+  .neon-text, .neon-sign {
+    color: var(--taboo-magenta);
+    text-shadow:
+      0 0 5px rgba(255, 0, 255, 0.3),
+      0 0 10px rgba(255, 0, 255, 0.2),
+      0 0 20px rgba(255, 0, 255, 0.1);
+    animation: glitch-pulse 4s ease-in-out infinite;
+  }
+
+  /* ELECTRIC CYAN TEXT */
+  .neon-sign-cyan {
+    color: var(--taboo-cyan);
+    text-shadow:
+      0 0 5px rgba(0, 255, 255, 0.3),
+      0 0 10px rgba(0, 255, 255, 0.2),
+      0 0 20px rgba(0, 255, 255, 0.1);
+  }
+
+  /* TOXIC GREEN TEXT (SUCCESS) */
+  .neon-sign-toxic {
+    color: var(--taboo-toxic-green);
+    text-shadow:
+      0 0 5px rgba(0, 255, 0, 0.3),
+      0 0 10px rgba(0, 255, 0, 0.2),
+      0 0 20px rgba(0, 255, 0, 0.1);
+  }
+
+  /* GLASS MORPHISM - CYBER AESTHETIC */
+  .glass-card {
+    background: rgba(50, 0, 80, 0.3);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 0, 255, 0.15);
+    box-shadow:
+      0 8px 32px 0 rgba(0, 0, 0, 0.6),
+      0 0 20px rgba(255, 0, 255, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .glass-card:hover {
+    background: rgba(60, 0, 100, 0.4);
+    border: 1px solid rgba(255, 0, 255, 0.3);
+    box-shadow:
+      0 8px 32px 0 rgba(0, 0, 0, 0.7),
+      0 0 30px rgba(255, 0, 255, 0.2);
+    transform: translateY(-2px);
+  }
+
+  /* TABOOFANZ BUTTONS */
+  .neon-button {
+    background: transparent;
+    border: 1px solid var(--taboo-magenta);
+    color: var(--taboo-magenta);
+    text-shadow: 0 0 3px rgba(255, 0, 255, 0.15);
+    box-shadow:
+      0 0 5px rgba(255, 0, 255, 0.1),
+      inset 0 0 3px rgba(255, 0, 255, 0.02);
+    transition: all 0.3s ease;
+  }
+
+  .neon-button:hover {
+    text-shadow: 0 0 5px rgba(255, 0, 255, 0.3);
+    box-shadow:
+      0 0 15px rgba(255, 0, 255, 0.2),
+      inset 0 0 5px rgba(255, 0, 255, 0.05);
+    transform: translateY(-1px);
+  }
+
+  /* CYAN BUTTON VARIANT */
+  .cyan-button {
+    background: transparent;
+    border: 1px solid var(--taboo-cyan);
+    color: var(--taboo-cyan);
+    text-shadow: 0 0 3px rgba(0, 255, 255, 0.15);
+    box-shadow:
+      0 0 5px rgba(0, 255, 255, 0.1),
+      inset 0 0 3px rgba(0, 255, 255, 0.02);
+    transition: all 0.3s ease;
+  }
+
+  .cyan-button:hover {
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+    box-shadow:
+      0 0 15px rgba(0, 255, 255, 0.2),
+      inset 0 0 5px rgba(0, 255, 255, 0.05);
+    transform: translateY(-1px);
+  }
+
+  /* INPUT STYLING */
+  .club-input {
+    background: var(--taboo-bg);
+    border: 1px solid rgba(255, 0, 255, 0.2);
+    color: hsl(0, 0%, 95%);
+    transition: all 0.3s ease;
+  }
+
+  .club-input:focus {
+    border-color: var(--taboo-magenta);
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.15);
+    background: var(--taboo-surface);
+  }
+
+  /* ARCHETYPE BADGES */
+  .archetype-badge {
+    background: linear-gradient(135deg, var(--taboo-magenta), var(--taboo-cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    border: 1px solid var(--taboo-magenta);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-family: "Orbitron", sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* GLITCH EFFECT ON HOVER */
+  .glitch-hover:hover {
+    animation: glitch 0.3s ease;
+  }
+}
+
+/* ANIMATIONS */
+
+/* Glitch pulse - cyber aesthetic */
+@keyframes glitch-pulse {
+  0%, 100% {
+    opacity: 1;
+    text-shadow:
+      0 0 5px rgba(255, 0, 255, 0.5),
+      0 0 10px rgba(255, 0, 255, 0.3),
+      0 0 20px rgba(255, 0, 255, 0.2);
+  }
+  50% {
+    opacity: 0.95;
+    text-shadow:
+      0 0 8px rgba(255, 0, 255, 0.6),
+      0 0 15px rgba(255, 0, 255, 0.4),
+      0 0 30px rgba(255, 0, 255, 0.3);
+  }
+}
+
+/* Glitch effect */
+@keyframes glitch {
+  0% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+  100% {
+    transform: translate(0);
+  }
+}
+
+/* Scanline animation */
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+.scanline-effect::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--taboo-magenta), transparent);
+  opacity: 0.1;
+  animation: scanline 8s linear infinite;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* HOLOGRAPHIC CHIP EFFECT */
+.holographic {
+  background: linear-gradient(
+    135deg,
+    var(--taboo-magenta) 0%,
+    var(--taboo-cyan) 50%,
+    var(--taboo-violet) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: holographic-shift 3s ease-in-out infinite;
+}
+
+@keyframes holographic-shift {
+  0%, 100% {
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    filter: hue-rotate(30deg);
+  }
+}
+
+/* SCROLLBAR STYLING */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--taboo-magenta) var(--taboo-bg);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--taboo-bg);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--taboo-magenta);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--taboo-cyan);
+}
+
+/* UTILITY CLASSES */
+.taboo-bg {
+  background: var(--taboo-bg);
+}
+
+.taboo-surface {
+  background: var(--taboo-surface);
+}
+
+.taboo-border {
+  border: 1px solid rgba(255, 0, 255, 0.2);
+  box-shadow: 0 0 10px rgba(255, 0, 255, 0.1);
+}
+
+/* MASKED CREATOR BADGE */
+.masked-badge {
+  background: rgba(255, 0, 255, 0.1);
+  border: 1px solid var(--taboo-magenta);
+  color: var(--taboo-magenta);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ACCESSIBILITY */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+:focus {
+  outline: 2px solid var(--taboo-magenta);
+  outline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--taboo-cyan);
+  outline-offset: 2px;
+}

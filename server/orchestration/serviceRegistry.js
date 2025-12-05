@@ -64,7 +64,7 @@ class ServiceRegistry {
       this.orchestrationEngine.registerService({
         name: 'apiGateway',
         instance: apiGatewayService,
-        healthCheck: () => apiGatewayService.getHealthStatus(),
+        healthCheck: () => apiGatewayService.getServiceHealth(),
         capabilities: ['routing', 'rate-limiting', 'load-balancing', 'circuit-breaker'],
         priority: 'critical',
         dependencies: [],

@@ -772,8 +772,8 @@ class WebSocketManager {
   }
 }
 
-// Export singleton instance
-export const wsManager = new WebSocketManager(3001);
+// Export singleton instance - Use port 3002 for WebSocket to avoid conflict with Express on 3001
+export const wsManager = new WebSocketManager(3002);
 
 // Export for use in other services
 export const sendWebSocketNotification = wsManager.sendNotification.bind(wsManager);

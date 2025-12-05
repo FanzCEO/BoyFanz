@@ -14,7 +14,7 @@ import {
 
 interface StorageProvider {
   id: string;
-  type: 'aws_s3' | 'digitalocean_spaces' | 'wasabi' | 'backblaze_b2' | 'vultr_object_storage' | 'pushr';
+  type: 'aws_s3' | 'digitalocean_spaces' | 'wasabi' | 'backblaze_b2' | 'vultr_object_storage' | 'pushr' | 'pcloud' | 'fanzcloud';
   config: any;
   credentials: any;
 }
@@ -510,6 +510,9 @@ export class StorageProviderService {
         return await this.uploadToVultr(provider, file, path, options);
       case 'pushr':
         return await this.uploadToPushr(provider, file, path, options);
+      case 'pcloud':
+      case 'fanzcloud':
+        return await this.uploadToPCloud(provider, file, path, options);
       default:
         throw new Error(`Unsupported provider type: ${provider.type}`);
     }
@@ -529,6 +532,9 @@ export class StorageProviderService {
         return await this.downloadFromVultr(provider, path);
       case 'pushr':
         return await this.downloadFromPushr(provider, path);
+      case 'pcloud':
+      case 'fanzcloud':
+        return await this.downloadFromPCloud(provider, path);
       default:
         throw new Error(`Unsupported provider type: ${provider.type}`);
     }
@@ -665,6 +671,97 @@ export class StorageProviderService {
   private async downloadFromPushr(provider: StorageProvider, path: string): Promise<Buffer> {
     // Pushr download implementation
     return Buffer.from('mock file content');
+  }
+
+  private async uploadToPCloud(provider: StorageProvider, file: Buffer, path: string, options?: any): Promise<any> {
+    // pCloud / FanzCloud upload implementation using pCloud API
+    const apiEndpoint = provider.credentials.apiEndpoint || 'https://api.pcloud.com';
+    const accessToken = provider.credentials.accessToken || provider.credentials.authToken;
+
+    if (!accessToken) {
+      throw new Error('pCloud access token not configured');
+    }
+
+    // Step 1: Get upload server
+    const uploadInfoUrl = `${apiEndpoint}/uploadfile?access_token=${accessToken}&path=${encodeURIComponent(path)}&filename=${encodeURIComponent(options?.filename || 'file')}&nopartial=1`;
+    const uploadInfoResponse = await fetch(uploadInfoUrl);
+    const uploadInfo = await uploadInfoResponse.json();
+
+    if (uploadInfo.result !== 0) {
+      throw new Error(uploadInfo.error || 'Failed to get upload URL');
+    }
+
+    // Step 2: Upload file to pCloud
+    const uploadHost = uploadInfo.hosts[0];
+    const uploadPath = uploadInfo.path;
+
+    const formData = new FormData();
+    const blob = new Blob([file]);
+    formData.append('file', blob, options?.filename || 'file');
+
+    const uploadResponse = await fetch(`https://${uploadHost}${uploadPath}`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    const result = await uploadResponse.json();
+
+    if (result.result !== 0) {
+      throw new Error(result.error || 'Upload failed');
+    }
+
+    return {
+      success: true,
+      fileid: result.metadata?.[0]?.fileid,
+      path: result.metadata?.[0]?.path,
+      url: `pcloud://${result.metadata?.[0]?.fileid}`
+    };
+  }
+
+  private async downloadFromPCloud(provider: StorageProvider, path: string): Promise<Buffer> {
+    // pCloud / FanzCloud download implementation
+    const apiEndpoint = provider.credentials.apiEndpoint || 'https://api.pcloud.com';
+    const accessToken = provider.credentials.accessToken || provider.credentials.authToken;
+
+    if (!accessToken) {
+      throw new Error('pCloud access token not configured');
+    }
+
+    // Get download link
+    const downloadLinkUrl = `${apiEndpoint}/getfilelink?access_token=${accessToken}&path=${encodeURIComponent(path)}`;
+    const linkResponse = await fetch(downloadLinkUrl);
+    const linkData = await linkResponse.json();
+
+    if (linkData.result !== 0) {
+      throw new Error(linkData.error || 'Failed to get download link');
+    }
+
+    // Download file
+    const downloadUrl = `https://${linkData.hosts[0]}${linkData.path}`;
+    const fileResponse = await fetch(downloadUrl);
+    const arrayBuffer = await fileResponse.arrayBuffer();
+
+    return Buffer.from(arrayBuffer);
+  }
+
+  private async deleteFromPCloud(provider: StorageProvider, path: string): Promise<any> {
+    // pCloud / FanzCloud delete implementation
+    const apiEndpoint = provider.credentials.apiEndpoint || 'https://api.pcloud.com';
+    const accessToken = provider.credentials.accessToken || provider.credentials.authToken;
+
+    if (!accessToken) {
+      throw new Error('pCloud access token not configured');
+    }
+
+    const deleteUrl = `${apiEndpoint}/deletefile?access_token=${accessToken}&path=${encodeURIComponent(path)}`;
+    const response = await fetch(deleteUrl);
+    const result = await response.json();
+
+    if (result.result !== 0) {
+      throw new Error(result.error || 'Delete failed');
+    }
+
+    return { success: true, deletedfileid: result.metadata?.fileid };
   }
 
   // Mock implementations for health checks and monitoring

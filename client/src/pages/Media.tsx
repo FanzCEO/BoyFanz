@@ -9,16 +9,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ObjectUploader } from "@/components/ObjectUploader";
-import { Upload, Eye, MoreHorizontal } from "lucide-react";
+import { CoStarPromptModal, CoStarInviteForm } from "@/components/costar";
+import { Upload, Eye, MoreHorizontal, Users } from "lucide-react";
 import type { UploadResult } from "@uppy/core";
 import { apiRequest } from "@/lib/queryClient";
 
+type UploadFlow = "idle" | "costar-prompt" | "costar-invite" | "upload-form";
+
 export default function Media() {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [uploadFlow, setUploadFlow] = useState<UploadFlow>("idle");
+  const [pendingCoStars, setPendingCoStars] = useState<any[]>([]);
   const [uploadForm, setUploadForm] = useState({
     title: '',
     description: '',
-    uploadedUrl: ''
+    uploadedUrl: '',
+    coStarInvitations: [] as string[],
   });
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -111,6 +117,41 @@ export default function Media() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  // Handle the upload button click - starts the co-star check flow
+  const handleUploadClick = () => {
+    setUploadFlow("costar-prompt");
+  };
+
+  // User confirmed no co-star - go straight to upload form
+  const handleNoCoStar = () => {
+    setUploadFlow("upload-form");
+    setIsUploadOpen(true);
+  };
+
+  // User has a co-star - show invite form
+  const handleHasCoStar = () => {
+    setUploadFlow("costar-invite");
+  };
+
+  // Co-star invitations created - continue to upload
+  const handleCoStarInviteComplete = (invitations: any[]) => {
+    setPendingCoStars(invitations);
+    setUploadForm(prev => ({
+      ...prev,
+      coStarInvitations: invitations.map(i => i.id),
+    }));
+    setUploadFlow("upload-form");
+    setIsUploadOpen(true);
+  };
+
+  // Reset the upload flow
+  const handleCloseFlow = () => {
+    setUploadFlow("idle");
+    setIsUploadOpen(false);
+    setPendingCoStars([]);
+    setUploadForm({ title: '', description: '', uploadedUrl: '', coStarInvitations: [] });
+  };
+
   return (
     <div className="space-y-6" data-testid="media-page">
       <div className="flex items-center justify-between">
@@ -121,13 +162,33 @@ export default function Media() {
           </p>
         </div>
         
-        <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-          <DialogTrigger asChild>
-            <Button className="glow-effect" data-testid="upload-media-button">
-              <Upload className="mr-2 h-4 w-4" />
-              Upload Media
-            </Button>
-          </DialogTrigger>
+        {/* Upload Button - Starts the Co-Star Check Flow */}
+        <Button className="glow-effect" data-testid="upload-media-button" onClick={handleUploadClick}>
+          <Upload className="mr-2 h-4 w-4" />
+          Upload Media
+        </Button>
+
+        {/* Co-Star Prompt Modal */}
+        <CoStarPromptModal
+          isOpen={uploadFlow === "costar-prompt"}
+          onClose={handleCloseFlow}
+          onNoCoStar={handleNoCoStar}
+          onHasCoStar={handleHasCoStar}
+        />
+
+        {/* Co-Star Invite Form */}
+        <CoStarInviteForm
+          isOpen={uploadFlow === "costar-invite"}
+          onClose={handleCloseFlow}
+          onComplete={handleCoStarInviteComplete}
+          onBack={() => setUploadFlow("costar-prompt")}
+        />
+
+        {/* Upload Dialog - Now triggered after co-star check */}
+        <Dialog open={isUploadOpen} onOpenChange={(open) => {
+          if (!open) handleCloseFlow();
+          else setIsUploadOpen(open);
+        }}>
           <DialogContent className="sm:max-w-md" data-testid="upload-dialog">
             <DialogHeader>
               <DialogTitle>Upload New Content</DialogTitle>
@@ -137,6 +198,26 @@ export default function Media() {
             </DialogHeader>
             
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Show pending co-star invitations */}
+              {pendingCoStars.length > 0 && (
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">Co-Stars ({pendingCoStars.length})</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {pendingCoStars.map((cs) => (
+                      <Badge key={cs.id} variant="secondary" className="text-xs">
+                        {cs.coStarName} <span className="text-muted-foreground">(pending)</span>
+                      </Badge>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Co-stars must complete verification before you can tag them.
+                  </p>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
                 <Input
