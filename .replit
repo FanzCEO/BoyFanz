@@ -1,0 +1,18 @@
+modules = ["postgresql-16", "nodejs-20"]
+[nix]
+channel = "stable-25_05"
+
+[workflows]
+
+[[workflows.workflow]]
+name = "Start application"
+mode = "sequential"
+author = 46450385
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
+[[ports]]
+localPort = 3001
+externalPort = 80

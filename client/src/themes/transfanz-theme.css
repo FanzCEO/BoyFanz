@@ -1,0 +1,455 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   TRANSFANZ THEME - EMBRACE YOUR TRUE SELF
+   Gender-diverse heart of the FANZ network
+   Inclusive, Affirming, Celebratory, Safe
+   ============================================ */
+
+:root {
+  /* CORE TRANSFANZ PALETTE - TRANS FLAG INSPIRED */
+  --background: hsl(240, 30%, 8%); /* Deep navy / midnight purple */
+  --foreground: hsl(0, 0%, 95%);
+  --card: hsl(240, 25%, 12%); /* Slightly lighter navy */
+  --card-foreground: hsl(0, 0%, 92%);
+  --popover: hsl(240, 28%, 10%);
+  --popover-foreground: hsl(0, 0%, 95%);
+  --primary: hsl(350, 85%, 82%); /* Trans-pink #F5A9B8 */
+  --primary-foreground: hsl(240, 30%, 10%);
+  --secondary: hsl(195, 95%, 68%); /* Trans-blue #5BCEFA */
+  --secondary-foreground: hsl(240, 30%, 10%);
+  --muted: hsl(240, 20%, 18%);
+  --muted-foreground: hsl(0, 0%, 60%);
+  --accent: hsl(280, 60%, 70%); /* Lavender/magenta */
+  --accent-foreground: hsl(240, 30%, 10%);
+  --destructive: hsl(0, 70%, 55%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(240, 20%, 22%);
+  --input: hsl(240, 25%, 12%);
+  --ring: hsl(350, 85%, 82%);
+  --radius: 0.5rem;
+
+  /* TRANSFANZ SIGNATURE COLORS - TRANS FLAG */
+  --tfz-bg: hsl(240, 30%, 8%); /* Deep navy / midnight purple */
+  --tfz-surface: hsl(240, 25%, 14%);
+  --tfz-pink: hsl(350, 85%, 82%); /* Trans-pink #F5A9B8 */
+  --tfz-pink-glow: hsl(350, 80%, 75%);
+  --tfz-pink-deep: hsl(350, 70%, 65%);
+  --tfz-blue: hsl(195, 95%, 68%); /* Trans-blue #5BCEFA */
+  --tfz-blue-glow: hsl(195, 90%, 60%);
+  --tfz-blue-deep: hsl(195, 85%, 55%);
+  --tfz-lavender: hsl(280, 60%, 70%); /* Lavender accent */
+  --tfz-white: hsl(0, 0%, 98%); /* White from flag */
+  --tfz-magenta: hsl(320, 70%, 65%); /* Magenta tertiary */
+  --tfz-purple: hsl(270, 50%, 55%); /* Purple accent */
+
+  /* Chart colors - TransFanz palette */
+  --chart-1: hsl(350, 85%, 82%);
+  --chart-2: hsl(195, 95%, 68%);
+  --chart-3: hsl(280, 60%, 70%);
+  --chart-4: hsl(0, 0%, 98%);
+  --chart-5: hsl(320, 70%, 65%);
+
+  /* Sidebar colors */
+  --sidebar: hsl(240, 30%, 6%);
+  --sidebar-foreground: hsl(0, 0%, 98%);
+  --sidebar-primary: hsl(350, 85%, 82%);
+  --sidebar-primary-foreground: hsl(240, 30%, 10%);
+  --sidebar-accent: hsl(240, 25%, 15%);
+  --sidebar-accent-foreground: hsl(0, 0%, 80%);
+  --sidebar-border: hsl(240, 20%, 20%);
+  --sidebar-ring: hsl(195, 95%, 68%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: "Inter", sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    position: relative;
+    min-height: 100vh;
+  }
+
+  /* TRANSFANZ ATMOSPHERE - SOFT GRADIENT GLOW */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(245, 169, 184, 0.08) 0%, transparent 40%),
+      radial-gradient(ellipse at 80% 90%, rgba(91, 206, 250, 0.06) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 50%, rgba(200, 150, 255, 0.04) 0%, transparent 50%);
+    opacity: 0.9;
+    z-index: 1;
+    pointer-events: none;
+    animation: aurora-shift 15s ease-in-out infinite;
+  }
+
+  /* SOFT VIGNETTE */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center,
+      rgba(30, 30, 60, 0.2) 0%,
+      rgba(10, 10, 30, 0.95) 100%
+    );
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* TYPOGRAPHY - FRIENDLY, ROUNDED */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Quicksand", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: hsl(0, 0%, 98%);
+    text-shadow: 0 0 20px rgba(245, 169, 184, 0.15);
+  }
+
+  .font-display {
+    font-family: "Quicksand", sans-serif !important;
+    font-weight: 700 !important;
+  }
+
+  .font-body {
+    font-family: "Inter", sans-serif !important;
+  }
+}
+
+@layer components {
+  /* TRANSFANZ GLOW EFFECTS - SOFT, AFFIRMING */
+  .glow-effect {
+    box-shadow:
+      0 0 10px rgba(245, 169, 184, 0.15),
+      0 0 20px rgba(91, 206, 250, 0.08);
+    transition: all 0.4s ease;
+  }
+
+  .glow-effect:hover {
+    box-shadow:
+      0 0 15px rgba(245, 169, 184, 0.25),
+      0 0 30px rgba(91, 206, 250, 0.15),
+      0 0 45px rgba(200, 150, 255, 0.08);
+    transform: translateY(-3px);
+  }
+
+  /* TRANS-PINK TEXT */
+  .neon-text, .neon-sign {
+    color: var(--tfz-pink);
+    text-shadow:
+      0 0 10px rgba(245, 169, 184, 0.5),
+      0 0 20px rgba(245, 169, 184, 0.3),
+      0 0 30px rgba(245, 169, 184, 0.15);
+    animation: soft-pulse 5s ease-in-out infinite;
+  }
+
+  /* TRANS-BLUE TEXT */
+  .neon-sign-blue {
+    color: var(--tfz-blue);
+    text-shadow:
+      0 0 10px rgba(91, 206, 250, 0.5),
+      0 0 20px rgba(91, 206, 250, 0.3),
+      0 0 30px rgba(91, 206, 250, 0.15);
+  }
+
+  /* LAVENDER TEXT */
+  .neon-sign-lavender {
+    color: var(--tfz-lavender);
+    text-shadow:
+      0 0 10px rgba(200, 150, 255, 0.5),
+      0 0 20px rgba(200, 150, 255, 0.3),
+      0 0 30px rgba(200, 150, 255, 0.15);
+  }
+
+  /* TRANS FLAG GRADIENT TEXT */
+  .trans-gradient-text {
+    background: linear-gradient(
+      135deg,
+      var(--tfz-pink) 0%,
+      var(--tfz-blue) 25%,
+      var(--tfz-white) 50%,
+      var(--tfz-pink) 75%,
+      var(--tfz-blue) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradient-flow 5s ease infinite;
+  }
+
+  /* GLASS MORPHISM - SOFT, AFFIRMING */
+  .glass-card {
+    background: rgba(50, 50, 100, 0.4);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(245, 169, 184, 0.15);
+    box-shadow:
+      0 8px 32px 0 rgba(0, 0, 0, 0.4),
+      0 0 30px rgba(245, 169, 184, 0.08),
+      0 0 30px rgba(91, 206, 250, 0.05);
+    transition: all 0.4s ease;
+  }
+
+  .glass-card:hover {
+    background: rgba(60, 60, 120, 0.5);
+    border: 1px solid rgba(245, 169, 184, 0.25);
+    box-shadow:
+      0 12px 40px 0 rgba(0, 0, 0, 0.5),
+      0 0 40px rgba(245, 169, 184, 0.12),
+      0 0 40px rgba(91, 206, 250, 0.08);
+    transform: translateY(-3px);
+  }
+
+  /* TRANSFANZ BUTTONS - PINK PRIMARY */
+  .neon-button {
+    background: linear-gradient(135deg,
+      rgba(245, 169, 184, 0.2) 0%,
+      rgba(91, 206, 250, 0.15) 100%
+    );
+    border: 1px solid var(--tfz-pink);
+    color: var(--tfz-pink);
+    text-shadow: 0 0 5px rgba(245, 169, 184, 0.3);
+    box-shadow:
+      0 0 10px rgba(245, 169, 184, 0.15),
+      inset 0 0 5px rgba(245, 169, 184, 0.05);
+    transition: all 0.3s ease;
+    border-radius: 25px;
+  }
+
+  .neon-button:hover {
+    background: linear-gradient(135deg,
+      rgba(245, 169, 184, 0.3) 0%,
+      rgba(91, 206, 250, 0.25) 100%
+    );
+    text-shadow: 0 0 8px rgba(245, 169, 184, 0.5);
+    box-shadow:
+      0 0 20px rgba(245, 169, 184, 0.25),
+      0 0 30px rgba(91, 206, 250, 0.15),
+      inset 0 0 8px rgba(245, 169, 184, 0.08);
+    transform: translateY(-2px);
+  }
+
+  /* BLUE BUTTON VARIANT */
+  .blue-button {
+    background: linear-gradient(135deg,
+      rgba(91, 206, 250, 0.2) 0%,
+      rgba(245, 169, 184, 0.15) 100%
+    );
+    border: 1px solid var(--tfz-blue);
+    color: var(--tfz-blue);
+    text-shadow: 0 0 5px rgba(91, 206, 250, 0.3);
+    transition: all 0.3s ease;
+    border-radius: 25px;
+  }
+
+  .blue-button:hover {
+    background: linear-gradient(135deg,
+      rgba(91, 206, 250, 0.3) 0%,
+      rgba(245, 169, 184, 0.25) 100%
+    );
+    box-shadow:
+      0 0 20px rgba(91, 206, 250, 0.25),
+      0 0 30px rgba(245, 169, 184, 0.15);
+    transform: translateY(-2px);
+  }
+
+  /* INPUT STYLING */
+  .club-input {
+    background: var(--tfz-bg);
+    border: 1px solid rgba(245, 169, 184, 0.2);
+    color: hsl(0, 0%, 95%);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .club-input:focus {
+    border-color: var(--tfz-pink);
+    box-shadow:
+      0 0 15px rgba(245, 169, 184, 0.15),
+      0 0 25px rgba(91, 206, 250, 0.08);
+    background: var(--tfz-surface);
+  }
+
+  /* PRONOUN BADGE */
+  .pronoun-badge {
+    background: linear-gradient(135deg,
+      rgba(245, 169, 184, 0.2) 0%,
+      rgba(91, 206, 250, 0.2) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--tfz-white);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  /* IDENTITY TAG */
+  .identity-tag {
+    background: rgba(200, 150, 255, 0.15);
+    border: 1px solid var(--tfz-lavender);
+    color: var(--tfz-lavender);
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 0.7rem;
+    font-weight: 500;
+  }
+
+  /* SAFE SPACE INDICATOR */
+  .safe-space-badge {
+    background: linear-gradient(135deg, var(--tfz-pink), var(--tfz-blue));
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+}
+
+/* ANIMATIONS */
+
+/* Soft pulse - gentle, affirming */
+@keyframes soft-pulse {
+  0%, 100% {
+    opacity: 1;
+    text-shadow:
+      0 0 10px rgba(245, 169, 184, 0.5),
+      0 0 20px rgba(245, 169, 184, 0.3),
+      0 0 30px rgba(245, 169, 184, 0.15);
+  }
+  50% {
+    opacity: 0.95;
+    text-shadow:
+      0 0 15px rgba(245, 169, 184, 0.6),
+      0 0 30px rgba(245, 169, 184, 0.4),
+      0 0 45px rgba(245, 169, 184, 0.2);
+  }
+}
+
+/* Aurora shift - trans flag colors flowing */
+@keyframes aurora-shift {
+  0%, 100% {
+    opacity: 0.9;
+    filter: hue-rotate(0deg);
+  }
+  33% {
+    opacity: 0.85;
+    filter: hue-rotate(10deg);
+  }
+  66% {
+    opacity: 0.95;
+    filter: hue-rotate(-10deg);
+  }
+}
+
+/* Gradient flow for text */
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* SCROLLBAR STYLING */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--tfz-pink) var(--tfz-bg);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--tfz-bg);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--tfz-pink), var(--tfz-blue));
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--tfz-blue), var(--tfz-pink));
+}
+
+/* UTILITY CLASSES */
+.trans-bg {
+  background: var(--tfz-bg);
+}
+
+.trans-surface {
+  background: var(--tfz-surface);
+}
+
+.trans-border {
+  border: 1px solid rgba(245, 169, 184, 0.2);
+  box-shadow:
+    0 0 10px rgba(245, 169, 184, 0.08),
+    0 0 10px rgba(91, 206, 250, 0.05);
+}
+
+/* TRANS FLAG STRIPE */
+.trans-flag-stripe {
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--tfz-pink) 0%,
+    var(--tfz-pink) 20%,
+    var(--tfz-blue) 20%,
+    var(--tfz-blue) 40%,
+    var(--tfz-white) 40%,
+    var(--tfz-white) 60%,
+    var(--tfz-pink) 60%,
+    var(--tfz-pink) 80%,
+    var(--tfz-blue) 80%,
+    var(--tfz-blue) 100%
+  );
+}
+
+/* AFFIRMING HEART ICON STYLE */
+.heart-glow {
+  color: var(--tfz-pink);
+  filter: drop-shadow(0 0 5px rgba(245, 169, 184, 0.5));
+}
+
+/* ACCESSIBILITY */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+:focus {
+  outline: 2px solid var(--tfz-pink);
+  outline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--tfz-blue);
+  outline-offset: 2px;
+}

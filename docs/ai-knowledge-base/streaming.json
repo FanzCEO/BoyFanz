@@ -1,0 +1,186 @@
+{
+  "feature": "live_streaming",
+  "display_name": "Live Streaming",
+  "category": "content_creation",
+  "context_triggers": {
+    "pages": ["/streams", "/stream/create", "/go-live", "/streaming"],
+    "keywords": ["stream", "live", "broadcast", "go live", "streaming"],
+    "user_actions": ["first_stream", "stream_setup", "equipment_test"]
+  },
+  "knowledge_entries": [
+    {
+      "id": "stream-001",
+      "question": "How do I start a live stream?",
+      "answer": "Click 'Go Live' or 'Create Stream', add a catchy title, choose your stream type (Free, Subscriber-Only, or Paid), and click 'Start Streaming'. That's it - you're live! Pro tip: Test your equipment first with the equipment check feature.",
+      "related_topics": ["streaming", "getting_started", "live"],
+      "difficulty": "beginner",
+      "quick_action": {
+        "label": "Go Live Now",
+        "action": "navigate",
+        "target": "/stream/create"
+      }
+    },
+    {
+      "id": "stream-002",
+      "question": "What are the different stream types?",
+      "answer": "Three types: 1) Public/Free (maximum reach, great for growth), 2) Subscriber-Only (exclusive for paying subscribers, builds loyalty), 3) Paid/PPV ($5-200+, direct monetization). Choose based on your goals!",
+      "related_topics": ["stream_types", "monetization", "pricing"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "stream-003",
+      "question": "What equipment do I need?",
+      "answer": "Minimum: HD webcam (or smartphone), microphone (headset works!), decent lighting (face the light), 5+ Mbps internet. That's it! You can upgrade later with ring lights, better mics, etc. Start simple!",
+      "related_topics": ["equipment", "setup", "technical"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "stream-004",
+      "question": "How much should I charge for streams?",
+      "answer": "Pricing guide: Q&A sessions ($5-15), Performances ($10-30), Tutorials ($15-50), Private shows ($50-200+). Our AI suggests optimal pricing based on your subscriber count and content type. Start lower, increase with demand!",
+      "related_topics": ["pricing", "monetization", "revenue"],
+      "difficulty": "intermediate",
+      "pro_tip": true
+    },
+    {
+      "id": "stream-005",
+      "question": "When is the best time to stream?",
+      "answer": "Your AI dashboard shows when YOUR fans are most active! Generally: Weekdays 7-10 PM, Weekends 2-4 PM or 8-11 PM. Consistency matters more than perfect timing - pick a schedule and stick to it!",
+      "related_topics": ["scheduling", "timing", "analytics"],
+      "difficulty": "intermediate",
+      "pro_tip": true
+    },
+    {
+      "id": "stream-006",
+      "question": "Should I schedule streams or go live spontaneously?",
+      "answer": "Both! Scheduled streams get 3-5x more viewers (fans can plan to attend, auto-notifications sent). But spontaneous streams create FOMO and excitement. Best: Consistent schedule (Weekly Q&A Wednesdays) + occasional surprises!",
+      "related_topics": ["scheduling", "strategy", "engagement"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "stream-007",
+      "question": "How do I keep viewers engaged during streams?",
+      "answer": "Pro tactics: 1) Welcome viewers by name, 2) Read and respond to chat constantly, 3) Ask questions to audience, 4) Set tip goals with rewards, 5) Tease what's coming next, 6) High energy throughout! Interaction is everything.",
+      "related_topics": ["engagement", "retention", "best_practices"],
+      "difficulty": "intermediate",
+      "pro_tip": true
+    },
+    {
+      "id": "stream-008",
+      "question": "Can I save my stream to watch later?",
+      "answer": "Yes! All streams auto-record. After your stream, the recording is saved in your Media library. You can sell it as PPV content, include it for subscribers, or create highlight clips. Monetize it twice!",
+      "related_topics": ["recording", "monetization", "content"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "stream-009",
+      "question": "What if my stream is lagging or buffering?",
+      "answer": "Quick fixes: 1) Check internet speed (need 5+ Mbps upload), 2) Close bandwidth-heavy apps, 3) Lower stream quality in settings, 4) Use wired connection vs WiFi, 5) Restart router. Test before going live with fans!",
+      "related_topics": ["troubleshooting", "technical", "performance"],
+      "difficulty": "beginner",
+      "troubleshooting": true
+    },
+    {
+      "id": "stream-010",
+      "question": "How can I make more money from streaming?",
+      "answer": "Top strategies: 1) Multi-tier pricing (Free preview → Paid full stream), 2) Tip goals with rewards, 3) Bundle deals (5 streams for $40), 4) Subscriber-only exclusives, 5) Sell recordings after, 6) Upsell custom content. Layer your monetization!",
+      "related_topics": ["monetization", "revenue", "strategy"],
+      "difficulty": "advanced",
+      "pro_tip": true
+    },
+    {
+      "id": "stream-011",
+      "question": "Do I need special software to stream?",
+      "answer": "No! Stream directly from your browser - no software needed. For advanced users: OBS Studio (free) enables custom overlays, multiple cameras, and effects. But browser streaming works great for most creators!",
+      "related_topics": ["software", "technical", "setup"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "stream-012",
+      "question": "How do I promote my upcoming stream?",
+      "answer": "Promotion checklist: 1) Announce 48 hours before, 2) Reminder 24 hours before, 3) Reminder 1 hour before, 4) Auto-notifications sent to subscribers, 5) Post on social media, 6) Tease in recent content. Build anticipation!",
+      "related_topics": ["promotion", "marketing", "growth"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "stream-013",
+      "question": "Can I stream from my phone?",
+      "answer": "Absolutely! Mobile streaming works great. Tips: Charge phone fully, use WiFi, landscape orientation, phone stand/tripod, good lighting. Close background apps to prevent overheating. Mobile is perfect for on-the-go or casual streams!",
+      "related_topics": ["mobile", "equipment", "setup"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "stream-014",
+      "question": "What content should I stream?",
+      "answer": "Popular stream ideas: Q&A sessions, workouts, cooking/tutorials, behind-the-scenes, day-in-the-life, gaming, performances, collabs with other creators. Test different formats, see what YOUR fans engage with most!",
+      "related_topics": ["content_ideas", "strategy", "creativity"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "stream-015",
+      "question": "How long should my streams be?",
+      "answer": "Sweet spot: 30-60 minutes. Long enough for value, short enough to maintain energy. Q&As can be shorter (20-30 min), special events longer (90+ min). Track your analytics - see when viewers drop off and adjust!",
+      "related_topics": ["strategy", "timing", "analytics"],
+      "difficulty": "intermediate",
+      "pro_tip": true
+    }
+  ],
+  "proactive_triggers": [
+    {
+      "condition": "first_time_streaming",
+      "message": "🎥 First time streaming? Let me help you set up your equipment and test everything before you go live!",
+      "action": "offer_equipment_checklist"
+    },
+    {
+      "condition": "stream_scheduled_soon",
+      "message": "⏰ Your stream starts in 30 minutes! Want to run a quick equipment check?",
+      "action": "pre_stream_checklist"
+    },
+    {
+      "condition": "low_stream_attendance",
+      "message": "📊 Your streams could reach more fans! Want tips on optimal scheduling and promotion?",
+      "action": "suggest_promotion_strategy"
+    },
+    {
+      "condition": "stream_revenue_low",
+      "message": "💡 Want to increase stream revenue? I can show you proven monetization strategies!",
+      "action": "monetization_tutorial"
+    },
+    {
+      "condition": "stream_quality_issues",
+      "message": "📶 I noticed stream quality issues. Let's optimize your setup!",
+      "action": "troubleshoot_streaming"
+    }
+  ],
+  "suggested_actions": [
+    {
+      "label": "Go Live Now",
+      "icon": "video",
+      "action": "navigate",
+      "target": "/stream/create",
+      "priority": "high"
+    },
+    {
+      "label": "Schedule Stream",
+      "icon": "calendar",
+      "action": "navigate",
+      "target": "/stream/schedule",
+      "priority": "medium"
+    },
+    {
+      "label": "View Stream Analytics",
+      "icon": "chart",
+      "action": "navigate",
+      "target": "/analytics/streams",
+      "priority": "low"
+    }
+  ],
+  "related_documentation": [
+    "/how-to/live-streaming.md",
+    "/how-to/content-creation.md",
+    "/how-to/monetization.md",
+    "/how-to/analytics.md"
+  ],
+  "last_updated": "2025-11-15",
+  "version": "1.0"
+}
