@@ -10450,6 +10450,94 @@ export type InsertWallReaction = typeof wallReactions.$inferInsert;
 export type Testimonial = typeof testimonials.$inferSelect;
 export type InsertTestimonial = typeof testimonials.$inferInsert;
 
+// ===== TWITTER-STYLE CONTENT SHARING =====
+// Cross-platform content sharing with creator tagging and attribution
+
+export const shareTypeEnum = pgEnum("share_type", [
+  "embed",   // Full embedded post (quote tweet style)
+  "link",    // Simple link to original with preview
+]);
+
+export const tagApprovalStatusEnum = pgEnum("tag_approval_status", [
+  "pending",   // Waiting for tagged creator approval
+  "approved",  // Creator approved the tag
+  "rejected",  // Creator rejected the tag
+]);
+
+export const sharedPosts = pgTable(
+  "shared_posts",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    // Who shared the content
+    sharerId: varchar("sharer_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    sharerPlatform: varchar("sharer_platform", { length: 50 }).default("boyfanz"),
+
+    // Original content info
+    originalPostId: varchar("original_post_id").notNull(),
+    originalCreatorId: varchar("original_creator_id").notNull(),
+    originalPlatform: varchar("original_platform", { length: 50 }).notNull(),
+
+    // Share type: embed (full post) or link (preview)
+    shareType: shareTypeEnum("share_type").default("embed").notNull(),
+
+    // Sharer's caption/commentary
+    shareCaption: text("share_caption"),
+
+    // Tag approval workflow
+    tagStatus: tagApprovalStatusEnum("tag_status").default("pending").notNull(),
+    tagRequestedAt: timestamp("tag_requested_at").defaultNow(),
+    tagRespondedAt: timestamp("tag_responded_at"),
+    tagRejectionReason: text("tag_rejection_reason"),
+
+    // Cross-platform visibility
+    showOnOriginalCreatorWall: boolean("show_on_original_creator_wall").default(false),
+    showOnSharerWall: boolean("show_on_sharer_wall").default(true),
+
+    // Engagement metrics
+    viewCount: integer("view_count").default(0),
+    clickThroughCount: integer("click_through_count").default(0),
+    reshareCount: integer("reshare_count").default(0),
+
+    // Cached original post data (for cross-platform display)
+    originalPostSnapshot: jsonb("original_post_snapshot").$type<{
+      content?: string;
+      mediaUrls?: string[];
+      creatorName?: string;
+      creatorAvatar?: string;
+      createdAt?: string;
+    }>(),
+
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_shared_posts_sharer").on(table.sharerId),
+    index("idx_shared_posts_original_creator").on(table.originalCreatorId),
+    index("idx_shared_posts_original_post").on(table.originalPostId),
+    index("idx_shared_posts_tag_status").on(table.tagStatus),
+    index("idx_shared_posts_created").on(table.createdAt.desc()),
+    index("idx_shared_posts_sharer_wall").on(table.sharerId, table.showOnSharerWall),
+    index("idx_shared_posts_original_wall").on(table.originalCreatorId, table.showOnOriginalCreatorWall),
+  ],
+);
+
+// Relations for shared posts
+export const sharedPostsRelations = relations(sharedPosts, ({ one }) => ({
+  sharer: one(users, {
+    fields: [sharedPosts.sharerId],
+    references: [users.id],
+    relationName: "sharesCreated",
+  }),
+}));
+
+// Types for shared posts
+export type SharedPost = typeof sharedPosts.$inferSelect;
+export type InsertSharedPost = typeof sharedPosts.$inferInsert;
+
 // ===== CREATOR AD SYSTEM & WITTLE BEAR FOUNDATION =====
 // Revenue system where creators get 70% of ad revenue, platform 30% goes to charity
 // Creators can donate their share to Wittle Bear Foundation (homeless youth & shelter animals)

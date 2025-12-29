@@ -23,6 +23,8 @@ import creatorAdRoutes from './routes/creatorAdRoutes';
 import aiGatewayRoutes from './routes/aiGatewayRoutes';
 import scheduledDropsRoutes from './routes/scheduledDropsRoutes';
 import nearbyRoutes from './routes/nearbyRoutes';
+import meetupRoutes from './routes/meetupRoutes';
+import sharingRoutes from './routes/sharingRoutes';
 // Admin Management Routes
 import brandingRoutes from './routes/admin/branding';
 import bookingsRoutes from './routes/admin/bookings';
@@ -301,6 +303,14 @@ export function registerRoutes(app: Express) {
   // ===== NEARBY CREATORS / GEOSPATIAL =====
   // Find creators near your location (creators only on map)
   app.use("/api/creators", nearbyRoutes);
+
+  // ===== MEETUP SCHEDULING =====
+  // Schedule and manage meetups between creators
+  app.use("/api/meetups", meetupRoutes);
+
+  // ===== TWITTER-STYLE CONTENT SHARING =====
+  // Cross-platform sharing with creator tagging and attribution
+  app.use("/api/shares", sharingRoutes);
 
   // ===== ADMIN MANAGEMENT ROUTES =====
   // Platform branding, bookings, site appearance, and gallery management

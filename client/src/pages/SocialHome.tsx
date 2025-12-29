@@ -60,7 +60,7 @@ import {
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
-// Stories Carousel - Facebook/Instagram Style
+// Stories Carousel - THE DUNGEON - Dark & Seductive
 const StoriesCarousel = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -86,7 +86,7 @@ const StoriesCarousel = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/stories/feed'] });
-      toast({ title: "Story posted!", description: "Your story is now live for 24 hours" });
+      toast({ title: "🔥 Story posted!", description: "Now showing in the dungeon for 24 hours" });
     },
   });
 
@@ -114,11 +114,11 @@ const StoriesCarousel = () => {
 
   if (isLoading) {
     return (
-      <div className="flex gap-3 px-4 py-3 overflow-x-auto scrollbar-hide">
+      <div className="flex gap-3 px-4 py-4 overflow-x-auto scrollbar-hide bg-gradient-to-r from-black via-red-950/40 to-black">
         {[...Array(6)].map((_, i) => (
           <div key={i} className="flex-shrink-0 text-center animate-pulse">
-            <div className="w-16 h-16 rounded-full bg-red-900/30" />
-            <div className="h-2 w-12 bg-red-900/30 mt-2 mx-auto rounded" />
+            <div className="w-18 h-18 rounded-full bg-gradient-to-br from-red-900/50 to-black ring-2 ring-red-600/30" />
+            <div className="h-2 w-14 bg-red-900/30 mt-2 mx-auto rounded" />
           </div>
         ))}
       </div>
@@ -127,16 +127,23 @@ const StoriesCarousel = () => {
 
   return (
     <>
-      <div className="flex gap-3 px-4 py-3 overflow-x-auto scrollbar-hide bg-gradient-to-r from-black via-red-950/20 to-black border-b border-red-900/30">
-        {/* Add Story Button */}
+      {/* Header Label */}
+      <div className="flex items-center gap-2 px-4 pt-3 pb-1 bg-gradient-to-r from-black via-red-950/40 to-black">
+        <span className="text-red-500 font-bebas text-lg tracking-wider">🔗 THE DUNGEON</span>
+        <span className="text-red-400/60 text-[10px] uppercase tracking-widest">• Fresh Meat</span>
+      </div>
+
+      <div className="flex gap-4 px-4 py-3 overflow-x-auto scrollbar-hide bg-gradient-to-r from-black via-red-950/40 to-black border-b-2 border-red-600/60 shadow-[0_0_50px_rgba(220,38,38,0.4)] shadow-inner">
+        {/* Add Story Button - Dungeon Entry */}
         <div className="flex-shrink-0 text-center">
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="w-16 h-16 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center border-2 border-dashed border-red-400 hover:border-gold-500 transition-colors"
+            className="w-18 h-18 rounded-full bg-gradient-to-br from-red-800 via-red-950 to-black flex items-center justify-center border-2 border-dashed border-red-500 hover:border-red-300 hover:shadow-[0_0_30px_rgba(220,38,38,0.8)] transition-all group relative overflow-hidden"
           >
-            <Plus className="w-6 h-6 text-white" />
+            <div className="absolute inset-0 bg-gradient-to-t from-red-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Plus className="w-7 h-7 text-red-400 group-hover:text-red-300 group-hover:scale-110 transition-all" />
           </button>
-          <p className="text-xs text-muted-foreground mt-1">Add Story</p>
+          <p className="text-xs text-red-400 mt-1.5 font-bebas tracking-wide">EXPOSE 🍆</p>
           <input
             ref={fileInputRef}
             type="file"
@@ -146,22 +153,22 @@ const StoriesCarousel = () => {
           />
         </div>
 
-        {/* Stories */}
+        {/* Stories - Captured Moments */}
         {stories.map((story: any) => (
           <button
             key={story.userId}
             onClick={() => { setSelectedStory(story); setStoryIndex(0); }}
             className="flex-shrink-0 text-center group"
           >
-            <div className={`w-16 h-16 rounded-full p-0.5 ${story.hasUnviewed ? 'bg-gradient-to-br from-red-500 via-gold-500 to-red-500' : 'bg-gray-600'}`}>
-              <div className="w-full h-full rounded-full bg-black p-0.5">
-                <Avatar className="w-full h-full">
+            <div className={`w-18 h-18 rounded-full p-0.5 ${story.hasUnviewed ? 'bg-gradient-to-br from-red-500 via-pink-500 to-red-600 animate-pulse shadow-[0_0_20px_rgba(220,38,38,0.6)]' : 'bg-gradient-to-br from-gray-700 to-gray-800'}`}>
+              <div className="w-full h-full rounded-full bg-black p-0.5 group-hover:bg-red-950/50 transition-colors">
+                <Avatar className="w-full h-full ring-1 ring-red-600/30 group-hover:ring-red-500/60 transition-all">
                   <AvatarImage src={story.userAvatar} />
-                  <AvatarFallback className="bg-red-900 text-red-100">{story.username?.[0]?.toUpperCase()}</AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-br from-red-900 to-black text-red-200 font-bebas">{story.username?.[0]?.toUpperCase()}</AvatarFallback>
                 </Avatar>
               </div>
             </div>
-            <p className="text-xs text-white/80 mt-1 truncate max-w-[60px] group-hover:text-red-400">
+            <p className="text-xs text-white/70 mt-1.5 truncate max-w-[70px] group-hover:text-red-400 transition-colors font-medium">
               {story.username}
             </p>
           </button>
@@ -351,14 +358,16 @@ const QuickMenu = () => {
   );
 };
 
-// Facebook-style Reactions (beyond just likes)
+// Fuck Buddies Reactions - Raw & Explicit
 const REACTIONS = [
-  { emoji: '❤️', name: 'love', color: 'text-red-500' },
-  { emoji: '🔥', name: 'fire', color: 'text-orange-500' },
-  { emoji: '😍', name: 'heart_eyes', color: 'text-pink-500' },
-  { emoji: '🥵', name: 'hot', color: 'text-red-600' },
-  { emoji: '💦', name: 'splash', color: 'text-blue-400' },
-  { emoji: '🍆', name: 'eggplant', color: 'text-purple-500' },
+  { emoji: '🍆', name: 'dick', color: 'text-purple-500' },
+  { emoji: '🍑', name: 'ass', color: 'text-orange-400' },
+  { emoji: '💦', name: 'cum', color: 'text-blue-300' },
+  { emoji: '🥵', name: 'horny', color: 'text-red-500' },
+  { emoji: '👅', name: 'lick', color: 'text-pink-500' },
+  { emoji: '🔥', name: 'hot', color: 'text-orange-500' },
+  { emoji: '😈', name: 'nasty', color: 'text-purple-400' },
+  { emoji: '🍆💦', name: 'breed', color: 'text-red-600' },
 ];
 
 const ReactionsButton = ({ postId, reactions = {} }: { postId: string; reactions: Record<string, number> }) => {
@@ -588,21 +597,21 @@ const BookmarkButton = ({ postId, isBookmarked }: { postId: string; isBookmarked
   );
 };
 
-// Platform Live Bar - Shows all live creators like TikTok
+// Fuck Buddies Live - Boys Getting Freaky Right Now
 const PlatformLiveBar = () => {
   const { data: liveCreators = [], isLoading } = useQuery({
     queryKey: ['/api/streams/live'],
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 30000,
   });
 
   if (isLoading) {
     return (
-      <div className="bg-gradient-to-r from-red-950/50 via-black to-red-950/50 border-b border-red-500/30 py-3 overflow-hidden">
+      <div className="bg-gradient-to-r from-black via-red-950/40 to-black border-b-2 border-red-600/60 py-4 overflow-hidden shadow-[0_0_40px_rgba(220,38,38,0.4)]">
         <div className="flex gap-4 px-4 animate-pulse">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="flex-shrink-0 text-center">
-              <div className="w-14 h-14 rounded-full bg-red-900/30" />
-              <div className="h-2 w-12 bg-red-900/30 mt-1 mx-auto rounded" />
+              <div className="w-16 h-16 rounded-full bg-red-900/40 ring-2 ring-red-600/50" />
+              <div className="h-2 w-14 bg-red-900/40 mt-2 mx-auto rounded" />
             </div>
           ))}
         </div>
@@ -611,11 +620,14 @@ const PlatformLiveBar = () => {
   }
 
   return (
-    <div className="bg-gradient-to-r from-red-950/50 via-black to-red-950/50 border-b border-red-500/30 py-3 overflow-hidden">
+    <div className="bg-gradient-to-r from-black via-red-950/40 to-black border-b-2 border-red-600/60 py-4 overflow-hidden shadow-[0_0_40px_rgba(220,38,38,0.4)]">
       <div className="flex items-center gap-4 px-4 overflow-x-auto scrollbar-hide">
-        <div className="flex items-center gap-2 flex-shrink-0 pr-4 border-r border-red-500/30">
-          <Radio className="w-5 h-5 text-red-500 animate-pulse" />
-          <span className="text-red-500 font-bebas text-lg tracking-wider">LIVE NOW</span>
+        <div className="flex items-center gap-2 flex-shrink-0 pr-4 border-r-2 border-red-600/50">
+          <Radio className="w-6 h-6 text-red-500 animate-pulse" />
+          <div className="flex flex-col">
+            <span className="text-red-500 font-bebas text-xl tracking-wider">LIVE 🔴</span>
+            <span className="text-red-400/70 text-[10px] uppercase tracking-widest">Boys Getting Nasty</span>
+          </div>
         </div>
 
         {liveCreators.length === 0 ? (
@@ -652,7 +664,7 @@ const PlatformLiveBar = () => {
   );
 };
 
-// Full Profile Section
+// Full Profile Section - Twitter/X Style with Fuck Buddies Vibe
 const ProfileSection = ({ user }: { user: any }) => {
   const [showQR, setShowQR] = useState(false);
   const { toast } = useToast();
@@ -690,72 +702,54 @@ const ProfileSection = ({ user }: { user: any }) => {
     }
   };
 
+  // Format join date
+  const formatJoinDate = (dateString?: string) => {
+    if (!dateString) return 'Recently joined';
+    const date = new Date(dateString);
+    return `Joined ${date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
+  };
+
   return (
-    <Card className="glass-card border-red-900/30 overflow-hidden">
-      {/* Cover Photo */}
-      <div className="relative h-32 md:h-48 bg-gradient-to-r from-red-900 via-red-800 to-red-900">
-        {profile?.coverUrl && (
+    <Card className="glass-card border-red-900/30 overflow-hidden shadow-[0_0_30px_rgba(220,38,38,0.2)]">
+      {/* Cover Photo - Dark & Sexy */}
+      <div className="relative h-36 md:h-52 bg-gradient-to-r from-black via-red-950 to-black">
+        {profile?.coverUrl ? (
           <img src={profile.coverUrl} alt="Cover" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-red-900/50 via-black to-red-950/50" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+
+        {/* Edit Cover Button */}
+        <Link href="/settings/profile">
+          <Button size="sm" variant="outline" className="absolute top-3 right-3 glass-button text-xs">
+            <Camera className="w-3 h-3 mr-1" /> Edit Cover
+          </Button>
+        </Link>
       </div>
 
       <CardContent className="relative -mt-16 md:-mt-20 pb-6">
-        <div className="flex flex-col md:flex-row md:items-end gap-4">
+        {/* Avatar & Action Buttons Row */}
+        <div className="flex items-end justify-between mb-4">
           {/* Avatar */}
-          <div className="relative mx-auto md:mx-0">
-            <Avatar className="w-28 h-28 md:w-36 md:h-36 ring-4 ring-red-500 ring-offset-4 ring-offset-black">
+          <div className="relative">
+            <Avatar className="w-28 h-28 md:w-36 md:h-36 ring-4 ring-red-600 ring-offset-4 ring-offset-black shadow-[0_0_20px_rgba(220,38,38,0.5)]">
               <AvatarImage src={user?.avatarUrl || user?.profileImageUrl} />
-              <AvatarFallback className="bg-red-900 text-red-100 text-3xl">
+              <AvatarFallback className="bg-gradient-to-br from-red-800 to-red-950 text-red-100 text-3xl font-bebas">
                 {user?.displayName?.[0] || user?.username?.[0]?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
             {user?.isVerified && (
-              <div className="absolute -bottom-2 -right-2 bg-blue-500 rounded-full p-1.5">
+              <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1.5 shadow-lg">
                 <Verified className="w-5 h-5 text-white" />
               </div>
             )}
           </div>
 
-          {/* Profile Info */}
-          <div className="flex-1 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-              <h1 className="font-bebas text-3xl text-gold-500">
-                {user?.displayName || user?.username}
-              </h1>
-              {user?.isVerified && (
-                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                  <Verified className="w-3 h-3 mr-1" /> Verified
-                </Badge>
-              )}
-            </div>
-            <p className="text-muted-foreground mb-2">@{user?.username}</p>
-
-            {/* Stats */}
-            <div className="flex items-center justify-center md:justify-start gap-6 text-sm">
-              <div className="text-center">
-                <p className="font-bold text-white">{stats?.postsCount || 0}</p>
-                <p className="text-muted-foreground text-xs">Posts</p>
-              </div>
-              <div className="text-center">
-                <p className="font-bold text-white">{stats?.followersCount || 0}</p>
-                <p className="text-muted-foreground text-xs">Fans</p>
-              </div>
-              <div className="text-center">
-                <p className="font-bold text-white">{stats?.subscribersCount || 0}</p>
-                <p className="text-muted-foreground text-xs">Subscribers</p>
-              </div>
-              <div className="text-center">
-                <p className="font-bold text-white">{stats?.likesCount || 0}</p>
-                <p className="text-muted-foreground text-xs">Likes</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center justify-center md:justify-end gap-2 mt-4 md:mt-0">
-            <Link href="/settings">
-              <Button size="sm" variant="outline" className="glass-button">
+          {/* Action Buttons - Right Aligned */}
+          <div className="flex items-center gap-2">
+            <Link href="/settings/profile">
+              <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white font-bebas">
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Profile
               </Button>
@@ -774,18 +768,42 @@ const ProfileSection = ({ user }: { user: any }) => {
           </div>
         </div>
 
-        {/* Bio */}
-        {profile?.bio && (
-          <p className="mt-4 text-foreground/80 text-center md:text-left max-w-2xl">
-            {profile.bio}
-          </p>
-        )}
+        {/* Name & Username */}
+        <div className="mb-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="font-bebas text-3xl text-gold-500">
+              {user?.displayName || user?.username}
+            </h1>
+            {user?.isVerified && (
+              <Verified className="w-5 h-5 text-blue-400" />
+            )}
+            {profile?.isCreator && (
+              <Badge className="bg-red-600/80 text-xs">🔥 CREATOR</Badge>
+            )}
+          </div>
+          <p className="text-muted-foreground">@{user?.username}</p>
+        </div>
 
-        {/* Location & Website */}
-        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-3 text-sm text-muted-foreground">
+        {/* Bio Section - Twitter Style */}
+        <div className="mb-4">
+          {profile?.bio ? (
+            <p className="text-foreground/90 whitespace-pre-wrap text-sm leading-relaxed">
+              {profile.bio}
+            </p>
+          ) : (
+            <Link href="/settings/profile">
+              <p className="text-red-400/70 text-sm italic cursor-pointer hover:text-red-400">
+                + Add a bio to tell people about yourself...
+              </p>
+            </Link>
+          )}
+        </div>
+
+        {/* Location, Website, Join Date Row - Twitter Style */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mb-4">
           {profile?.location && (
             <span className="flex items-center gap-1">
-              <MapPin className="w-4 h-4" /> {profile.location}
+              <MapPin className="w-4 h-4 text-red-400" /> {profile.location}
             </span>
           )}
           {profile?.websiteUrl && (
@@ -793,35 +811,121 @@ const ProfileSection = ({ user }: { user: any }) => {
               href={profile.websiteUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-red-400 hover:text-red-300"
+              className="flex items-center gap-1 text-red-400 hover:underline"
             >
-              <Globe className="w-4 h-4" /> Website
+              <LinkIcon className="w-4 h-4" /> {profile.websiteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')}
             </a>
+          )}
+          <span className="flex items-center gap-1">
+            <Calendar className="w-4 h-4 text-red-400" /> {formatJoinDate(user?.createdAt)}
+          </span>
+        </div>
+
+        {/* Following / Followers - Twitter Style */}
+        <div className="flex items-center gap-4 mb-4">
+          <Link href={`/creator/${user?.id}/following`}>
+            <span className="hover:underline cursor-pointer">
+              <span className="font-bold text-white">{stats?.followingCount || 0}</span>
+              <span className="text-muted-foreground ml-1">Following</span>
+            </span>
+          </Link>
+          <Link href={`/creator/${user?.id}/followers`}>
+            <span className="hover:underline cursor-pointer">
+              <span className="font-bold text-white">{stats?.followersCount || 0}</span>
+              <span className="text-muted-foreground ml-1">Fans</span>
+            </span>
+          </Link>
+          <Link href={`/creator/${user?.id}/subscribers`}>
+            <span className="hover:underline cursor-pointer">
+              <span className="font-bold text-red-400">{stats?.subscribersCount || 0}</span>
+              <span className="text-muted-foreground ml-1">Subscribers</span>
+            </span>
+          </Link>
+        </div>
+
+        {/* Social Media Links - Twitter Style */}
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          {profile?.socialLinks?.twitter && (
+            <a href={profile.socialLinks.twitter} target="_blank" rel="noopener noreferrer"
+               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/50 border border-gray-700 hover:bg-gray-800 transition-colors text-sm">
+              <Twitter className="w-4 h-4 text-white" />
+              <span className="text-gray-300">X / Twitter</span>
+            </a>
+          )}
+          {profile?.socialLinks?.instagram && (
+            <a href={profile.socialLinks.instagram} target="_blank" rel="noopener noreferrer"
+               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-pink-500/30 hover:from-purple-600/30 hover:to-pink-600/30 transition-colors text-sm">
+              <Instagram className="w-4 h-4 text-pink-400" />
+              <span className="text-pink-300">Instagram</span>
+            </a>
+          )}
+          {profile?.socialLinks?.tiktok && (
+            <a href={profile.socialLinks.tiktok} target="_blank" rel="noopener noreferrer"
+               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/50 border border-gray-700 hover:bg-gray-800 transition-colors text-sm">
+              <span className="text-white text-sm">🎵</span>
+              <span className="text-gray-300">TikTok</span>
+            </a>
+          )}
+          {profile?.socialLinks?.onlyfans && (
+            <a href={profile.socialLinks.onlyfans} target="_blank" rel="noopener noreferrer"
+               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600/20 border border-blue-500/30 hover:bg-blue-600/30 transition-colors text-sm">
+              <span className="text-blue-400 text-sm">🔞</span>
+              <span className="text-blue-300">OnlyFans</span>
+            </a>
+          )}
+          {!profile?.socialLinks?.twitter && !profile?.socialLinks?.instagram && (
+            <Link href="/settings/profile">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-dashed border-red-600/50 hover:bg-red-900/20 transition-colors text-sm text-red-400 cursor-pointer">
+                <Plus className="w-4 h-4" /> Add Social Links
+              </span>
+            </Link>
           )}
         </div>
 
-        {/* Social Links */}
-        <div className="flex items-center justify-center md:justify-start gap-3 mt-4">
-          {profile?.socialLinks?.instagram && (
-            <a href={profile.socialLinks.instagram} target="_blank" rel="noopener noreferrer"
-               className="p-2 rounded-full bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 transition-colors">
-              <Instagram className="w-5 h-5" />
-            </a>
-          )}
-          {profile?.socialLinks?.twitter && (
-            <a href={profile.socialLinks.twitter} target="_blank" rel="noopener noreferrer"
-               className="p-2 rounded-full bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors">
-              <Twitter className="w-5 h-5" />
-            </a>
-          )}
+        {/* Sexual Preferences / Kinks (Fuck Buddies Specific) */}
+        {profile?.sexualPreferences && (
+          <div className="mb-4">
+            <p className="text-xs text-red-400 font-bebas uppercase tracking-wider mb-2">🔥 Into</p>
+            <div className="flex flex-wrap gap-1.5">
+              {profile.sexualPreferences.map((pref: string, idx: number) => (
+                <Badge key={idx} className="bg-red-900/50 text-red-300 border-red-600/30 text-xs">
+                  {pref}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Profile Stats Bar */}
+        <div className="grid grid-cols-4 gap-2 p-3 bg-black/40 rounded-lg border border-red-900/30 mb-4">
+          <div className="text-center">
+            <p className="font-bebas text-xl text-white">{stats?.postsCount || 0}</p>
+            <p className="text-xs text-muted-foreground">Posts</p>
+          </div>
+          <div className="text-center border-l border-red-900/30">
+            <p className="font-bebas text-xl text-white">{stats?.mediaCount || 0}</p>
+            <p className="text-xs text-muted-foreground">Media</p>
+          </div>
+          <div className="text-center border-l border-red-900/30">
+            <p className="font-bebas text-xl text-red-400">{stats?.likesCount || 0}</p>
+            <p className="text-xs text-muted-foreground">Likes</p>
+          </div>
+          <div className="text-center border-l border-red-900/30">
+            <p className="font-bebas text-xl text-gold-500">${((stats?.earningsTotal || 0) / 100).toFixed(0)}</p>
+            <p className="text-xs text-muted-foreground">Earned</p>
+          </div>
+        </div>
+
+        {/* Copy Profile Link */}
+        <div className="flex items-center gap-2">
           <Button
             size="sm"
-            variant="ghost"
-            className="text-muted-foreground hover:text-white"
+            variant="outline"
+            className="glass-button flex-1"
             onClick={copyProfileLink}
           >
             <Copy className="w-4 h-4 mr-2" />
-            Copy Link
+            Copy Profile Link
           </Button>
         </div>
 
@@ -844,7 +948,7 @@ const ProfileSection = ({ user }: { user: any }) => {
   );
 };
 
-// Post Composer
+// Post Composer - Share Your Dirty Thoughts
 const PostComposer = () => {
   const [content, setContent] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
@@ -1306,6 +1410,264 @@ const FanzFeedTab = () => {
   );
 };
 
+// FanzCock Tab Content - TikTok Style Short Videos
+const FanzCockTab = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [muted, setMuted] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const { data: videos = [], isLoading } = useQuery({
+    queryKey: ['/api/fanzcock/feed'],
+    refetchInterval: 60000,
+  });
+
+  // Fallback videos for demo
+  const demoVideos = [
+    { id: '1', creatorId: 'demo1', creator: { username: 'hotboy_mike', avatarUrl: '', isVerified: true }, videoUrl: '', thumbnailUrl: '', caption: '🔥 New content dropping tonight... who wants a preview? 💦 #HornyBoys #FuckMe', likes: 12847, comments: 892, shares: 234, views: 98234 },
+    { id: '2', creatorId: 'demo2', creator: { username: 'daddy_jake', avatarUrl: '', isVerified: true }, videoUrl: '', thumbnailUrl: '', caption: 'When daddy comes home early 😈🍆 #DaddysBoy #BreedMe', likes: 8923, comments: 567, shares: 189, views: 67890 },
+    { id: '3', creatorId: 'demo3', creator: { username: 'twink_tyler', avatarUrl: '', isVerified: false }, videoUrl: '', thumbnailUrl: '', caption: 'POV: You caught me 🥵👀 #TwinkSlut #Caught', likes: 15678, comments: 1234, shares: 456, views: 123456 },
+    { id: '4', creatorId: 'demo4', creator: { username: 'alpha_chad', avatarUrl: '', isVerified: true }, videoUrl: '', thumbnailUrl: '', caption: 'Top energy only 💪🔥 Who can handle it? #TopEnergy #RawDog', likes: 21345, comments: 1876, shares: 678, views: 234567 },
+    { id: '5', creatorId: 'demo5', creator: { username: 'bottom_boi', avatarUrl: '', isVerified: false }, videoUrl: '', thumbnailUrl: '', caption: 'Looking for someone to use me tonight 🍑💦 #BottomBitch #UseMe', likes: 9876, comments: 654, shares: 321, views: 87654 },
+  ];
+
+  const allVideos = videos.length > 0 ? videos : demoVideos;
+
+  // Handle scroll to change videos
+  const handleScroll = () => {
+    if (!containerRef.current) return;
+    const scrollTop = containerRef.current.scrollTop;
+    const height = containerRef.current.clientHeight;
+    const newIndex = Math.round(scrollTop / height);
+
+    if (newIndex !== currentIndex && newIndex >= 0 && newIndex < allVideos.length) {
+      setCurrentIndex(newIndex);
+      // Pause previous video
+      if (videoRefs.current[currentIndex]) {
+        videoRefs.current[currentIndex]?.pause();
+      }
+      // Play new video
+      if (videoRefs.current[newIndex]) {
+        videoRefs.current[newIndex]?.play();
+      }
+    }
+  };
+
+  const likeMutation = useMutation({
+    mutationFn: async (videoId: string) => {
+      return apiRequest('POST', '/api/fanzcock/like', { videoId });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/fanzcock/feed'] });
+      toast({ title: '🍆 Liked!', description: 'Added to your favorites' });
+    },
+  });
+
+  const formatCount = (count: number) => {
+    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toString();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="h-[calc(100vh-200px)] bg-black flex items-center justify-center rounded-lg">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-red-400 font-bebas text-xl">Loading FanzCock...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      {/* TikTok-style Header */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-3xl">🐓</span>
+          <h3 className="font-bebas text-xl text-red-500">FANZCOCK</h3>
+          <Badge className="bg-gradient-to-r from-red-600 to-pink-600 text-xs animate-pulse">TikTok Style</Badge>
+        </div>
+        <Link href="/fanzcock/upload">
+          <Button size="sm" className="bg-red-600 hover:bg-red-700">
+            <Plus className="w-4 h-4 mr-1" /> Upload
+          </Button>
+        </Link>
+      </div>
+
+      {/* TikTok-style Vertical Video Feed */}
+      <div
+        ref={containerRef}
+        onScroll={handleScroll}
+        className="h-[calc(100vh-280px)] overflow-y-scroll snap-y snap-mandatory scrollbar-hide rounded-xl bg-black"
+        style={{ scrollSnapType: 'y mandatory' }}
+      >
+        {allVideos.map((video: any, index: number) => (
+          <div
+            key={video.id}
+            className="relative h-full w-full snap-start snap-always"
+            style={{ minHeight: 'calc(100vh - 280px)' }}
+          >
+            {/* Video Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-red-950 via-black to-red-950">
+              {video.thumbnailUrl ? (
+                <img src={video.thumbnailUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <Play className="w-20 h-20 text-red-500/50 mx-auto mb-4" />
+                    <p className="text-red-400/70 font-bebas text-lg">Video Preview</p>
+                  </div>
+                </div>
+              )}
+              {video.videoUrl && (
+                <video
+                  ref={el => videoRefs.current[index] = el}
+                  src={video.videoUrl}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loop
+                  playsInline
+                  muted={muted}
+                  onClick={() => {
+                    const vid = videoRefs.current[index];
+                    if (vid?.paused) vid.play();
+                    else vid?.pause();
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80" />
+
+            {/* Right Side Actions - TikTok Style */}
+            <div className="absolute right-3 bottom-32 flex flex-col items-center gap-5">
+              {/* Creator Avatar */}
+              <Link href={`/creator/${video.creatorId}`}>
+                <div className="relative">
+                  <Avatar className="w-12 h-12 ring-2 ring-red-500">
+                    <AvatarImage src={video.creator?.avatarUrl} />
+                    <AvatarFallback className="bg-red-900 text-red-100 font-bebas">
+                      {video.creator?.username?.[0]?.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-red-600 rounded-full w-5 h-5 flex items-center justify-center">
+                    <Plus className="w-3 h-3 text-white" />
+                  </div>
+                </div>
+              </Link>
+
+              {/* Like */}
+              <button
+                onClick={() => likeMutation.mutate(video.id)}
+                className="flex flex-col items-center group"
+              >
+                <div className="w-12 h-12 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-red-600/50 transition-colors">
+                  <Heart className="w-7 h-7 text-white group-hover:text-red-400 group-hover:fill-red-400" />
+                </div>
+                <span className="text-white text-xs mt-1">{formatCount(video.likes)}</span>
+              </button>
+
+              {/* Comment */}
+              <button className="flex flex-col items-center group">
+                <div className="w-12 h-12 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-red-600/50 transition-colors">
+                  <MessageCircle className="w-7 h-7 text-white" />
+                </div>
+                <span className="text-white text-xs mt-1">{formatCount(video.comments)}</span>
+              </button>
+
+              {/* Share */}
+              <button className="flex flex-col items-center group">
+                <div className="w-12 h-12 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-red-600/50 transition-colors">
+                  <Share2 className="w-7 h-7 text-white" />
+                </div>
+                <span className="text-white text-xs mt-1">{formatCount(video.shares)}</span>
+              </button>
+
+              {/* Bookmark */}
+              <button className="flex flex-col items-center group">
+                <div className="w-12 h-12 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-gold-500/50 transition-colors">
+                  <Bookmark className="w-7 h-7 text-white" />
+                </div>
+              </button>
+
+              {/* Sound Toggle */}
+              <button
+                onClick={() => setMuted(!muted)}
+                className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center"
+              >
+                {muted ? (
+                  <span className="text-white text-lg">🔇</span>
+                ) : (
+                  <span className="text-white text-lg">🔊</span>
+                )}
+              </button>
+            </div>
+
+            {/* Bottom Info - TikTok Style */}
+            <div className="absolute left-3 right-16 bottom-4">
+              {/* Creator Info */}
+              <div className="flex items-center gap-2 mb-2">
+                <Link href={`/creator/${video.creatorId}`}>
+                  <span className="font-bold text-white hover:underline">@{video.creator?.username}</span>
+                </Link>
+                {video.creator?.isVerified && (
+                  <Verified className="w-4 h-4 text-blue-400" />
+                )}
+              </div>
+
+              {/* Caption */}
+              <p className="text-white text-sm mb-2 line-clamp-2">
+                {video.caption}
+              </p>
+
+              {/* Music/Sound - Scrolling Text */}
+              <div className="flex items-center gap-2 overflow-hidden">
+                <Music className="w-4 h-4 text-white flex-shrink-0" />
+                <div className="overflow-hidden">
+                  <p className="text-white text-xs whitespace-nowrap animate-marquee">
+                    🎵 Original Sound - @{video.creator?.username} • FanzCock Original
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Video Index Indicator */}
+            <div className="absolute top-3 right-3 bg-black/50 px-2 py-1 rounded text-xs text-white">
+              {index + 1} / {allVideos.length}
+            </div>
+
+            {/* Views */}
+            <div className="absolute top-3 left-3 bg-black/50 px-2 py-1 rounded text-xs text-white flex items-center gap-1">
+              <Eye className="w-3 h-3" /> {formatCount(video.views)}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-white/50 text-xs flex flex-col items-center animate-bounce">
+        <ChevronRight className="w-4 h-4 rotate-90" />
+        <span>Scroll for more</span>
+      </div>
+
+      {/* CSS for marquee animation */}
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          animation: marquee 10s linear infinite;
+        }
+      `}</style>
+    </div>
+  );
+};
+
 // Live Events Tab Content
 const LiveEventsTab = () => {
   const { data: events = [], isLoading } = useQuery({
@@ -1407,6 +1769,124 @@ const LiveEventsTab = () => {
   );
 };
 
+// Trending Hashtags - What's Hot Right Now
+const TrendingHashtags = () => {
+  const { data: trending = [] } = useQuery({
+    queryKey: ['/api/hashtags/trending'],
+    refetchInterval: 60000,
+  });
+
+  // Fallback trending tags if API returns empty
+  const defaultTags = [
+    { tag: '#HornyBoys', count: 2847, hot: true },
+    { tag: '#FuckMeHard', count: 1923, hot: true },
+    { tag: '#BreedMe', count: 1654 },
+    { tag: '#DaddysBoy', count: 1432 },
+    { tag: '#TwinkSlut', count: 1287 },
+    { tag: '#RawDog', count: 1156, hot: true },
+    { tag: '#TopEnergy', count: 998 },
+    { tag: '#BottomBitch', count: 876 },
+  ];
+
+  const tags = trending.length > 0 ? trending : defaultTags;
+
+  return (
+    <div className="mb-4">
+      <div className="flex items-center gap-2 mb-2">
+        <TrendingUp className="w-4 h-4 text-red-500" />
+        <span className="text-sm font-bebas text-red-400 uppercase tracking-wider">Trending Now 🔥</span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {tags.slice(0, 8).map((item: any, idx: number) => (
+          <Link key={idx} href={`/explore?tag=${encodeURIComponent(item.tag)}`}>
+            <Badge
+              className={`cursor-pointer transition-all hover:scale-105 ${
+                item.hot
+                  ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white border-0 shadow-[0_0_10px_rgba(220,38,38,0.5)] animate-pulse'
+                  : 'bg-red-950/50 text-red-400 border-red-600/30 hover:bg-red-900/50'
+              }`}
+            >
+              {item.tag}
+              <span className="ml-1 text-[10px] opacity-70">{item.count?.toLocaleString()}</span>
+            </Badge>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Fuck Buddies List - Your Sexual Network
+const FuckBuddiesList = () => {
+  const { data: buddies = [] } = useQuery({
+    queryKey: ['/api/fuck-buddies'],
+    refetchInterval: 30000,
+  });
+
+  if (buddies.length === 0) {
+    return (
+      <Card className="mb-4 bg-black/40 border-red-600/30">
+        <CardContent className="p-4 text-center">
+          <Users className="w-8 h-8 text-red-500 mx-auto mb-2" />
+          <p className="text-sm text-red-400 font-bebas">NO FUCK BUDDIES YET</p>
+          <p className="text-xs text-muted-foreground mt-1">Connect with boys to build your network</p>
+          <Link href="/explore">
+            <Button size="sm" className="mt-3 bg-red-600 hover:bg-red-700">
+              Find Buddies 🍆
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="mb-4">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span className="text-xl">🍆</span>
+          <span className="text-sm font-bebas text-red-400 uppercase tracking-wider">Your Fuck Buddies</span>
+          <Badge className="bg-red-600 text-xs">{buddies.length}</Badge>
+        </div>
+        <Link href="/fuck-buddies">
+          <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300 text-xs">
+            See All
+          </Button>
+        </Link>
+      </div>
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+        {buddies.slice(0, 10).map((buddy: any) => (
+          <Link key={buddy.id} href={`/creator/${buddy.id}`}>
+            <div className="flex-shrink-0 text-center group cursor-pointer">
+              <div className="relative">
+                <Avatar className={`w-12 h-12 ring-2 ${buddy.isOnline ? 'ring-green-500' : 'ring-red-600/50'} ring-offset-2 ring-offset-black group-hover:ring-red-400 transition-all`}>
+                  <AvatarImage src={buddy.avatarUrl} />
+                  <AvatarFallback className="bg-red-900 text-red-100 text-sm">{buddy.username?.[0]?.toUpperCase()}</AvatarFallback>
+                </Avatar>
+                {buddy.isOnline && (
+                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-black" />
+                )}
+                {buddy.isLive && (
+                  <span className="absolute -top-1 -right-1 bg-red-600 text-[8px] px-1 rounded text-white font-bold animate-pulse">LIVE</span>
+                )}
+              </div>
+              <p className="text-[10px] text-white/80 mt-1 truncate max-w-[50px] group-hover:text-red-400">{buddy.username}</p>
+            </div>
+          </Link>
+        ))}
+        <Link href="/explore">
+          <div className="flex-shrink-0 text-center cursor-pointer">
+            <div className="w-12 h-12 rounded-full bg-red-900/30 border-2 border-dashed border-red-600/50 flex items-center justify-center hover:border-red-500 hover:bg-red-900/50 transition-all">
+              <Plus className="w-5 h-5 text-red-400" />
+            </div>
+            <p className="text-[10px] text-red-400 mt-1">Add</p>
+          </div>
+        </Link>
+      </div>
+    </div>
+  );
+};
+
 // Main Social Home Component
 export default function SocialHome() {
   const { user } = useAuth();
@@ -1427,37 +1907,73 @@ export default function SocialHome() {
         {/* Profile Section */}
         <ProfileSection user={user} />
 
-        {/* Feed Tabs */}
+        {/* Fuck Buddies Social - Tabs */}
         <div className="mt-6">
+          {/* Section Header */}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bebas text-2xl text-red-500 flex items-center gap-2">
+              <span className="text-3xl">🍆</span> FUCK BUDDIES SOCIAL
+            </h2>
+            <Link href="/explore">
+              <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300">
+                Explore <TrendingUp className="w-4 h-4 ml-1" />
+              </Button>
+            </Link>
+          </div>
+
+          {/* Trending Hashtags */}
+          <TrendingHashtags />
+
+          {/* Fuck Buddies Section - Moved Above Friends List */}
+          <Card className="mb-4 bg-gradient-to-r from-black via-red-950/30 to-black border-2 border-red-600/50 shadow-[0_0_25px_rgba(220,38,38,0.3)]">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bebas text-xl text-red-500 flex items-center gap-2">
+                  <span className="text-2xl">🍆</span> FUCK BUDDIES
+                  <Badge className="bg-red-600/80 text-xs animate-pulse">HOT</Badge>
+                </h3>
+                <Link href="/fuck-buddies">
+                  <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300 text-xs">
+                    Manage <Users className="w-3 h-3 ml-1" />
+                  </Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {/* Fuck Buddies List (Friends) */}
+              <FuckBuddiesList />
+            </CardContent>
+          </Card>
+
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full glass-panel border-red-900/30 p-1 mb-4 grid grid-cols-4">
+            <TabsList className="w-full bg-black/60 border-2 border-red-600/50 p-1 mb-4 grid grid-cols-4 shadow-[0_0_20px_rgba(220,38,38,0.3)]">
               <TabsTrigger
                 value="my-feed"
-                className="data-[state=active]:bg-red-600 data-[state=active]:text-white font-bebas"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-700 data-[state=active]:to-red-900 data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(220,38,38,0.5)] font-bebas text-red-400"
               >
                 <Flame className="w-4 h-4 mr-1 md:mr-2" />
-                <span className="hidden md:inline">My Feed</span>
+                <span className="hidden md:inline">Feed</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="fanzcock"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-600 data-[state=active]:to-red-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(236,72,153,0.5)] font-bebas text-pink-400"
+              >
+                <span className="text-lg mr-1">🐓</span>
+                <span className="hidden md:inline">FanzCock</span>
               </TabsTrigger>
               <TabsTrigger
                 value="infinity-feed"
-                className="data-[state=active]:bg-red-600 data-[state=active]:text-white font-bebas"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-700 data-[state=active]:to-red-900 data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(220,38,38,0.5)] font-bebas text-red-400"
               >
                 <Zap className="w-4 h-4 mr-1 md:mr-2" />
-                <span className="hidden md:inline">Infinity</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="fanz-feed"
-                className="data-[state=active]:bg-red-600 data-[state=active]:text-white font-bebas"
-              >
-                <Star className="w-4 h-4 mr-1 md:mr-2" />
-                <span className="hidden md:inline">Fanz</span>
+                <span className="hidden md:inline">Explore</span>
               </TabsTrigger>
               <TabsTrigger
                 value="live-events"
-                className="data-[state=active]:bg-red-600 data-[state=active]:text-white font-bebas"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-700 data-[state=active]:to-red-900 data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(220,38,38,0.5)] font-bebas text-red-400"
               >
-                <Radio className="w-4 h-4 mr-1 md:mr-2" />
-                <span className="hidden md:inline">Live</span>
+                <Radio className="w-4 h-4 mr-1 md:mr-2 animate-pulse" />
+                <span className="hidden md:inline">Live 🔴</span>
               </TabsTrigger>
             </TabsList>
 
@@ -1465,12 +1981,12 @@ export default function SocialHome() {
               <MyFeedTab />
             </TabsContent>
 
-            <TabsContent value="infinity-feed" className="mt-0">
-              <InfinityFeedTab />
+            <TabsContent value="fanzcock" className="mt-0">
+              <FanzCockTab />
             </TabsContent>
 
-            <TabsContent value="fanz-feed" className="mt-0">
-              <FanzFeedTab />
+            <TabsContent value="infinity-feed" className="mt-0">
+              <InfinityFeedTab />
             </TabsContent>
 
             <TabsContent value="live-events" className="mt-0">
