@@ -21,6 +21,7 @@ import safetyRoutes from './routes/safetyRoutes';
 import aiRoutes from './routes/aiRoutes';
 import aiGatewayRoutes from './routes/aiGatewayRoutes';
 import scheduledDropsRoutes from './routes/scheduledDropsRoutes';
+import nearbyRoutes from './routes/nearbyRoutes';
 // Admin Management Routes
 import brandingRoutes from './routes/admin/branding';
 import bookingsRoutes from './routes/admin/bookings';
@@ -291,6 +292,10 @@ export function registerRoutes(app: Express) {
   // ===== SCHEDULED DROPS / CONTENT CALENDAR =====
   // Creator content schedule visible on profile
   app.use("/api/scheduled-drops", scheduledDropsRoutes);
+
+  // ===== NEARBY CREATORS / GEOSPATIAL =====
+  // Find creators near your location (creators only on map)
+  app.use("/api/creators", nearbyRoutes);
 
   // ===== ADMIN MANAGEMENT ROUTES =====
   // Platform branding, bookings, site appearance, and gallery management

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,11 +52,11 @@ export default function Settings() {
   });
 
   // Update state when creator profile loads
-  useState(() => {
+  useEffect(() => {
     if (creatorProfile?.showScheduleOnProfile !== undefined) {
       setShowScheduleOnProfile(creatorProfile.showScheduleOnProfile);
     }
-  });
+  }, [creatorProfile?.showScheduleOnProfile]);
 
   const toggleScheduleVisibilityMutation = useMutation({
     mutationFn: async (show: boolean) => {
@@ -334,6 +334,47 @@ export default function Settings() {
                   {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
                 </Button>
               </form>
+            </CardContent>
+          </Card>
+
+          {/* Creator Settings Card */}
+          <Card className="bg-gradient-to-br from-gray-900 via-black to-gray-900 border-2 border-gray-800/50 overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-orange-950/30 to-amber-950/30 border-b border-gray-800/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-orange-600 to-amber-600 rounded-lg">
+                  <Video className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl font-black uppercase tracking-wide text-white">
+                    Creator Settings
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Configure your creator profile and content settings
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-6">
+              <div className="flex items-center justify-between p-5 bg-gradient-to-r from-gray-900/50 to-gray-800/50 border border-gray-700/50 rounded-xl hover:border-orange-500/30 transition-all">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-gradient-to-br from-orange-600 to-amber-600 rounded-lg">
+                    <Calendar className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-white uppercase tracking-wide">Show Schedule on Profile</h4>
+                    <p className="text-sm text-gray-400">
+                      Display your upcoming content drops calendar on your public profile
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={showScheduleOnProfile}
+                  onCheckedChange={handleScheduleToggle}
+                  disabled={toggleScheduleVisibilityMutation.isPending}
+                  className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-orange-600 data-[state=checked]:to-amber-600"
+                  data-testid="schedule-visibility-switch"
+                />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

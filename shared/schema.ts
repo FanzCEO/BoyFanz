@@ -281,6 +281,34 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Creator Locations table - for nearby/geospatial features (CREATORS ONLY)
+export const creatorLocations = pgTable(
+  "creator_locations",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    userId: varchar("user_id")
+      .notNull()
+      .unique()
+      .references(() => users.id, { onDelete: "cascade" }),
+    lat: decimal("lat", { precision: 10, scale: 7 }).notNull(), // Latitude with high precision
+    lng: decimal("lng", { precision: 10, scale: 7 }).notNull(), // Longitude with high precision
+    city: varchar("city", { length: 100 }),
+    state: varchar("state", { length: 100 }),
+    country: varchar("country", { length: 100 }).default("US"),
+    isVisible: boolean("is_visible").default(true).notNull(), // Allow creators to hide from map
+    lastUpdated: timestamp("last_updated").defaultNow(),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_creator_locations_user").on(table.userId),
+    index("idx_creator_locations_visible").on(table.isVisible),
+    // Geospatial index for efficient nearby queries
+    index("idx_creator_locations_coords").on(table.lat, table.lng),
+  ],
+);
+
 // Social Accounts table - links social provider accounts to users
 export const socialAccounts = pgTable(
   "social_accounts",
@@ -10494,8 +10522,8 @@ export const creatorAdSettings = pgTable("creator_ad_settings", {
   index("idx_creator_ad_settings_charity").on(table.donateToCharity),
 ]);
 
-// Track ad impressions
-export const adImpressions = pgTable("ad_impressions", {
+// Track charity ad impressions
+export const charityAdImpressions = pgTable("charity_ad_impressions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   adId: varchar("ad_id").notNull().references(() => ads.id, { onDelete: "cascade" }),
   creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
@@ -10510,17 +10538,17 @@ export const adImpressions = pgTable("ad_impressions", {
   viewDuration: integer("view_duration"), // Seconds
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
-  index("idx_ad_impressions_ad").on(table.adId),
-  index("idx_ad_impressions_creator").on(table.creatorId),
-  index("idx_ad_impressions_date").on(table.createdAt),
-  index("idx_ad_impressions_session").on(table.sessionId),
+  index("idx_charity_ad_impressions_ad").on(table.adId),
+  index("idx_charity_ad_impressions_creator").on(table.creatorId),
+  index("idx_charity_ad_impressions_date").on(table.createdAt),
+  index("idx_charity_ad_impressions_session").on(table.sessionId),
 ]);
 
-// Track ad clicks
-export const adClicks = pgTable("ad_clicks", {
+// Track charity ad clicks
+export const charityAdClicks = pgTable("charity_ad_clicks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   adId: varchar("ad_id").notNull().references(() => ads.id, { onDelete: "cascade" }),
-  impressionId: varchar("impression_id").references(() => adImpressions.id, { onDelete: "set null" }),
+  impressionId: varchar("impression_id").references(() => charityAdImpressions.id, { onDelete: "set null" }),
   creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   viewerId: varchar("viewer_id").references(() => users.id, { onDelete: "set null" }),
   earnedAmount: decimal("earned_amount", { precision: 8, scale: 4 }).default("0"),
@@ -10529,9 +10557,9 @@ export const adClicks = pgTable("ad_clicks", {
   referrer: varchar("referrer"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
-  index("idx_ad_clicks_ad").on(table.adId),
-  index("idx_ad_clicks_creator").on(table.creatorId),
-  index("idx_ad_clicks_date").on(table.createdAt),
+  index("idx_charity_ad_clicks_ad").on(table.adId),
+  index("idx_charity_ad_clicks_creator").on(table.creatorId),
+  index("idx_charity_ad_clicks_date").on(table.createdAt),
 ]);
 
 // Daily revenue aggregation per creator
