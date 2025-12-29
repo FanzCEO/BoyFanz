@@ -123,8 +123,8 @@ const STATUS_COLORS = {
   pending: "bg-yellow-500",
   failed: "bg-red-500",
   cancelled: "bg-gray-500",
-  refunded: "bg-blue-500",
-  disputed: "bg-purple-500"
+  refunded: "bg-orange-500",
+  disputed: "bg-red-500"
 };
 
 const RISK_COLORS = {

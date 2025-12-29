@@ -186,12 +186,12 @@ export default function PostsManagement() {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'photo': return 'bg-blue-500 text-white';
-      case 'video': return 'bg-purple-500 text-white';
+      case 'photo': return 'bg-orange-500 text-white';
+      case 'video': return 'bg-red-500 text-white';
       case 'audio': return 'bg-green-500 text-white';
       case 'text': return 'bg-gray-500 text-white';
       case 'reel': return 'bg-orange-500 text-white';
-      case 'story': return 'bg-pink-500 text-white';
+      case 'story': return 'bg-rose-500 text-white';
       case 'live': return 'bg-red-500 text-white';
       default: return 'bg-muted text-muted-foreground';
     }
@@ -201,7 +201,7 @@ export default function PostsManagement() {
     switch (visibility) {
       case 'free': return <Badge className="bg-green-500 text-white">Free</Badge>;
       case 'premium': return <Badge className="bg-yellow-500 text-white">Premium</Badge>;
-      case 'subscribers_only': return <Badge className="bg-purple-500 text-white">Subscribers</Badge>;
+      case 'subscribers_only': return <Badge className="bg-red-500 text-white">Subscribers</Badge>;
       default: return <Badge variant="outline">Unknown</Badge>;
     }
   };
@@ -402,12 +402,12 @@ export default function PostsManagement() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-blue-500" />
+              <div className="h-10 w-10 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-orange-500" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Total Views</p>
-                <p className="text-xl font-bold text-blue-500" data-testid="total-views">
+                <p className="text-xl font-bold text-orange-500" data-testid="total-views">
                   {postsStats?.totalViews?.toLocaleString() || 0}
                 </p>
               </div>
@@ -418,12 +418,12 @@ export default function PostsManagement() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
-                <DollarSign className="h-5 w-5 text-purple-500" />
+              <div className="h-10 w-10 bg-red-500/10 rounded-lg flex items-center justify-center">
+                <DollarSign className="h-5 w-5 text-red-500" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Revenue</p>
-                <p className="text-xl font-bold text-purple-500" data-testid="total-revenue">
+                <p className="text-xl font-bold text-red-500" data-testid="total-revenue">
                   ${(postsStats?.totalRevenue || 0).toLocaleString()}
                 </p>
               </div>

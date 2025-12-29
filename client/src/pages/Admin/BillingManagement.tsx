@@ -181,11 +181,11 @@ const invoiceSchema = z.object({
 
 const STATUS_COLORS = {
   draft: "bg-gray-500",
-  sent: "bg-blue-500",
+  sent: "bg-orange-500",
   paid: "bg-green-500",
   overdue: "bg-red-500",
   cancelled: "bg-gray-600",
-  refunded: "bg-purple-500"
+  refunded: "bg-red-500"
 };
 
 const CYCLE_COLORS = {

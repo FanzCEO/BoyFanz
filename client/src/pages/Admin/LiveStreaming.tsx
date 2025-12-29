@@ -184,7 +184,7 @@ export default function LiveStreaming() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'live': return <Badge className="bg-red-500 text-white animate-pulse"><Radio className="w-3 h-3 mr-1" />Live</Badge>;
-      case 'scheduled': return <Badge className="bg-blue-500 text-white"><Calendar className="w-3 h-3 mr-1" />Scheduled</Badge>;
+      case 'scheduled': return <Badge className="bg-orange-500 text-white"><Calendar className="w-3 h-3 mr-1" />Scheduled</Badge>;
       case 'ended': return <Badge className="bg-gray-500 text-white"><StopCircle className="w-3 h-3 mr-1" />Ended</Badge>;
       case 'cancelled': return <Badge className="bg-red-500 text-white"><XCircle className="w-3 h-3 mr-1" />Cancelled</Badge>;
       default: return <Badge variant="outline">Unknown</Badge>;
@@ -195,7 +195,7 @@ export default function LiveStreaming() {
     switch (type) {
       case 'public': return <Badge className="bg-green-500 text-white"><Globe className="w-3 h-3 mr-1" />Public</Badge>;
       case 'private': return <Badge className="bg-orange-500 text-white"><Shield className="w-3 h-3 mr-1" />Private</Badge>;
-      case 'subscribers_only': return <Badge className="bg-purple-500 text-white"><Star className="w-3 h-3 mr-1" />Subscribers</Badge>;
+      case 'subscribers_only': return <Badge className="bg-red-500 text-white"><Star className="w-3 h-3 mr-1" />Subscribers</Badge>;
       default: return <Badge variant="outline">Unknown</Badge>;
     }
   };
@@ -205,9 +205,9 @@ export default function LiveStreaming() {
     const bitrate = stream.bitrate || 0;
     
     if (quality === '4K' || bitrate > 15000) {
-      return <Badge className="bg-purple-500 text-white">4K Ultra</Badge>;
+      return <Badge className="bg-red-500 text-white">4K Ultra</Badge>;
     } else if (quality === '1080p' || bitrate > 8000) {
-      return <Badge className="bg-blue-500 text-white">1080p HD</Badge>;
+      return <Badge className="bg-orange-500 text-white">1080p HD</Badge>;
     } else if (quality === '720p' || bitrate > 3000) {
       return <Badge className="bg-green-500 text-white">720p HD</Badge>;
     } else if (quality === '480p' || bitrate > 1000) {
@@ -380,12 +380,12 @@ export default function LiveStreaming() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                <Users className="h-5 w-5 text-blue-500" />
+              <div className="h-10 w-10 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                <Users className="h-5 w-5 text-orange-500" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Live Viewers</p>
-                <p className="text-xl font-bold text-blue-500" data-testid="live-viewers">
+                <p className="text-xl font-bold text-orange-500" data-testid="live-viewers">
                   {streamStats?.totalViewers?.toLocaleString() || 0}
                 </p>
               </div>
@@ -412,12 +412,12 @@ export default function LiveStreaming() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
-                <DollarSign className="h-5 w-5 text-purple-500" />
+              <div className="h-10 w-10 bg-red-500/10 rounded-lg flex items-center justify-center">
+                <DollarSign className="h-5 w-5 text-red-500" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Live Revenue</p>
-                <p className="text-xl font-bold text-purple-500" data-testid="live-revenue">
+                <p className="text-xl font-bold text-red-500" data-testid="live-revenue">
                   ${(streamStats?.liveRevenue || 0).toLocaleString()}
                 </p>
               </div>
@@ -476,12 +476,12 @@ export default function LiveStreaming() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-pink-500/10 rounded-lg flex items-center justify-center">
-                <Activity className="h-5 w-5 text-pink-500" />
+              <div className="h-10 w-10 bg-rose-500/10 rounded-lg flex items-center justify-center">
+                <Activity className="h-5 w-5 text-rose-500" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Total Today</p>
-                <p className="text-xl font-bold text-pink-500" data-testid="streams-today">
+                <p className="text-xl font-bold text-rose-500" data-testid="streams-today">
                   {streamStats?.streamsToday || 0}
                 </p>
               </div>

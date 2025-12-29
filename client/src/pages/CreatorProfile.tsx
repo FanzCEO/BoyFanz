@@ -355,10 +355,10 @@ export default function CreatorProfile() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-red-900 to-black">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-purple-300 animate-pulse">Loading profile...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-fanz-red border-t-transparent mx-auto mb-4"></div>
+          <p className="text-red-300 animate-pulse">Loading profile...</p>
         </div>
       </div>
     );
@@ -366,8 +366,8 @@ export default function CreatorProfile() {
 
   if (!creator) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black">
-        <Card className="w-96 bg-black/50 border-purple-500/30 backdrop-blur-lg">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-red-900 to-black">
+        <Card className="w-96 bg-black/50 border-red-500/30 backdrop-blur-lg">
           <CardHeader className="text-center">
             <CardTitle className="text-white">Creator Not Found</CardTitle>
             <CardDescription className="text-gray-400">
@@ -433,25 +433,25 @@ export default function CreatorProfile() {
 
         {/* Profile Views Counter - MySpace style */}
         <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2 border border-white/20">
-          <Eye className="h-4 w-4 text-purple-400" />
+          <Eye className="h-4 w-4 text-orange-400" />
           <span className="text-white text-sm font-medium">{formatNumber(creator.profileViews || 0)} views</span>
         </div>
 
         {/* Music Player - MySpace style */}
         {creator.profileSongUrl && (
-          <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-md rounded-lg p-3 border border-purple-500/30">
+          <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-md rounded-lg p-3 border border-red-500/30">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={togglePlay}
-                className="h-10 w-10 rounded-full bg-purple-600 hover:bg-purple-500 text-white"
+                className="h-10 w-10 rounded-full bg-red-600 hover:bg-red-500 text-white"
               >
                 {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
               </Button>
               <div className="text-left">
                 <p className="text-white text-sm font-medium">{creator.profileSongTitle || 'Profile Song'}</p>
-                <p className="text-purple-300 text-xs">{creator.profileSongArtist || 'Unknown Artist'}</p>
+                <p className="text-red-300 text-xs">{creator.profileSongArtist || 'Unknown Artist'}</p>
               </div>
               <Button
                 variant="ghost"
@@ -467,7 +467,7 @@ export default function CreatorProfile() {
                 {[...Array(5)].map((_, i) => (
                   <div
                     key={i}
-                    className="w-1 bg-purple-400 rounded-full animate-pulse"
+                    className="w-1 bg-orange-400 rounded-full animate-pulse"
                     style={{
                       height: `${Math.random() * 16 + 8}px`,
                       animationDelay: `${i * 0.1}s`,
@@ -486,12 +486,12 @@ export default function CreatorProfile() {
           {/* Left Sidebar - Profile Info */}
           <div className="lg:col-span-1 space-y-4">
             {/* Main Profile Card */}
-            <Card className="bg-black/60 backdrop-blur-lg border-purple-500/30 overflow-hidden">
+            <Card className="bg-black/60 backdrop-blur-lg border-red-500/30 overflow-hidden">
               <div className="p-6 text-center">
                 <div className="relative inline-block mb-4">
-                  <Avatar className="h-32 w-32 ring-4 ring-purple-500/50 mx-auto" data-testid="creator-avatar">
+                  <Avatar className="h-32 w-32 ring-4 ring-red-500/50 mx-auto" data-testid="creator-avatar">
                     <AvatarImage src={creator.user?.profileImageUrl} />
-                    <AvatarFallback className="bg-purple-600 text-white text-4xl">
+                    <AvatarFallback className="bg-red-600 text-white text-4xl">
                       {creator.user?.username?.[0]?.toUpperCase() || 'C'}
                     </AvatarFallback>
                   </Avatar>
@@ -500,7 +500,7 @@ export default function CreatorProfile() {
                   )}
                   {creator.isVerified && (
                     <div className="absolute -top-2 -right-2">
-                      <div className="bg-blue-500 rounded-full p-1">
+                      <div className="bg-green-500 rounded-full p-1">
                         <Shield className="h-5 w-5 text-white" />
                       </div>
                     </div>
@@ -512,9 +512,9 @@ export default function CreatorProfile() {
                 </h1>
 
                 {creator.mood && (
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-500/20 rounded-full mb-3">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/20 rounded-full mb-3">
                     <span className="text-lg">{MOOD_OPTIONS.find(m => m.label === creator.mood)?.emoji}</span>
-                    <span className="text-purple-300 text-sm">{creator.mood}</span>
+                    <span className="text-red-300 text-sm">{creator.mood}</span>
                   </div>
                 )}
 
@@ -543,7 +543,7 @@ export default function CreatorProfile() {
                 {/* Categories */}
                 <div className="flex flex-wrap gap-1 justify-center mb-4">
                   {creator.categories.slice(0, 4).map((category, idx) => (
-                    <Badge key={idx} variant="outline" className="text-xs border-purple-500/50 text-purple-300">
+                    <Badge key={idx} variant="outline" className="text-xs border-red-500/50 text-red-300">
                       {category}
                     </Badge>
                   ))}
@@ -553,7 +553,7 @@ export default function CreatorProfile() {
                 {!isOwnProfile && (
                   <div className="space-y-2">
                     <Button
-                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500"
+                      className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500"
                       onClick={handleSubscribe}
                       data-testid="subscribe-button"
                     >
@@ -563,7 +563,7 @@ export default function CreatorProfile() {
                     <div className="grid grid-cols-2 gap-2">
                       <Button
                         variant="outline"
-                        className="border-purple-500/50 text-purple-300 hover:bg-purple-500/20"
+                        className="border-red-500/50 text-red-300 hover:bg-red-500/20"
                         onClick={handleAddFriend}
                       >
                         <UserPlus className="h-4 w-4 mr-1" />
@@ -600,7 +600,7 @@ export default function CreatorProfile() {
                 )}
 
                 {isOwnProfile && (
-                  <Button variant="outline" className="w-full border-purple-500/50 text-purple-300">
+                  <Button variant="outline" className="w-full border-red-500/50 text-red-300">
                     <Settings className="h-4 w-4 mr-2" />
                     Edit Profile
                   </Button>
@@ -608,18 +608,18 @@ export default function CreatorProfile() {
 
                 {/* Share Menu Dropdown */}
                 {showShareMenu && (
-                  <div className="absolute mt-2 right-0 left-0 mx-4 bg-black/90 backdrop-blur-lg rounded-lg border border-purple-500/30 p-2 z-50">
+                  <div className="absolute mt-2 right-0 left-0 mx-4 bg-black/90 backdrop-blur-lg rounded-lg border border-red-500/30 p-2 z-50">
                     <Button
                       variant="ghost"
-                      className="w-full justify-start text-white hover:bg-purple-500/20"
+                      className="w-full justify-start text-white hover:bg-red-500/20"
                       onClick={() => handleShare('twitter')}
                     >
-                      <Twitter className="h-4 w-4 mr-2 text-blue-400" />
+                      <Twitter className="h-4 w-4 mr-2 text-orange-400" />
                       Share on X/Twitter
                     </Button>
                     <Button
                       variant="ghost"
-                      className="w-full justify-start text-white hover:bg-purple-500/20"
+                      className="w-full justify-start text-white hover:bg-red-500/20"
                       onClick={() => handleShare('copy')}
                     >
                       {copied ? (
@@ -636,17 +636,17 @@ export default function CreatorProfile() {
 
             {/* Social Links */}
             {creator.socialLinks && (
-              <Card className="bg-black/60 backdrop-blur-lg border-purple-500/30">
+              <Card className="bg-black/60 backdrop-blur-lg border-red-500/30">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-white text-sm flex items-center gap-2">
-                    <Link2 className="h-4 w-4 text-purple-400" />
+                    <Link2 className="h-4 w-4 text-orange-400" />
                     Links
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {creator.socialLinks.twitter && (
                     <a href={creator.socialLinks.twitter} target="_blank" rel="noopener noreferrer"
-                       className="flex items-center gap-2 text-gray-300 hover:text-blue-400 transition-colors">
+                       className="flex items-center gap-2 text-gray-300 hover:text-orange-400 transition-colors">
                       <Twitter className="h-4 w-4" />
                       <span className="text-sm">Twitter</span>
                     </a>
@@ -660,7 +660,7 @@ export default function CreatorProfile() {
                   )}
                   {creator.socialLinks.website && (
                     <a href={creator.socialLinks.website} target="_blank" rel="noopener noreferrer"
-                       className="flex items-center gap-2 text-gray-300 hover:text-purple-400 transition-colors">
+                       className="flex items-center gap-2 text-gray-300 hover:text-orange-400 transition-colors">
                       <ExternalLink className="h-4 w-4" />
                       <span className="text-sm">Website</span>
                     </a>
@@ -671,10 +671,10 @@ export default function CreatorProfile() {
 
             {/* Top Friends - MySpace style */}
             {creator.topFriends && creator.topFriends.length > 0 && (
-              <Card className="bg-black/60 backdrop-blur-lg border-purple-500/30">
+              <Card className="bg-black/60 backdrop-blur-lg border-red-500/30">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-white text-sm flex items-center gap-2">
-                    <Heart className="h-4 w-4 text-pink-400" />
+                    <Heart className="h-4 w-4 text-red-400" />
                     Top Friends
                   </CardTitle>
                 </CardHeader>
@@ -682,13 +682,13 @@ export default function CreatorProfile() {
                   <div className="grid grid-cols-4 gap-2">
                     {creator.topFriends.slice(0, 8).map((friend) => (
                       <a key={friend.id} href={`/creator/${friend.id}`} className="group text-center">
-                        <Avatar className="h-12 w-12 mx-auto ring-2 ring-transparent group-hover:ring-purple-500 transition-all">
+                        <Avatar className="h-12 w-12 mx-auto ring-2 ring-transparent group-hover:ring-red-500 transition-all">
                           <AvatarImage src={friend.avatarUrl} />
-                          <AvatarFallback className="bg-purple-600/50 text-white text-xs">
+                          <AvatarFallback className="bg-red-600/50 text-white text-xs">
                             {friend.username[0]?.toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <p className="text-gray-300 text-xs mt-1 truncate group-hover:text-purple-300">
+                        <p className="text-gray-300 text-xs mt-1 truncate group-hover:text-red-300">
                           {friend.username}
                         </p>
                       </a>
@@ -699,7 +699,7 @@ export default function CreatorProfile() {
             )}
 
             {/* Send Tip */}
-            <Card className="bg-black/60 backdrop-blur-lg border-purple-500/30">
+            <Card className="bg-black/60 backdrop-blur-lg border-red-500/30">
               <CardHeader className="pb-2">
                 <CardTitle className="text-white text-sm flex items-center gap-2">
                   <Gift className="h-4 w-4 text-green-400" />
@@ -730,34 +730,34 @@ export default function CreatorProfile() {
           {/* Main Content Area */}
           <div className="lg:col-span-3 space-y-4">
             {/* About Section - MySpace style */}
-            <Card className="bg-black/60 backdrop-blur-lg border-purple-500/30">
+            <Card className="bg-black/60 backdrop-blur-lg border-red-500/30">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <Smile className="h-5 w-5 text-purple-400" />
+                  <Smile className="h-5 w-5 text-orange-400" />
                   About Me
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {creator.aboutMe && (
                   <div>
-                    <h4 className="text-purple-300 text-sm font-medium mb-2">About Me</h4>
+                    <h4 className="text-orange-300 text-sm font-medium mb-2">About Me</h4>
                     <p className="text-gray-300 text-sm leading-relaxed">{creator.aboutMe}</p>
                   </div>
                 )}
                 {creator.interests && (
                   <div>
-                    <h4 className="text-purple-300 text-sm font-medium mb-2">Interests</h4>
+                    <h4 className="text-orange-300 text-sm font-medium mb-2">Interests</h4>
                     <p className="text-gray-300 text-sm">{creator.interests}</p>
                   </div>
                 )}
                 {creator.whoIdLikeToMeet && (
                   <div>
-                    <h4 className="text-purple-300 text-sm font-medium mb-2">Who I'd Like to Meet</h4>
+                    <h4 className="text-orange-300 text-sm font-medium mb-2">Who I'd Like to Meet</h4>
                     <p className="text-gray-300 text-sm">{creator.whoIdLikeToMeet}</p>
                   </div>
                 )}
                 {creator.favoriteQuote && (
-                  <div className="border-l-4 border-purple-500 pl-4 py-2 bg-purple-500/10 rounded-r-lg">
+                  <div className="border-l-4 border-red-500 pl-4 py-2 bg-red-500/10 rounded-r-lg">
                     <p className="text-gray-300 italic">"{creator.favoriteQuote}"</p>
                   </div>
                 )}
@@ -768,19 +768,19 @@ export default function CreatorProfile() {
             </Card>
 
             {/* Content Tabs */}
-            <Card className="bg-black/60 backdrop-blur-lg border-purple-500/30">
+            <Card className="bg-black/60 backdrop-blur-lg border-red-500/30">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <CardHeader className="pb-0">
                   <TabsList className="bg-white/5 w-full justify-start">
-                    <TabsTrigger value="posts" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                    <TabsTrigger value="posts" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
                       <Camera className="h-4 w-4 mr-2" />
                       Posts
                     </TabsTrigger>
-                    <TabsTrigger value="media" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                    <TabsTrigger value="media" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
                       <Video className="h-4 w-4 mr-2" />
                       Media
                     </TabsTrigger>
-                    <TabsTrigger value="comments" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                    <TabsTrigger value="comments" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Wall ({comments.length})
                     </TabsTrigger>
@@ -790,7 +790,7 @@ export default function CreatorProfile() {
                   <TabsContent value="posts" className="mt-0">
                     {posts.length === 0 ? (
                       <div className="text-center py-12">
-                        <Camera className="h-16 w-16 mx-auto mb-4 text-purple-500/50" />
+                        <Camera className="h-16 w-16 mx-auto mb-4 text-red-500/50" />
                         <p className="text-gray-400">No posts yet</p>
                       </div>
                     ) : (
@@ -798,7 +798,7 @@ export default function CreatorProfile() {
                         {posts.map((post) => (
                           <div
                             key={post.id}
-                            className="group relative aspect-square rounded-lg overflow-hidden bg-purple-900/20 cursor-pointer hover:ring-2 hover:ring-purple-500 transition-all"
+                            className="group relative aspect-square rounded-lg overflow-hidden bg-red-900/20 cursor-pointer hover:ring-2 hover:ring-red-500 transition-all"
                             data-testid={`post-${post.id}`}
                           >
                             {post.thumbnailUrl ? (
@@ -810,9 +810,9 @@ export default function CreatorProfile() {
                             ) : (
                               <div className="flex items-center justify-center h-full">
                                 {post.type === 'video' ? (
-                                  <Video className="h-12 w-12 text-purple-500/50" />
+                                  <Video className="h-12 w-12 text-red-500/50" />
                                 ) : (
-                                  <Camera className="h-12 w-12 text-purple-500/50" />
+                                  <Camera className="h-12 w-12 text-red-500/50" />
                                 )}
                               </div>
                             )}
@@ -832,7 +832,7 @@ export default function CreatorProfile() {
                                     </span>
                                   </div>
                                   {post.visibility === 'premium' && (
-                                    <Badge className="bg-purple-600 text-white text-xs">
+                                    <Badge className="bg-red-600 text-white text-xs">
                                       ${(post.priceCents / 100).toFixed(0)}
                                     </Badge>
                                   )}
@@ -849,7 +849,7 @@ export default function CreatorProfile() {
 
                             {/* Premium indicator */}
                             {post.visibility === 'premium' && (
-                              <div className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full p-1">
+                              <div className="absolute top-2 right-2 bg-gradient-to-r from-red-600 to-orange-600 rounded-full p-1">
                                 <Crown className="h-3 w-3 text-white" />
                               </div>
                             )}
@@ -864,7 +864,7 @@ export default function CreatorProfile() {
                       {posts.filter(p => p.type === 'video' || p.type === 'image').map((post) => (
                         <div
                           key={post.id}
-                          className="aspect-square rounded-lg overflow-hidden bg-purple-900/20 cursor-pointer hover:ring-2 hover:ring-purple-500 transition-all"
+                          className="aspect-square rounded-lg overflow-hidden bg-red-900/20 cursor-pointer hover:ring-2 hover:ring-red-500 transition-all"
                         >
                           {post.thumbnailUrl ? (
                             <img
@@ -874,7 +874,7 @@ export default function CreatorProfile() {
                             />
                           ) : (
                             <div className="flex items-center justify-center h-full">
-                              <Camera className="h-8 w-8 text-purple-500/50" />
+                              <Camera className="h-8 w-8 text-red-500/50" />
                             </div>
                           )}
                         </div>
@@ -888,7 +888,7 @@ export default function CreatorProfile() {
                       <div className="flex gap-3 mb-6">
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={currentUser?.profileImageUrl} />
-                          <AvatarFallback className="bg-purple-600 text-white">
+                          <AvatarFallback className="bg-red-600 text-white">
                             {currentUser?.username?.[0]?.toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
@@ -897,9 +897,9 @@ export default function CreatorProfile() {
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
                             placeholder={`Leave a comment for ${creator.user?.username}...`}
-                            className="bg-white/5 border-purple-500/30 text-white placeholder:text-gray-500"
+                            className="bg-white/5 border-red-500/30 text-white placeholder:text-gray-500"
                           />
-                          <Button onClick={handlePostComment} className="bg-purple-600 hover:bg-purple-500">
+                          <Button onClick={handlePostComment} className="bg-red-600 hover:bg-red-500">
                             <Send className="h-4 w-4" />
                           </Button>
                         </div>
@@ -909,7 +909,7 @@ export default function CreatorProfile() {
                     {/* Comments List */}
                     {comments.length === 0 ? (
                       <div className="text-center py-12">
-                        <MessageSquare className="h-16 w-16 mx-auto mb-4 text-purple-500/50" />
+                        <MessageSquare className="h-16 w-16 mx-auto mb-4 text-red-500/50" />
                         <p className="text-gray-400">No comments yet. Be the first!</p>
                       </div>
                     ) : (
@@ -918,13 +918,13 @@ export default function CreatorProfile() {
                           <div key={comment.id} className="flex gap-3 p-4 bg-white/5 rounded-lg">
                             <Avatar className="h-10 w-10">
                               <AvatarImage src={comment.avatarUrl} />
-                              <AvatarFallback className="bg-purple-600/50 text-white">
+                              <AvatarFallback className="bg-red-600/50 text-white">
                                 {comment.username[0]?.toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <a href={`/creator/${comment.userId}`} className="text-purple-300 font-medium hover:text-purple-200">
+                                <a href={`/creator/${comment.userId}`} className="text-red-300 font-medium hover:text-red-200">
                                   {comment.username}
                                 </a>
                                 <span className="text-gray-500 text-xs">

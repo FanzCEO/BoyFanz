@@ -145,18 +145,18 @@ const calculationSchema = z.object({
 });
 
 const TAX_TYPE_COLORS = {
-  vat: "bg-blue-500",
+  vat: "bg-orange-500",
   sales_tax: "bg-green-500",
-  income_tax: "bg-purple-500",
-  withholding_tax: "bg-orange-500",
-  service_tax: "bg-pink-500"
+  income_tax: "bg-red-500",
+  withholding_tax: "bg-amber-500",
+  service_tax: "bg-rose-500"
 };
 
 const COMPLIANCE_COLORS = {
   compliant: "bg-green-500",
   pending: "bg-yellow-500",
   overdue: "bg-red-500",
-  submitted: "bg-blue-500"
+  submitted: "bg-orange-500"
 };
 
 const COUNTRIES = [

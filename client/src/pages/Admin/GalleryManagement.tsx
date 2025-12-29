@@ -307,13 +307,13 @@ export default function GalleryManagement() {
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-400">{data.stats.images}</div>
+              <div className="text-2xl font-bold text-orange-400">{data.stats.images}</div>
               <div className="text-sm text-gray-400">Images</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-purple-400">{data.stats.videos}</div>
+              <div className="text-2xl font-bold text-red-400">{data.stats.videos}</div>
               <div className="text-sm text-gray-400">Videos</div>
             </CardContent>
           </Card>
@@ -349,7 +349,7 @@ export default function GalleryManagement() {
                   <span className={
                     file.status === "completed" ? "text-green-500" :
                     file.status === "failed" ? "text-red-500" :
-                    file.status === "uploading" ? "text-blue-500" : "text-gray-500"
+                    file.status === "uploading" ? "text-orange-500" : "text-gray-500"
                   }>
                     {file.status === "completed" ? (
                       <i className="fas fa-check" />

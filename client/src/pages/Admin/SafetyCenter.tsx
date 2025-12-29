@@ -221,7 +221,7 @@ export default function SafetyCenter() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-500/20 text-yellow-500';
-      case 'investigating': return 'bg-blue-500/20 text-blue-500';
+      case 'investigating': return 'bg-orange-500/20 text-orange-500';
       case 'resolved': return 'bg-green-500/20 text-green-500';
       case 'active': return 'bg-red-500/20 text-red-500';
       default: return 'bg-gray-500/20 text-gray-500';

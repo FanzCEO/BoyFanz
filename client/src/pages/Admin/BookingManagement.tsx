@@ -39,7 +39,7 @@ interface Booking {
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/20 text-yellow-500",
-  confirmed: "bg-blue-500/20 text-blue-500",
+  confirmed: "bg-orange-500/20 text-orange-500",
   completed: "bg-green-500/20 text-green-500",
   cancelled: "bg-red-500/20 text-red-500",
   no_show: "bg-gray-500/20 text-gray-500"
@@ -193,7 +193,7 @@ export default function BookingManagement() {
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-500">{data.stats.confirmed}</div>
+              <div className="text-2xl font-bold text-orange-500">{data.stats.confirmed}</div>
               <div className="text-sm text-gray-400">Confirmed</div>
             </CardContent>
           </Card>

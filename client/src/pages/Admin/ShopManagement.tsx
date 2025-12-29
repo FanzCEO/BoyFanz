@@ -237,7 +237,7 @@ export default function ShopManagement() {
       case 'draft': return <Badge className="bg-gray-500 text-white"><Edit className="w-3 h-3 mr-1" />Draft</Badge>;
       case 'inactive': return <Badge className="bg-red-500 text-white"><XCircle className="w-3 h-3 mr-1" />Inactive</Badge>;
       case 'out_of_stock': return <Badge className="bg-orange-500 text-white"><PackageX className="w-3 h-3 mr-1" />Out of Stock</Badge>;
-      case 'discontinued': return <Badge className="bg-purple-500 text-white"><Archive className="w-3 h-3 mr-1" />Discontinued</Badge>;
+      case 'discontinued': return <Badge className="bg-red-500 text-white"><Archive className="w-3 h-3 mr-1" />Discontinued</Badge>;
       default: return <Badge variant="outline">Unknown</Badge>;
     }
   };
@@ -245,8 +245,8 @@ export default function ShopManagement() {
   const getOrderStatusBadge = (status: string) => {
     switch (status) {
       case 'pending': return <Badge className="bg-yellow-500 text-white"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
-      case 'confirmed': return <Badge className="bg-blue-500 text-white"><CheckCircle className="w-3 h-3 mr-1" />Confirmed</Badge>;
-      case 'processing': return <Badge className="bg-purple-500 text-white"><Package className="w-3 h-3 mr-1" />Processing</Badge>;
+      case 'confirmed': return <Badge className="bg-orange-500 text-white"><CheckCircle className="w-3 h-3 mr-1" />Confirmed</Badge>;
+      case 'processing': return <Badge className="bg-amber-500 text-white"><Package className="w-3 h-3 mr-1" />Processing</Badge>;
       case 'shipped': return <Badge className="bg-green-500 text-white"><Truck className="w-3 h-3 mr-1" />Shipped</Badge>;
       case 'delivered': return <Badge className="bg-green-600 text-white"><PackageCheck className="w-3 h-3 mr-1" />Delivered</Badge>;
       case 'cancelled': return <Badge className="bg-red-500 text-white"><XCircle className="w-3 h-3 mr-1" />Cancelled</Badge>;
@@ -258,7 +258,7 @@ export default function ShopManagement() {
   const getFulfillmentStatusBadge = (status: string) => {
     switch (status) {
       case 'pending': return <Badge variant="outline"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
-      case 'processing': return <Badge className="bg-blue-500 text-white"><Package className="w-3 h-3 mr-1" />Processing</Badge>;
+      case 'processing': return <Badge className="bg-orange-500 text-white"><Package className="w-3 h-3 mr-1" />Processing</Badge>;
       case 'shipped': return <Badge className="bg-green-500 text-white"><Truck className="w-3 h-3 mr-1" />Shipped</Badge>;
       case 'delivered': return <Badge className="bg-green-600 text-white"><PackageCheck className="w-3 h-3 mr-1" />Delivered</Badge>;
       case 'cancelled': return <Badge className="bg-red-500 text-white"><XCircle className="w-3 h-3 mr-1" />Cancelled</Badge>;
@@ -268,9 +268,9 @@ export default function ShopManagement() {
 
   const getProductTypeBadge = (type: string) => {
     switch (type) {
-      case 'digital': return <Badge className="bg-blue-500 text-white"><FileText className="w-3 h-3 mr-1" />Digital</Badge>;
+      case 'digital': return <Badge className="bg-orange-500 text-white"><FileText className="w-3 h-3 mr-1" />Digital</Badge>;
       case 'physical': return <Badge className="bg-green-500 text-white"><Package className="w-3 h-3 mr-1" />Physical</Badge>;
-      case 'subscription': return <Badge className="bg-purple-500 text-white"><RefreshCw className="w-3 h-3 mr-1" />Subscription</Badge>;
+      case 'subscription': return <Badge className="bg-red-500 text-white"><RefreshCw className="w-3 h-3 mr-1" />Subscription</Badge>;
       case 'bundle': return <Badge className="bg-orange-500 text-white"><Boxes className="w-3 h-3 mr-1" />Bundle</Badge>;
       default: return <Badge variant="outline">Unknown</Badge>;
     }
@@ -444,12 +444,12 @@ export default function ShopManagement() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                <ShoppingCart className="h-5 w-5 text-blue-500" />
+              <div className="h-10 w-10 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                <ShoppingCart className="h-5 w-5 text-orange-500" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Pending Orders</p>
-                <p className="text-xl font-bold text-blue-500" data-testid="pending-orders">
+                <p className="text-xl font-bold text-orange-500" data-testid="pending-orders">
                   {shopStats?.pendingOrders || 0}
                 </p>
               </div>
@@ -460,12 +460,12 @@ export default function ShopManagement() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
-                <DollarSign className="h-5 w-5 text-purple-500" />
+              <div className="h-10 w-10 bg-red-500/10 rounded-lg flex items-center justify-center">
+                <DollarSign className="h-5 w-5 text-red-500" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Total Revenue</p>
-                <p className="text-xl font-bold text-purple-500" data-testid="total-revenue">
+                <p className="text-xl font-bold text-red-500" data-testid="total-revenue">
                   ${(shopStats?.totalRevenue || 0).toLocaleString()}
                 </p>
               </div>
@@ -540,12 +540,12 @@ export default function ShopManagement() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-pink-500/10 rounded-lg flex items-center justify-center">
-                <Calendar className="h-5 w-5 text-pink-500" />
+              <div className="h-10 w-10 bg-rose-500/10 rounded-lg flex items-center justify-center">
+                <Calendar className="h-5 w-5 text-rose-500" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Today's Orders</p>
-                <p className="text-xl font-bold text-pink-500" data-testid="todays-orders">
+                <p className="text-xl font-bold text-rose-500" data-testid="todays-orders">
                   {shopStats?.todaysOrders || 0}
                 </p>
               </div>

@@ -239,7 +239,7 @@ export default function CategoriesManagement() {
     if (category.parentId) {
       return <Badge variant="outline"><Folder className="w-3 h-3 mr-1" />Subcategory</Badge>;
     } else {
-      return <Badge className="bg-purple-500 text-white"><FolderTree className="w-3 h-3 mr-1" />Parent</Badge>;
+      return <Badge className="bg-red-500 text-white"><FolderTree className="w-3 h-3 mr-1" />Parent</Badge>;
     }
   };
 
@@ -708,12 +708,12 @@ export default function CategoriesManagement() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
-                <FolderTree className="h-5 w-5 text-purple-500" />
+              <div className="h-10 w-10 bg-red-500/10 rounded-lg flex items-center justify-center">
+                <FolderTree className="h-5 w-5 text-red-500" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Total Categories</p>
-                <p className="text-xl font-bold text-purple-500" data-testid="total-categories">
+                <p className="text-xl font-bold text-red-500" data-testid="total-categories">
                   {categoryStats?.totalCategories || 0}
                 </p>
               </div>
@@ -740,12 +740,12 @@ export default function CategoriesManagement() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                <FileText className="h-5 w-5 text-blue-500" />
+              <div className="h-10 w-10 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                <FileText className="h-5 w-5 text-orange-500" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Total Content</p>
-                <p className="text-xl font-bold text-blue-500" data-testid="total-content">
+                <p className="text-xl font-bold text-orange-500" data-testid="total-content">
                   {categoryStats?.totalContent?.toLocaleString() || 0}
                 </p>
               </div>

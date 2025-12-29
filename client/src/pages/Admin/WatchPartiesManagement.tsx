@@ -233,7 +233,7 @@ export default function WatchPartiesManagement() {
       case "live":
         return "bg-red-500";
       case "scheduled":
-        return "bg-blue-500";
+        return "bg-orange-500";
       case "completed":
         return "bg-green-500";
       case "cancelled":

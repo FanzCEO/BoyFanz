@@ -125,7 +125,7 @@ const STATUS_COLORS = {
   pending: "bg-yellow-500",
   approved: "bg-green-500",
   rejected: "bg-red-500",
-  processing: "bg-blue-500",
+  processing: "bg-orange-500",
   failed: "bg-red-600",
   cancelled: "bg-gray-500"
 };
@@ -135,7 +135,7 @@ const AML_STATUS_COLORS = {
   clear: "bg-green-500",
   flagged: "bg-orange-500",
   blocked: "bg-red-500",
-  review: "bg-purple-500"
+  review: "bg-red-500"
 };
 
 const RISK_COLORS = {

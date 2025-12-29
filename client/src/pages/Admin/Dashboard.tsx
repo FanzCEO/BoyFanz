@@ -224,7 +224,7 @@ export default function AdminDashboard() {
     switch (type) {
       case 'error': return 'border-red-500 bg-red-50 text-red-700';
       case 'warning': return 'border-yellow-500 bg-yellow-50 text-yellow-700';
-      case 'info': return 'border-blue-500 bg-blue-50 text-blue-700';
+      case 'info': return 'border-orange-500 bg-orange-50 text-orange-700';
       default: return 'border-gray-500 bg-gray-50 text-gray-700';
     }
   };
@@ -243,9 +243,9 @@ export default function AdminDashboard() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed': return <Badge className="bg-green-100 text-green-700" data-testid={`status-${status}`}>Completed</Badge>;
-      case 'processing': return <Badge className="bg-blue-100 text-blue-700" data-testid={`status-${status}`}>Processing</Badge>;
+      case 'processing': return <Badge className="bg-orange-100 text-orange-700" data-testid={`status-${status}`}>Processing</Badge>;
       case 'pending': return <Badge className="bg-yellow-100 text-yellow-700" data-testid={`status-${status}`}>Pending</Badge>;
-      case 'review': return <Badge className="bg-purple-100 text-purple-700" data-testid={`status-${status}`}>Review</Badge>;
+      case 'review': return <Badge className="bg-red-100 text-red-700" data-testid={`status-${status}`}>Review</Badge>;
       case 'assigned': return <Badge className="bg-orange-100 text-orange-700" data-testid={`status-${status}`}>Assigned</Badge>;
       default: return <Badge className="bg-gray-100 text-gray-700" data-testid={`status-${status}`}>{status}</Badge>;
     }

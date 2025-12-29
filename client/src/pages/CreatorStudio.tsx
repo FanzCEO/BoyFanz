@@ -255,23 +255,23 @@ export default function CreatorStudio() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-red-900/20 to-gray-900 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Sparkles className="h-8 w-8 text-purple-400" />
+              <Sparkles className="h-8 w-8 text-orange-400" />
               Creator Studio
             </h1>
             <p className="text-gray-400 mt-1">Manage your content, analytics, and earnings</p>
           </div>
           <div className="flex items-center gap-3">
             <Select value={selectedTimeRange} onValueChange={setSelectedTimeRange}>
-              <SelectTrigger className="w-[140px] bg-white/5 border-purple-500/30 text-white">
+              <SelectTrigger className="w-[140px] bg-white/5 border-red-500/30 text-white">
                 <SelectValue placeholder="Time range" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-purple-500/30">
+              <SelectContent className="bg-gray-900 border-red-500/30">
                 <SelectItem value="7d" className="text-white">Last 7 days</SelectItem>
                 <SelectItem value="30d" className="text-white">Last 30 days</SelectItem>
                 <SelectItem value="90d" className="text-white">Last 90 days</SelectItem>
@@ -280,7 +280,7 @@ export default function CreatorStudio() {
             </Select>
             <Button
               onClick={() => setIsCreatingPost(true)}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500"
+              className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500"
             >
               <Plus className="h-4 w-4 mr-2" />
               Create Post
@@ -290,7 +290,7 @@ export default function CreatorStudio() {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+          <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <DollarSign className="h-5 w-5 text-green-400" />
@@ -304,11 +304,11 @@ export default function CreatorStudio() {
             </CardContent>
           </Card>
 
-          <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+          <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
-                <Users className="h-5 w-5 text-purple-400" />
-                <Badge className="bg-purple-500/20 text-purple-400 text-xs">
+                <Users className="h-5 w-5 text-red-400" />
+                <Badge className="bg-red-500/20 text-red-400 text-xs">
                   <ArrowUp className="h-3 w-3 mr-1" />
                   +{mockStats.newSubscribersThisMonth}
                 </Badge>
@@ -318,11 +318,11 @@ export default function CreatorStudio() {
             </CardContent>
           </Card>
 
-          <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+          <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
-                <Eye className="h-5 w-5 text-blue-400" />
-                <Badge className="bg-blue-500/20 text-blue-400 text-xs">
+                <Eye className="h-5 w-5 text-orange-400" />
+                <Badge className="bg-orange-500/20 text-orange-400 text-xs">
                   <ArrowUp className="h-3 w-3 mr-1" />
                   8.2%
                 </Badge>
@@ -332,7 +332,7 @@ export default function CreatorStudio() {
             </CardContent>
           </Card>
 
-          <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+          <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <TrendingUp className="h-5 w-5 text-pink-400" />
@@ -346,28 +346,28 @@ export default function CreatorStudio() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white/5 border border-purple-500/30 p-1">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+          <TabsList className="bg-white/5 border border-red-500/30 p-1">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <BarChart3 className="h-4 w-4 mr-2" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="content" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="content" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <FileText className="h-4 w-4 mr-2" />
               Content
             </TabsTrigger>
-            <TabsTrigger value="schedule" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="schedule" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <Calendar className="h-4 w-4 mr-2" />
               Schedule
             </TabsTrigger>
-            <TabsTrigger value="audience" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="audience" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <Users className="h-4 w-4 mr-2" />
               Audience
             </TabsTrigger>
-            <TabsTrigger value="earnings" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="earnings" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <DollarSign className="h-4 w-4 mr-2" />
               Earnings
             </TabsTrigger>
-            <TabsTrigger value="messages" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="messages" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <Mail className="h-4 w-4 mr-2" />
               Mass Message
             </TabsTrigger>
@@ -377,7 +377,7 @@ export default function CreatorStudio() {
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Earnings Chart */}
-              <Card className="lg:col-span-2 bg-black/40 backdrop-blur-lg border-purple-500/30">
+              <Card className="lg:col-span-2 bg-black/40 backdrop-blur-lg border-red-500/30">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <LineChart className="h-5 w-5 text-green-400" />
@@ -385,9 +385,9 @@ export default function CreatorStudio() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 flex items-center justify-center bg-purple-900/20 rounded-lg">
+                  <div className="h-64 flex items-center justify-center bg-red-900/20 rounded-lg">
                     <div className="text-center">
-                      <BarChart3 className="h-16 w-16 mx-auto text-purple-500/50 mb-4" />
+                      <BarChart3 className="h-16 w-16 mx-auto text-red-500/50 mb-4" />
                       <p className="text-gray-400">Earnings chart visualization</p>
                       <p className="text-2xl font-bold text-green-400 mt-2">
                         {formatCurrency(mockStats.monthlyEarnings)}
@@ -399,10 +399,10 @@ export default function CreatorStudio() {
               </Card>
 
               {/* Earnings Breakdown */}
-              <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+              <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
-                    <PieChart className="h-5 w-5 text-purple-400" />
+                    <PieChart className="h-5 w-5 text-orange-400" />
                     Revenue Sources
                   </CardTitle>
                 </CardHeader>
@@ -412,28 +412,28 @@ export default function CreatorStudio() {
                       <span className="text-gray-300 text-sm">Subscriptions</span>
                       <span className="text-white font-medium">{formatCurrency(mockEarningsBreakdown.subscriptions)}</span>
                     </div>
-                    <Progress value={62} className="h-2 bg-purple-900/30" />
+                    <Progress value={62} className="h-2 bg-red-900/30" />
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-gray-300 text-sm">Tips</span>
                       <span className="text-white font-medium">{formatCurrency(mockEarningsBreakdown.tips)}</span>
                     </div>
-                    <Progress value={23} className="h-2 bg-purple-900/30" />
+                    <Progress value={23} className="h-2 bg-red-900/30" />
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-gray-300 text-sm">PPV Content</span>
                       <span className="text-white font-medium">{formatCurrency(mockEarningsBreakdown.ppvContent)}</span>
                     </div>
-                    <Progress value={12} className="h-2 bg-purple-900/30" />
+                    <Progress value={12} className="h-2 bg-red-900/30" />
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-gray-300 text-sm">Messages</span>
                       <span className="text-white font-medium">{formatCurrency(mockEarningsBreakdown.messages)}</span>
                     </div>
-                    <Progress value={3} className="h-2 bg-purple-900/30" />
+                    <Progress value={3} className="h-2 bg-red-900/30" />
                   </div>
                 </CardContent>
               </Card>
@@ -442,7 +442,7 @@ export default function CreatorStudio() {
             {/* Top Performing Content & Top Fans */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Top Performing Content */}
-              <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+              <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-pink-400" />
@@ -452,8 +452,8 @@ export default function CreatorStudio() {
                 <CardContent>
                   {mockStats.topPerformingPost ? (
                     <div className="flex items-start gap-4">
-                      <div className="w-24 h-24 bg-purple-900/30 rounded-lg flex items-center justify-center">
-                        <Image className="h-8 w-8 text-purple-500/50" />
+                      <div className="w-24 h-24 bg-red-900/30 rounded-lg flex items-center justify-center">
+                        <Image className="h-8 w-8 text-red-500/50" />
                       </div>
                       <div className="flex-1">
                         <h4 className="text-white font-medium mb-2">{mockStats.topPerformingPost.title}</h4>
@@ -467,7 +467,7 @@ export default function CreatorStudio() {
                             {formatNumber(mockStats.topPerformingPost.likes)}
                           </span>
                         </div>
-                        <Button variant="outline" size="sm" className="mt-3 border-purple-500/50 text-purple-300">
+                        <Button variant="outline" size="sm" className="mt-3 border-red-500/50 text-red-300">
                           View Insights
                         </Button>
                       </div>
@@ -479,7 +479,7 @@ export default function CreatorStudio() {
               </Card>
 
               {/* Top Fans */}
-              <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+              <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <Crown className="h-5 w-5 text-yellow-400" />
@@ -494,11 +494,11 @@ export default function CreatorStudio() {
                       { id: '3', username: 'BigTipper', totalSpent: 28000, subscriptionMonths: 6 },
                     ].map((fan, index) => (
                       <div key={fan.id} className="flex items-center gap-3 p-2 rounded-lg bg-white/5">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center text-white font-bold text-sm">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-600 to-orange-600 flex items-center justify-center text-white font-bold text-sm">
                           {index + 1}
                         </div>
                         <Avatar className="h-10 w-10">
-                          <AvatarFallback className="bg-purple-600 text-white">
+                          <AvatarFallback className="bg-red-600 text-white">
                             {fan.username[0]}
                           </AvatarFallback>
                         </Avatar>
@@ -527,10 +527,10 @@ export default function CreatorStudio() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Search content..."
-                    className="pl-10 bg-white/5 border-purple-500/30 text-white w-64"
+                    className="pl-10 bg-white/5 border-red-500/30 text-white w-64"
                   />
                 </div>
-                <Button variant="outline" className="border-purple-500/50 text-purple-300">
+                <Button variant="outline" className="border-red-500/50 text-red-300">
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
@@ -539,13 +539,13 @@ export default function CreatorStudio() {
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {[...Array(8)].map((_, i) => (
-                <Card key={i} className="bg-black/40 backdrop-blur-lg border-purple-500/30 overflow-hidden group">
-                  <div className="aspect-square bg-purple-900/30 relative">
+                <Card key={i} className="bg-black/40 backdrop-blur-lg border-red-500/30 overflow-hidden group">
+                  <div className="aspect-square bg-red-900/30 relative">
                     <div className="absolute inset-0 flex items-center justify-center">
                       {i % 2 === 0 ? (
-                        <Image className="h-12 w-12 text-purple-500/50" />
+                        <Image className="h-12 w-12 text-red-500/50" />
                       ) : (
-                        <Video className="h-12 w-12 text-purple-500/50" />
+                        <Video className="h-12 w-12 text-red-500/50" />
                       )}
                     </div>
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
@@ -559,7 +559,7 @@ export default function CreatorStudio() {
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                    <Badge className="absolute top-2 right-2 bg-purple-600/90 text-white text-xs">
+                    <Badge className="absolute top-2 right-2 bg-red-600/90 text-white text-xs">
                       {i % 3 === 0 ? 'PPV' : 'Sub'}
                     </Badge>
                   </div>
@@ -589,17 +589,17 @@ export default function CreatorStudio() {
           <TabsContent value="schedule" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Calendar View */}
-              <Card className="lg:col-span-2 bg-black/40 backdrop-blur-lg border-purple-500/30">
+              <Card className="lg:col-span-2 bg-black/40 backdrop-blur-lg border-red-500/30">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
-                    <CalendarDays className="h-5 w-5 text-purple-400" />
+                    <CalendarDays className="h-5 w-5 text-orange-400" />
                     Content Calendar
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-96 flex items-center justify-center bg-purple-900/20 rounded-lg">
+                  <div className="h-96 flex items-center justify-center bg-red-900/20 rounded-lg">
                     <div className="text-center">
-                      <Calendar className="h-16 w-16 mx-auto text-purple-500/50 mb-4" />
+                      <Calendar className="h-16 w-16 mx-auto text-red-500/50 mb-4" />
                       <p className="text-gray-400">Calendar view coming soon</p>
                     </div>
                   </div>
@@ -607,10 +607,10 @@ export default function CreatorStudio() {
               </Card>
 
               {/* Scheduled Posts List */}
-              <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+              <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-blue-400" />
+                    <Clock className="h-5 w-5 text-orange-400" />
                     Upcoming Posts
                   </CardTitle>
                 </CardHeader>
@@ -621,7 +621,7 @@ export default function CreatorStudio() {
                       <p className="text-gray-500">No scheduled posts</p>
                       <Button
                         size="sm"
-                        className="mt-3 bg-purple-600 hover:bg-purple-500"
+                        className="mt-3 bg-red-600 hover:bg-red-500"
                         onClick={() => setIsCreatingPost(true)}
                       >
                         Schedule Post
@@ -638,7 +638,7 @@ export default function CreatorStudio() {
                             </p>
                           </div>
                           <Badge className={`text-xs ${
-                            post.status === 'scheduled' ? 'bg-blue-500/20 text-blue-400' :
+                            post.status === 'scheduled' ? 'bg-orange-500/20 text-orange-400' :
                             post.status === 'published' ? 'bg-green-500/20 text-green-400' :
                             'bg-red-500/20 text-red-400'
                           }`}>
@@ -653,7 +653,7 @@ export default function CreatorStudio() {
             </div>
 
             {/* Drafts */}
-            <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+            <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <FileText className="h-5 w-5 text-yellow-400" />
@@ -684,7 +684,7 @@ export default function CreatorStudio() {
           <TabsContent value="audience" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Subscriber Growth */}
-              <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+              <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-green-400" />
@@ -692,9 +692,9 @@ export default function CreatorStudio() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 flex items-center justify-center bg-purple-900/20 rounded-lg">
+                  <div className="h-64 flex items-center justify-center bg-red-900/20 rounded-lg">
                     <div className="text-center">
-                      <LineChart className="h-16 w-16 mx-auto text-purple-500/50 mb-4" />
+                      <LineChart className="h-16 w-16 mx-auto text-red-500/50 mb-4" />
                       <p className="text-gray-400">Growth chart</p>
                       <div className="flex items-center justify-center gap-6 mt-4">
                         <div className="text-center">
@@ -712,10 +712,10 @@ export default function CreatorStudio() {
               </Card>
 
               {/* Demographics */}
-              <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+              <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
-                    <PieChart className="h-5 w-5 text-purple-400" />
+                    <PieChart className="h-5 w-5 text-orange-400" />
                     Audience Demographics
                   </CardTitle>
                 </CardHeader>
@@ -731,7 +731,7 @@ export default function CreatorStudio() {
                         <span className="text-gray-300 text-sm">{demo.label}</span>
                         <span className="text-white font-medium">{demo.percentage}%</span>
                       </div>
-                      <Progress value={demo.percentage} className="h-2 bg-purple-900/30" />
+                      <Progress value={demo.percentage} className="h-2 bg-red-900/30" />
                     </div>
                   ))}
                 </CardContent>
@@ -739,10 +739,10 @@ export default function CreatorStudio() {
             </div>
 
             {/* Active Times */}
-            <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+            <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-blue-400" />
+                  <Clock className="h-5 w-5 text-orange-400" />
                   Best Times to Post
                 </CardTitle>
                 <CardDescription className="text-gray-400">
@@ -760,10 +760,10 @@ export default function CreatorStudio() {
                             key={hour}
                             className={`h-6 rounded-sm ${
                               Math.random() > 0.5
-                                ? 'bg-purple-500'
+                                ? 'bg-red-500'
                                 : Math.random() > 0.3
-                                ? 'bg-purple-700'
-                                : 'bg-purple-900/50'
+                                ? 'bg-red-700'
+                                : 'bg-red-900/50'
                             }`}
                           />
                         ))}
@@ -773,15 +773,15 @@ export default function CreatorStudio() {
                 </div>
                 <div className="flex items-center justify-center gap-4 mt-4">
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-purple-500 rounded" />
+                    <div className="w-3 h-3 bg-red-500 rounded" />
                     <span className="text-gray-400 text-xs">High activity</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-purple-700 rounded" />
+                    <div className="w-3 h-3 bg-red-700 rounded" />
                     <span className="text-gray-400 text-xs">Medium</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-purple-900/50 rounded" />
+                    <div className="w-3 h-3 bg-red-900/50 rounded" />
                     <span className="text-gray-400 text-xs">Low</span>
                   </div>
                 </div>
@@ -799,16 +799,16 @@ export default function CreatorStudio() {
                   <p className="text-gray-400 text-sm">All Time</p>
                 </CardContent>
               </Card>
-              <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+              <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
                 <CardContent className="p-4">
-                  <Calendar className="h-5 w-5 text-purple-400 mb-2" />
+                  <Calendar className="h-5 w-5 text-orange-400 mb-2" />
                   <p className="text-2xl font-bold text-white">{formatCurrency(mockStats.monthlyEarnings)}</p>
                   <p className="text-gray-400 text-sm">This Month</p>
                 </CardContent>
               </Card>
-              <Card className="bg-black/40 backdrop-blur-lg border-blue-500/30">
+              <Card className="bg-black/40 backdrop-blur-lg border-orange-500/30">
                 <CardContent className="p-4">
-                  <Clock className="h-5 w-5 text-blue-400 mb-2" />
+                  <Clock className="h-5 w-5 text-orange-400 mb-2" />
                   <p className="text-2xl font-bold text-white">{formatCurrency(mockStats.weeklyEarnings)}</p>
                   <p className="text-gray-400 text-sm">This Week</p>
                 </CardContent>
@@ -822,10 +822,10 @@ export default function CreatorStudio() {
               </Card>
             </div>
 
-            <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+            <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-white">Transaction History</CardTitle>
-                <Button variant="outline" size="sm" className="border-purple-500/50 text-purple-300">
+                <Button variant="outline" size="sm" className="border-red-500/50 text-red-300">
                   <Download className="h-4 w-4 mr-2" />
                   Export CSV
                 </Button>
@@ -842,10 +842,10 @@ export default function CreatorStudio() {
                     <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-white/5">
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          tx.type === 'Subscription' ? 'bg-purple-600' :
+                          tx.type === 'Subscription' ? 'bg-red-600' :
                           tx.type === 'Tip' ? 'bg-green-600' :
                           tx.type === 'PPV Purchase' ? 'bg-pink-600' :
-                          'bg-blue-600'
+                          'bg-orange-600'
                         }`}>
                           {tx.type === 'Subscription' ? <Crown className="h-5 w-5 text-white" /> :
                            tx.type === 'Tip' ? <Gift className="h-5 w-5 text-white" /> :
@@ -870,10 +870,10 @@ export default function CreatorStudio() {
 
           {/* Mass Message Tab */}
           <TabsContent value="messages" className="space-y-6">
-            <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+            <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <Send className="h-5 w-5 text-purple-400" />
+                  <Send className="h-5 w-5 text-orange-400" />
                   Mass Message
                 </CardTitle>
                 <CardDescription className="text-gray-400">
@@ -884,10 +884,10 @@ export default function CreatorStudio() {
                 <div className="space-y-2">
                   <Label className="text-white">Target Audience</Label>
                   <Select defaultValue="all">
-                    <SelectTrigger className="bg-white/5 border-purple-500/30 text-white">
+                    <SelectTrigger className="bg-white/5 border-red-500/30 text-white">
                       <SelectValue placeholder="Select audience" />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-900 border-purple-500/30">
+                    <SelectContent className="bg-gray-900 border-red-500/30">
                       <SelectItem value="all" className="text-white">All Subscribers</SelectItem>
                       <SelectItem value="active" className="text-white">Active (last 30 days)</SelectItem>
                       <SelectItem value="expiring" className="text-white">Expiring Soon</SelectItem>
@@ -900,28 +900,28 @@ export default function CreatorStudio() {
                   <Label className="text-white">Message</Label>
                   <Textarea
                     placeholder="Type your message..."
-                    className="bg-white/5 border-purple-500/30 text-white min-h-[150px]"
+                    className="bg-white/5 border-red-500/30 text-white min-h-[150px]"
                   />
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Button variant="outline" className="border-purple-500/50 text-purple-300">
+                  <Button variant="outline" className="border-red-500/50 text-red-300">
                     <Image className="h-4 w-4 mr-2" />
                     Attach Media
                   </Button>
-                  <Button variant="outline" className="border-purple-500/50 text-purple-300">
+                  <Button variant="outline" className="border-red-500/50 text-red-300">
                     <Lock className="h-4 w-4 mr-2" />
                     Add PPV Content
                   </Button>
                 </div>
 
-                <Separator className="bg-purple-500/20" />
+                <Separator className="bg-red-500/20" />
 
                 <div className="flex items-center justify-between">
                   <div className="text-gray-400 text-sm">
                     Estimated reach: <span className="text-white font-medium">{formatNumber(mockStats.totalSubscribers)} subscribers</span>
                   </div>
-                  <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500">
+                  <Button className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500">
                     <Send className="h-4 w-4 mr-2" />
                     Send Message
                   </Button>
@@ -930,7 +930,7 @@ export default function CreatorStudio() {
             </Card>
 
             {/* Message Templates */}
-            <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+            <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <FileText className="h-5 w-5 text-yellow-400" />
@@ -949,10 +949,10 @@ export default function CreatorStudio() {
                       <p className="text-gray-400 text-sm truncate">{template.preview}</p>
                     </div>
                   ))}
-                  <div className="p-4 rounded-lg border-2 border-dashed border-purple-500/30 hover:border-purple-500/50 transition-colors cursor-pointer flex items-center justify-center">
+                  <div className="p-4 rounded-lg border-2 border-dashed border-red-500/30 hover:border-red-500/50 transition-colors cursor-pointer flex items-center justify-center">
                     <div className="text-center">
-                      <Plus className="h-6 w-6 text-purple-400 mx-auto mb-1" />
-                      <p className="text-purple-300 text-sm">Create Template</p>
+                      <Plus className="h-6 w-6 text-orange-400 mx-auto mb-1" />
+                      <p className="text-red-300 text-sm">Create Template</p>
                     </div>
                   </div>
                 </div>
@@ -964,11 +964,11 @@ export default function CreatorStudio() {
         {/* Create Post Modal */}
         {isCreatingPost && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <Card className="w-full max-w-2xl bg-gray-900 border-purple-500/30">
+            <Card className="w-full max-w-2xl bg-gray-900 border-red-500/30">
               <CardHeader>
                 <CardTitle className="text-white flex items-center justify-between">
                   <span className="flex items-center gap-2">
-                    <Edit3 className="h-5 w-5 text-purple-400" />
+                    <Edit3 className="h-5 w-5 text-orange-400" />
                     Create New Post
                   </span>
                   <Button
@@ -988,7 +988,7 @@ export default function CreatorStudio() {
                     value={newPost.title}
                     onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
                     placeholder="Post title..."
-                    className="bg-white/5 border-purple-500/30 text-white"
+                    className="bg-white/5 border-red-500/30 text-white"
                   />
                 </div>
 
@@ -998,16 +998,16 @@ export default function CreatorStudio() {
                     value={newPost.content}
                     onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
                     placeholder="What's on your mind?"
-                    className="bg-white/5 border-purple-500/30 text-white min-h-[150px]"
+                    className="bg-white/5 border-red-500/30 text-white min-h-[150px]"
                   />
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <Button variant="outline" className="border-purple-500/50 text-purple-300">
+                  <Button variant="outline" className="border-red-500/50 text-red-300">
                     <Image className="h-4 w-4 mr-2" />
                     Add Photo
                   </Button>
-                  <Button variant="outline" className="border-purple-500/50 text-purple-300">
+                  <Button variant="outline" className="border-red-500/50 text-red-300">
                     <Video className="h-4 w-4 mr-2" />
                     Add Video
                   </Button>
@@ -1022,10 +1022,10 @@ export default function CreatorStudio() {
                         setNewPost({ ...newPost, visibility: value })
                       }
                     >
-                      <SelectTrigger className="bg-white/5 border-purple-500/30 text-white">
+                      <SelectTrigger className="bg-white/5 border-red-500/30 text-white">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-gray-900 border-purple-500/30">
+                      <SelectContent className="bg-gray-900 border-red-500/30">
                         <SelectItem value="public" className="text-white">
                           <span className="flex items-center gap-2">
                             <Globe className="h-4 w-4" />
@@ -1056,7 +1056,7 @@ export default function CreatorStudio() {
                         value={newPost.priceCents / 100}
                         onChange={(e) => setNewPost({ ...newPost, priceCents: parseFloat(e.target.value) * 100 })}
                         placeholder="0.00"
-                        className="bg-white/5 border-purple-500/30 text-white"
+                        className="bg-white/5 border-red-500/30 text-white"
                       />
                     </div>
                   )}
@@ -1068,17 +1068,17 @@ export default function CreatorStudio() {
                     type="datetime-local"
                     value={newPost.scheduledAt}
                     onChange={(e) => setNewPost({ ...newPost, scheduledAt: e.target.value })}
-                    className="bg-white/5 border-purple-500/30 text-white"
+                    className="bg-white/5 border-red-500/30 text-white"
                   />
                 </div>
 
-                <Separator className="bg-purple-500/20" />
+                <Separator className="bg-red-500/20" />
 
                 <div className="flex items-center justify-end gap-3">
                   <Button
                     variant="outline"
                     onClick={() => setIsCreatingPost(false)}
-                    className="border-purple-500/50 text-purple-300"
+                    className="border-red-500/50 text-red-300"
                   >
                     Cancel
                   </Button>
@@ -1091,7 +1091,7 @@ export default function CreatorStudio() {
                   <Button
                     onClick={() => createPostMutation.mutate(newPost)}
                     disabled={createPostMutation.isPending}
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500"
+                    className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500"
                   >
                     {newPost.scheduledAt ? (
                       <>

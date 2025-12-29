@@ -317,12 +317,12 @@ export default function UserManagement() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                <Users className="h-5 w-5 text-blue-500" />
+              <div className="h-10 w-10 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                <Users className="h-5 w-5 text-orange-500" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Fans</p>
-                <p className="text-xl font-bold text-blue-500" data-testid="fans-count">
+                <p className="text-xl font-bold text-orange-500" data-testid="fans-count">
                   {userStats?.fanCount || 0}
                 </p>
               </div>

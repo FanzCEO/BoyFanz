@@ -194,9 +194,9 @@ export default function VerificationManagement() {
   // Helper functions
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'kyc': return 'bg-blue-500 text-white';
+      case 'kyc': return 'bg-orange-500 text-white';
       case 'age': return 'bg-green-500 text-white';
-      case 'costar': return 'bg-purple-500 text-white';
+      case 'costar': return 'bg-red-500 text-white';
       case '2257': return 'bg-red-500 text-white';
       default: return 'bg-gray-500 text-white';
     }
@@ -205,7 +205,7 @@ export default function VerificationManagement() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-500 text-white';
-      case 'under_review': return 'bg-blue-500 text-white';
+      case 'under_review': return 'bg-orange-500 text-white';
       case 'approved': return 'bg-green-500 text-white';
       case 'rejected': return 'bg-red-500 text-white';
       case 'expired': return 'bg-gray-500 text-white';
@@ -276,8 +276,8 @@ export default function VerificationManagement() {
         <Card className="bg-card border-border">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <div className="h-12 w-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                <Shield className="h-6 w-6 text-blue-500" />
+              <div className="h-12 w-12 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                <Shield className="h-6 w-6 text-orange-500" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Verifications</p>
@@ -324,8 +324,8 @@ export default function VerificationManagement() {
         <Card className="bg-card border-border">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <div className="h-12 w-12 bg-purple-500/10 rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-purple-500" />
+              <div className="h-12 w-12 bg-red-500/10 rounded-lg flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-red-500" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Avg Processing Time</p>

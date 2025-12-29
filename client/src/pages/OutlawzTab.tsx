@@ -333,7 +333,7 @@ export default function OutlawzTab() {
                 <span>Still <strong>2257 compliant</strong> & legal</span>
               </p>
               <p className="flex items-center gap-3">
-                <Swords className="h-5 w-5 text-purple-500" />
+                <Swords className="h-5 w-5 text-orange-500" />
                 <span>No limits. No filters. <strong>No mercy.</strong></span>
               </p>
             </div>

@@ -400,7 +400,7 @@ export default function StorageManagement() {
 
   const getSeverityColor = (severity: string) => {
     const colors = {
-      low: "text-blue-600 bg-blue-50 border-blue-200",
+      low: "text-orange-600 bg-orange-50 border-orange-200",
       medium: "text-yellow-600 bg-yellow-50 border-yellow-200", 
       high: "text-orange-600 bg-orange-50 border-orange-200",
       critical: "text-red-600 bg-red-50 border-red-200"
@@ -474,7 +474,7 @@ export default function StorageManagement() {
         <Card data-testid="stat-total-providers">
           <CardContent className="p-6">
             <div className="flex items-center">
-              <Database className="h-8 w-8 text-blue-600" />
+              <Database className="h-8 w-8 text-orange-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-muted-foreground">Total Providers</p>
                 <p className="text-2xl font-bold">{providers.length}</p>

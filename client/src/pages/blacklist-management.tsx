@@ -521,7 +521,7 @@ export default function BlacklistManagement() {
             <Card className="cyber-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-purple-500" />
+                  <Activity className="w-5 h-5 text-orange-500" />
                   User Activity Monitoring
                 </CardTitle>
                 <CardDescription>

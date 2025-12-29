@@ -246,7 +246,7 @@ export default function AuctionsManagement() {
       case "active":
         return "bg-green-500";
       case "completed":
-        return "bg-blue-500";
+        return "bg-orange-500";
       case "cancelled":
         return "bg-red-500";
       case "pending":
@@ -346,7 +346,7 @@ export default function AuctionsManagement() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">
+            <div className="text-2xl font-bold text-red-600">
               ${((analytics.tipGoalStats?.totalRaised || goals.reduce((sum, g) => sum + g.currentAmount, 0)) / 100).toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">From tip goals</p>
@@ -605,7 +605,7 @@ export default function AuctionsManagement() {
                         </div>
 
                         <div className="mt-3 flex items-center gap-2">
-                          <Gift className="w-4 h-4 text-purple-500" />
+                          <Gift className="w-4 h-4 text-red-500" />
                           <Badge variant="outline">{goal.rewardType}</Badge>
                           {goal.expiresAt && (
                             <span className="text-xs text-muted-foreground ml-auto">

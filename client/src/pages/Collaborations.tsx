@@ -282,20 +282,20 @@ export default function Collaborations() {
   const outgoingRequests = mockRequests.filter(r => r.fromUser.id === user?.id);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-red-900/20 to-gray-900 p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Users className="h-8 w-8 text-purple-400" />
+              <Users className="h-8 w-8 text-orange-400" />
               Collaborations
             </h1>
             <p className="text-gray-400 mt-1">Partner with other creators, share content, and grow together</p>
           </div>
           <Button
             onClick={() => setShowCollabDialog(true)}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500"
+            className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500"
           >
             <UserPlus className="h-4 w-4 mr-2" />
             New Collaboration
@@ -304,11 +304,11 @@ export default function Collaborations() {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+          <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-purple-600/20 flex items-center justify-center">
-                  <Users className="h-5 w-5 text-purple-400" />
+                <div className="w-10 h-10 rounded-full bg-red-600/20 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-orange-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{mockCollabPosts.length}</p>
@@ -318,11 +318,11 @@ export default function Collaborations() {
             </CardContent>
           </Card>
 
-          <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+          <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-600/20 flex items-center justify-center">
-                  <Clock className="h-5 w-5 text-blue-400" />
+                <div className="w-10 h-10 rounded-full bg-orange-600/20 flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-orange-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{incomingRequests.length}</p>
@@ -332,7 +332,7 @@ export default function Collaborations() {
             </CardContent>
           </Card>
 
-          <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+          <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-green-600/20 flex items-center justify-center">
@@ -348,11 +348,11 @@ export default function Collaborations() {
             </CardContent>
           </Card>
 
-          <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+          <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-pink-600/20 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-pink-400" />
+                <div className="w-10 h-10 rounded-full bg-red-600/20 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-orange-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">
@@ -367,23 +367,23 @@ export default function Collaborations() {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white/5 border border-purple-500/30 p-1">
-            <TabsTrigger value="requests" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+          <TabsList className="bg-white/5 border border-red-500/30 p-1">
+            <TabsTrigger value="requests" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <Clock className="h-4 w-4 mr-2" />
               Requests
               {incomingRequests.length > 0 && (
                 <Badge className="ml-2 bg-red-500 text-white text-xs">{incomingRequests.length}</Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="active" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="active" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <Users className="h-4 w-4 mr-2" />
               Active Collabs
             </TabsTrigger>
-            <TabsTrigger value="reposts" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="reposts" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <Repeat2 className="h-4 w-4 mr-2" />
               Quote Reposts
             </TabsTrigger>
-            <TabsTrigger value="discover" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="discover" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <Search className="h-4 w-4 mr-2" />
               Discover Creators
             </TabsTrigger>
@@ -392,7 +392,7 @@ export default function Collaborations() {
           {/* Requests Tab */}
           <TabsContent value="requests" className="space-y-6">
             {/* Incoming Requests */}
-            <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+            <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <Zap className="h-5 w-5 text-yellow-400" />
@@ -408,11 +408,11 @@ export default function Collaborations() {
                 ) : (
                   <div className="space-y-4">
                     {incomingRequests.map((request) => (
-                      <div key={request.id} className="p-4 rounded-lg bg-white/5 border border-purple-500/20">
+                      <div key={request.id} className="p-4 rounded-lg bg-white/5 border border-red-500/20">
                         <div className="flex items-start gap-4">
                           <Avatar className="h-12 w-12">
                             <AvatarImage src={request.fromUser.avatarUrl} />
-                            <AvatarFallback className="bg-purple-600 text-white">
+                            <AvatarFallback className="bg-red-600 text-white">
                               {request.fromUser.username[0]}
                             </AvatarFallback>
                           </Avatar>
@@ -420,15 +420,15 @@ export default function Collaborations() {
                             <div className="flex items-center gap-2 mb-1">
                               <span className="text-white font-medium">{request.fromUser.username}</span>
                               {request.fromUser.isVerified && (
-                                <Crown className="h-4 w-4 text-blue-400" />
+                                <Crown className="h-4 w-4 text-orange-400" />
                               )}
-                              <Badge className="bg-purple-500/20 text-purple-300 text-xs">
+                              <Badge className="bg-red-500/20 text-red-300 text-xs">
                                 {formatNumber(request.fromUser.subscriberCount)} subs
                               </Badge>
                             </div>
                             <Badge className={`text-xs mb-2 ${
-                              request.type === 'collab_post' ? 'bg-pink-500/20 text-pink-300' :
-                              request.type === 'quote_repost' ? 'bg-blue-500/20 text-blue-300' :
+                              request.type === 'collab_post' ? 'bg-red-500/20 text-red-300' :
+                              request.type === 'quote_repost' ? 'bg-orange-500/20 text-orange-300' :
                               'bg-green-500/20 text-green-300'
                             }`}>
                               {request.type === 'collab_post' ? 'Collab Post' :
@@ -436,7 +436,7 @@ export default function Collaborations() {
                             </Badge>
                             <p className="text-gray-300 text-sm">{request.message}</p>
                             {request.revenueShare && (
-                              <p className="text-purple-300 text-sm mt-2">
+                              <p className="text-red-300 text-sm mt-2">
                                 Proposed split: {request.revenueShare}% / {100 - request.revenueShare}%
                               </p>
                             )}
@@ -472,10 +472,10 @@ export default function Collaborations() {
             </Card>
 
             {/* Outgoing Requests */}
-            <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+            <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <Send className="h-5 w-5 text-blue-400" />
+                  <Send className="h-5 w-5 text-orange-400" />
                   Sent Requests ({outgoingRequests.length})
                 </CardTitle>
               </CardHeader>
@@ -486,7 +486,7 @@ export default function Collaborations() {
                     <p className="text-gray-500">No sent requests</p>
                     <Button
                       size="sm"
-                      className="mt-3 bg-purple-600 hover:bg-purple-500"
+                      className="mt-3 bg-red-600 hover:bg-red-500"
                       onClick={() => setShowCollabDialog(true)}
                     >
                       Start a Collaboration
@@ -498,7 +498,7 @@ export default function Collaborations() {
                       <div key={request.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarFallback className="bg-purple-600/50 text-white">
+                            <AvatarFallback className="bg-red-600/50 text-white">
                               {request.toUser.username[0]}
                             </AvatarFallback>
                           </Avatar>
@@ -526,7 +526,7 @@ export default function Collaborations() {
 
           {/* Active Collabs Tab */}
           <TabsContent value="active" className="space-y-6">
-            <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+            <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
               <CardHeader>
                 <CardTitle className="text-white">Active Collaborations</CardTitle>
                 <CardDescription className="text-gray-400">Content you've created with other creators</CardDescription>
@@ -534,10 +534,10 @@ export default function Collaborations() {
               <CardContent>
                 {mockCollabPosts.length === 0 ? (
                   <div className="text-center py-12">
-                    <Users className="h-16 w-16 mx-auto text-purple-500/50 mb-4" />
+                    <Users className="h-16 w-16 mx-auto text-red-500/50 mb-4" />
                     <p className="text-gray-400 mb-4">No collaborations yet</p>
                     <Button
-                      className="bg-purple-600 hover:bg-purple-500"
+                      className="bg-red-600 hover:bg-red-500"
                       onClick={() => setShowCollabDialog(true)}
                     >
                       Start Your First Collab
@@ -546,13 +546,13 @@ export default function Collaborations() {
                 ) : (
                   <div className="space-y-4">
                     {mockCollabPosts.map((post) => (
-                      <div key={post.id} className="p-4 rounded-lg bg-white/5 border border-purple-500/20">
+                      <div key={post.id} className="p-4 rounded-lg bg-white/5 border border-red-500/20">
                         {/* Participants */}
                         <div className="flex items-center gap-2 mb-3">
                           <div className="flex -space-x-2">
                             {post.participants.map((p, i) => (
                               <Avatar key={p.userId} className="h-8 w-8 ring-2 ring-gray-900">
-                                <AvatarFallback className="bg-purple-600 text-white text-xs">
+                                <AvatarFallback className="bg-red-600 text-white text-xs">
                                   {p.username[0]}
                                 </AvatarFallback>
                               </Avatar>
@@ -561,7 +561,7 @@ export default function Collaborations() {
                           <span className="text-gray-300 text-sm">
                             {post.participants.map(p => p.username).join(' & ')}
                           </span>
-                          <Badge className="bg-purple-500/20 text-purple-300 text-xs ml-auto">
+                          <Badge className="bg-red-500/20 text-red-300 text-xs ml-auto">
                             {post.visibility === 'public' ? <Globe className="h-3 w-3 mr-1" /> : <Lock className="h-3 w-3 mr-1" />}
                             {post.visibility}
                           </Badge>
@@ -597,14 +597,14 @@ export default function Collaborations() {
                         </div>
 
                         {/* Revenue Split */}
-                        <div className="mt-3 pt-3 border-t border-purple-500/20">
+                        <div className="mt-3 pt-3 border-t border-red-500/20">
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-400">Revenue Split:</span>
                             <div className="flex items-center gap-2">
                               {post.participants.map((p, i) => (
                                 <span key={p.userId} className="flex items-center gap-1">
                                   <span className="text-white">{p.username}</span>
-                                  <span className="text-purple-300">({p.revenueShare}%)</span>
+                                  <span className="text-red-300">({p.revenueShare}%)</span>
                                   {i < post.participants.length - 1 && <span className="text-gray-500">|</span>}
                                 </span>
                               ))}
@@ -621,7 +621,7 @@ export default function Collaborations() {
 
           {/* Quote Reposts Tab */}
           <TabsContent value="reposts" className="space-y-6">
-            <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+            <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <Repeat2 className="h-5 w-5 text-green-400" />
@@ -633,11 +633,11 @@ export default function Collaborations() {
               </CardHeader>
               <CardContent>
                 <div className="text-center py-12">
-                  <Repeat2 className="h-16 w-16 mx-auto text-purple-500/50 mb-4" />
+                  <Repeat2 className="h-16 w-16 mx-auto text-red-500/50 mb-4" />
                   <p className="text-gray-400 mb-4">No quote reposts yet</p>
                   <Button
                     variant="outline"
-                    className="border-purple-500/50 text-purple-300"
+                    className="border-red-500/50 text-red-300"
                     onClick={() => setShowQuoteDialog(true)}
                   >
                     <Repeat2 className="h-4 w-4 mr-2" />
@@ -650,10 +650,10 @@ export default function Collaborations() {
 
           {/* Discover Tab */}
           <TabsContent value="discover" className="space-y-6">
-            <Card className="bg-black/40 backdrop-blur-lg border-purple-500/30">
+            <Card className="bg-black/40 backdrop-blur-lg border-red-500/30">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <Search className="h-5 w-5 text-blue-400" />
+                  <Search className="h-5 w-5 text-orange-400" />
                   Find Creators to Collaborate With
                 </CardTitle>
               </CardHeader>
@@ -665,7 +665,7 @@ export default function Collaborations() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search creators by username or category..."
-                    className="pl-10 bg-white/5 border-purple-500/30 text-white"
+                    className="pl-10 bg-white/5 border-red-500/30 text-white"
                   />
                 </div>
 
@@ -680,19 +680,19 @@ export default function Collaborations() {
                     <div key={creator.id} className="flex items-center justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-12 w-12">
-                          <AvatarFallback className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                          <AvatarFallback className="bg-gradient-to-r from-red-600 to-orange-600 text-white">
                             {creator.username[0]}
                           </AvatarFallback>
                         </Avatar>
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="text-white font-medium">{creator.username}</span>
-                            {creator.isVerified && <Crown className="h-4 w-4 text-blue-400" />}
+                            {creator.isVerified && <Crown className="h-4 w-4 text-orange-400" />}
                           </div>
                           <p className="text-gray-400 text-sm">{formatNumber(creator.subscriberCount)} subscribers</p>
                           <div className="flex gap-1 mt-1">
                             {creator.categories.map((cat) => (
-                              <Badge key={cat} variant="outline" className="text-xs border-purple-500/30 text-purple-300">
+                              <Badge key={cat} variant="outline" className="text-xs border-red-500/30 text-red-300">
                                 {cat}
                               </Badge>
                             ))}
@@ -701,7 +701,7 @@ export default function Collaborations() {
                       </div>
                       <Button
                         variant="outline"
-                        className="border-purple-500/50 text-purple-300 hover:bg-purple-500/20"
+                        className="border-red-500/50 text-red-300 hover:bg-red-500/20"
                         onClick={() => {
                           setSelectedCreator(creator);
                           setShowCollabDialog(true);
@@ -720,18 +720,18 @@ export default function Collaborations() {
 
         {/* New Collaboration Dialog */}
         <Dialog open={showCollabDialog} onOpenChange={setShowCollabDialog}>
-          <DialogContent className="bg-gray-900 border-purple-500/30 max-w-md">
+          <DialogContent className="bg-gray-900 border-red-500/30 max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white flex items-center gap-2">
-                <Users className="h-5 w-5 text-purple-400" />
+                <Users className="h-5 w-5 text-orange-400" />
                 New Collaboration Request
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               {selectedCreator && (
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-500/10">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-red-500/10">
                   <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-purple-600 text-white">
+                    <AvatarFallback className="bg-red-600 text-white">
                       {selectedCreator.username[0]}
                     </AvatarFallback>
                   </Avatar>
@@ -753,8 +753,8 @@ export default function Collaborations() {
                       key={value}
                       variant={newCollab.type === value ? 'default' : 'outline'}
                       className={newCollab.type === value
-                        ? 'bg-purple-600'
-                        : 'border-purple-500/50 text-purple-300'}
+                        ? 'bg-red-600'
+                        : 'border-red-500/50 text-red-300'}
                       onClick={() => setNewCollab({ ...newCollab, type: value as typeof newCollab.type })}
                     >
                       <Icon className="h-4 w-4 mr-2" />
@@ -774,7 +774,7 @@ export default function Collaborations() {
                       max={90}
                       value={newCollab.revenueShare}
                       onChange={(e) => setNewCollab({ ...newCollab, revenueShare: parseInt(e.target.value) })}
-                      className="w-24 bg-white/5 border-purple-500/30 text-white"
+                      className="w-24 bg-white/5 border-red-500/30 text-white"
                     />
                     <span className="text-gray-400">You: {newCollab.revenueShare}% | Them: {100 - newCollab.revenueShare}%</span>
                   </div>
@@ -787,20 +787,20 @@ export default function Collaborations() {
                   value={newCollab.message}
                   onChange={(e) => setNewCollab({ ...newCollab, message: e.target.value })}
                   placeholder="Introduce yourself and explain what you have in mind..."
-                  className="bg-white/5 border-purple-500/30 text-white min-h-[100px]"
+                  className="bg-white/5 border-red-500/30 text-white min-h-[100px]"
                 />
               </div>
 
               <div className="flex gap-3 pt-4">
                 <Button
                   variant="outline"
-                  className="flex-1 border-purple-500/50 text-purple-300"
+                  className="flex-1 border-red-500/50 text-red-300"
                   onClick={() => setShowCollabDialog(false)}
                 >
                   Cancel
                 </Button>
                 <Button
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500"
+                  className="flex-1 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500"
                   disabled={!newCollab.message || sendRequestMutation.isPending}
                   onClick={() => {
                     if (selectedCreator) {
@@ -823,7 +823,7 @@ export default function Collaborations() {
         <div className="fixed bottom-6 right-6 flex flex-col gap-2">
           <Button
             size="lg"
-            className="rounded-full w-14 h-14 bg-blue-600 hover:bg-blue-500 shadow-lg"
+            className="rounded-full w-14 h-14 bg-red-600 hover:bg-red-500 shadow-lg"
             onClick={() => {
               const text = `Check out my profile on BoyFanz!`;
               const url = window.location.origin;
@@ -834,7 +834,7 @@ export default function Collaborations() {
           </Button>
           <Button
             size="lg"
-            className="rounded-full w-14 h-14 bg-purple-600 hover:bg-purple-500 shadow-lg"
+            className="rounded-full w-14 h-14 bg-red-600 hover:bg-red-500 shadow-lg"
             onClick={() => {
               navigator.clipboard.writeText(window.location.origin);
               toast({ title: 'Link Copied!', description: 'Share your profile anywhere!' });

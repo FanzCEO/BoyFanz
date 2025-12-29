@@ -177,9 +177,9 @@ export default function ComplaintsManagement() {
     switch (category) {
       case 'content_violation': return 'bg-red-500 text-white';
       case 'user_behavior': return 'bg-orange-500 text-white';
-      case 'technical_issue': return 'bg-blue-500 text-white';
+      case 'technical_issue': return 'bg-orange-500 text-white';
       case 'billing_dispute': return 'bg-green-500 text-white';
-      case 'dmca': return 'bg-purple-500 text-white';
+      case 'dmca': return 'bg-red-500 text-white';
       default: return 'bg-gray-500 text-white';
     }
   };
@@ -196,7 +196,7 @@ export default function ComplaintsManagement() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'open': return 'bg-blue-500 text-white';
+      case 'open': return 'bg-orange-500 text-white';
       case 'in_progress': return 'bg-yellow-500 text-white';
       case 'resolved': return 'bg-green-500 text-white';
       case 'closed': return 'bg-gray-500 text-white';
@@ -248,8 +248,8 @@ export default function ComplaintsManagement() {
         <Card className="bg-card border-border">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <div className="h-12 w-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                <MessageSquare className="h-6 w-6 text-blue-500" />
+              <div className="h-12 w-12 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                <MessageSquare className="h-6 w-6 text-orange-500" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Complaints</p>
@@ -296,8 +296,8 @@ export default function ComplaintsManagement() {
         <Card className="bg-card border-border">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <div className="h-12 w-12 bg-purple-500/10 rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-purple-500" />
+              <div className="h-12 w-12 bg-red-500/10 rounded-lg flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-red-500" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Avg Resolution Time</p>

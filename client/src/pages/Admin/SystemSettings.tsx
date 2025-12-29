@@ -322,15 +322,15 @@ export default function SystemSettingsManagement() {
 
   const getCategoryBadge = (category: string) => {
     const colors = {
-      general: "bg-blue-100 text-blue-800",
+      general: "bg-orange-100 text-orange-800",
       maintenance: "bg-yellow-100 text-yellow-800",
       email: "bg-green-100 text-green-800",
-      theme: "bg-purple-100 text-purple-800",
+      theme: "bg-red-100 text-red-800",
       security: "bg-red-100 text-red-800",
       backup: "bg-gray-100 text-gray-800",
-      api: "bg-indigo-100 text-indigo-800",
+      api: "bg-amber-100 text-amber-800",
       features: "bg-orange-100 text-orange-800",
-      languages: "bg-pink-100 text-pink-800",
+      languages: "bg-rose-100 text-rose-800",
       custom: "bg-teal-100 text-teal-800"
     };
     return (

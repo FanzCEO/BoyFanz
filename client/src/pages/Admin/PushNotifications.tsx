@@ -365,7 +365,7 @@ export default function PushNotificationsManagement() {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       draft: { color: "bg-gray-500", text: "Draft" },
-      scheduled: { color: "bg-blue-500", text: "Scheduled" },
+      scheduled: { color: "bg-orange-500", text: "Scheduled" },
       sending: { color: "bg-yellow-500", text: "Sending" },
       sent: { color: "bg-green-500", text: "Sent" },
       paused: { color: "bg-orange-500", text: "Paused" },
@@ -377,11 +377,11 @@ export default function PushNotificationsManagement() {
 
   const getAudienceBadge = (audience: string) => {
     const audienceConfig = {
-      all: { color: "bg-blue-100 text-blue-800", icon: "🌐" },
-      creators: { color: "bg-purple-100 text-purple-800", icon: "👤" },
+      all: { color: "bg-orange-100 text-orange-800", icon: "🌐" },
+      creators: { color: "bg-red-100 text-red-800", icon: "👤" },
       fans: { color: "bg-green-100 text-green-800", icon: "❤️" },
       subscribers: { color: "bg-yellow-100 text-yellow-800", icon: "⭐" },
-      verified: { color: "bg-indigo-100 text-indigo-800", icon: "✅" },
+      verified: { color: "bg-green-100 text-green-800", icon: "✅" },
       custom: { color: "bg-red-100 text-red-800", icon: "🎯" }
     };
     const config = audienceConfig[audience as keyof typeof audienceConfig] || audienceConfig.all;
@@ -817,7 +817,7 @@ export default function PushNotificationsManagement() {
         <Card data-testid="stat-total-campaigns">
           <CardContent className="p-6">
             <div className="flex items-center">
-              <Bell className="h-8 w-8 text-blue-600" />
+              <Bell className="h-8 w-8 text-orange-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-muted-foreground">Total Campaigns</p>
                 <p className="text-2xl font-bold">{campaigns.length}</p>
@@ -857,7 +857,7 @@ export default function PushNotificationsManagement() {
         <Card data-testid="stat-engagement">
           <CardContent className="p-6">
             <div className="flex items-center">
-              <TrendingUp className="h-8 w-8 text-purple-600" />
+              <TrendingUp className="h-8 w-8 text-red-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-muted-foreground">Avg. Engagement</p>
                 <p className="text-2xl font-bold">
@@ -958,7 +958,7 @@ export default function PushNotificationsManagement() {
               
               {/* Bulk Actions */}
               {selectedCampaigns.length > 0 && (
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                <div className="mt-4 p-4 bg-orange-50 rounded-lg">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">
                       {selectedCampaigns.length} campaign(s) selected

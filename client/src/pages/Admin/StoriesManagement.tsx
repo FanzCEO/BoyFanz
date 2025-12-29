@@ -233,7 +233,7 @@ export default function StoriesManagement() {
     }
     
     if (story.status === 'archived') {
-      return <Badge className="bg-blue-500 text-white"><Archive className="w-3 h-3 mr-1" />Archived</Badge>;
+      return <Badge className="bg-orange-500 text-white"><Archive className="w-3 h-3 mr-1" />Archived</Badge>;
     }
     
     return <Badge variant="outline">Unknown</Badge>;
@@ -244,7 +244,7 @@ export default function StoriesManagement() {
       return <Badge className="bg-yellow-500 text-white"><Star className="w-3 h-3 mr-1" />Promoted</Badge>;
     }
     if (story.isFeatured) {
-      return <Badge className="bg-purple-500 text-white"><Award className="w-3 h-3 mr-1" />Featured</Badge>;
+      return <Badge className="bg-red-500 text-white"><Award className="w-3 h-3 mr-1" />Featured</Badge>;
     }
     return null;
   };
@@ -270,7 +270,7 @@ export default function StoriesManagement() {
     } else if (totalEngagement > 100) {
       return <Badge className="bg-yellow-500 text-white">Medium Engagement</Badge>;
     } else if (totalEngagement > 10) {
-      return <Badge className="bg-blue-500 text-white">Low Engagement</Badge>;
+      return <Badge className="bg-orange-500 text-white">Low Engagement</Badge>;
     } else {
       return <Badge className="bg-gray-500 text-white">No Engagement</Badge>;
     }
@@ -443,12 +443,12 @@ export default function StoriesManagement() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                <Eye className="h-5 w-5 text-blue-500" />
+              <div className="h-10 w-10 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                <Eye className="h-5 w-5 text-orange-500" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Total Views</p>
-                <p className="text-xl font-bold text-blue-500" data-testid="total-views">
+                <p className="text-xl font-bold text-orange-500" data-testid="total-views">
                   {storiesStats?.totalViews?.toLocaleString() || 0}
                 </p>
               </div>
@@ -475,12 +475,12 @@ export default function StoriesManagement() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
-                <Star className="h-5 w-5 text-purple-500" />
+              <div className="h-10 w-10 bg-red-500/10 rounded-lg flex items-center justify-center">
+                <Star className="h-5 w-5 text-red-500" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Promoted</p>
-                <p className="text-xl font-bold text-purple-500" data-testid="promoted-stories">
+                <p className="text-xl font-bold text-red-500" data-testid="promoted-stories">
                   {storiesStats?.promotedStories || 0}
                 </p>
               </div>
@@ -523,12 +523,12 @@ export default function StoriesManagement() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-pink-500/10 rounded-lg flex items-center justify-center">
-                <Calendar className="h-5 w-5 text-pink-500" />
+              <div className="h-10 w-10 bg-rose-500/10 rounded-lg flex items-center justify-center">
+                <Calendar className="h-5 w-5 text-rose-500" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Today</p>
-                <p className="text-xl font-bold text-pink-500" data-testid="stories-today">
+                <p className="text-xl font-bold text-rose-500" data-testid="stories-today">
                   {storiesStats?.storiesToday || 0}
                 </p>
               </div>

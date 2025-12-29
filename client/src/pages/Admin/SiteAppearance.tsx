@@ -405,7 +405,7 @@ export default function SiteAppearance() {
                             {review.author}
                             {review.verified && (
                               <Badge variant="outline" className="text-xs">
-                                <i className="fas fa-check-circle text-blue-400 mr-1" />
+                                <i className="fas fa-check-circle text-green-400 mr-1" />
                                 Verified
                               </Badge>
                             )}
