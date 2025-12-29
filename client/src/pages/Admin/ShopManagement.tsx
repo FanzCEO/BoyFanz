@@ -92,7 +92,7 @@ export default function ShopManagement() {
         sortOrder
       }
     ],
-    enabled: (user?.role === 'admin' || user?.role === 'moderator') && activeTab === 'products',
+    enabled: ((user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator') && activeTab === 'products',
     refetchInterval: autoRefresh ? 60000 : false
   });
 
@@ -112,34 +112,34 @@ export default function ShopManagement() {
         sortOrder
       }
     ],
-    enabled: (user?.role === 'admin' || user?.role === 'moderator') && activeTab === 'orders',
+    enabled: ((user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator') && activeTab === 'orders',
     refetchInterval: autoRefresh ? 30000 : false
   });
 
   // Fetch shop analytics
   const { data: shopStats } = useQuery({
     queryKey: ['/api/admin/shop/stats'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator',
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 60000 : false
   });
 
   // Fetch revenue analytics
   const { data: revenueStats } = useQuery({
     queryKey: ['/api/admin/shop/revenue'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator',
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 300000 : false // 5 minutes
   });
 
   // Fetch creators for filter
   const { data: creators } = useQuery({
     queryKey: ['/api/admin/creators'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator'
   });
 
   // Fetch product categories
   const { data: categories } = useQuery({
     queryKey: ['/api/admin/product-categories'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator'
   });
 
   const products = productsData?.products || [];

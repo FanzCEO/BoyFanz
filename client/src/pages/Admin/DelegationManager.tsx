@@ -66,12 +66,12 @@ export default function DelegationManager() {
 
   const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ['/api/admin/users'],
-    enabled: user?.role === 'admin',
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin'),
   });
 
   const { data: delegations, isLoading: delegationsLoading } = useQuery({
     queryKey: ['/api/admin/delegations'],
-    enabled: user?.role === 'admin',
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin'),
   });
 
   const updateRoleMutation = useMutation({

@@ -74,13 +74,13 @@ export default function UserManagement() {
         sortOrder
       }
     ],
-    enabled: user?.role === 'admin'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin')
   });
 
   // Fetch user stats
   const { data: userStats } = useQuery({
     queryKey: ['/api/admin/users/stats'],
-    enabled: user?.role === 'admin'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin')
   });
 
   const users = usersData?.users || [];

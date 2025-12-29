@@ -107,7 +107,7 @@ export default function CategoriesManagement() {
         sortOrder
       }
     ],
-    enabled: (user?.role === 'admin' || user?.role === 'moderator') && activeTab === 'content',
+    enabled: ((user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator') && activeTab === 'content',
     refetchInterval: autoRefresh ? 60000 : false
   });
 
@@ -123,21 +123,21 @@ export default function CategoriesManagement() {
         sortOrder
       }
     ],
-    enabled: (user?.role === 'admin' || user?.role === 'moderator') && activeTab === 'products',
+    enabled: ((user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator') && activeTab === 'products',
     refetchInterval: autoRefresh ? 60000 : false
   });
 
   // Fetch category analytics
   const { data: categoryStats } = useQuery({
     queryKey: [`/api/admin/categories/${activeTab}/stats`],
-    enabled: user?.role === 'admin' || user?.role === 'moderator',
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 300000 : false // 5 minutes
   });
 
   // Fetch category performance data
   const { data: performanceData } = useQuery({
     queryKey: [`/api/admin/categories/${activeTab}/performance`],
-    enabled: user?.role === 'admin' || user?.role === 'moderator',
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 300000 : false
   });
 

@@ -96,19 +96,19 @@ export default function WithdrawalsManagement() {
       limit,
       offset: page * limit
     }],
-    enabled: user?.role === 'admin'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin')
   });
 
   // Fetch payout statistics
   const { data: statsData } = useQuery({
     queryKey: ['/api/admin/payouts/stats'],
-    enabled: user?.role === 'admin'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin')
   });
 
   // Fetch audit trail for selected payout
   const { data: auditData } = useQuery({
     queryKey: ['/api/admin/payouts', selectedPayout?.id, 'audit'],
-    enabled: !!selectedPayout && user?.role === 'admin'
+    enabled: !!selectedPayout && (user?.role === 'admin' || user?.role === 'super_admin')
   });
 
   // Mutations for payout actions

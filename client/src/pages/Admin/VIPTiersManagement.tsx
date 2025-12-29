@@ -89,19 +89,19 @@ export default function VIPTiersManagement() {
   // Fetch all VIP tiers
   const { data: tiersData, isLoading: tiersLoading, refetch: refetchTiers } = useQuery({
     queryKey: ['/api/vip-tiers/admin', { searchQuery, tier: tierFilter, status: statusFilter, page: currentPage, limit: pageSize }],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator'
   });
 
   // Fetch subscriptions
   const { data: subscriptionsData, isLoading: subscriptionsLoading } = useQuery({
     queryKey: ['/api/vip-tiers/admin/subscriptions', { page: currentPage, limit: pageSize }],
-    enabled: (user?.role === 'admin' || user?.role === 'moderator') && activeTab === 'subscriptions'
+    enabled: ((user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator') && activeTab === 'subscriptions'
   });
 
   // Fetch analytics
   const { data: analyticsData } = useQuery({
     queryKey: ['/api/vip-tiers/admin/analytics'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator'
   });
 
   // Create tier mutation

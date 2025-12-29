@@ -14,8 +14,8 @@ import {
   ads,
   advertisers,
   creatorAdSettings,
-  adImpressions,
-  adClicks,
+  charityAdImpressions,
+  charityAdClicks,
   creatorAdRevenue,
   charities,
   charityDonations,
@@ -288,7 +288,7 @@ export class CreatorAdService {
 
     // Record impression
     const [impression] = await db
-      .insert(adImpressions)
+      .insert(charityAdImpressions)
       .values({
         adId: data.adId,
         creatorId: data.creatorId,
@@ -334,7 +334,7 @@ export class CreatorAdService {
     const charityEarned = cpcRate * (CHARITY_SHARE_PERCENT / 100);
 
     // Record click
-    await db.insert(adClicks).values({
+    await db.insert(charityAdClicks).values({
       adId: data.adId,
       impressionId: data.impressionId,
       creatorId: data.creatorId,
@@ -527,14 +527,14 @@ export class CreatorAdService {
     // Get impression count
     const impressionResult = await db
       .select({ count: sql<number>`count(*)` })
-      .from(adImpressions)
-      .where(eq(adImpressions.creatorId, creatorId));
+      .from(charityAdImpressions)
+      .where(eq(charityAdImpressions.creatorId, creatorId));
 
     // Get click count
     const clickResult = await db
       .select({ count: sql<number>`count(*)` })
-      .from(adClicks)
-      .where(eq(adClicks.creatorId, creatorId));
+      .from(charityAdClicks)
+      .where(eq(charityAdClicks.creatorId, creatorId));
 
     return {
       settings,

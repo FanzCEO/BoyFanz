@@ -177,25 +177,25 @@ export default function SystemSettingsManagement() {
   // Fetch system settings
   const { data: settings = [], isLoading: settingsLoading, refetch: refetchSettings } = useQuery({
     queryKey: ['/api/admin/system-settings', { search: searchQuery, category: categoryFilter !== 'all' ? categoryFilter : undefined }],
-    enabled: user?.role === 'admin'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin')
   });
 
   // Fetch email settings
   const { data: emailSettings, isLoading: emailLoading, refetch: refetchEmail } = useQuery({
     queryKey: ['/api/admin/email-settings'],
-    enabled: user?.role === 'admin' && activeTab === 'email'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') && activeTab === 'email'
   });
 
   // Fetch maintenance schedules
   const { data: maintenanceSchedules = [], isLoading: maintenanceLoading, refetch: refetchMaintenance } = useQuery({
     queryKey: ['/api/admin/maintenance-schedules'],
-    enabled: user?.role === 'admin' && activeTab === 'maintenance'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') && activeTab === 'maintenance'
   });
 
   // Fetch system info
   const { data: systemInfo, isLoading: systemInfoLoading } = useQuery({
     queryKey: ['/api/admin/system-info'],
-    enabled: user?.role === 'admin' && activeTab === 'general'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') && activeTab === 'general'
   });
 
   // Mutations

@@ -102,19 +102,19 @@ export default function VerificationManagement() {
       limit,
       offset: page * limit
     }],
-    enabled: user?.role === 'admin'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin')
   });
 
   // Fetch verification statistics
   const { data: statsData } = useQuery({
     queryKey: ['/api/admin/verifications/stats'],
-    enabled: user?.role === 'admin'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin')
   });
 
   // Fetch documents for selected verification
   const { data: documentsData } = useQuery({
     queryKey: ['/api/admin/verifications', selectedVerification?.id, 'documents'],
-    enabled: !!selectedVerification && user?.role === 'admin'
+    enabled: !!selectedVerification && (user?.role === 'admin' || user?.role === 'super_admin')
   });
 
   // Mutations for verification actions

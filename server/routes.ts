@@ -19,6 +19,7 @@ import auctionRoutes from './routes/auctionRoutes';
 import watchPartyRoutes from './routes/watchPartyRoutes';
 import safetyRoutes from './routes/safetyRoutes';
 import aiRoutes from './routes/aiRoutes';
+import creatorAdRoutes from './routes/creatorAdRoutes';
 import aiGatewayRoutes from './routes/aiGatewayRoutes';
 import scheduledDropsRoutes from './routes/scheduledDropsRoutes';
 import nearbyRoutes from './routes/nearbyRoutes';
@@ -281,6 +282,10 @@ export function registerRoutes(app: Express) {
   // ===== SAFETY CENTER =====
   // Panic button, screenshot protection, reports, and content safety
   app.use("/api/safety", safetyRoutes);
+
+  // ===== CREATOR AD SYSTEM =====
+  // Opt-in ads on profiles, feeds, videos - 70% to creator, 30% to Wittle Bear Foundation
+  app.use("/api/creator-ads", creatorAdRoutes);
 
   // ===== UNIFIED AI GATEWAY =====
   // Together AI, OpenAI, Anthropic - with auto-failover

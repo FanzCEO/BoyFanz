@@ -151,19 +151,19 @@ export default function AnnouncementsManagement() {
         sortOrder
       }
     ],
-    enabled: user?.role === 'admin'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin')
   });
 
   // Fetch announcement templates
   const { data: templates = [], isLoading: templatesLoading } = useQuery({
     queryKey: ['/api/admin/announcement-templates'],
-    enabled: user?.role === 'admin' && activeTab === 'templates'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') && activeTab === 'templates'
   });
 
   // Fetch announcement analytics
   const { data: analytics, isLoading: analyticsLoading } = useQuery<AnnouncementAnalytics>({
     queryKey: ['/api/admin/announcements/analytics', { dateFrom: analyticsDateFrom, dateTo: analyticsDateTo }],
-    enabled: user?.role === 'admin' && showAnalyticsDialog
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') && showAnalyticsDialog
   });
 
   // Mutations

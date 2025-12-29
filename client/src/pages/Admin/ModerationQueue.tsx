@@ -25,7 +25,7 @@ export default function ModerationQueue() {
 
   const { data: moderationQueue, isLoading } = useQuery({
     queryKey: ['/api/moderation/queue'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator',
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator',
   });
 
   const approveMutation = useMutation({

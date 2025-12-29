@@ -87,28 +87,28 @@ export default function LiveStreaming() {
         sortOrder
       }
     ],
-    enabled: user?.role === 'admin' || user?.role === 'moderator',
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 30000 : false
   });
 
   // Fetch real-time analytics
   const { data: streamStats } = useQuery({
     queryKey: ['/api/admin/streams/stats'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator',
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 10000 : false
   });
 
   // Fetch active stream analytics
   const { data: liveAnalytics } = useQuery({
     queryKey: ['/api/admin/streams/live-analytics'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator',
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 5000 : false
   });
 
   // Fetch creators for filter
   const { data: creators } = useQuery({
     queryKey: ['/api/admin/creators'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator'
   });
 
   const streams = streamsData?.streams || [];

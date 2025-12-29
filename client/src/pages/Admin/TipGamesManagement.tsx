@@ -88,19 +88,19 @@ export default function TipGamesManagement() {
   // Fetch all tip games
   const { data: gamesData, isLoading: gamesLoading, refetch: refetchGames } = useQuery({
     queryKey: ['/api/tip-games/admin', { searchQuery, status: statusFilter, type: typeFilter, page: currentPage, limit: pageSize }],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator'
   });
 
   // Fetch spin history
   const { data: spinsData, isLoading: spinsLoading } = useQuery({
     queryKey: ['/api/tip-games/admin/spins', { page: currentPage, limit: pageSize }],
-    enabled: (user?.role === 'admin' || user?.role === 'moderator') && activeTab === 'history'
+    enabled: ((user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator') && activeTab === 'history'
   });
 
   // Fetch analytics
   const { data: analyticsData } = useQuery({
     queryKey: ['/api/tip-games/admin/analytics'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator'
   });
 
   // Create game mutation

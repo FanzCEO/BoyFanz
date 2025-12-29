@@ -33,7 +33,7 @@ export default function Sidebar({ user }: SidebarProps) {
     { path: "/dashboard", icon: "fas fa-tachometer-alt", label: "Dashboard" },
     { path: "/purchased", icon: "fas fa-shopping-bag", label: "Purchased" },
     { path: "/messages", icon: "fas fa-envelope", label: "Messages", dot: true },
-    { path: "/fuck-buddies", icon: "fas fa-heart", label: "Fuck Buddies", badge: "Social" },
+    { path: "/fuck-buddies", icon: "fas fa-fire", label: "Fuck Buddies", badge: "Social" },
     { path: "/search", icon: "fas fa-search", label: "Explore" },
     { path: "/subscriptions", icon: "fas fa-star", label: "Subscriptions" },
     { path: "/release-forms", icon: "fas fa-file-contract", label: "Release Forms" },

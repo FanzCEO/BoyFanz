@@ -182,25 +182,25 @@ export default function PushNotificationsManagement() {
         sortOrder
       }
     ],
-    enabled: user?.role === 'admin'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin')
   });
 
   // Fetch notification templates
   const { data: templates = [], isLoading: templatesLoading } = useQuery({
     queryKey: ['/api/admin/notification-templates'],
-    enabled: user?.role === 'admin' && activeTab === 'templates'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') && activeTab === 'templates'
   });
 
   // Fetch campaign analytics
   const { data: analytics, isLoading: analyticsLoading } = useQuery<CampaignAnalytics>({
     queryKey: ['/api/admin/push-campaigns/analytics', { dateFrom: analyticsDateFrom, dateTo: analyticsDateTo }],
-    enabled: user?.role === 'admin' && showAnalyticsDialog
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') && showAnalyticsDialog
   });
 
   // Fetch user notification preferences
   const { data: userPreferences = [], isLoading: preferencesLoading } = useQuery({
     queryKey: ['/api/admin/user-notification-preferences'],
-    enabled: user?.role === 'admin' && activeTab === 'preferences'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') && activeTab === 'preferences'
   });
 
   // Mutations

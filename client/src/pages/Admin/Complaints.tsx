@@ -102,19 +102,19 @@ export default function ComplaintsManagement() {
       limit,
       offset: page * limit
     }],
-    enabled: user?.role === 'admin'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin')
   });
 
   // Fetch complaint statistics
   const { data: statsData } = useQuery({
     queryKey: ['/api/admin/complaints/stats'],
-    enabled: user?.role === 'admin'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin')
   });
 
   // Fetch comments for selected complaint
   const { data: commentsData } = useQuery({
     queryKey: ['/api/admin/complaints', selectedComplaint?.id, 'comments'],
-    enabled: !!selectedComplaint && user?.role === 'admin'
+    enabled: !!selectedComplaint && (user?.role === 'admin' || user?.role === 'super_admin')
   });
 
   // Mutations for complaint actions

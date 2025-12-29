@@ -90,25 +90,25 @@ export default function GamificationManagement() {
   // Fetch XP leaderboard
   const { data: xpData, isLoading: xpLoading, refetch: refetchXP } = useQuery({
     queryKey: ['/api/gamification/xp/leaderboard', { search: searchQuery, limit: 50 }],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator'
   });
 
   // Fetch badges
   const { data: badgesData, isLoading: badgesLoading, refetch: refetchBadges } = useQuery({
     queryKey: ['/api/gamification/badges', { category: categoryFilter, rarity: rarityFilter }],
-    enabled: (user?.role === 'admin' || user?.role === 'moderator') && activeTab === 'badges'
+    enabled: ((user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator') && activeTab === 'badges'
   });
 
   // Fetch leaderboards
   const { data: leaderboardData, isLoading: leaderboardLoading } = useQuery({
     queryKey: ['/api/gamification/leaderboards', { type: leaderboardType, period: periodFilter }],
-    enabled: (user?.role === 'admin' || user?.role === 'moderator') && activeTab === 'leaderboards'
+    enabled: ((user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator') && activeTab === 'leaderboards'
   });
 
   // Fetch analytics
   const { data: analyticsData } = useQuery({
     queryKey: ['/api/gamification/analytics'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator'
   });
 
   // Create badge mutation

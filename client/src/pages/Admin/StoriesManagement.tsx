@@ -89,28 +89,28 @@ export default function StoriesManagement() {
         sortOrder
       }
     ],
-    enabled: user?.role === 'admin' || user?.role === 'moderator',
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 60000 : false // Refresh every minute for expiration updates
   });
 
   // Fetch real-time analytics
   const { data: storiesStats } = useQuery({
     queryKey: ['/api/admin/stories/stats'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator',
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 30000 : false
   });
 
   // Fetch trending stories analytics
   const { data: trendingStats } = useQuery({
     queryKey: ['/api/admin/stories/trending'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator',
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 60000 : false
   });
 
   // Fetch creators for filter
   const { data: creators } = useQuery({
     queryKey: ['/api/admin/creators'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator'
   });
 
   const stories = storiesData?.stories || [];

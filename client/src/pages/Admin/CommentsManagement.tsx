@@ -129,13 +129,13 @@ export default function CommentsManagement() {
         sortOrder
       }
     ],
-    enabled: user?.role === 'admin'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin')
   });
 
   // Fetch comment analytics
   const { data: analytics, isLoading: analyticsLoading } = useQuery<CommentAnalytics>({
     queryKey: ['/api/admin/comments/analytics', { dateFrom: analyticsDateFrom, dateTo: analyticsDateTo }],
-    enabled: user?.role === 'admin' && showAnalyticsDialog
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') && showAnalyticsDialog
   });
 
   const comments: Comment[] = commentsData || [];

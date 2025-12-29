@@ -157,7 +157,7 @@ export default function MessagesManagement() {
         sortOrder
       }
     ],
-    enabled: user?.role === 'admin' && activeTab === 'messages'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') && activeTab === 'messages'
   });
 
   // Fetch message templates
@@ -171,13 +171,13 @@ export default function MessagesManagement() {
         offset: 0
       }
     ],
-    enabled: user?.role === 'admin' && (activeTab === 'templates' || activeTab === 'mass-messaging')
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') && (activeTab === 'templates' || activeTab === 'mass-messaging')
   });
 
   // Fetch message analytics
   const { data: analytics, isLoading: analyticsLoading } = useQuery<MessageAnalytics>({
     queryKey: ['/api/admin/messages/analytics', { dateFrom: analyticsDateFrom, dateTo: analyticsDateTo }],
-    enabled: user?.role === 'admin' && showAnalyticsDialog
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') && showAnalyticsDialog
   });
 
   const totalMessages = messages.length;

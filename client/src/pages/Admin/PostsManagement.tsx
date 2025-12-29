@@ -81,25 +81,25 @@ export default function PostsManagement() {
         sortOrder
       }
     ],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator'
   });
 
   // Fetch analytics stats
   const { data: postsStats } = useQuery({
     queryKey: ['/api/admin/posts/stats'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator'
   });
 
   // Fetch creators for filter
   const { data: creators } = useQuery({
     queryKey: ['/api/admin/creators'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator'
   });
 
   // Fetch categories for filter
   const { data: categories } = useQuery({
     queryKey: ['/api/admin/categories'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    enabled: (user?.role === 'admin' || user?.role === 'super_admin') || user?.role === 'moderator'
   });
 
   const posts = postsData?.posts || [];

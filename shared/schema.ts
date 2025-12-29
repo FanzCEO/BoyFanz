@@ -15,6 +15,7 @@ import {
   bigserial,
   bigint,
   inet,
+  uuid,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -285,10 +286,10 @@ export const users = pgTable("users", {
 export const creatorLocations = pgTable(
   "creator_locations",
   {
-    id: varchar("id")
+    id: uuid("id")
       .primaryKey()
-      .default(sql`gen_random_uuid()`),
-    userId: varchar("user_id")
+      .defaultRandom(),
+    userId: uuid("user_id")
       .notNull()
       .unique()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -306,6 +307,63 @@ export const creatorLocations = pgTable(
     index("idx_creator_locations_visible").on(table.isVisible),
     // Geospatial index for efficient nearby queries
     index("idx_creator_locations_coords").on(table.lat, table.lng),
+  ],
+);
+
+// ===== MEETUP SCHEDULING SYSTEM =====
+// Cross-platform meetup scheduling for creators
+
+export const meetupStatus = pgEnum("meetup_status", [
+  "pending",      // Waiting for response
+  "confirmed",    // Both parties confirmed
+  "cancelled",    // Cancelled by either party
+  "completed",    // Meetup happened
+  "expired",      // No response within timeframe
+]);
+
+export const meetups = pgTable(
+  "meetups",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    creatorId: uuid("creator_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    inviteeId: uuid("invitee_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    // Location details
+    locationName: varchar("location_name", { length: 255 }),
+    locationAddress: text("location_address"),
+    lat: decimal("lat", { precision: 10, scale: 7 }),
+    lng: decimal("lng", { precision: 10, scale: 7 }),
+    // Scheduling
+    proposedAt: timestamp("proposed_at").notNull(),
+    alternateTime1: timestamp("alternate_time_1"),
+    alternateTime2: timestamp("alternate_time_2"),
+    confirmedAt: timestamp("confirmed_at"), // The agreed-upon time
+    // Status tracking
+    status: meetupStatus("status").default("pending").notNull(),
+    // Cross-platform tracking
+    creatorPlatform: varchar("creator_platform", { length: 50 }),
+    inviteePlatform: varchar("invitee_platform", { length: 50 }),
+    chatRoomId: varchar("chat_room_id", { length: 100 }), // Link to FanzChat room
+    // Notes and safety
+    creatorNotes: text("creator_notes"),
+    inviteeNotes: text("invitee_notes"),
+    isPublic: boolean("is_public").default(false), // Allow others to see/join
+    maxAttendees: integer("max_attendees").default(2),
+    // Timestamps
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+    cancelledAt: timestamp("cancelled_at"),
+    cancelReason: text("cancel_reason"),
+  },
+  (table) => [
+    index("idx_meetups_creator").on(table.creatorId),
+    index("idx_meetups_invitee").on(table.inviteeId),
+    index("idx_meetups_status").on(table.status),
+    index("idx_meetups_proposed_at").on(table.proposedAt),
+    index("idx_meetups_chat_room").on(table.chatRoomId),
   ],
 );
 
@@ -10694,8 +10752,8 @@ export const adsRelations = relations(ads, ({ one, many }) => ({
     fields: [ads.advertiserId],
     references: [advertisers.id],
   }),
-  impressions: many(adImpressions),
-  clicks: many(adClicks),
+  impressions: many(charityAdImpressions),
+  clicks: many(charityAdClicks),
 }));
 
 export const creatorAdSettingsRelations = relations(creatorAdSettings, ({ one }) => ({
@@ -10705,13 +10763,28 @@ export const creatorAdSettingsRelations = relations(creatorAdSettings, ({ one })
   }),
 }));
 
-export const adImpressionsRelations = relations(adImpressions, ({ one }) => ({
+export const charityAdImpressionsRelations = relations(charityAdImpressions, ({ one }) => ({
   ad: one(ads, {
-    fields: [adImpressions.adId],
+    fields: [charityAdImpressions.adId],
     references: [ads.id],
   }),
   creator: one(users, {
-    fields: [adImpressions.creatorId],
+    fields: [charityAdImpressions.creatorId],
+    references: [users.id],
+  }),
+}));
+
+export const charityAdClicksRelations = relations(charityAdClicks, ({ one }) => ({
+  ad: one(ads, {
+    fields: [charityAdClicks.adId],
+    references: [ads.id],
+  }),
+  impression: one(charityAdImpressions, {
+    fields: [charityAdClicks.impressionId],
+    references: [charityAdImpressions.id],
+  }),
+  creator: one(users, {
+    fields: [charityAdClicks.creatorId],
     references: [users.id],
   }),
 }));
@@ -10747,8 +10820,8 @@ export type CreatorAdSettings = typeof creatorAdSettings.$inferSelect;
 export type InsertCreatorAdSettings = typeof creatorAdSettings.$inferInsert;
 export type AdImpression = typeof adImpressions.$inferSelect;
 export type InsertAdImpression = typeof adImpressions.$inferInsert;
-export type AdClick = typeof adClicks.$inferSelect;
-export type InsertAdClick = typeof adClicks.$inferInsert;
+export type AdClick = typeof charityAdClicks.$inferSelect;
+export type InsertAdClick = typeof charityAdClicks.$inferInsert;
 export type CreatorAdRevenue = typeof creatorAdRevenue.$inferSelect;
 export type InsertCreatorAdRevenue = typeof creatorAdRevenue.$inferInsert;
 export type Charity = typeof charities.$inferSelect;

@@ -29,7 +29,7 @@ export function isSuperAdmin(email?: string): boolean {
 export function shouldBypassCharges(user?: Express.User | null): boolean {
   if (!user) return false;
   if (isSuperAdmin(user.email)) return true;
-  if (user.role === 'admin' || user.role === 'moderator') return true;
+  if (user.role === 'admin' || user.role === 'super_admin' || user.role === 'moderator') return true;
   return false;
 }
 
@@ -57,7 +57,8 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction) {
     if (isSuperAdmin(ssoUser.email)) {
       return next();
     }
-    if (ssoUser.isAdmin || ssoUser.roles?.includes('admin')) {
+    // Check for admin or super_admin role
+    if (ssoUser.isAdmin || ssoUser.roles?.includes('admin') || ssoUser.roles?.includes('super_admin') || ssoUser.role === 'super_admin') {
       return next();
     }
     return res.status(403).json({ error: 'Admin access required' });
@@ -73,7 +74,8 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction) {
     return next();
   }
 
-  if (req.user?.role !== 'admin') {
+  // Check for admin or super_admin role
+  if (req.user?.role !== 'admin' && req.user?.role !== 'super_admin') {
     return res.status(403).json({ error: 'Admin access required' });
   }
 
@@ -155,14 +157,15 @@ export function requireOwnershipOrAdmin(resourceUserIdField: string = 'userId') 
     if (!req.isAuthenticated || !req.isAuthenticated()) {
       return res.status(401).json({ error: 'Authentication required' });
     }
-    
+
     const currentUserId = req.user?.id;
     const resourceUserId = req.params[resourceUserIdField] || req.body[resourceUserIdField];
-    
-    if (req.user?.role === 'admin' || currentUserId === resourceUserId) {
+
+    // Allow admin, super_admin, or resource owner
+    if (req.user?.role === 'admin' || req.user?.role === 'super_admin' || currentUserId === resourceUserId) {
       return next();
     }
-    
+
     res.status(403).json({ error: 'Access denied' });
   };
 }

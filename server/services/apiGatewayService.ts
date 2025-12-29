@@ -941,15 +941,26 @@ export class APIGatewayService extends EventEmitter {
 
   private buildTargetUrl(baseUrl: string, req: Request, route: RouteDefinition): string {
     let targetPath = req.path;
-    
+
     // Remove route prefix if needed
     const routePrefix = route.path.replace('/*', '');
     if (targetPath.startsWith(routePrefix)) {
       targetPath = targetPath.substring(routePrefix.length);
     }
-    
+
     const queryString = req.url?.includes('?') ? req.url.split('?')[1] : '';
-    return `${baseUrl}${route.target}${targetPath}${queryString ? '?' + queryString : ''}`;
+
+    // Check if route.target is already a full URL (contains protocol)
+    // If so, use route.target directly instead of combining with baseUrl
+    if (route.target.startsWith('http://') || route.target.startsWith('https://')) {
+      return `${route.target}${targetPath}${queryString ? '?' + queryString : ''}`;
+    }
+
+    // Also ensure baseUrl doesn't get duplicated if already in target
+    const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    const cleanTarget = route.target.startsWith('/') ? route.target : `/${route.target}`;
+
+    return `${cleanBaseUrl}${cleanTarget}${targetPath}${queryString ? '?' + queryString : ''}`;
   }
 
   private prepareHeaders(req: Request): Record<string, string> {
