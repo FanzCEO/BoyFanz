@@ -1,0 +1,214 @@
+{
+  "feature": "analytics",
+  "display_name": "Analytics & Insights",
+  "category": "business_intelligence",
+  "context_triggers": {
+    "pages": ["/analytics", "/dashboard/analytics", "/insights", "/reports", "/stats"],
+    "keywords": ["analytics", "stats", "data", "metrics", "performance", "insights", "reports"],
+    "user_actions": ["view_analytics", "export_report", "low_performance", "high_performance"]
+  },
+  "knowledge_entries": [
+    {
+      "id": "analytics-001",
+      "question": "How do I view my analytics?",
+      "answer": "Click Dashboard → Analytics to see all your metrics! You'll see revenue, subscribers, engagement, content performance, and more. The dashboard updates in real-time. Explore tabs for Revenue, Fans, Content, Messages, and Streams. Export reports anytime!",
+      "related_topics": ["analytics", "dashboard", "getting_started"],
+      "difficulty": "beginner",
+      "quick_action": {
+        "label": "View Analytics",
+        "action": "navigate",
+        "target": "/analytics"
+      }
+    },
+    {
+      "id": "analytics-002",
+      "question": "What metrics should I track?",
+      "answer": "Focus on these key metrics: 1) Revenue (daily/monthly), 2) Subscriber growth, 3) Engagement rate (target 20%+), 4) Top performing content, 5) Response time (<4 hours), 6) Retention rate (80%+). These tell you if you're growing and what's working!",
+      "related_topics": ["metrics", "kpis", "performance"],
+      "difficulty": "beginner",
+      "pro_tip": true
+    },
+    {
+      "id": "analytics-003",
+      "question": "What is engagement rate?",
+      "answer": "Engagement rate = (Likes + Comments + Shares) ÷ Views × 100. It shows how much your audience interacts with content. Average: 15-25%, High: 30%+. Higher engagement = fans love your content! Boost it by asking questions, creating interactive content, and responding to comments.",
+      "related_topics": ["engagement", "metrics", "performance"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "analytics-004",
+      "question": "How do I find my top performing content?",
+      "answer": "Dashboard → Analytics → Content → 'Top Earning' or 'Most Viewed'. See which posts made the most money and got highest engagement. Sort by earnings, views, or engagement rate. Then create MORE of what works! Replicate your winners.",
+      "related_topics": ["content", "performance", "optimization"],
+      "difficulty": "beginner",
+      "quick_action": {
+        "label": "View Top Content",
+        "action": "navigate",
+        "target": "/analytics/content/top"
+      }
+    },
+    {
+      "id": "analytics-005",
+      "question": "When is the best time to post?",
+      "answer": "Check Analytics → Content → 'Best Posting Times' - we analyze YOUR audience's activity! Generally: Weekdays 7-10 PM, Weekends 2-4 PM & 8-11 PM. Your data might differ. Post when YOUR fans are most active for 2-3x more engagement!",
+      "related_topics": ["timing", "scheduling", "optimization"],
+      "difficulty": "intermediate",
+      "pro_tip": true
+    },
+    {
+      "id": "analytics-006",
+      "question": "What is RPM and why does it matter?",
+      "answer": "RPM (Revenue Per Mille) = earnings per 1,000 views. Formula: (Revenue ÷ Views) × 1,000. Average: $50-150, High: $200+. Use it to compare content value. Higher RPM = more valuable content. Focus on creating high-RPM content types!",
+      "related_topics": ["rpm", "metrics", "revenue"],
+      "difficulty": "advanced",
+      "pro_tip": true
+    },
+    {
+      "id": "analytics-007",
+      "question": "How do I export my analytics data?",
+      "answer": "Analytics → Reports → Export. Choose: Revenue Report (CSV), Subscriber Report, Content Performance, or Custom Date Range. Perfect for taxes, tracking trends, or deeper analysis in Excel. Download anytime, free!",
+      "related_topics": ["export", "reports", "data"],
+      "difficulty": "beginner",
+      "quick_action": {
+        "label": "Export Reports",
+        "action": "navigate",
+        "target": "/analytics/export"
+      }
+    },
+    {
+      "id": "analytics-008",
+      "question": "What is a good subscriber retention rate?",
+      "answer": "Target: 80%+ monthly retention (subscribers renewing). Average: 75-85%, Excellent: 90%+. If below 75%, improve by: better content quality, consistent posting, engaging with fans, exclusive perks, and responding fast to messages. Retention = sustainable income!",
+      "related_topics": ["retention", "subscribers", "churn"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "analytics-009",
+      "question": "How can I increase my revenue per subscriber?",
+      "answer": "Current average: $15-25/month per subscriber. Increase it by: 1) Selling PPV content (not just subscriptions), 2) Offering higher subscription tiers, 3) Paid messages for exclusives, 4) Live streams with tips, 5) Custom content requests. Diversify income = higher revenue per fan!",
+      "related_topics": ["revenue", "monetization", "optimization"],
+      "difficulty": "advanced",
+      "pro_tip": true
+    },
+    {
+      "id": "analytics-010",
+      "question": "What does 'pending balance' mean in analytics?",
+      "answer": "Pending balance is money being processed before it's available to withdraw. Holding periods: Subscriptions (5 days), PPV sales (2 days), Streams (24 hours), Tips (instant). Anti-fraud measure. Track it in Analytics → Revenue → Balance Breakdown. It'll clear soon!",
+      "related_topics": ["balance", "pending", "revenue"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "analytics-011",
+      "question": "How do I track subscriber growth?",
+      "answer": "Analytics → Fans → Subscriber Growth. See daily/weekly/monthly new subscribers, cancellations, and net growth. Graph shows trends over time. Track where subscribers come from (search, external, etc.) and conversion rate. Aim for 10-20% monthly growth!",
+      "related_topics": ["growth", "subscribers", "tracking"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "analytics-012",
+      "question": "What are 'super fans' in analytics?",
+      "answer": "Super fans are your top 10% most engaged subscribers! They view all content, message frequently, tip regularly, and engage highly. Analytics shows who they are. Reward them with exclusive content, shoutouts, discounts, or special perks. They're your VIPs - treat them well!",
+      "related_topics": ["superfans", "engagement", "vip"],
+      "difficulty": "intermediate",
+      "pro_tip": true
+    },
+    {
+      "id": "analytics-013",
+      "question": "How do I set revenue goals?",
+      "answer": "Analytics → Goals → Set Revenue Goal. Enter target amount (e.g., $5,000/month), and we'll track your progress! Shows: current amount, % complete, days remaining, required daily average. Visual progress bar keeps you motivated. Update goals monthly as you grow!",
+      "related_topics": ["goals", "revenue", "targets"],
+      "difficulty": "beginner",
+      "quick_action": {
+        "label": "Set Goals",
+        "action": "navigate",
+        "target": "/analytics/goals"
+      }
+    },
+    {
+      "id": "analytics-014",
+      "question": "Why did my engagement rate drop?",
+      "answer": "Common causes: Posting less frequently, lower content quality, wrong posting times, or subscriber base changed. Check Analytics → Content → Recent Performance to identify the issue. Fix by: returning to consistent schedule, analyzing what worked before, posting when fans are active, and A/B testing content.",
+      "related_topics": ["troubleshooting", "engagement", "decline"],
+      "difficulty": "intermediate",
+      "troubleshooting": true
+    },
+    {
+      "id": "analytics-015",
+      "question": "What analytics should I check daily?",
+      "answer": "Daily routine: 1) Yesterday's earnings (revenue trend), 2) New subscribers (growth), 3) Top content from yesterday (what worked), 4) Response rate (fan service). Takes 2 minutes! Deep analysis weekly. Analytics → Dashboard shows all these at a glance. Make it a morning habit!",
+      "related_topics": ["routine", "daily", "best_practices"],
+      "difficulty": "beginner",
+      "pro_tip": true
+    }
+  ],
+  "proactive_triggers": [
+    {
+      "condition": "first_visit_analytics",
+      "message": "👋 Welcome to Analytics! Want a quick tour of the most important metrics to track?",
+      "action": "offer_analytics_tour"
+    },
+    {
+      "condition": "revenue_spike_detected",
+      "message": "🎉 Revenue spike detected! Want to see what content drove this increase?",
+      "action": "show_top_content"
+    },
+    {
+      "condition": "engagement_declining_7days",
+      "message": "📉 Your engagement has declined this week. Want tips to boost it back up?",
+      "action": "suggest_engagement_tips"
+    },
+    {
+      "condition": "subscriber_growth_accelerating",
+      "message": "🚀 Your growth is accelerating! Here's what's working - keep it up!",
+      "action": "highlight_success_factors"
+    },
+    {
+      "condition": "analytics_never_exported",
+      "message": "💡 Pro tip: Export your analytics monthly for tax records and trend tracking!",
+      "action": "guide_export_process"
+    },
+    {
+      "condition": "below_industry_benchmark",
+      "message": "📊 You're below the industry average for engagement. Want personalized tips to improve?",
+      "action": "provide_optimization_plan"
+    }
+  ],
+  "suggested_actions": [
+    {
+      "label": "View Analytics Dashboard",
+      "icon": "chart",
+      "action": "navigate",
+      "target": "/analytics",
+      "priority": "high"
+    },
+    {
+      "label": "Export Revenue Report",
+      "icon": "download",
+      "action": "navigate",
+      "target": "/analytics/export/revenue",
+      "priority": "medium"
+    },
+    {
+      "label": "View Top Content",
+      "icon": "star",
+      "action": "navigate",
+      "target": "/analytics/content/top",
+      "priority": "medium"
+    },
+    {
+      "label": "Set Revenue Goals",
+      "icon": "target",
+      "action": "navigate",
+      "target": "/analytics/goals",
+      "priority": "low"
+    }
+  ],
+  "related_documentation": [
+    "/how-to/analytics.md",
+    "/how-to/content-optimization.md",
+    "/how-to/revenue-growth.md",
+    "/how-to/fan-engagement.md"
+  ],
+  "last_updated": "2025-11-15",
+  "version": "1.0"
+}

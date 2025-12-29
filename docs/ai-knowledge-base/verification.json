@@ -1,0 +1,192 @@
+{
+  "feature": "creator_verification",
+  "display_name": "Creator Verification",
+  "category": "account_setup",
+  "context_triggers": {
+    "pages": ["/verification", "/settings/verification", "/get-verified", "/profile/verify"],
+    "keywords": ["verify", "verification", "verified", "badge", "ID", "identity"],
+    "user_actions": ["verification_started", "verification_failed", "id_upload_error", "profile_incomplete"]
+  },
+  "knowledge_entries": [
+    {
+      "id": "verify-001",
+      "question": "How do I get verified?",
+      "answer": "Getting verified takes just 5 minutes! Go to Profile → Settings → Verification → 'Get Verified'. Upload your government ID, take a live selfie, fill in your info, and submit. You'll be verified within 24 hours (usually 4-12 hours). Once approved, you get a blue badge and unlock premium features!",
+      "related_topics": ["verification", "getting_started", "badge"],
+      "difficulty": "beginner",
+      "quick_action": {
+        "label": "Start Verification",
+        "action": "navigate",
+        "target": "/verification/start"
+      }
+    },
+    {
+      "id": "verify-002",
+      "question": "What documents are accepted for verification?",
+      "answer": "Accepted IDs: Driver's License, Passport, National ID Card, or State ID Card from any country. Must be current (not expired), show all 4 corners clearly, and have readable text. No photocopies or screenshots - original documents only!",
+      "related_topics": ["documents", "requirements", "id"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "verify-003",
+      "question": "How long does verification take?",
+      "answer": "Average verification time is 4-12 hours, with a maximum of 24 hours. Most applications are reviewed within 8 hours! Submit during business hours (9am-5pm EST) for fastest approval. You'll get an email notification once approved.",
+      "related_topics": ["timeline", "waiting", "approval"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "verify-004",
+      "question": "Why was my verification rejected?",
+      "answer": "Common reasons: Blurry ID photo (40%), poor selfie lighting (25%), info doesn't match ID (20%), or expired document (10%). Check your rejection email for the specific reason. You can reapply immediately with better photos and correct info!",
+      "related_topics": ["rejection", "troubleshooting", "reapply"],
+      "difficulty": "intermediate",
+      "troubleshooting": true
+    },
+    {
+      "id": "verify-005",
+      "question": "What are the benefits of getting verified?",
+      "answer": "HUGE benefits! Blue verified badge on profile, 40% higher subscription rates, unlock live streaming, priority customer support, higher search ranking, featured creator opportunities, priority payouts, and fans trust you more. Totally worth 5 minutes!",
+      "related_topics": ["benefits", "badge", "earnings"],
+      "difficulty": "beginner",
+      "pro_tip": true
+    },
+    {
+      "id": "verify-006",
+      "question": "How do I take a good ID photo?",
+      "answer": "Pro tips: Use natural lighting (no flash!), lay ID flat on dark background, ensure all 4 corners visible, keep camera steady, take high-res photo (no blur), all text readable. DON'T use flash (glare!), crop edges, or use photocopies. Retake if unclear!",
+      "related_topics": ["photo_tips", "id_upload", "quality"],
+      "difficulty": "beginner",
+      "pro_tip": true
+    },
+    {
+      "id": "verify-007",
+      "question": "Why do I need to take a selfie?",
+      "answer": "The live selfie confirms you're the person on the ID - prevents fraud and impersonation! We compare it to your ID photo. Take it in good lighting, face the light source, remove hats/sunglasses, keep hair away from face, and look directly at camera. Takes 30 seconds!",
+      "related_topics": ["selfie", "identity", "security"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "verify-008",
+      "question": "Is my personal information safe?",
+      "answer": "Absolutely! Your ID and personal info are encrypted with bank-level security, stored securely, only viewable by our verification team, and auto-deleted after verification. Fans only see your blue badge - NOT your legal name, ID, age, or personal details. You're in control!",
+      "related_topics": ["privacy", "security", "data_protection"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "verify-009",
+      "question": "Can I get verified without a government ID?",
+      "answer": "Unfortunately, no. Government-issued ID is required for all verifications to comply with age verification laws and prevent fraud. Accepted: Driver's License, Passport, National ID, or State ID. If you don't have any of these, contact support to discuss options.",
+      "related_topics": ["requirements", "documents", "alternatives"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "verify-010",
+      "question": "What if my ID is expired?",
+      "answer": "Expired IDs cannot be used for verification. You'll need to renew your ID first, or use a different valid government ID (passport, national ID, etc.). If renewal is in process and urgent, contact support with proof of renewal application.",
+      "related_topics": ["expired_id", "troubleshooting", "documents"],
+      "difficulty": "beginner",
+      "troubleshooting": true
+    },
+    {
+      "id": "verify-011",
+      "question": "Can I lose my verification badge?",
+      "answer": "Your badge stays active as long as you follow community guidelines and maintain good standing. You could lose it for: repeated content violations, fraud, terms violations, chargebacks, or 12+ months inactivity. If removed, you get 7 days to appeal and can reapply after 30 days.",
+      "related_topics": ["badge_removal", "violations", "appeal"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "verify-012",
+      "question": "What's the difference between blue badge and gold badge?",
+      "answer": "Blue badge = standard verified creator. Gold badge = celebrity/influencer/public figure verification (50K+ followers on other platforms, press mentions, etc.). Gold gets top search placement, featured opportunities, and business features. Apply via 'Public Figure Verification' after getting blue badge first!",
+      "related_topics": ["badges", "celebrity", "public_figure"],
+      "difficulty": "intermediate",
+      "pro_tip": true
+    },
+    {
+      "id": "verify-013",
+      "question": "My verification is taking longer than 24 hours",
+      "answer": "Check spam folder for emails, view status in your dashboard. If over 48 hours with no response, contact support with your submission timestamp. Weekend/holiday submissions may take longer. Most delays are from needing additional info - check for emails from verification team!",
+      "related_topics": ["delays", "waiting", "support"],
+      "difficulty": "beginner",
+      "troubleshooting": true
+    },
+    {
+      "id": "verify-014",
+      "question": "Do I need to be verified to use the platform?",
+      "answer": "No, verification is optional! You can create content, earn money, and build your fanbase without it. However, verified creators earn 40% more on average, unlock live streaming, get priority support, and rank higher in search. Highly recommended for serious creators!",
+      "related_topics": ["requirements", "benefits", "optional"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "verify-015",
+      "question": "Can I use a different name than what's on my ID?",
+      "answer": "Your legal name (from ID) is required for verification, but fans only see your display name/stage name! Legal name is private and only used for verification, taxes, and payouts. You have full control over your public profile name, bio, and branding. Best of both worlds!",
+      "related_topics": ["display_name", "privacy", "stage_name"],
+      "difficulty": "intermediate",
+      "pro_tip": true
+    }
+  ],
+  "proactive_triggers": [
+    {
+      "condition": "profile_complete_70_not_verified",
+      "message": "🎉 Your profile looks great! Want to get verified and unlock premium features? It takes just 5 minutes!",
+      "action": "offer_verification_start"
+    },
+    {
+      "condition": "verification_rejected_blurry_photo",
+      "message": "📸 Your ID photo was a bit unclear. Want tips on taking the perfect verification photo?",
+      "action": "show_photo_guide"
+    },
+    {
+      "condition": "verification_started_not_completed",
+      "message": "⏱️ You started verification but didn't finish. Want to pick up where you left off?",
+      "action": "resume_verification"
+    },
+    {
+      "condition": "high_earnings_not_verified",
+      "message": "💰 You're doing great! Getting verified could increase your earnings by 40%. Want to get your badge?",
+      "action": "suggest_verification"
+    },
+    {
+      "condition": "verification_approved",
+      "message": "🎊 Congratulations! You're verified! Want tips on leveraging your badge to maximize earnings?",
+      "action": "show_verified_benefits"
+    },
+    {
+      "condition": "trying_to_go_live_unverified",
+      "message": "📹 Live streaming requires verification. Want to get verified now? It takes just 5 minutes!",
+      "action": "require_verification_for_feature"
+    }
+  ],
+  "suggested_actions": [
+    {
+      "label": "Start Verification",
+      "icon": "badge",
+      "action": "navigate",
+      "target": "/verification/start",
+      "priority": "high"
+    },
+    {
+      "label": "View Verification Status",
+      "icon": "status",
+      "action": "navigate",
+      "target": "/verification/status",
+      "priority": "medium"
+    },
+    {
+      "label": "Learn About Benefits",
+      "icon": "info",
+      "action": "navigate",
+      "target": "/help/verification-benefits",
+      "priority": "low"
+    }
+  ],
+  "related_documentation": [
+    "/how-to/creator-verification.md",
+    "/how-to/profile-setup.md",
+    "/how-to/account-settings.md",
+    "/policies/privacy-policy.md"
+  ],
+  "last_updated": "2025-11-15",
+  "version": "1.0"
+}

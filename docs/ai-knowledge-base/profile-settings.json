@@ -1,0 +1,199 @@
+{
+  "feature": "profile_settings",
+  "display_name": "Profile & Settings",
+  "category": "account_setup",
+  "context_triggers": {
+    "pages": ["/profile", "/settings", "/edit-profile", "/account"],
+    "keywords": ["profile", "settings", "bio", "photo", "privacy", "account"],
+    "user_actions": ["profile_incomplete", "edit_profile", "first_login", "settings_access"]
+  },
+  "knowledge_entries": [
+    {
+      "id": "profile-001",
+      "question": "How do I edit my profile?",
+      "answer": "Click Profile → Edit Profile. Upload your photo and banner, write your bio (300 chars), add social links, and save! Profiles 80%+ complete get 3x more subscribers. Make a great first impression!",
+      "related_topics": ["profile", "setup", "getting_started"],
+      "difficulty": "beginner",
+      "quick_action": {
+        "label": "Edit Profile",
+        "action": "navigate",
+        "target": "/profile/edit"
+      }
+    },
+    {
+      "id": "profile-002",
+      "question": "What size should my profile photo be?",
+      "answer": "Minimum 400×400 pixels, square format (1:1), max 5MB, JPG or PNG. Best practice: Clear face shot, good lighting, professional quality. Avoid group photos or heavy filters. Your photo is the first thing fans see!",
+      "related_topics": ["photo", "image", "requirements"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "profile-003",
+      "question": "How do I write a good bio?",
+      "answer": "300 character bio formula: Who you are + What content you create + Posting schedule + Call-to-action. Example: '🏋️ Fitness coach | Daily workouts & meal plans | New content Mon/Wed/Fri | Subscribe for exclusive training! 👇' Use emojis, keywords, and be clear!",
+      "related_topics": ["bio", "optimization", "writing"],
+      "difficulty": "beginner",
+      "pro_tip": true
+    },
+    {
+      "id": "profile-004",
+      "question": "What banner size do I need?",
+      "answer": "1500×500 pixels (3:1 ratio) for desktop. Mobile crops it, so keep important elements centered. Use high-quality images that represent your brand. Update seasonally for freshness. Great banners increase profile engagement by 40%!",
+      "related_topics": ["banner", "cover", "image"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "profile-005",
+      "question": "How do I get a custom URL?",
+      "answer": "Settings → Profile → Custom URL. Choose 3-30 characters (letters, numbers, underscores). Example: boyfanz.com/yourname. Must be unique and it's permanent, so choose wisely! Makes your profile easy to share and professional.",
+      "related_topics": ["url", "vanity", "custom"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "profile-006",
+      "question": "How do I enable two-factor authentication?",
+      "answer": "Settings → Security → Enable 2FA. Choose SMS or authenticator app. You'll need your password + code to login. HIGHLY recommended for account security! Protects against unauthorized access. Takes 2 minutes to set up.",
+      "related_topics": ["security", "2fa", "authentication"],
+      "difficulty": "beginner",
+      "quick_action": {
+        "label": "Enable 2FA",
+        "action": "navigate",
+        "target": "/settings/security/2fa"
+      }
+    },
+    {
+      "id": "profile-007",
+      "question": "How do I change my privacy settings?",
+      "answer": "Settings → Privacy. Control: Who sees content (public/followers/subscribers), who can message you, search visibility, and block users. Customize per your comfort level. You're in control of your creator experience!",
+      "related_topics": ["privacy", "visibility", "control"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "profile-008",
+      "question": "Can I use a stage name instead of my real name?",
+      "answer": "Absolutely! Your display name (what fans see) can be anything. Your legal name is only used for verification and payouts - fans never see it. Privacy protected! Use a stage name, brand name, or whatever represents you best.",
+      "related_topics": ["name", "privacy", "identity"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "profile-009",
+      "question": "How do I link my social media accounts?",
+      "answer": "Profile → Edit → Social Links. Add Instagram, Twitter, TikTok, YouTube, etc. Benefits: Build trust, cross-promote, multiple touchpoints, grow all platforms. Only link accounts you want fans to see!",
+      "related_topics": ["social", "links", "promotion"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "profile-010",
+      "question": "Why does profile completion matter?",
+      "answer": "Profiles 80%+ complete get 3x more subscribers! Complete = trustworthy, professional, discoverable. Upload photo, banner, bio, link socials, verify email, add payout method, post content. Each % increases conversion. First impressions matter!",
+      "related_topics": ["completion", "optimization", "conversion"],
+      "difficulty": "intermediate",
+      "pro_tip": true
+    },
+    {
+      "id": "profile-011",
+      "question": "How do I manage notifications?",
+      "answer": "Settings → Notifications. Control email + push notifications for: new subscribers, messages, comments, tips, payouts. Set quiet hours for do-not-disturb. Choose real-time, daily digest, or weekly summary. Stay informed without overwhelm!",
+      "related_topics": ["notifications", "alerts", "settings"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "profile-012",
+      "question": "What are profile tags and categories?",
+      "answer": "Tags help fans discover you: Fitness, Lifestyle, Gaming, Fashion, etc. Choose relevant categories in Profile → Edit. You can select multiple! Better tags = better search ranking = more subscribers. Update as your content evolves.",
+      "related_topics": ["tags", "categories", "discovery"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "profile-013",
+      "question": "How do I pin posts to my profile?",
+      "answer": "Feature your best content! Click '...' on any post → 'Pin to Profile'. Pin up to 3 posts. These show first on your profile - great first impression! Update regularly with latest best work. Pinned posts get 5x more views!",
+      "related_topics": ["pinned", "featured", "content"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "profile-014",
+      "question": "How do I block someone?",
+      "answer": "Go to their profile → '...' menu → 'Block User'. Or Settings → Privacy → Blocked Users → Add. Blocking prevents: all messages, viewing your content, commenting, tipping. They won't be notified. You control your space!",
+      "related_topics": ["blocking", "safety", "privacy"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "profile-015",
+      "question": "What's the difference between public and private profile?",
+      "answer": "Public = anyone can find and view your profile (great for growth). Private = invite-only (more exclusive). Most creators use public for discovery. You can still control who sees specific content (subscribers-only posts). Choose based on your goals!",
+      "related_topics": ["visibility", "privacy", "settings"],
+      "difficulty": "intermediate"
+    }
+  ],
+  "proactive_triggers": [
+    {
+      "condition": "profile_less_than_50_percent",
+      "message": "📝 Your profile is incomplete! Complete profiles get 3x more subscribers. Want help finishing it?",
+      "action": "guide_profile_completion"
+    },
+    {
+      "condition": "no_profile_photo",
+      "message": "📸 Add a profile photo to make a great first impression! Takes 30 seconds.",
+      "action": "prompt_photo_upload"
+    },
+    {
+      "condition": "no_bio_set",
+      "message": "✍️ Write your bio to tell fans who you are and what you create! (300 characters)",
+      "action": "open_bio_editor"
+    },
+    {
+      "condition": "2fa_not_enabled",
+      "message": "🔒 Protect your account! Enable two-factor authentication for security.",
+      "action": "suggest_2fa_setup"
+    },
+    {
+      "condition": "profile_100_percent_complete",
+      "message": "🎉 Your profile is 100% complete! This increases subscriber conversions by 300%. Great job!",
+      "action": "congratulate_completion"
+    },
+    {
+      "condition": "no_social_links",
+      "message": "🔗 Link your social media to build trust and cross-promote your content!",
+      "action": "add_social_links"
+    }
+  ],
+  "suggested_actions": [
+    {
+      "label": "Edit Profile",
+      "icon": "edit",
+      "action": "navigate",
+      "target": "/profile/edit",
+      "priority": "high"
+    },
+    {
+      "label": "Privacy Settings",
+      "icon": "lock",
+      "action": "navigate",
+      "target": "/settings/privacy",
+      "priority": "medium"
+    },
+    {
+      "label": "Notification Settings",
+      "icon": "bell",
+      "action": "navigate",
+      "target": "/settings/notifications",
+      "priority": "low"
+    },
+    {
+      "label": "Security Settings",
+      "icon": "shield",
+      "action": "navigate",
+      "target": "/settings/security",
+      "priority": "medium"
+    }
+  ],
+  "related_documentation": [
+    "/how-to/profile-settings.md",
+    "/how-to/profile-optimization.md",
+    "/how-to/privacy-security.md",
+    "/how-to/branding.md"
+  ],
+  "last_updated": "2025-11-16",
+  "version": "1.0"
+}

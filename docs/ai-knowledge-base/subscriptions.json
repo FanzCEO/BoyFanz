@@ -1,0 +1,198 @@
+{
+  "feature": "subscriptions",
+  "display_name": "Subscriptions",
+  "category": "monetization",
+  "context_triggers": {
+    "pages": ["/subscriptions", "/settings/subscriptions", "/pricing", "/tiers"],
+    "keywords": ["subscription", "subscribe", "monthly", "tier", "pricing", "recurring"],
+    "user_actions": ["set_price", "new_subscriber", "cancellation", "pricing_change"]
+  },
+  "knowledge_entries": [
+    {
+      "id": "sub-001",
+      "question": "How do I set up subscriptions?",
+      "answer": "Settings → Subscriptions → Set your monthly price ($5-50), describe what subscribers get, and save! Start at $9.99 for best conversion. Subscribers get all your exclusive content, can message you directly, and support your work monthly. Easy setup, recurring income!",
+      "related_topics": ["setup", "getting_started", "pricing"],
+      "difficulty": "beginner",
+      "quick_action": {
+        "label": "Set Subscription Price",
+        "action": "navigate",
+        "target": "/settings/subscriptions"
+      }
+    },
+    {
+      "id": "sub-002",
+      "question": "What price should I charge for subscriptions?",
+      "answer": "Start at $9.99 - it's the sweet spot! Pricing guide: Beginners $9.99, Growing creators $14.99, Established $19.99, Premium $29.99, VIP $49.99. Consider your content quality, posting frequency, and niche. You can always adjust! Most creators earn $15-25/subscriber/month.",
+      "related_topics": ["pricing", "strategy", "revenue"],
+      "difficulty": "beginner",
+      "pro_tip": true
+    },
+    {
+      "id": "sub-003",
+      "question": "What do subscribers get?",
+      "answer": "Subscribers get: 1) All exclusive posts (photos, videos, stories), 2) Direct messaging access, 3) Early content access, 4) Subscriber-only comments, 5) Special badge, 6) Discounts on PPV content, 7) Monthly exclusive content. You control what perks to offer!",
+      "related_topics": ["benefits", "perks", "access"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "sub-004",
+      "question": "Should I offer multiple subscription tiers?",
+      "answer": "Yes! Multi-tier = more revenue! Example: Basic ($9.99), Premium ($19.99 with HD + early access), VIP ($49.99 with customs + calls). Price anchoring makes Premium look attractive. Fans choose their budget. You earn more overall. Highly recommended!",
+      "related_topics": ["tiers", "pricing", "strategy"],
+      "difficulty": "intermediate",
+      "pro_tip": true
+    },
+    {
+      "id": "sub-005",
+      "question": "How often should I post for subscribers?",
+      "answer": "Minimum: 2-3x/week for casual creators. Standard: 4-6x/week for active creators. Pro: 1-2x/day for full-time. PLUS weekly premium content. Consistency matters more than volume! Set a schedule and stick to it. Subscribers value reliability.",
+      "related_topics": ["posting", "frequency", "content"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "sub-006",
+      "question": "What if subscribers cancel?",
+      "answer": "Some cancellation is normal! Target: <20% monthly churn. Prevent cancellations by: consistent posting, high quality, quick responses, exclusive perks, personal engagement. If they cancel, ask why (exit survey), learn, improve. Win them back later with special offers!",
+      "related_topics": ["retention", "churn", "cancellations"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "sub-007",
+      "question": "Can I offer free trials?",
+      "answer": "Yes! 3-7 day free trial lets fans try before they buy. Pros: Higher conversions, showcase value. Cons: Some won't convert to paid. Best for: Starting out, new tiers, promotions. Requires payment method upfront, auto-converts to paid. Try it!",
+      "related_topics": ["trials", "promotions", "conversions"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "sub-008",
+      "question": "How do I grow my subscriber count?",
+      "answer": "Growth strategies: 1) Post free teasers ('subscribe for more!'), 2) Limited-time discounts, 3) Social media promotion, 4) Collaborate with creators, 5) Optimize profile, 6) Consistent quality content, 7) Engage with community. Target: 10-20% monthly growth!",
+      "related_topics": ["growth", "marketing", "conversions"],
+      "difficulty": "intermediate",
+      "pro_tip": true
+    },
+    {
+      "id": "sub-009",
+      "question": "What's the difference between subscribers and followers?",
+      "answer": "Followers = free (can see public content). Subscribers = paying monthly (access exclusive content + perks). Your goal: Convert followers to subscribers! Post teasers publicly, exclusive full content for subs. Think of followers as your marketing funnel, subscribers as your revenue!",
+      "related_topics": ["followers", "conversions", "basics"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "sub-010",
+      "question": "Can I change my subscription price later?",
+      "answer": "Yes! You can adjust pricing anytime. Best practice: 1) Announce 2 weeks ahead, 2) Grandfather existing subs (they keep old price), 3) Explain added value, 4) New subs pay new price. Raise prices when: high retention, growing waitlist, added value, consistent quality!",
+      "related_topics": ["pricing", "changes", "strategy"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "sub-011",
+      "question": "What's a good subscriber retention rate?",
+      "answer": "Target: 80%+ monthly retention (subscribers renewing). Industry average: 75-85%. Excellent: 90%+. Improve retention by: posting consistently, high-quality content, quick message responses, exclusive perks, personal engagement, exceeding expectations. Retention = sustainable income!",
+      "related_topics": ["retention", "metrics", "churn"],
+      "difficulty": "intermediate",
+      "pro_tip": true
+    },
+    {
+      "id": "sub-012",
+      "question": "Should I offer annual subscriptions?",
+      "answer": "Yes, great strategy! Offer 12 months for price of 10 (16% discount). Benefits: Upfront revenue, higher commitment, better retention, easier planning. Fans save money, you get stability. Offer both monthly and annual - let fans choose!",
+      "related_topics": ["annual", "pricing", "strategy"],
+      "difficulty": "advanced",
+      "pro_tip": true
+    },
+    {
+      "id": "sub-013",
+      "question": "How do I welcome new subscribers?",
+      "answer": "Send automated welcome message: Thank them, explain what to expect, ask what content they want, set posting schedule, offer welcome bonus content. Personal touch builds loyalty! Make them feel special from day one. First impression matters!",
+      "related_topics": ["welcome", "engagement", "onboarding"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "sub-014",
+      "question": "What's Monthly Recurring Revenue (MRR)?",
+      "answer": "MRR = Total monthly subscription revenue. Example: 100 subscribers × $15 avg = $1,500 MRR. It's predictable income you can count on. Track it in Analytics → Subscriptions. Growing MRR = healthy business. Aim for 10-20% monthly MRR growth!",
+      "related_topics": ["mrr", "metrics", "revenue"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "sub-015",
+      "question": "How can I increase revenue per subscriber?",
+      "answer": "Subscribers pay for subscription ($15 avg), but can spend more! Upsells: PPV exclusive content ($10-30), paid messages ($5-20), tips ($10-50), custom requests ($50-200). Goal: $35-50 total per subscriber/month. Diversify revenue streams within your subscriber base!",
+      "related_topics": ["revenue", "upsells", "monetization"],
+      "difficulty": "advanced",
+      "pro_tip": true
+    }
+  ],
+  "proactive_triggers": [
+    {
+      "condition": "no_subscription_price_set",
+      "message": "💰 Set up your subscription to start earning recurring revenue! It takes just 2 minutes.",
+      "action": "guide_subscription_setup"
+    },
+    {
+      "condition": "first_subscriber",
+      "message": "🎉 You got your first subscriber! Here's how to welcome them and keep them happy.",
+      "action": "first_subscriber_tips"
+    },
+    {
+      "condition": "high_follower_low_conversion",
+      "message": "📈 You have lots of followers but few subscribers. Want tips to convert more?",
+      "action": "conversion_optimization"
+    },
+    {
+      "condition": "subscriber_cancellation_spike",
+      "message": "⚠️ Cancellations are higher than usual. Let me help you identify and fix the issue.",
+      "action": "retention_analysis"
+    },
+    {
+      "condition": "subscriber_milestone_reached",
+      "message": "🎊 You hit 100 subscribers! Want to celebrate with your fans and boost engagement?",
+      "action": "milestone_celebration"
+    },
+    {
+      "condition": "low_posting_frequency",
+      "message": "📅 You haven't posted in 5 days. Subscribers expect consistent content. Need a content plan?",
+      "action": "content_planning_help"
+    }
+  ],
+  "suggested_actions": [
+    {
+      "label": "Set Subscription Price",
+      "icon": "dollar",
+      "action": "navigate",
+      "target": "/settings/subscriptions/pricing",
+      "priority": "high"
+    },
+    {
+      "label": "View Subscribers",
+      "icon": "users",
+      "action": "navigate",
+      "target": "/subscribers",
+      "priority": "medium"
+    },
+    {
+      "label": "Create Subscriber-Only Post",
+      "icon": "lock",
+      "action": "navigate",
+      "target": "/create-post?type=subscriber-only",
+      "priority": "medium"
+    },
+    {
+      "label": "View Subscription Analytics",
+      "icon": "chart",
+      "action": "navigate",
+      "target": "/analytics/subscriptions",
+      "priority": "low"
+    }
+  ],
+  "related_documentation": [
+    "/how-to/subscriptions.md",
+    "/how-to/pricing-strategy.md",
+    "/how-to/subscriber-retention.md",
+    "/how-to/content-planning.md"
+  ],
+  "last_updated": "2025-11-15",
+  "version": "1.0"
+}
