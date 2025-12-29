@@ -1410,7 +1410,7 @@ const FanzFeedTab = () => {
   );
 };
 
-// FanzCock Tab Content - TikTok Style Short Videos
+// FanzCock Tab Content - Vertical Short Videos
 const FanzCockTab = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [muted, setMuted] = useState(false);
@@ -1484,12 +1484,12 @@ const FanzCockTab = () => {
 
   return (
     <div className="relative">
-      {/* TikTok-style Header */}
+      {/* FanzCock Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="text-3xl">🐓</span>
           <h3 className="font-bebas text-xl text-red-500">FANZCOCK</h3>
-          <Badge className="bg-gradient-to-r from-red-600 to-pink-600 text-xs animate-pulse">TikTok Style</Badge>
+          <Badge className="bg-gradient-to-r from-red-600 to-pink-600 text-xs animate-pulse">VIRAL SHORTS</Badge>
         </div>
         <Link href="/fanzcock/upload">
           <Button size="sm" className="bg-red-600 hover:bg-red-700">
@@ -1498,7 +1498,7 @@ const FanzCockTab = () => {
         </Link>
       </div>
 
-      {/* TikTok-style Vertical Video Feed */}
+      {/* Vertical Short Video Feed */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
@@ -1543,7 +1543,7 @@ const FanzCockTab = () => {
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80" />
 
-            {/* Right Side Actions - TikTok Style */}
+            {/* Right Side Actions - Vertical Layout */}
             <div className="absolute right-3 bottom-32 flex flex-col items-center gap-5">
               {/* Creator Avatar */}
               <Link href={`/creator/${video.creatorId}`}>
@@ -1607,7 +1607,7 @@ const FanzCockTab = () => {
               </button>
             </div>
 
-            {/* Bottom Info - TikTok Style */}
+            {/* Bottom Info Overlay */}
             <div className="absolute left-3 right-16 bottom-4">
               {/* Creator Info */}
               <div className="flex items-center gap-2 mb-2">
@@ -1816,73 +1816,249 @@ const TrendingHashtags = () => {
   );
 };
 
-// Fuck Buddies List - Your Sexual Network
-const FuckBuddiesList = () => {
-  const { data: buddies = [] } = useQuery({
-    queryKey: ['/api/fuck-buddies'],
-    refetchInterval: 30000,
+// Fuck Buddies Request Notifications - Premium Tinder-Style Card Stack
+const FuckBuddiesRequests = () => {
+  const { toast } = useToast();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [showMatch, setShowMatch] = useState(false);
+  const [matchedUser, setMatchedUser] = useState<any>(null);
+
+  const { data: requests = [], isLoading } = useQuery({
+    queryKey: ['/api/fuck-buddies/requests'],
+    refetchInterval: 15000,
   });
 
-  if (buddies.length === 0) {
+  const acceptMutation = useMutation({
+    mutationFn: async (requestId: string) => {
+      return apiRequest('POST', '/api/fuck-buddies/accept', { requestId });
+    },
+    onSuccess: (_, requestId) => {
+      const acceptedUser = requests.find((r: any) => r.id === requestId);
+      setMatchedUser(acceptedUser?.fromUser);
+      setShowMatch(true);
+      setTimeout(() => setShowMatch(false), 2500);
+      queryClient.invalidateQueries({ queryKey: ['/api/fuck-buddies/requests'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/fuck-buddies'] });
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: async (requestId: string) => {
+      return apiRequest('POST', '/api/fuck-buddies/reject', { requestId });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/fuck-buddies/requests'] });
+      toast({ title: 'Passed', description: 'Maybe someone better...', variant: 'default' });
+    },
+  });
+
+  const handleSwipe = (direction: 'left' | 'right', requestId: string) => {
+    setSwipeDirection(direction);
+    setTimeout(() => {
+      if (direction === 'right') {
+        acceptMutation.mutate(requestId);
+      } else {
+        rejectMutation.mutate(requestId);
+      }
+      setSwipeDirection(null);
+      setCurrentIndex(prev => Math.min(prev + 1, requests.length));
+    }, 300);
+  };
+
+  if (isLoading) {
     return (
-      <Card className="mb-4 bg-black/40 border-red-600/30">
-        <CardContent className="p-4 text-center">
-          <Users className="w-8 h-8 text-red-500 mx-auto mb-2" />
-          <p className="text-sm text-red-400 font-bebas">NO FUCK BUDDIES YET</p>
-          <p className="text-xs text-muted-foreground mt-1">Connect with boys to build your network</p>
-          <Link href="/explore">
-            <Button size="sm" className="mt-3 bg-red-600 hover:bg-red-700">
-              Find Buddies 🍆
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
+      <div className="relative h-[320px] flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-b from-red-950/20 to-black/60 rounded-xl" />
+        <div className="relative w-full max-w-[280px] h-[280px] rounded-xl bg-gradient-to-br from-red-950/40 to-black/80 border border-red-600/30 animate-pulse">
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <div className="w-20 h-20 rounded-full bg-red-900/40 mb-4" />
+            <div className="h-4 w-32 bg-red-900/40 rounded mb-2" />
+            <div className="h-3 w-24 bg-red-900/30 rounded" />
+          </div>
+        </div>
+      </div>
     );
   }
 
-  return (
-    <div className="mb-4">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">🍆</span>
-          <span className="text-sm font-bebas text-red-400 uppercase tracking-wider">Your Fuck Buddies</span>
-          <Badge className="bg-red-600 text-xs">{buddies.length}</Badge>
+  if (requests.length === 0 || currentIndex >= requests.length) {
+    return (
+      <div className="relative h-[320px] flex items-center justify-center overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-red-950/30 via-black to-red-950/20 rounded-xl" />
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-4 left-4 w-32 h-32 bg-red-600/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-4 right-4 w-40 h-40 bg-red-800/20 rounded-full blur-3xl animate-pulse delay-700" />
         </div>
-        <Link href="/fuck-buddies">
-          <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300 text-xs">
-            See All
-          </Button>
-        </Link>
-      </div>
-      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-        {buddies.slice(0, 10).map((buddy: any) => (
-          <Link key={buddy.id} href={`/creator/${buddy.id}`}>
-            <div className="flex-shrink-0 text-center group cursor-pointer">
-              <div className="relative">
-                <Avatar className={`w-12 h-12 ring-2 ${buddy.isOnline ? 'ring-green-500' : 'ring-red-600/50'} ring-offset-2 ring-offset-black group-hover:ring-red-400 transition-all`}>
-                  <AvatarImage src={buddy.avatarUrl} />
-                  <AvatarFallback className="bg-red-900 text-red-100 text-sm">{buddy.username?.[0]?.toUpperCase()}</AvatarFallback>
-                </Avatar>
-                {buddy.isOnline && (
-                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-black" />
-                )}
-                {buddy.isLive && (
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-[8px] px-1 rounded text-white font-bold animate-pulse">LIVE</span>
-                )}
-              </div>
-              <p className="text-[10px] text-white/80 mt-1 truncate max-w-[50px] group-hover:text-red-400">{buddy.username}</p>
+
+        <div className="relative text-center px-4">
+          <div className="relative mx-auto w-20 h-20 mb-4">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-600/30 to-red-900/30 rounded-full animate-ping" />
+            <div className="relative w-full h-full rounded-full bg-gradient-to-br from-red-900/60 to-black flex items-center justify-center border border-red-600/40">
+              <Heart className="w-8 h-8 text-red-500/60" />
             </div>
-          </Link>
-        ))}
-        <Link href="/explore">
-          <div className="flex-shrink-0 text-center cursor-pointer">
-            <div className="w-12 h-12 rounded-full bg-red-900/30 border-2 border-dashed border-red-600/50 flex items-center justify-center hover:border-red-500 hover:bg-red-900/50 transition-all">
-              <Plus className="w-5 h-5 text-red-400" />
-            </div>
-            <p className="text-[10px] text-red-400 mt-1">Add</p>
           </div>
-        </Link>
+          <h3 className="font-bebas text-xl text-red-400 tracking-wide mb-1">ALL CAUGHT UP</h3>
+          <p className="text-sm text-muted-foreground mb-4">No pending requests right now</p>
+          <Link href="/explore">
+            <Button className="bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:shadow-[0_0_30px_rgba(220,38,38,0.6)] transition-all">
+              <Users className="w-4 h-4 mr-2" />
+              Find Boys to Connect
+            </Button>
+          </Link>
+        </div>
       </div>
+    );
+  }
+
+  const currentRequest = requests[currentIndex];
+  const nextRequest = requests[currentIndex + 1];
+
+  return (
+    <div className="relative h-[340px] overflow-hidden">
+      {/* Match Animation Overlay */}
+      {showMatch && matchedUser && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/90 rounded-xl animate-in fade-in duration-300">
+          <div className="text-center">
+            <div className="relative">
+              <div className="absolute inset-0 bg-red-500 rounded-full blur-2xl opacity-50 animate-ping" />
+              <Avatar className="w-24 h-24 ring-4 ring-red-500 relative">
+                <AvatarImage src={matchedUser?.avatarUrl} />
+                <AvatarFallback className="bg-red-900 text-red-100 font-bebas text-2xl">
+                  {matchedUser?.username?.[0]?.toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            <h3 className="font-bebas text-3xl text-red-500 mt-4 animate-pulse">IT'S A MATCH!</h3>
+            <p className="text-sm text-muted-foreground">You and @{matchedUser?.username} are now fuck buddies</p>
+          </div>
+        </div>
+      )}
+
+      {/* Card Stack */}
+      <div className="relative h-full flex items-center justify-center">
+        {/* Background card (next in stack) */}
+        {nextRequest && (
+          <div className="absolute w-[260px] h-[280px] rounded-xl bg-gradient-to-br from-red-950/30 to-black/80 border border-red-600/20 transform scale-95 translate-y-2 opacity-50" />
+        )}
+
+        {/* Main Card */}
+        <div
+          className={`relative w-[280px] rounded-xl overflow-hidden border border-red-600/40 shadow-[0_0_30px_rgba(220,38,38,0.2)] transition-all duration-300 transform ${
+            swipeDirection === 'right' ? 'translate-x-[120%] rotate-12 opacity-0' :
+            swipeDirection === 'left' ? '-translate-x-[120%] -rotate-12 opacity-0' : ''
+          }`}
+        >
+          {/* Card Background with User's Image */}
+          <div className="relative h-[180px] overflow-hidden">
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage: `url(${currentRequest.fromUser?.bannerUrl || currentRequest.fromUser?.avatarUrl})`,
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+
+            {/* Online indicator */}
+            {currentRequest.fromUser?.isOnline && (
+              <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-[10px] text-green-400 font-medium">ONLINE</span>
+              </div>
+            )}
+
+            {/* Avatar Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 p-4">
+              <div className="flex items-end gap-3">
+                <Link href={`/creator/${currentRequest.fromUser?.id}`}>
+                  <Avatar className="w-16 h-16 ring-3 ring-red-500 shadow-xl hover:scale-105 transition-transform">
+                    <AvatarImage src={currentRequest.fromUser?.avatarUrl} />
+                    <AvatarFallback className="bg-gradient-to-br from-red-800 to-red-900 text-white font-bebas text-xl">
+                      {currentRequest.fromUser?.username?.[0]?.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+                <div className="flex-1 min-w-0 pb-1">
+                  <Link href={`/creator/${currentRequest.fromUser?.id}`}>
+                    <h4 className="font-bebas text-xl text-white flex items-center gap-1 hover:text-red-400 transition-colors truncate">
+                      @{currentRequest.fromUser?.username}
+                      {currentRequest.fromUser?.isVerified && (
+                        <Verified className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                      )}
+                    </h4>
+                  </Link>
+                  <p className="text-xs text-red-400/80">{currentRequest.timeAgo || 'Just now'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Card Content */}
+          <div className="bg-gradient-to-b from-black/90 to-red-950/30 p-4">
+            {/* User Stats */}
+            <div className="flex justify-around mb-3 py-2 border-y border-red-600/20">
+              <div className="text-center">
+                <p className="font-bebas text-lg text-white">{currentRequest.fromUser?.postCount || 0}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Posts</p>
+              </div>
+              <div className="text-center border-x border-red-600/20 px-6">
+                <p className="font-bebas text-lg text-white">{currentRequest.fromUser?.followerCount || 0}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Fans</p>
+              </div>
+              <div className="text-center">
+                <p className="font-bebas text-lg text-white">{currentRequest.fromUser?.contentCount || 0}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Media</p>
+              </div>
+            </div>
+
+            {/* Request Message */}
+            {currentRequest.message && (
+              <div className="mb-3 p-2 bg-red-950/30 rounded-lg border border-red-600/20">
+                <p className="text-xs text-muted-foreground italic">"{currentRequest.message}"</p>
+              </div>
+            )}
+
+            {/* Action Buttons - Tinder Style */}
+            <div className="flex items-center justify-center gap-4">
+              <button
+                onClick={() => handleSwipe('left', currentRequest.id)}
+                disabled={rejectMutation.isPending}
+                className="group relative w-14 h-14 rounded-full bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-gray-600/50 hover:border-gray-500 shadow-lg hover:shadow-xl transition-all hover:scale-110 active:scale-95 disabled:opacity-50"
+              >
+                <X className="w-6 h-6 text-gray-400 group-hover:text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-colors" />
+                {rejectMutation.isPending && (
+                  <Loader2 className="w-6 h-6 text-gray-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-spin" />
+                )}
+              </button>
+
+              <button
+                onClick={() => handleSwipe('right', currentRequest.id)}
+                disabled={acceptMutation.isPending}
+                className="group relative w-16 h-16 rounded-full bg-gradient-to-br from-red-600 to-red-700 border-2 border-red-500/50 hover:border-red-400 shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:shadow-[0_0_30px_rgba(220,38,38,0.6)] transition-all hover:scale-110 active:scale-95 disabled:opacity-50"
+              >
+                <Heart className="w-7 h-7 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform" />
+                {acceptMutation.isPending && (
+                  <Loader2 className="w-7 h-7 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-spin" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Request Counter */}
+      <div className="absolute bottom-2 left-0 right-0 text-center">
+        <p className="text-xs text-muted-foreground">
+          {currentIndex + 1} of {requests.length} requests
+        </p>
+      </div>
+
+      {/* View All Link */}
+      <Link href="/fuck-buddies/requests" className="absolute top-2 right-2">
+        <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300 hover:bg-red-950/30 text-xs h-7">
+          View All Requests <ChevronRight className="w-4 h-4 ml-1" />
+        </Button>
+      </Link>
     </div>
   );
 };
@@ -1924,24 +2100,26 @@ export default function SocialHome() {
           {/* Trending Hashtags */}
           <TrendingHashtags />
 
-          {/* Fuck Buddies Section - Moved Above Friends List */}
+          {/* Fuck Buddies Request Notifications - Who Wants You */}
           <Card className="mb-4 bg-gradient-to-r from-black via-red-950/30 to-black border-2 border-red-600/50 shadow-[0_0_25px_rgba(220,38,38,0.3)]">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <h3 className="font-bebas text-xl text-red-500 flex items-center gap-2">
-                  <span className="text-2xl">🍆</span> FUCK BUDDIES
-                  <Badge className="bg-red-600/80 text-xs animate-pulse">HOT</Badge>
+                  <Bell className="w-5 h-5 text-red-400 animate-pulse" />
+                  <span>BUDDY REQUESTS</span>
+                  <Badge className="bg-red-600/80 text-xs animate-pulse">🔥 NEW</Badge>
                 </h3>
                 <Link href="/fuck-buddies">
                   <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300 text-xs">
-                    Manage <Users className="w-3 h-3 ml-1" />
+                    My Buddies <Users className="w-3 h-3 ml-1" />
                   </Button>
                 </Link>
               </div>
+              <p className="text-xs text-muted-foreground mt-1">Boys who want to connect with you 🍆</p>
             </CardHeader>
             <CardContent className="pt-0">
-              {/* Fuck Buddies List (Friends) */}
-              <FuckBuddiesList />
+              {/* Fuck Buddies Request Notifications */}
+              <FuckBuddiesRequests />
             </CardContent>
           </Card>
 

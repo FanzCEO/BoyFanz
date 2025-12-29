@@ -93,6 +93,7 @@ import ResetPassword from "@/pages/auth/ResetPassword";
 // Creator Economy pages
 import CreatorProfile from "@/pages/CreatorProfile";
 import NaughtyProfile from "@/pages/NaughtyProfile";
+import ProfileThemeEditor from "@/pages/ProfileThemeEditor";
 import CreatorStudio from "@/pages/CreatorStudio";
 import Collaborations from "@/pages/Collaborations";
 import PostsFeed from "@/pages/PostsFeed";
@@ -324,6 +325,8 @@ function Router() {
             <Route path="/creator/:userId" component={CreatorProfile} />
             <Route path="/naughty-profile" component={NaughtyProfile} />
             <Route path="/fuck-buddies" component={NaughtyProfile} />
+            <Route path="/profile-theme" component={ProfileThemeEditor} />
+            <Route path="/settings/profile-theme" component={ProfileThemeEditor} />
             <Route path="/feed" component={PostsFeed} />
             <Route path="/fanz-feed" component={FanzFeed} />
             <Route path="/infinity-feed" component={InfinityFeed} />
