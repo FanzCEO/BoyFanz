@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   User, Shield, Bell, Key, Webhook, Save, Copy, Plus, Trash2,
   Skull, Flame, Lock, Eye, EyeOff, Zap, Settings2, AlertTriangle,
-  LogOut, Fingerprint, Smartphone
+  LogOut, Fingerprint, Smartphone, Calendar, Video
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -29,6 +29,7 @@ export default function Settings() {
     push: true,
     marketing: false
   });
+  const [showScheduleOnProfile, setShowScheduleOnProfile] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -44,6 +45,45 @@ export default function Settings() {
   const { data: webhooks, isLoading: webhooksLoading } = useQuery({
     queryKey: ['/api/webhooks'],
   });
+
+  const { data: creatorProfile } = useQuery<{ showScheduleOnProfile: boolean }>({
+    queryKey: ['/api/creator-profiles/me'],
+    enabled: !!user,
+  });
+
+  // Update state when creator profile loads
+  useState(() => {
+    if (creatorProfile?.showScheduleOnProfile !== undefined) {
+      setShowScheduleOnProfile(creatorProfile.showScheduleOnProfile);
+    }
+  });
+
+  const toggleScheduleVisibilityMutation = useMutation({
+    mutationFn: async (show: boolean) => {
+      return apiRequest('PATCH', '/api/scheduled-drops/schedule-visibility', { showScheduleOnProfile: show });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/creator-profiles/me'] });
+      toast({
+        title: "Setting Updated",
+        description: showScheduleOnProfile ? "Schedule will now appear on your profile" : "Schedule hidden from profile",
+      });
+    },
+    onError: (error) => {
+      // Revert on error
+      setShowScheduleOnProfile(!showScheduleOnProfile);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleScheduleToggle = (checked: boolean) => {
+    setShowScheduleOnProfile(checked);
+    toggleScheduleVisibilityMutation.mutate(checked);
+  };
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: any) => {

@@ -1484,6 +1484,24 @@ export const creatorProfiles = pgTable("creator_profiles", {
   totalSubscribers: integer("total_subscribers").default(0),
   isOnline: boolean("is_online").default(false),
   lastActiveAt: timestamp("last_active_at").defaultNow(),
+  showScheduleOnProfile: boolean("show_schedule_on_profile").default(false), // Show upcoming media drops calendar
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Scheduled Media Drops (for public calendar display)
+export const scheduledDrops = pgTable("scheduled_drops", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  dropType: varchar("drop_type").notNull().default("content"), // content, live_stream, exclusive, bundle
+  scheduledAt: timestamp("scheduled_at").notNull(),
+  thumbnailUrl: varchar("thumbnail_url"),
+  isPublic: boolean("is_public").default(true), // Visible on public schedule
+  notifySubscribers: boolean("notify_subscribers").default(true),
+  status: varchar("status").default("scheduled"), // scheduled, published, cancelled
+  publishedPostId: varchar("published_post_id"), // Link to actual post once published
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -2758,6 +2776,15 @@ export const insertCreatorProfileSchema = createInsertSchema(
   welcomeMessageText: true,
   welcomeMessagePriceCents: true,
   categories: true,
+  showScheduleOnProfile: true,
+});
+
+export const insertScheduledDropSchema = createInsertSchema(scheduledDrops).omit({
+  id: true,
+  status: true,
+  publishedPostId: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
@@ -3160,6 +3187,8 @@ export const insertDelegatedPermissionSchema = createInsertSchema(
 
 // Creator Economy Types
 export type CreatorProfile = typeof creatorProfiles.$inferSelect;
+export type ScheduledDrop = typeof scheduledDrops.$inferSelect;
+export type InsertScheduledDrop = typeof scheduledDrops.$inferInsert;
 
 // Enhanced Subscription System Types
 export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
@@ -10334,6 +10363,372 @@ export type WallReaction = typeof wallReactions.$inferSelect;
 export type InsertWallReaction = typeof wallReactions.$inferInsert;
 export type Testimonial = typeof testimonials.$inferSelect;
 export type InsertTestimonial = typeof testimonials.$inferInsert;
+
+// ===== CREATOR AD SYSTEM & WITTLE BEAR FOUNDATION =====
+// Revenue system where creators get 70% of ad revenue, platform 30% goes to charity
+// Creators can donate their share to Wittle Bear Foundation (homeless youth & shelter animals)
+
+export const adPlacementTypeEnum = pgEnum("ad_placement_type", [
+  "profile_banner",      // Banner on creator's profile page
+  "feed_inline",         // In-feed ads between posts
+  "video_preroll",       // Before video content
+  "video_overlay",       // Overlay during video
+  "sidebar",             // Sidebar placement
+  "story_interstitial",  // Between stories
+]);
+
+export const adStatusEnum = pgEnum("ad_status", [
+  "pending",
+  "approved",
+  "active",
+  "paused",
+  "rejected",
+  "completed",
+]);
+
+export const adCategoryEnum = pgEnum("ad_category", [
+  "adult_products",
+  "dating_apps",
+  "wellness",
+  "fashion",
+  "travel",
+  "entertainment",
+  "technology",
+  "general",
+]);
+
+// Advertisers who want to place ads
+export const advertisers = pgTable("advertisers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyName: varchar("company_name").notNull(),
+  contactEmail: varchar("contact_email").notNull(),
+  contactName: varchar("contact_name"),
+  website: varchar("website"),
+  category: adCategoryEnum("category").default("general"),
+  isVerified: boolean("is_verified").default(false),
+  totalSpent: decimal("total_spent", { precision: 12, scale: 2 }).default("0"),
+  balance: decimal("balance", { precision: 12, scale: 2 }).default("0"),
+  status: varchar("status").default("pending"),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_advertisers_email").on(table.contactEmail),
+  index("idx_advertisers_status").on(table.status),
+]);
+
+// Individual ad creatives
+export const ads = pgTable("ads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  advertiserId: varchar("advertiser_id").notNull().references(() => advertisers.id, { onDelete: "cascade" }),
+  name: varchar("name").notNull(),
+  headline: varchar("headline", { length: 100 }),
+  description: text("description"),
+  imageUrl: varchar("image_url"),
+  videoUrl: varchar("video_url"),
+  clickUrl: varchar("click_url").notNull(),
+  placementType: adPlacementTypeEnum("placement_type").notNull(),
+  category: adCategoryEnum("category").default("general"),
+  status: adStatusEnum("status").default("pending"),
+  bidAmountCpm: decimal("bid_amount_cpm", { precision: 8, scale: 4 }).default("1.00"), // Cost per 1000 impressions
+  bidAmountCpc: decimal("bid_amount_cpc", { precision: 8, scale: 4 }).default("0.10"), // Cost per click
+  dailyBudget: decimal("daily_budget", { precision: 10, scale: 2 }),
+  totalBudget: decimal("total_budget", { precision: 12, scale: 2 }),
+  totalSpent: decimal("total_spent", { precision: 12, scale: 2 }).default("0"),
+  impressions: integer("impressions").default(0),
+  clicks: integer("clicks").default(0),
+  targetAgeMin: integer("target_age_min").default(18),
+  targetAgeMax: integer("target_age_max").default(99),
+  targetGenders: text("target_genders").array().default([]),
+  targetLocations: text("target_locations").array().default([]),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  isAdultContent: boolean("is_adult_content").default(true),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_ads_advertiser").on(table.advertiserId),
+  index("idx_ads_status").on(table.status),
+  index("idx_ads_placement").on(table.placementType),
+  index("idx_ads_active").on(table.status, table.startDate, table.endDate),
+]);
+
+// Creator ad preferences - opt-in system
+export const creatorAdSettings = pgTable("creator_ad_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+
+  // Opt-in toggles for each placement type
+  enableProfileBanner: boolean("enable_profile_banner").default(false),
+  enableFeedAds: boolean("enable_feed_ads").default(false),
+  enableVideoPreroll: boolean("enable_video_preroll").default(false),
+  enableVideoOverlay: boolean("enable_video_overlay").default(false),
+  enableSidebar: boolean("enable_sidebar").default(false),
+  enableStoryAds: boolean("enable_story_ads").default(false),
+
+  // Category preferences (which ad types they allow)
+  allowedCategories: text("allowed_categories").array().default(["adult_products", "dating_apps", "wellness", "fashion", "entertainment"]),
+  blockedAdvertisers: text("blocked_advertisers").array().default([]), // Advertiser IDs to block
+
+  // Charity donation settings
+  donationPercentage: integer("donation_percentage").default(0), // 0-100% of their 70% share
+  donateToCharity: boolean("donate_to_charity").default(false),
+  charityId: varchar("charity_id").default("wittle-bear-foundation"),
+
+  // Revenue tracking
+  totalEarned: decimal("total_earned", { precision: 12, scale: 2 }).default("0"),
+  totalDonated: decimal("total_donated", { precision: 12, scale: 2 }).default("0"),
+  pendingPayout: decimal("pending_payout", { precision: 12, scale: 2 }).default("0"),
+
+  // Badge status
+  hasCharityBadge: boolean("has_charity_badge").default(false),
+  badgeEarnedAt: timestamp("badge_earned_at"),
+  badgeTier: varchar("badge_tier").default("none"), // none, bronze, silver, gold, diamond
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique("unique_creator_ad_settings").on(table.creatorId),
+  index("idx_creator_ad_settings_creator").on(table.creatorId),
+  index("idx_creator_ad_settings_charity").on(table.donateToCharity),
+]);
+
+// Track ad impressions
+export const adImpressions = pgTable("ad_impressions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  adId: varchar("ad_id").notNull().references(() => ads.id, { onDelete: "cascade" }),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  viewerId: varchar("viewer_id").references(() => users.id, { onDelete: "set null" }),
+  placementType: adPlacementTypeEnum("placement_type").notNull(),
+  sessionId: varchar("session_id"),
+  ipHash: varchar("ip_hash"), // Hashed for privacy
+  userAgent: varchar("user_agent"),
+  country: varchar("country"),
+  earnedAmount: decimal("earned_amount", { precision: 8, scale: 4 }).default("0"), // Creator's 70% share
+  charityAmount: decimal("charity_amount", { precision: 8, scale: 4 }).default("0"), // Platform's 30% to charity
+  viewDuration: integer("view_duration"), // Seconds
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_ad_impressions_ad").on(table.adId),
+  index("idx_ad_impressions_creator").on(table.creatorId),
+  index("idx_ad_impressions_date").on(table.createdAt),
+  index("idx_ad_impressions_session").on(table.sessionId),
+]);
+
+// Track ad clicks
+export const adClicks = pgTable("ad_clicks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  adId: varchar("ad_id").notNull().references(() => ads.id, { onDelete: "cascade" }),
+  impressionId: varchar("impression_id").references(() => adImpressions.id, { onDelete: "set null" }),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  viewerId: varchar("viewer_id").references(() => users.id, { onDelete: "set null" }),
+  earnedAmount: decimal("earned_amount", { precision: 8, scale: 4 }).default("0"),
+  charityAmount: decimal("charity_amount", { precision: 8, scale: 4 }).default("0"),
+  ipHash: varchar("ip_hash"),
+  referrer: varchar("referrer"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_ad_clicks_ad").on(table.adId),
+  index("idx_ad_clicks_creator").on(table.creatorId),
+  index("idx_ad_clicks_date").on(table.createdAt),
+]);
+
+// Daily revenue aggregation per creator
+export const creatorAdRevenue = pgTable("creator_ad_revenue", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  creatorId: varchar("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  date: timestamp("date").notNull(),
+  impressions: integer("impressions").default(0),
+  clicks: integer("clicks").default(0),
+  grossRevenue: decimal("gross_revenue", { precision: 12, scale: 2 }).default("0"), // Total ad spend
+  creatorShare: decimal("creator_share", { precision: 12, scale: 2 }).default("0"), // 70%
+  charityShare: decimal("charity_share", { precision: 12, scale: 2 }).default("0"), // 30%
+  creatorDonation: decimal("creator_donation", { precision: 12, scale: 2 }).default("0"), // Creator's voluntary donation
+  netPayout: decimal("net_payout", { precision: 12, scale: 2 }).default("0"), // What creator actually receives
+  isPaidOut: boolean("is_paid_out").default(false),
+  paidOutAt: timestamp("paid_out_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  unique("unique_creator_ad_revenue_date").on(table.creatorId, table.date),
+  index("idx_creator_ad_revenue_creator").on(table.creatorId),
+  index("idx_creator_ad_revenue_date").on(table.date),
+  index("idx_creator_ad_revenue_unpaid").on(table.isPaidOut),
+]);
+
+// Wittle Bear Foundation and charity donations tracking
+export const charities = pgTable("charities", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  slug: varchar("slug").unique().notNull(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  mission: text("mission"),
+  website: varchar("website"),
+  logoUrl: varchar("logo_url"),
+  bannerUrl: varchar("banner_url"),
+  causes: text("causes").array().default([]), // ["homeless_youth", "animal_shelters"]
+  taxId: varchar("tax_id"), // EIN for tax purposes
+  isVerified: boolean("is_verified").default(false),
+  isActive: boolean("is_active").default(true),
+  totalReceived: decimal("total_received", { precision: 14, scale: 2 }).default("0"),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Individual charity donations
+export const charityDonations = pgTable("charity_donations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  charityId: varchar("charity_id").notNull().references(() => charities.id, { onDelete: "cascade" }),
+
+  // Source of donation
+  sourceType: varchar("source_type").notNull(), // "platform_ad_share", "creator_donation", "direct"
+  creatorId: varchar("creator_id").references(() => users.id, { onDelete: "set null" }),
+  adRevenueId: varchar("ad_revenue_id").references(() => creatorAdRevenue.id, { onDelete: "set null" }),
+
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  currency: varchar("currency").default("USD"),
+
+  // For platform's 30% share
+  isPlatformShare: boolean("is_platform_share").default(false),
+
+  // For creator voluntary donations
+  isCreatorDonation: boolean("is_creator_donation").default(false),
+  donationPercentage: integer("donation_percentage"), // What % of their share they donated
+
+  // Status
+  status: varchar("status").default("pending"), // pending, processed, failed
+  processedAt: timestamp("processed_at"),
+  transactionId: varchar("transaction_id"),
+
+  // Period this covers
+  periodStart: timestamp("period_start"),
+  periodEnd: timestamp("period_end"),
+
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_charity_donations_charity").on(table.charityId),
+  index("idx_charity_donations_creator").on(table.creatorId),
+  index("idx_charity_donations_date").on(table.createdAt),
+  index("idx_charity_donations_status").on(table.status),
+]);
+
+// Charity supporter badges
+export const charityBadgeTierEnum = pgEnum("charity_badge_tier", [
+  "supporter",     // $1-49 donated
+  "bronze",        // $50-199 donated
+  "silver",        // $200-499 donated
+  "gold",          // $500-999 donated
+  "diamond",       // $1000-4999 donated
+  "champion",      // $5000+ donated (ultimate tier)
+]);
+
+export const charityBadges = pgTable("charity_badges", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  charityId: varchar("charity_id").notNull().references(() => charities.id, { onDelete: "cascade" }),
+  tier: charityBadgeTierEnum("tier").notNull(),
+
+  // Badge display info
+  badgeName: varchar("badge_name").notNull(), // "Wittle Bear Champion"
+  badgeIcon: varchar("badge_icon"), // Icon URL or emoji
+  badgeColor: varchar("badge_color"), // Hex color for tier
+
+  // Causes supported
+  causes: text("causes").array().default([]), // ["homeless_youth", "animal_shelters"]
+
+  // Donation stats
+  totalDonated: decimal("total_donated", { precision: 12, scale: 2 }).default("0"),
+  donationCount: integer("donation_count").default(0),
+
+  // Display preferences
+  isDisplayed: boolean("is_displayed").default(true), // Show on profile
+  isPrimary: boolean("is_primary").default(false), // Featured badge
+
+  earnedAt: timestamp("earned_at").defaultNow(),
+  upgradedAt: timestamp("upgraded_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  unique("unique_user_charity_badge").on(table.userId, table.charityId),
+  index("idx_charity_badges_user").on(table.userId),
+  index("idx_charity_badges_tier").on(table.tier),
+  index("idx_charity_badges_displayed").on(table.isDisplayed),
+]);
+
+// Relations for ad system
+export const advertisersRelations = relations(advertisers, ({ many }) => ({
+  ads: many(ads),
+}));
+
+export const adsRelations = relations(ads, ({ one, many }) => ({
+  advertiser: one(advertisers, {
+    fields: [ads.advertiserId],
+    references: [advertisers.id],
+  }),
+  impressions: many(adImpressions),
+  clicks: many(adClicks),
+}));
+
+export const creatorAdSettingsRelations = relations(creatorAdSettings, ({ one }) => ({
+  creator: one(users, {
+    fields: [creatorAdSettings.creatorId],
+    references: [users.id],
+  }),
+}));
+
+export const adImpressionsRelations = relations(adImpressions, ({ one }) => ({
+  ad: one(ads, {
+    fields: [adImpressions.adId],
+    references: [ads.id],
+  }),
+  creator: one(users, {
+    fields: [adImpressions.creatorId],
+    references: [users.id],
+  }),
+}));
+
+export const charityDonationsRelations = relations(charityDonations, ({ one }) => ({
+  charity: one(charities, {
+    fields: [charityDonations.charityId],
+    references: [charities.id],
+  }),
+  creator: one(users, {
+    fields: [charityDonations.creatorId],
+    references: [users.id],
+  }),
+}));
+
+export const charityBadgesRelations = relations(charityBadges, ({ one }) => ({
+  user: one(users, {
+    fields: [charityBadges.userId],
+    references: [users.id],
+  }),
+  charity: one(charities, {
+    fields: [charityBadges.charityId],
+    references: [charities.id],
+  }),
+}));
+
+// Types for ad system
+export type Advertiser = typeof advertisers.$inferSelect;
+export type InsertAdvertiser = typeof advertisers.$inferInsert;
+export type Ad = typeof ads.$inferSelect;
+export type InsertAd = typeof ads.$inferInsert;
+export type CreatorAdSettings = typeof creatorAdSettings.$inferSelect;
+export type InsertCreatorAdSettings = typeof creatorAdSettings.$inferInsert;
+export type AdImpression = typeof adImpressions.$inferSelect;
+export type InsertAdImpression = typeof adImpressions.$inferInsert;
+export type AdClick = typeof adClicks.$inferSelect;
+export type InsertAdClick = typeof adClicks.$inferInsert;
+export type CreatorAdRevenue = typeof creatorAdRevenue.$inferSelect;
+export type InsertCreatorAdRevenue = typeof creatorAdRevenue.$inferInsert;
+export type Charity = typeof charities.$inferSelect;
+export type InsertCharity = typeof charities.$inferInsert;
+export type CharityDonation = typeof charityDonations.$inferSelect;
+export type InsertCharityDonation = typeof charityDonations.$inferInsert;
+export type CharityBadge = typeof charityBadges.$inferSelect;
+export type InsertCharityBadge = typeof charityBadges.$inferInsert;
 
 // ===== PWA EXTENSIONS =====
 // Import PWA schemas

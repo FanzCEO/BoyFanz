@@ -20,6 +20,7 @@ import watchPartyRoutes from './routes/watchPartyRoutes';
 import safetyRoutes from './routes/safetyRoutes';
 import aiRoutes from './routes/aiRoutes';
 import aiGatewayRoutes from './routes/aiGatewayRoutes';
+import scheduledDropsRoutes from './routes/scheduledDropsRoutes';
 // Admin Management Routes
 import brandingRoutes from './routes/admin/branding';
 import bookingsRoutes from './routes/admin/bookings';
@@ -286,6 +287,10 @@ export function registerRoutes(app: Express) {
 
   // Unified AI Gateway with Together AI support
   app.use("/api/ai-gateway", aiGatewayRoutes);
+
+  // ===== SCHEDULED DROPS / CONTENT CALENDAR =====
+  // Creator content schedule visible on profile
+  app.use("/api/scheduled-drops", scheduledDropsRoutes);
 
   // ===== ADMIN MANAGEMENT ROUTES =====
   // Platform branding, bookings, site appearance, and gallery management

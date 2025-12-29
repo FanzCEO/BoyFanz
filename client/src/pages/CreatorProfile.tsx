@@ -127,6 +127,15 @@ interface ProfileComment {
   createdAt: string;
 }
 
+interface ScheduledDrop {
+  id: string;
+  title: string;
+  description?: string;
+  dropType: 'content' | 'live_stream' | 'exclusive' | 'bundle';
+  scheduledAt: string;
+  thumbnailUrl?: string;
+}
+
 // MySpace-style theme presets
 const THEME_PRESETS = [
   { name: 'Midnight', bg: 'from-gray-900 via-purple-900 to-black', accent: 'purple-500' },
@@ -179,6 +188,11 @@ export default function CreatorProfile() {
 
   const { data: comments = [] } = useQuery<ProfileComment[]>({
     queryKey: ['/api/profile-comments', userId],
+    enabled: !!userId,
+  });
+
+  const { data: scheduleData } = useQuery<{ drops: ScheduledDrop[], scheduleEnabled: boolean }>({
+    queryKey: ['/api/scheduled-drops/creator', userId],
     enabled: !!userId,
   });
 
@@ -784,6 +798,12 @@ export default function CreatorProfile() {
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Wall ({comments.length})
                     </TabsTrigger>
+                    {scheduleData?.scheduleEnabled && (
+                      <TabsTrigger value="schedule" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Schedule
+                      </TabsTrigger>
+                    )}
                   </TabsList>
                 </CardHeader>
                 <CardContent className="pt-4">
@@ -932,6 +952,81 @@ export default function CreatorProfile() {
                                 </span>
                               </div>
                               <p className="text-gray-300 text-sm">{comment.content}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  {/* Schedule Tab - Upcoming Content Drops */}
+                  <TabsContent value="schedule" className="mt-0">
+                    {!scheduleData?.scheduleEnabled ? (
+                      <div className="text-center py-12">
+                        <Calendar className="h-16 w-16 mx-auto mb-4 text-red-500/50" />
+                        <p className="text-gray-400">Schedule not available</p>
+                      </div>
+                    ) : (scheduleData?.drops || []).length === 0 ? (
+                      <div className="text-center py-12">
+                        <Calendar className="h-16 w-16 mx-auto mb-4 text-red-500/50" />
+                        <p className="text-gray-400">No upcoming drops scheduled</p>
+                        <p className="text-gray-500 text-sm mt-2">Check back soon for new content!</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {(scheduleData?.drops || []).map((drop) => (
+                          <div key={drop.id} className="flex gap-4 p-4 bg-gradient-to-r from-red-950/30 to-orange-950/30 rounded-xl border border-red-500/20 hover:border-red-500/40 transition-all">
+                            {drop.thumbnailUrl ? (
+                              <img
+                                src={drop.thumbnailUrl}
+                                alt={drop.title}
+                                className="w-20 h-20 rounded-lg object-cover"
+                              />
+                            ) : (
+                              <div className="w-20 h-20 rounded-lg bg-red-900/30 flex items-center justify-center">
+                                {drop.dropType === 'live_stream' ? (
+                                  <Video className="h-8 w-8 text-red-500/50" />
+                                ) : drop.dropType === 'exclusive' ? (
+                                  <Crown className="h-8 w-8 text-yellow-500/50" />
+                                ) : drop.dropType === 'bundle' ? (
+                                  <Gift className="h-8 w-8 text-green-500/50" />
+                                ) : (
+                                  <Camera className="h-8 w-8 text-red-500/50" />
+                                )}
+                              </div>
+                            )}
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="text-white font-bold">{drop.title}</h4>
+                                <Badge className={
+                                  drop.dropType === 'live_stream'
+                                    ? 'bg-red-600 text-white text-xs'
+                                    : drop.dropType === 'exclusive'
+                                    ? 'bg-yellow-600 text-white text-xs'
+                                    : drop.dropType === 'bundle'
+                                    ? 'bg-green-600 text-white text-xs'
+                                    : 'bg-orange-600 text-white text-xs'
+                                }>
+                                  {drop.dropType === 'live_stream' ? 'LIVE' :
+                                   drop.dropType === 'exclusive' ? 'EXCLUSIVE' :
+                                   drop.dropType === 'bundle' ? 'BUNDLE' : 'CONTENT'}
+                                </Badge>
+                              </div>
+                              {drop.description && (
+                                <p className="text-gray-400 text-sm mb-2">{drop.description}</p>
+                              )}
+                              <div className="flex items-center gap-2 text-sm">
+                                <Clock className="h-4 w-4 text-orange-400" />
+                                <span className="text-orange-300">
+                                  {new Date(drop.scheduledAt).toLocaleDateString('en-US', {
+                                    weekday: 'short',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: 'numeric',
+                                    minute: '2-digit'
+                                  })}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         ))}

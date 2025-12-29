@@ -262,7 +262,7 @@ function IssuesPanel({ issues }: { issues: any[] }) {
       case 'critical': return 'bg-red-500';
       case 'high': return 'bg-orange-500';
       case 'medium': return 'bg-yellow-500';
-      case 'low': return 'bg-blue-500';
+      case 'low': return 'bg-orange-500';
       default: return 'bg-gray-500';
     }
   };
@@ -423,8 +423,8 @@ export default function AgentsPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-500/10 rounded-lg">
-                <Shield className="h-6 w-6 text-blue-500" />
+              <div className="p-3 bg-orange-500/10 rounded-lg">
+                <Shield className="h-6 w-6 text-orange-500" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{Math.round(overallHealth)}%</p>

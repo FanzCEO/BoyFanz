@@ -336,7 +336,7 @@ export default function BattlesManagement() {
                           <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
                               <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                                <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">
                                   {battle.creator_1_display_name?.[0] || 'A'}
                                 </div>
                                 <div>
@@ -344,12 +344,12 @@ export default function BattlesManagement() {
                                   <p className="text-muted-foreground text-xs">@{battle.creator_1_username}</p>
                                 </div>
                               </div>
-                              <span className="font-bold text-blue-500">{formatNumber(battle.creator_1_score)}</span>
+                              <span className="font-bold text-orange-500">{formatNumber(battle.creator_1_score)}</span>
                             </div>
 
                             <div className="relative h-3 bg-muted rounded-full overflow-hidden">
                               <div
-                                className="absolute left-0 top-0 h-full bg-blue-500 transition-all duration-500"
+                                className="absolute left-0 top-0 h-full bg-orange-500 transition-all duration-500"
                                 style={{ width: `${creator1Percent}%` }}
                               />
                               <div

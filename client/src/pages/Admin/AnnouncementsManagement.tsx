@@ -329,7 +329,7 @@ export default function AnnouncementsManagement() {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       draft: { color: "bg-gray-500", text: "Draft" },
-      scheduled: { color: "bg-blue-500", text: "Scheduled" },
+      scheduled: { color: "bg-orange-500", text: "Scheduled" },
       published: { color: "bg-green-500", text: "Published" },
       paused: { color: "bg-yellow-500", text: "Paused" },
       archived: { color: "bg-red-500", text: "Archived" }
@@ -340,11 +340,11 @@ export default function AnnouncementsManagement() {
 
   const getTypeBadge = (type: string) => {
     const typeConfig = {
-      general: { color: "bg-blue-100 text-blue-800", icon: "📢" },
+      general: { color: "bg-orange-100 text-orange-800", icon: "📢" },
       emergency: { color: "bg-red-100 text-red-800", icon: "🚨" },
       maintenance: { color: "bg-orange-100 text-orange-800", icon: "🔧" },
       promotion: { color: "bg-green-100 text-green-800", icon: "🎉" },
-      update: { color: "bg-purple-100 text-purple-800", icon: "📱" }
+      update: { color: "bg-red-100 text-red-800", icon: "📱" }
     };
     const config = typeConfig[type as keyof typeof typeConfig] || typeConfig.general;
     return (
@@ -358,7 +358,7 @@ export default function AnnouncementsManagement() {
   const getPriorityBadge = (priority: number) => {
     const colors = {
       1: "bg-gray-100 text-gray-800",
-      2: "bg-blue-100 text-blue-800", 
+      2: "bg-orange-100 text-orange-800",
       3: "bg-yellow-100 text-yellow-800",
       4: "bg-orange-100 text-orange-800",
       5: "bg-red-100 text-red-800"
@@ -792,7 +792,7 @@ export default function AnnouncementsManagement() {
         <Card data-testid="stat-total-announcements">
           <CardContent className="p-6">
             <div className="flex items-center">
-              <Megaphone className="h-8 w-8 text-blue-600" />
+              <Megaphone className="h-8 w-8 text-orange-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-muted-foreground">Total Announcements</p>
                 <p className="text-2xl font-bold">{announcements.length}</p>
@@ -929,7 +929,7 @@ export default function AnnouncementsManagement() {
               
               {/* Bulk Actions */}
               {selectedAnnouncements.length > 0 && (
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                <div className="mt-4 p-4 bg-orange-50 rounded-lg">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">
                       {selectedAnnouncements.length} announcement(s) selected

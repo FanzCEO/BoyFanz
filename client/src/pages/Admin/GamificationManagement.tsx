@@ -161,8 +161,8 @@ export default function GamificationManagement() {
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
       case 'common': return 'bg-gray-400/10 text-gray-400 border-gray-400/20';
-      case 'rare': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-      case 'epic': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
+      case 'rare': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
+      case 'epic': return 'bg-red-500/10 text-red-500 border-red-500/20';
       case 'legendary': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
       default: return 'bg-muted text-muted-foreground';
     }
@@ -233,7 +233,7 @@ export default function GamificationManagement() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Badges Earned</CardTitle>
-            <Medal className="h-4 w-4 text-purple-500" />
+            <Medal className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{analytics.totalBadgesEarned?.toLocaleString() || 0}</div>
@@ -243,7 +243,7 @@ export default function GamificationManagement() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Average Level</CardTitle>
-            <Star className="h-4 w-4 text-blue-500" />
+            <Star className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{(analytics.avgLevel || 0).toFixed(1)}</div>

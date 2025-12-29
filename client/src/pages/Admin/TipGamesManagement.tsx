@@ -280,7 +280,7 @@ export default function TipGamesManagement() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Avg Tip</CardTitle>
-            <TrendingUp className="h-4 w-4 text-blue-500" />
+            <TrendingUp className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${(analytics.avgTip || 0).toFixed(2)}</div>
@@ -540,7 +540,7 @@ export default function TipGamesManagement() {
                   {(analyticsData?.topPrizes || []).map((prize: any, index: number) => (
                     <div key={prize.name} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <Gift className="h-4 w-4 text-purple-500" />
+                        <Gift className="h-4 w-4 text-red-500" />
                         <span className="font-medium">{prize.name}</span>
                       </div>
                       <Badge variant="outline">{prize.count} wins</Badge>
