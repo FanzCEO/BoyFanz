@@ -8,7 +8,6 @@ import { useState, createContext, useContext } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import { BoostedPostsCarousel } from "@/components/sidebar/BoostedPostsCarousel";
-import { PlatformSwitcher } from "@/components/platform/PlatformSwitcher";
 
 // Sidebar collapse context
 const SidebarCollapseContext = createContext<{
@@ -99,13 +98,12 @@ export default function Sidebar({ user }: SidebarProps) {
   };
   
   const navItems = [
-    { path: "/infinity-feed", icon: "fas fa-spa", label: "Fanz Spa" },
-    { path: "/fanzccock", icon: "fas fa-play-circle", label: "FanzCock", badge: "NEW" },
-    { path: "/bathhouse", icon: "fas fa-hot-tub", label: "Bathhouse", badge: "HOT" },
+    { path: "/", icon: "fas fa-home", label: "Home" },
+    { path: "/infinity-feed", icon: "fas fa-infinity", label: "Infinity Feed" },
     { path: "/fanz-money-center", icon: "fas fa-wallet", label: "FanzMoneyCenter" },
     { path: `/creator/${user?.id}`, icon: "fas fa-user", label: "My page" },
     { path: "/dashboard", icon: "fas fa-tachometer-alt", label: "Dashboard" },
-    { path: "/breeding-zone", icon: "fas fa-fire", label: "Breeding Zone" },
+    { path: "/starz-studio", icon: "fas fa-star", label: "Starz Studio" },
     { path: "/analytics", icon: "fas fa-chart-line", label: "Analytics" },
     { path: "/notifications", icon: "fas fa-bell", label: "Notifications", dot: true },
     { path: "/messages", icon: "fas fa-comments", label: "Messages", dot: true },
@@ -120,9 +118,17 @@ export default function Sidebar({ user }: SidebarProps) {
     { path: "/nearby", icon: "fas fa-map-marker-alt", label: "Near by me" },
     { path: "/forums", icon: "fas fa-comments", label: "Forums" },
     { path: "/outlawz", icon: "fas fa-skull-crossbones", label: "Outlawz", badge: "HOT" },
-    { path: "/resources", icon: "fas fa-hands-helping", label: "Resources" },
     { path: "/settings", icon: "fas fa-cog", label: "Settings" },
   ] as Array<{ path: string; icon: string; label: string; dot?: boolean; badge?: string }>;
+
+  // FanzTube section items
+  const tubeItems = [
+    { path: "/tube", icon: "fas fa-play-circle", label: "FanzTube" },
+    { path: "/tube/gay", icon: "fas fa-rainbow", label: "Gay Tube" },
+    { path: "/tube/hunks", icon: "fas fa-dumbbell", label: "Hunks" },
+    { path: "/tube/broz", icon: "fas fa-users", label: "Broz" },
+    { path: "/tube/categories", icon: "fas fa-th-large", label: "All Categories", badge: "NEW" },
+  ];
 
   // Add streaming and events items to main nav for easy access
   if (user?.role === 'creator' || user?.role === 'admin' || user?.role === 'moderator') {
@@ -217,11 +223,6 @@ export default function Sidebar({ user }: SidebarProps) {
         </div>
       )}
 
-      {/* Platform Switcher */}
-      <div className={cn("border-b border-border", isCollapsed ? "p-2" : "p-3")}>
-        <PlatformSwitcher variant="sidebar" />
-      </div>
-
       {/* Navigation */}
       <nav className={cn(
         "flex-1 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent",
@@ -270,6 +271,39 @@ export default function Sidebar({ user }: SidebarProps) {
             </Link>
           ))}
         </div>
+
+        {/* FanzTube Section */}
+        {!isCollapsed && (
+          <div className="mt-6 md:mt-8">
+            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              FanzTube
+            </h3>
+            <div className="mt-2 space-y-1">
+              {tubeItems.map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  onClick={isMobile ? handleMobileLinkClick : undefined}
+                  className={cn(
+                    "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                    isActive(item.path)
+                      ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  <i className={`${item.icon} w-5 h-5 md:w-4 md:h-4`}></i>
+                  {item.label}
+                  {item.badge && (
+                    <span className="ml-auto text-xs px-2 py-0.5 bg-primary text-primary-foreground rounded-full">
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Become a Creator CTA for Fans */}
         {user?.role === 'fan' && !isCollapsed && (
