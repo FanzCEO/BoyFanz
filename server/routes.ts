@@ -6,6 +6,7 @@ import express from 'express';
 import { storage } from './storage';
 import { registerHelpSupportRoutes } from './routes/helpSupportRoutes';
 import pwaRoutes from './routes/pwaRoutes';
+import liveChatRoutes from './routes/liveChatRoutes';
 import authRoutes from './routes/authRoutes';
 import ssoRoutes from './routes/ssoRoutes';
 import dataRetentionRoutes from './routes/dataRetentionRoutes';
@@ -5799,7 +5800,10 @@ export async function setupAdvancedRoutes(app: Express) {
   
   // AI-Powered Help & Support System
   registerHelpSupportRoutes(app);
-  
+
+  // Live Chat Support Routes (adds /api/help/support/status, /api/help/chat/*, etc.)
+  app.use('/api/help', liveChatRoutes);
+
   // Email/Password Authentication Routes (NO auth middleware - public)
   app.use('/api/auth', authRoutes);
 
