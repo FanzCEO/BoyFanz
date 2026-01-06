@@ -6,7 +6,6 @@ import express from 'express';
 import { storage } from './storage';
 import { registerHelpSupportRoutes } from './routes/helpSupportRoutes';
 import pwaRoutes from './routes/pwaRoutes';
-import liveChatRoutes from './routes/liveChatRoutes';
 import authRoutes from './routes/authRoutes';
 import ssoRoutes from './routes/ssoRoutes';
 import dataRetentionRoutes from './routes/dataRetentionRoutes';
@@ -24,6 +23,7 @@ import watchPartyRoutes from './routes/watchPartyRoutes';
 import safetyRoutes from './routes/safetyRoutes';
 import aiRoutes from './routes/aiRoutes';
 import aiGatewayRoutes from './routes/aiGatewayRoutes';
+import liveChatRoutes from './routes/liveChatRoutes';
 // Admin Management Routes
 import brandingRoutes from './routes/admin/branding';
 import bookingsRoutes from './routes/admin/bookings';
@@ -301,6 +301,7 @@ export function registerRoutes(app: Express) {
 
   // Unified AI Gateway with Together AI support
   app.use("/api/ai-gateway", aiGatewayRoutes);
+  app.use("/api/help", liveChatRoutes);
 
   // ===== ADMIN MANAGEMENT ROUTES =====
   // Platform branding, bookings, site appearance, and gallery management
@@ -5800,10 +5801,7 @@ export async function setupAdvancedRoutes(app: Express) {
   
   // AI-Powered Help & Support System
   registerHelpSupportRoutes(app);
-
-  // Live Chat Support Routes (adds /api/help/support/status, /api/help/chat/*, etc.)
-  app.use('/api/help', liveChatRoutes);
-
+  
   // Email/Password Authentication Routes (NO auth middleware - public)
   app.use('/api/auth', authRoutes);
 
@@ -6247,5 +6245,156 @@ export async function setupAdvancedRoutes(app: Express) {
       console.error('Failed to get discount analytics:', error);
       res.status(500).json({ error: 'Failed to get analytics' });
     }
+  });
+
+  // ============================================
+  // FEED & SOCIAL ENDPOINTS (STUBS)
+  // ============================================
+  
+  // Main feed endpoint
+  app.get("/api/feed", isAuthenticated, async (req, res) => {
+    try {
+      res.json({ posts: [], hasMore: false, page: 1 });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch feed" });
+    }
+  });
+
+  // User permissions
+  app.get("/api/user/permissions", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      res.json({
+        canPost: true,
+        canMessage: true,
+        canStream: user?.role === "creator" || user?.role === "admin",
+        canModerate: user?.role === "admin" || user?.role === "moderator",
+        isVerified: user?.isVerified || false
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch permissions" });
+    }
+  });
+
+  // Unread messages count
+  app.get("/api/messages/unread-count", isAuthenticated, async (req, res) => {
+    try {
+      res.json({ count: 0 });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch unread count" });
+    }
+  });
+
+  // Suggested creators
+  app.get("/api/creators/suggested", async (req, res) => {
+    try {
+      res.json({ creators: [] });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch suggested creators" });
+    }
+  });
+
+  // Social notifications
+  app.get("/api/social-notifications", isAuthenticated, async (req, res) => {
+    try {
+      res.json({ notifications: [], unreadCount: 0 });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+  });
+
+  // Creators leaderboard
+  app.get("/api/creators/leaderboard", async (req, res) => {
+    try {
+      res.json({ creators: [] });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch leaderboard" });
+    }
+  });
+
+  // User story status
+  app.get("/api/user/story-status", isAuthenticated, async (req, res) => {
+    try {
+      res.json({ hasActiveStory: false, storyCount: 0 });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch story status" });
+    }
+  });
+
+  // Stories endpoint
+  app.get("/api/stories", async (req, res) => {
+    try {
+      res.json({ stories: [] });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stories" });
+    }
+  });
+
+  // Live streams
+  app.get("/api/streams/live", async (req, res) => {
+    try {
+      res.json({ streams: [] });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch live streams" });
+    }
+  });
+
+  // Trending topics
+  app.get("/api/trending/topics", async (req, res) => {
+    try {
+      res.json({ topics: [] });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch trending topics" });
+    }
+  });
+
+  // ===== STUB ENDPOINTS =====
+  // These return placeholder responses per MISSING_CONNECTIONS.md P1 fixes
+
+  // Marketplace stub (P1 #10)
+  app.get("/api/marketplace", async (req, res) => {
+    res.json({
+      placeholder: true,
+      message: "Marketplace coming soon",
+      items: [],
+      categories: [],
+      total: 0
+    });
+  });
+
+  app.get("/api/marketplace/:itemId", async (req, res) => {
+    res.json({
+      placeholder: true,
+      message: "Marketplace coming soon",
+      item: null
+    });
+  });
+
+  // Groups stub (P1 #11)
+  app.get("/api/groups", async (req, res) => {
+    res.json({
+      placeholder: true,
+      message: "Groups feature coming soon",
+      groups: [],
+      total: 0
+    });
+  });
+
+  app.get("/api/groups/:groupId", async (req, res) => {
+    res.json({
+      placeholder: true,
+      message: "Groups feature coming soon",
+      group: null
+    });
+  });
+
+  // Collaborations stub (unverified endpoint)
+  app.get("/api/collaborations", async (req, res) => {
+    res.json({
+      placeholder: true,
+      message: "Collaborations feature coming soon",
+      collaborations: [],
+      total: 0
+    });
   });
 }
