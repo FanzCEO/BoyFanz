@@ -37,6 +37,7 @@ const adSizeConfig: Record<AdSize, { width: string; height: string; label: strin
 };
 
 // In-house affiliate/promotional ads
+// NOTE: Keep at least 8 unique ads to avoid duplication in 4-block carousels (P1 #8 fix)
 const inhouseAds = [
   {
     id: "promo-premium",
@@ -56,15 +57,6 @@ const inhouseAds = [
     isStarzPromo: true
   },
   {
-    id: "promo-starz-membership",
-    title: "Join the Starz Elite",
-    description: "7 Tiers from ToyBoy to Ultimate Stud - Unlock Premium Tools & Revenue Boosts",
-    cta: "Choose Your Tier",
-    gradient: "from-pink-600/90 via-purple-600/80 to-rose-700/90",
-    link: "/starz-elite",
-    isStarzPromo: true
-  },
-  {
     id: "promo-verify",
     title: "Get Verified",
     description: "Boost visibility with the verified creator badge",
@@ -79,6 +71,38 @@ const inhouseAds = [
     cta: "Start Stream",
     gradient: "from-rose-600/90 via-pink-600/80 to-red-600/90",
     link: "/streams/create"
+  },
+  {
+    id: "promo-custom-content",
+    title: "Custom Requests",
+    description: "Earn more with personalized content for your biggest fans",
+    cta: "Enable Requests",
+    gradient: "from-purple-600/90 via-violet-600/80 to-indigo-600/90",
+    link: "/creator/custom-requests"
+  },
+  {
+    id: "promo-analytics",
+    title: "Track Your Growth",
+    description: "Powerful analytics to understand what your fans love",
+    cta: "View Stats",
+    gradient: "from-cyan-600/90 via-teal-600/80 to-emerald-600/90",
+    link: "/creator/analytics"
+  },
+  {
+    id: "promo-messaging",
+    title: "Mass Messaging",
+    description: "Reach all your subscribers at once with targeted campaigns",
+    cta: "Start Campaign",
+    gradient: "from-orange-600/90 via-red-600/80 to-rose-600/90",
+    link: "/creator/messages/broadcast"
+  },
+  {
+    id: "promo-vault",
+    title: "Content Vault",
+    description: "Store and organize your content securely in the cloud",
+    cta: "Open Vault",
+    gradient: "from-slate-600/90 via-zinc-600/80 to-neutral-600/90",
+    link: "/creator/vault"
   }
 ];
 
