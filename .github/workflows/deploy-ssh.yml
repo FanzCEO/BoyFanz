@@ -19,10 +19,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build application
         run: npm run build
@@ -41,7 +40,7 @@ jobs:
             git reset --hard origin/main
 
             # Install dependencies
-            npm ci --production=false
+            npm install
 
             # Build the application
             npm run build
