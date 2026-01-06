@@ -1,0 +1,173 @@
+{
+  "platform": {
+    "name": "BoyFanz",
+    "slug": "boyfanz",
+    "code": "boy_fanz",
+    "version": "1.0.0",
+    "tagline": "Underground. Raw. Unleashed.",
+    "description": "Underground sex club and bathhouse aesthetic - blue and red neon theme",
+    "domain": "boyzapp.com"
+  },
+  "infrastructure": {
+    "database": {
+      "schema": "boy_fanz_",
+      "prefix": "boy_fanz",
+      "namespace": "boyfanz"
+    },
+    "events": {
+      "prefix": "boy_fanz.",
+      "topics": {
+        "user_created": "boy_fanz.user.created",
+        "content_uploaded": "boy_fanz.content.uploaded",
+        "transaction_completed": "boy_fanz.transaction.completed",
+        "verification_requested": "boy_fanz.verification.requested"
+      }
+    },
+    "cdn": {
+      "baseUrl": "https://cdn.fanz.website",
+      "platformPath": "/boyfanz",
+      "mediaBucket": "boy_fanz-media",
+      "assetBucket": "boy_fanz-assets"
+    },
+    "observability": {
+      "logPrefix": "[BOY_FANZ]",
+      "metricsNamespace": "boy_fanz",
+      "tracingService": "boyfanz",
+      "tags": {
+        "platform": "boyfanz",
+        "platform_code": "boy_fanz",
+        "environment": "production"
+      }
+    }
+  },
+  "hub": {
+    "sso": {
+      "issuer": "https://sso.fanz.website",
+      "clientId": "boy_fanz_web",
+      "audience": "boy_fanz",
+      "scopes": [
+        "openid",
+        "profile",
+        "email",
+        "platform"
+      ],
+      "redirectUri": "https://boyzapp.com/auth/callback",
+      "logoutUri": "https://boyzapp.com/auth/logout"
+    },
+    "services": {
+      "api": "https://api.fanz.website",
+      "media": "https://media.fanz.website",
+      "vault": "https://vault.fanz.website",
+      "money": "https://money.fanz.website",
+      "websocket": "wss://ws.fanz.website"
+    },
+    "config": {
+      "platformCode": "boy_fanz",
+      "platformSlug": "boyfanz",
+      "webhookSecret": "WEBHOOK_SECRET_BOY_FANZ",
+      "apiKey": "API_KEY_BOY_FANZ"
+    }
+  },
+  "envVars": {
+    "required": [
+      "PLATFORM_CODE=boy_fanz",
+      "PLATFORM_SLUG=boyfanz",
+      "SSO_ISSUER=https://sso.fanz.website",
+      "SSO_CLIENT_ID=boy_fanz_web",
+      "SSO_AUDIENCE=boy_fanz",
+      "SSO_CLIENT_SECRET=<secret>",
+      "HUB_API_BASE=https://api.fanz.website",
+      "MEDIA_BASE=https://media.fanz.website",
+      "VAULT_BASE=https://vault.fanz.website",
+      "MONEY_BASE=https://money.fanz.website",
+      "WEBHOOK_SIGNING_SECRET=<secret>",
+      "CDN_BASE_URL=https://cdn.fanz.website/boyfanz",
+      "DATABASE_URL=<connection-string>",
+      "REDIS_URL=<connection-string>"
+    ]
+  },
+  "branding": {
+    "colors": {
+      "primary": "#00e5ff",
+      "secondary": "#00d2ff",
+      "accent": "#06b6d4",
+      "background": "#0A0A0F",
+      "neon-cyan-primary": "#00e5ff",
+      "neon-cyan": "#00d2ff",
+      "neon-blue": "#4facfe",
+      "electric-blue": "#06b6d4",
+      "cyber-cyan": "#00d2ff",
+      "neon-pink": "#ff49db"
+    },
+    "aesthetic": "underground-sex-club-bathhouse",
+    "theme": "blue-red-neon",
+    "fonts": {
+      "heading": "'Inter', sans-serif",
+      "body": "'Inter', sans-serif",
+      "accent": "'Bebas Neue', sans-serif"
+    }
+  },
+  "components": {
+    "prefix": "Boy",
+    "namespace": "boyfanz"
+  },
+  "security": {
+    "csp": {
+      "enabled": true,
+      "directives": {
+        "defaultSrc": [
+          "'self'",
+          "https://*.fanz.website"
+        ],
+        "scriptSrc": [
+          "'self'",
+          "'unsafe-inline'",
+          "https://*.fanz.website"
+        ],
+        "styleSrc": [
+          "'self'",
+          "'unsafe-inline'"
+        ],
+        "imgSrc": [
+          "'self'",
+          "data:",
+          "blob:",
+          "https://*.fanz.website"
+        ],
+        "mediaSrc": [
+          "'self'",
+          "blob:",
+          "https://*.fanz.website"
+        ],
+        "connectSrc": [
+          "'self'",
+          "https://*.fanz.website",
+          "wss://*.fanz.website"
+        ]
+      }
+    },
+    "cors": {
+      "allowedOrigins": [
+        "https://boyzapp.com",
+        "https://www.boyzapp.com",
+        "https://sso.fanz.website",
+        "https://api.fanz.website"
+      ]
+    }
+  },
+  "deployment": {
+    "requiresApproval": true,
+    "requiresMFA": true,
+    "approvalSource": "Manual",
+    "archiveOnly": false,
+    "authorizationCode": "Bama@11061990",
+    "themeLocked": true,
+    "healthCheckEndpoint": "/health",
+    "readinessProbe": "/ready"
+  },
+  "_meta": {
+    "generatedAt": "2025-12-31T03:00:00.000Z",
+    "generator": "manual-platform-identity",
+    "version": "1.0.0"
+  }
+}

@@ -1,0 +1,391 @@
+/**
+ * FanzEditor Styles
+ * Custom styling for the Tiptap-based rich text editor
+ */
+
+/* Base editor styles */
+.ProseMirror {
+  outline: none;
+  min-height: 150px;
+}
+
+/* Placeholder */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+  height: 0;
+}
+
+/* Focus styles */
+.ProseMirror:focus {
+  outline: none;
+}
+
+/* Selection styles */
+.ProseMirror ::selection {
+  background: hsl(var(--primary) / 0.3);
+}
+
+/* Table styles */
+.ProseMirror table {
+  border-collapse: collapse;
+  table-layout: auto;
+  width: 100%;
+  margin: 1rem 0;
+  overflow: hidden;
+}
+
+.ProseMirror td,
+.ProseMirror th {
+  border: 1px solid hsl(var(--border));
+  padding: 0.5rem 1rem;
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.ProseMirror th {
+  background: hsl(var(--muted));
+  font-weight: 600;
+  text-align: left;
+}
+
+.ProseMirror .selectedCell:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: hsl(var(--primary) / 0.2);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Column resize handle */
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: hsl(var(--primary));
+  pointer-events: none;
+}
+
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
+}
+
+/* Image styles */
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* YouTube/Video embed styles */
+.ProseMirror .youtube-video,
+.ProseMirror iframe {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.ProseMirror .youtube-video.ProseMirror-selectednode,
+.ProseMirror iframe.ProseMirror-selectednode {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Code block styles */
+.ProseMirror pre {
+  background: hsl(var(--muted));
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 0.875rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.ProseMirror pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Inline code styles */
+.ProseMirror code {
+  background: hsl(var(--muted));
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 0.875em;
+}
+
+/* Blockquote styles */
+.ProseMirror blockquote {
+  border-left: 3px solid hsl(var(--primary));
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: hsl(var(--muted-foreground));
+  font-style: italic;
+}
+
+/* Link styles */
+.ProseMirror a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ProseMirror a:hover {
+  opacity: 0.8;
+}
+
+/* List styles */
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.ProseMirror li {
+  margin: 0.25rem 0;
+}
+
+.ProseMirror ul li {
+  list-style-type: disc;
+}
+
+.ProseMirror ol li {
+  list-style-type: decimal;
+}
+
+/* Heading styles */
+.ProseMirror h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 1.5rem 0 1rem;
+  line-height: 1.2;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.75rem;
+  line-height: 1.3;
+}
+
+.ProseMirror h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem;
+  line-height: 1.4;
+}
+
+/* Paragraph styles */
+.ProseMirror p {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+/* Horizontal rule */
+.ProseMirror hr {
+  border: none;
+  border-top: 1px solid hsl(var(--border));
+  margin: 1.5rem 0;
+}
+
+/* Mention styles */
+.ProseMirror .mention {
+  background: hsl(var(--primary) / 0.2);
+  color: hsl(var(--primary));
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+/* Highlight styles */
+.ProseMirror mark {
+  border-radius: 0.125rem;
+  padding: 0.125rem 0;
+}
+
+/* Strikethrough */
+.ProseMirror s {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* Text alignment */
+.ProseMirror .text-left {
+  text-align: left;
+}
+
+.ProseMirror .text-center {
+  text-align: center;
+}
+
+.ProseMirror .text-right {
+  text-align: right;
+}
+
+.ProseMirror .text-justify {
+  text-align: justify;
+}
+
+/* Syntax highlighting for code blocks */
+.ProseMirror pre .hljs-comment,
+.ProseMirror pre .hljs-quote {
+  color: #6a737d;
+}
+
+.ProseMirror pre .hljs-variable,
+.ProseMirror pre .hljs-template-variable,
+.ProseMirror pre .hljs-tag,
+.ProseMirror pre .hljs-name,
+.ProseMirror pre .hljs-selector-id,
+.ProseMirror pre .hljs-selector-class,
+.ProseMirror pre .hljs-regexp,
+.ProseMirror pre .hljs-deletion {
+  color: #e06c75;
+}
+
+.ProseMirror pre .hljs-number,
+.ProseMirror pre .hljs-built_in,
+.ProseMirror pre .hljs-literal,
+.ProseMirror pre .hljs-type,
+.ProseMirror pre .hljs-params,
+.ProseMirror pre .hljs-meta,
+.ProseMirror pre .hljs-link {
+  color: #d19a66;
+}
+
+.ProseMirror pre .hljs-attribute {
+  color: #e6c07b;
+}
+
+.ProseMirror pre .hljs-string,
+.ProseMirror pre .hljs-symbol,
+.ProseMirror pre .hljs-bullet,
+.ProseMirror pre .hljs-addition {
+  color: #98c379;
+}
+
+.ProseMirror pre .hljs-title,
+.ProseMirror pre .hljs-section {
+  color: #61afef;
+}
+
+.ProseMirror pre .hljs-keyword,
+.ProseMirror pre .hljs-selector-tag {
+  color: #c678dd;
+}
+
+/* Collaboration cursor (for future multiplayer editing) */
+.ProseMirror .collaboration-cursor__caret {
+  position: relative;
+  margin-left: -1px;
+  margin-right: -1px;
+  border-left: 1px solid;
+  border-right: 1px solid;
+  word-break: normal;
+  pointer-events: none;
+}
+
+.ProseMirror .collaboration-cursor__label {
+  position: absolute;
+  top: -1.4em;
+  left: -1px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: normal;
+  user-select: none;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px 3px 3px 0;
+  white-space: nowrap;
+}
+
+/* Gapcursor (for navigating between blocks) */
+.ProseMirror .ProseMirror-gapcursor {
+  display: none;
+  pointer-events: none;
+  position: absolute;
+}
+
+.ProseMirror .ProseMirror-gapcursor:after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: -2px;
+  width: 20px;
+  border-top: 1px solid hsl(var(--foreground));
+  animation: ProseMirror-cursor-blink 1.1s steps(2, start) infinite;
+}
+
+@keyframes ProseMirror-cursor-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+.ProseMirror-focused .ProseMirror-gapcursor {
+  display: block;
+}
+
+/* Dropcursor (for drag and drop) */
+.ProseMirror .ProseMirror-dropcursor {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: hsl(var(--primary));
+}
+
+/* Task list styles (for future checkbox support) */
+.ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding: 0;
+}
+
+.ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.ProseMirror ul[data-type="taskList"] li > label {
+  flex: 0 0 auto;
+  margin-top: 0.25rem;
+}
+
+.ProseMirror ul[data-type="taskList"] li > div {
+  flex: 1 1 auto;
+}
+
+/* Print styles */
+@media print {
+  .ProseMirror {
+    background: white;
+    color: black;
+  }
+
+  .ProseMirror a {
+    color: blue;
+  }
+
+  .ProseMirror code,
+  .ProseMirror pre {
+    background: #f4f4f4;
+  }
+}

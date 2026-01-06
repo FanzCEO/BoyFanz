@@ -1,0 +1,27 @@
+{
+  "platform": "boyfanz",
+  "correct_version": "ba26f36c836c0f98201d2a35b94638044a03842f",
+  "theme": {
+    "name": "Metallic Silver & Junkyard Red",
+    "description": "Underground sex club/bathhouse aesthetic with metallic silver (looks blue) and junkyard red accents",
+    "colors": {
+      "primary": "hsl(352, 72%, 40%)",
+      "secondary": "hsl(0, 0%, 78%)",
+      "chromeRed": "hsl(352, 72%, 40%)",
+      "metalSilver": "hsl(0, 0%, 78%)"
+    }
+  },
+  "verified_date": "2025-12-31T07:30:00Z",
+  "protection": {
+    "theme_hook_disabled": true,
+    "database_theme_override_disabled": true,
+    "static_css_only": true
+  },
+  "rollback_history": {
+    "incident_date": "2025-09-24T00:33:39Z",
+    "culprit": "Replit AI Agent",
+    "rollback_commit": "94a4c2baa72f76eb79857aa8f90eb3dcdd79e483",
+    "restored_to_commit": "7d4139f24587b16c65afecf0ca9ec6702dd1580f",
+    "resolution": "Checked out ba26f36, disabled useTheme hook, redeployed"
+  }
+}

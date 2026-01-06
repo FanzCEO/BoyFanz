@@ -1,0 +1,208 @@
+{
+  "feature": "payments_payouts",
+  "display_name": "Payments & Payouts",
+  "category": "earnings",
+  "context_triggers": {
+    "pages": ["/payouts", "/earnings", "/settings/payouts", "/balance", "/withdraw"],
+    "keywords": ["payout", "withdraw", "earnings", "payment", "money", "bank", "paypal", "balance"],
+    "user_actions": ["payout_failed", "first_earnings", "payout_requested", "balance_inquiry"]
+  },
+  "knowledge_entries": [
+    {
+      "id": "payout-001",
+      "question": "How do I get paid?",
+      "answer": "Getting paid is easy! Go to Settings → Payouts, choose your method (Bank, PayPal, Crypto, or Payout Card), enter your details, and verify. Once you have earnings, click 'Request Payout' and your money is on the way! Bank takes 3-4 days, PayPal same-day, Crypto 2-6 hours, Payout Card instant.",
+      "related_topics": ["payouts", "getting_started", "withdrawal"],
+      "difficulty": "beginner",
+      "quick_action": {
+        "label": "Set Up Payouts",
+        "action": "navigate",
+        "target": "/settings/payouts"
+      }
+    },
+    {
+      "id": "payout-002",
+      "question": "When do I get paid?",
+      "answer": "Timing depends on revenue type: Tips = instant, PPV sales = 2 days, Subscriptions = 5 days after billing, Live streams = 24 hours. Then choose payout method: Payout Card (instant), PayPal (same day), Crypto (2-6 hrs), Bank (3-4 days). You control when you withdraw!",
+      "related_topics": ["timing", "schedule", "processing"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "payout-003",
+      "question": "What payout methods are available?",
+      "answer": "Four great options! 1) Bank Transfer (FREE for U.S., 3-4 days), 2) PayPal (2% fee, same day), 3) Cryptocurrency (1% fee, 2-6 hours), 4) Payout Card ($2.50/transfer, instant!). Choose based on speed vs fees. Most creators use bank for large amounts, PayPal for speed.",
+      "related_topics": ["methods", "options", "bank"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "payout-004",
+      "question": "How much does BoyFanz take?",
+      "answer": "You keep 80% on subscriptions, PPV sales, paid messages, and streams. You keep 85% on tips (better rate!). Platform fee covers payment processing, hosting, and support. Industry-leading rates! Plus many payout methods are FREE (bank transfer).",
+      "related_topics": ["fees", "revenue_split", "earnings"],
+      "difficulty": "beginner",
+      "pro_tip": true
+    },
+    {
+      "id": "payout-005",
+      "question": "What's the minimum payout amount?",
+      "answer": "Minimums vary by method: Bank Transfer $50, PayPal $20, Cryptocurrency $100, Payout Card $10. Pro tip: Wait for larger amounts when using PayPal (2% fee) to minimize fee impact. Bank transfer is FREE so withdraw anytime over $50!",
+      "related_topics": ["minimums", "requirements", "limits"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "payout-006",
+      "question": "Why is money in my pending balance?",
+      "answer": "Pending balance is being processed and will clear soon! Holding periods: Subscriptions (5 days), PPV sales (2 days), Streams (24 hours), Tips (instant). This prevents fraud and chargebacks. Once cleared, it moves to current balance and you can withdraw it!",
+      "related_topics": ["pending", "balance", "waiting"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "payout-007",
+      "question": "How do I set up bank transfer payouts?",
+      "answer": "Settings → Payouts → Bank Transfer. Enter your routing number and account number (find on check or bank app). We'll send micro-deposits (small amounts like $0.23) to verify - confirm those amounts. Once verified, you're all set! FREE transfers, 3-4 day processing.",
+      "related_topics": ["bank", "setup", "verification"],
+      "difficulty": "beginner",
+      "quick_action": {
+        "label": "Add Bank Account",
+        "action": "navigate",
+        "target": "/settings/payouts/bank"
+      }
+    },
+    {
+      "id": "payout-008",
+      "question": "My payout failed, what do I do?",
+      "answer": "Common fixes: 1) Verify bank/PayPal info is correct (no typos!), 2) Ensure account is verified, 3) Check you meet minimum balance, 4) Confirm bank didn't reject transfer. Go to Settings → Payouts → Review Details. If still stuck, contact support with the error code!",
+      "related_topics": ["troubleshooting", "errors", "failed"],
+      "difficulty": "beginner",
+      "troubleshooting": true
+    },
+    {
+      "id": "payout-009",
+      "question": "How can I get paid faster?",
+      "answer": "Fastest to slowest: 1) Payout Card (INSTANT, 24/7), 2) Cryptocurrency (2-6 hours), 3) PayPal (same day), 4) Bank Transfer (3-4 days). For speed, use Payout Card or crypto. For free transfers, use bank. Get verified creator status for even faster processing!",
+      "related_topics": ["speed", "instant", "fast"],
+      "difficulty": "intermediate",
+      "pro_tip": true
+    },
+    {
+      "id": "payout-010",
+      "question": "What are payout fees?",
+      "answer": "Bank Transfer (U.S.): FREE! International wire: $25. PayPal: 2% (max $20). Cryptocurrency: 1%. Payout Card: $2.50 per transfer. Pro tip: Use bank for amounts >$500 to avoid fees. PayPal's 2% is okay for smaller, urgent withdrawals. Choose wisely!",
+      "related_topics": ["fees", "costs", "charges"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "payout-011",
+      "question": "Do I need to pay taxes on my earnings?",
+      "answer": "Yes! You're self-employed. U.S. creators: Set aside 25-30% for taxes, file Schedule C, pay quarterly estimated taxes. Get 1099-NEC if you earn >$600/year. International: Submit W-8BEN to reduce U.S. withholding, report in your country. Track ALL earnings and expenses. Hire accountant if earning >$50K!",
+      "related_topics": ["taxes", "1099", "self_employment"],
+      "difficulty": "advanced",
+      "pro_tip": true
+    },
+    {
+      "id": "payout-012",
+      "question": "What is a chargeback?",
+      "answer": "A chargeback is when a fan disputes a charge with their bank/card company. The amount is deducted from your balance plus a $15 fee. Prevent them by: delivering promised content, clear descriptions, responding to questions, keeping records. We fight illegitimate chargebacks for you!",
+      "related_topics": ["chargebacks", "disputes", "refunds"],
+      "difficulty": "intermediate",
+      "troubleshooting": true
+    },
+    {
+      "id": "payout-013",
+      "question": "Can I have multiple payout methods?",
+      "answer": "Yes! You can add Bank, PayPal, Crypto, and Payout Card all at once. Choose which one to use for each withdrawal. Smart strategy: Bank for large amounts (free), PayPal for medium (fast), Payout Card for small/urgent (instant). Flexibility is key!",
+      "related_topics": ["multiple_methods", "options", "flexibility"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "payout-014",
+      "question": "How do I track my earnings?",
+      "answer": "Dashboard → Earnings! You'll see: today/week/month/lifetime earnings, balance breakdown (current/pending), earnings by source (subs/PPV/tips), top content, payout history, and detailed reports. Export to CSV for your records. Track everything to optimize your strategy and prepare taxes!",
+      "related_topics": ["tracking", "analytics", "reports"],
+      "difficulty": "beginner",
+      "quick_action": {
+        "label": "View Earnings",
+        "action": "navigate",
+        "target": "/dashboard/earnings"
+      }
+    },
+    {
+      "id": "payout-015",
+      "question": "What's the Payout Card?",
+      "answer": "It's a Mastercard debit card linked to your creator earnings! Transfer money INSTANTLY anytime (24/7), $10 minimum, $2.50 fee per transfer. Use it for purchases or ATM withdrawals. Perfect for daily access to your money. Order in Settings → Payouts → Payout Card. Ships in 7-10 days!",
+      "related_topics": ["payout_card", "instant", "debit_card"],
+      "difficulty": "beginner",
+      "pro_tip": true
+    }
+  ],
+  "proactive_triggers": [
+    {
+      "condition": "first_earnings_no_payout_method",
+      "message": "🎉 Congrats on your first earnings! Want to set up payouts so you can get paid?",
+      "action": "prompt_payout_setup"
+    },
+    {
+      "condition": "balance_over_100_no_withdrawal",
+      "message": "💰 You have $100+ available! Ready to request a payout?",
+      "action": "suggest_withdrawal"
+    },
+    {
+      "condition": "payout_failed",
+      "message": "⚠️ Your payout failed. Want help troubleshooting the issue?",
+      "action": "troubleshoot_payout"
+    },
+    {
+      "condition": "pending_balance_clearing_soon",
+      "message": "⏰ Your pending balance clears in 24 hours! Set up your payout method now?",
+      "action": "remind_payout_setup"
+    },
+    {
+      "condition": "high_paypal_fees",
+      "message": "💡 You're paying high PayPal fees. Bank transfer is FREE for amounts over $50. Want to switch?",
+      "action": "suggest_bank_transfer"
+    },
+    {
+      "condition": "tax_season_approaching",
+      "message": "📋 Tax season is coming! Download your earnings report and 1099 here.",
+      "action": "provide_tax_documents"
+    }
+  ],
+  "suggested_actions": [
+    {
+      "label": "Request Payout",
+      "icon": "money",
+      "action": "navigate",
+      "target": "/payouts/request",
+      "priority": "high"
+    },
+    {
+      "label": "View Earnings",
+      "icon": "chart",
+      "action": "navigate",
+      "target": "/dashboard/earnings",
+      "priority": "medium"
+    },
+    {
+      "label": "Set Up Payout Method",
+      "icon": "settings",
+      "action": "navigate",
+      "target": "/settings/payouts",
+      "priority": "medium"
+    },
+    {
+      "label": "Download Tax Documents",
+      "icon": "document",
+      "action": "navigate",
+      "target": "/settings/tax-documents",
+      "priority": "low"
+    }
+  ],
+  "related_documentation": [
+    "/how-to/payments-payouts.md",
+    "/how-to/earnings-optimization.md",
+    "/policies/payment-terms.md",
+    "/tax/creator-tax-guide.md"
+  ],
+  "last_updated": "2025-11-15",
+  "version": "1.0"
+}

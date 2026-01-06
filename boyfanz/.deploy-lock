@@ -1,0 +1,14 @@
+{
+  "platform": "boyfanz",
+  "locked_at": "2025-12-28T05:45:35Z",
+  "locked_by": "wyatt-cole-owner",
+  "lock_code_hash": "91d24fe509143191d1de388e8d62584fb4cd0a569f95f6d7d28927e7943f0fad",
+  "permissions": {
+    "deploy": "owner_only",
+    "takedown": "owner_only",
+    "switch_platform": "owner_only",
+    "new_features": "allowed_with_review",
+    "bug_fixes": "allowed",
+    "code_corrections": "allowed"
+  }
+}

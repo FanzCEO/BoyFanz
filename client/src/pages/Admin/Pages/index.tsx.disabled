@@ -1,0 +1,213 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
+
+export default function PagesManagement() {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+
+  const { data: pagesData, isLoading } = useQuery({
+    queryKey: ["/api/admin/pages", search, statusFilter, typeFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (search) params.append("search", search);
+      if (statusFilter && statusFilter !== "all") params.append("status", statusFilter);
+      if (typeFilter && typeFilter !== "all") params.append("type", typeFilter);
+
+      const res = await apiRequest("GET", "/api/admin/pages?" + params.toString());
+      return await res.json();
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (pageId: string) => {
+      const res = await apiRequest("DELETE", "/api/admin/pages/" + pageId);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pages"] });
+      toast({ title: "Success", description: "Page deleted successfully" });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete page",
+        variant: "destructive"
+      });
+    },
+  });
+
+  const pages = pagesData?.data || [];
+
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Pages Management</h1>
+          <p className="text-zinc-400 mt-1">
+            Ultra-comprehensive page editor - manage all content, policies, footers, logos, backgrounds
+          </p>
+        </div>
+        <Button
+          onClick={() => setLocation("/admin/pages/editor")}
+          className="bg-[#00e5ff] hover:bg-[#00bcd4] text-black font-bold"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Create New Page
+        </Button>
+      </div>
+
+      <div className="flex gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+          <Input
+            placeholder="Search pages..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10 bg-zinc-900 border-zinc-800"
+          />
+        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[180px] bg-zinc-900 border-zinc-800">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
+            <SelectItem value="published">Published</SelectItem>
+            <SelectItem value="archived">Archived</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger className="w-[180px] bg-zinc-900 border-zinc-800">
+            <SelectValue placeholder="Filter by type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="static">Static</SelectItem>
+            <SelectItem value="policy">Policy</SelectItem>
+            <SelectItem value="footer">Footer</SelectItem>
+            <SelectItem value="landing">Landing</SelectItem>
+            <SelectItem value="blog">Blog</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="bg-zinc-900 rounded-lg border border-zinc-800">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-zinc-800">
+              <TableHead>Title</TableHead>
+              <TableHead>Slug</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Last Updated</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-zinc-500 py-8">
+                  Loading pages...
+                </TableCell>
+              </TableRow>
+            ) : pages.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-zinc-500 py-8">
+                  No pages found. Create your first page!
+                </TableCell>
+              </TableRow>
+            ) : (
+              pages.map((page: any) => (
+                <TableRow key={page.id} className="border-zinc-800">
+                  <TableCell className="font-medium">{page.title}</TableCell>
+                  <TableCell className="text-zinc-400">/{page.slug}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="capitalize">
+                      {page.type}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        page.status === "published"
+                          ? "default"
+                          : page.status === "draft"
+                          ? "secondary"
+                          : "outline"
+                      }
+                      className="capitalize"
+                    >
+                      {page.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-zinc-400">
+                    {new Date(page.updatedAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex justify-end gap-2">
+                      {page.status === "published" && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => window.open("/" + page.slug, "_blank")}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setLocation("/admin/pages/editor?id=" + page.id)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          if (confirm("Are you sure you want to delete this page?")) {
+                            deleteMutation.mutate(page.id);
+                          }
+                        }}
+                        className="text-red-500 hover:text-red-400"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}

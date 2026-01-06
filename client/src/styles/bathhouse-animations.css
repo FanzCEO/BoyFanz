@@ -1,0 +1,569 @@
+/* ============================================
+   BATHHOUSE ANIMATIONS
+   Modern Gay Bathhouse Theme for BoyFanz
+   ============================================ */
+
+/* ============================================
+   STEAM & FOG EFFECTS
+   ============================================ */
+
+/* Steam rising from surfaces - multiple variants */
+@keyframes steam-rise {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-40px) translateX(8px) scale(1.3);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-80px) translateX(-5px) scale(1.6);
+    opacity: 0;
+  }
+}
+
+@keyframes steam-rise-slow {
+  0% {
+    transform: translateY(0) translateX(0) scale(1) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-60px) translateX(15px) scale(1.4) rotate(5deg);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-120px) translateX(-10px) scale(1.8) rotate(-5deg);
+    opacity: 0;
+  }
+}
+
+@keyframes steam-drift {
+  0%, 100% {
+    transform: translateX(0) translateY(0);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translateX(10px) translateY(-5px);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateX(-5px) translateY(-10px);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translateX(8px) translateY(-3px);
+    opacity: 0.5;
+  }
+}
+
+/* Fog layer that slowly moves */
+@keyframes fog-drift {
+  0% {
+    transform: translateX(-10%) scale(1);
+    opacity: 0.15;
+  }
+  50% {
+    transform: translateX(10%) scale(1.05);
+    opacity: 0.25;
+  }
+  100% {
+    transform: translateX(-10%) scale(1);
+    opacity: 0.15;
+  }
+}
+
+/* ============================================
+   WATER EFFECTS
+   ============================================ */
+
+/* Water ripple for pool areas */
+@keyframes water-ripple {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.5;
+  }
+}
+
+/* Water shimmer/reflection */
+@keyframes water-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Water caustics (light patterns through water) */
+@keyframes caustics {
+  0%, 100% {
+    background-position: 0% 0%;
+    opacity: 0.3;
+  }
+  25% {
+    background-position: 50% 25%;
+    opacity: 0.4;
+  }
+  50% {
+    background-position: 100% 50%;
+    opacity: 0.35;
+  }
+  75% {
+    background-position: 50% 75%;
+    opacity: 0.45;
+  }
+}
+
+/* Water drip animation */
+@keyframes water-drip {
+  0% {
+    transform: translateY(0) scaleY(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(10px) scaleY(1.2);
+    opacity: 0.6;
+  }
+  80% {
+    transform: translateY(30px) scaleY(0.8);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(50px) scaleY(0.5);
+    opacity: 0;
+  }
+}
+
+/* Pool surface gentle wave */
+@keyframes pool-wave {
+  0%, 100% {
+    transform: translateY(0) scaleX(1);
+  }
+  25% {
+    transform: translateY(-2px) scaleX(1.01);
+  }
+  50% {
+    transform: translateY(0) scaleX(0.99);
+  }
+  75% {
+    transform: translateY(2px) scaleX(1.01);
+  }
+}
+
+/* ============================================
+   NEON & LIGHTING EFFECTS
+   ============================================ */
+
+/* Neon sign buzz/flicker */
+@keyframes neon-buzz {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+    opacity: 1;
+    text-shadow:
+      0 0 10px currentColor,
+      0 0 20px currentColor,
+      0 0 40px currentColor;
+  }
+  20%, 24%, 55% {
+    opacity: 0.7;
+    text-shadow:
+      0 0 5px currentColor,
+      0 0 10px currentColor;
+  }
+}
+
+/* Slow neon pulse */
+@keyframes neon-pulse {
+  0%, 100% {
+    filter: brightness(1);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+  }
+  50% {
+    filter: brightness(1.2);
+    box-shadow: 0 0 40px rgba(0, 229, 255, 0.8);
+  }
+}
+
+/* Corridor light flicker (dim red) */
+@keyframes corridor-flicker {
+  0%, 92%, 94%, 96%, 98%, 100% {
+    opacity: 1;
+  }
+  93%, 95%, 97% {
+    opacity: 0.6;
+  }
+}
+
+/* Red light pulse for private areas */
+@keyframes red-pulse {
+  0%, 100% {
+    background-color: rgba(139, 0, 0, 0.1);
+    box-shadow: 0 0 30px rgba(139, 0, 0, 0.2);
+  }
+  50% {
+    background-color: rgba(139, 0, 0, 0.15);
+    box-shadow: 0 0 50px rgba(139, 0, 0, 0.35);
+  }
+}
+
+/* Occupied light blink */
+@keyframes occupied-blink {
+  0%, 100% {
+    background-color: #ff3333;
+    box-shadow: 0 0 10px #ff3333;
+  }
+  50% {
+    background-color: #cc0000;
+    box-shadow: 0 0 5px #cc0000;
+  }
+}
+
+/* ============================================
+   DOOR & ROOM EFFECTS
+   ============================================ */
+
+/* Door creak open on hover */
+@keyframes door-peek {
+  0% {
+    transform: perspective(1000px) rotateY(0deg);
+  }
+  100% {
+    transform: perspective(1000px) rotateY(-12deg);
+  }
+}
+
+/* Door opening animation */
+@keyframes door-open {
+  0% {
+    transform: perspective(1000px) rotateY(0deg);
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
+  }
+  100% {
+    transform: perspective(1000px) rotateY(-85deg);
+    box-shadow: -20px 0 40px rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* Light spilling from door crack */
+@keyframes light-spill {
+  0% {
+    opacity: 0;
+    width: 0;
+  }
+  100% {
+    opacity: 0.8;
+    width: 20px;
+  }
+}
+
+/* Peek window glow */
+@keyframes peek-glow {
+  0%, 100% {
+    box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.1);
+  }
+  50% {
+    box-shadow: inset 0 0 25px rgba(0, 229, 255, 0.2);
+  }
+}
+
+/* Room number brass shine */
+@keyframes brass-shine {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ============================================
+   LOCKER EFFECTS
+   ============================================ */
+
+/* Locker door swing */
+@keyframes locker-open {
+  0% {
+    transform: perspective(500px) rotateY(0deg);
+  }
+  100% {
+    transform: perspective(500px) rotateY(-110deg);
+  }
+}
+
+/* Locker vent shimmer */
+@keyframes vent-shimmer {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Metal surface gleam */
+@keyframes metal-gleam {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ============================================
+   SHOWER EFFECTS
+   ============================================ */
+
+/* Shower spray particles */
+@keyframes shower-spray {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(100px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+/* Shower head drip */
+@keyframes shower-drip {
+  0%, 80% {
+    transform: translateY(0) scaleY(1);
+    opacity: 0;
+  }
+  85% {
+    transform: translateY(0) scaleY(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(20px) scaleY(1.5);
+    opacity: 0;
+  }
+}
+
+/* Wet tile shimmer */
+@keyframes wet-shimmer {
+  0%, 100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* ============================================
+   CHAIN & INDUSTRIAL EFFECTS
+   ============================================ */
+
+/* Chain sway */
+@keyframes chain-sway {
+  0%, 100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+/* Industrial hum glow */
+@keyframes industrial-hum {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.1);
+  }
+}
+
+/* ============================================
+   ENTRANCE & TRANSITION EFFECTS
+   ============================================ */
+
+/* Frosted glass door reveal */
+@keyframes frosted-reveal {
+  0% {
+    backdrop-filter: blur(20px);
+    opacity: 1;
+  }
+  100% {
+    backdrop-filter: blur(0px);
+    opacity: 0;
+  }
+}
+
+/* Welcome mat fade in */
+@keyframes welcome-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Zone transition slide */
+@keyframes zone-slide {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Apply animations */
+.animate-steam-rise {
+  animation: steam-rise 6s ease-out infinite;
+}
+
+.animate-steam-rise-slow {
+  animation: steam-rise-slow 10s ease-out infinite;
+}
+
+.animate-steam-drift {
+  animation: steam-drift 8s ease-in-out infinite;
+}
+
+.animate-fog-drift {
+  animation: fog-drift 20s ease-in-out infinite;
+}
+
+.animate-water-ripple {
+  animation: water-ripple 4s ease-in-out infinite;
+}
+
+.animate-water-shimmer {
+  animation: water-shimmer 8s ease-in-out infinite;
+  background-size: 200% 100%;
+}
+
+.animate-caustics {
+  animation: caustics 12s ease-in-out infinite;
+}
+
+.animate-water-drip {
+  animation: water-drip 2s ease-in infinite;
+}
+
+.animate-pool-wave {
+  animation: pool-wave 3s ease-in-out infinite;
+}
+
+.animate-neon-buzz {
+  animation: neon-buzz 4s ease-in-out infinite;
+}
+
+.animate-neon-pulse {
+  animation: neon-pulse 3s ease-in-out infinite;
+}
+
+.animate-corridor-flicker {
+  animation: corridor-flicker 8s ease-in-out infinite;
+}
+
+.animate-red-pulse {
+  animation: red-pulse 4s ease-in-out infinite;
+}
+
+.animate-occupied-blink {
+  animation: occupied-blink 1s ease-in-out infinite;
+}
+
+.animate-door-peek {
+  animation: door-peek 0.3s ease-out forwards;
+}
+
+.animate-door-open {
+  animation: door-open 0.8s ease-out forwards;
+}
+
+.animate-peek-glow {
+  animation: peek-glow 3s ease-in-out infinite;
+}
+
+.animate-brass-shine {
+  animation: brass-shine 3s linear infinite;
+  background: linear-gradient(90deg,
+    rgba(205, 127, 50, 0.8) 0%,
+    rgba(255, 215, 0, 1) 50%,
+    rgba(205, 127, 50, 0.8) 100%);
+  background-size: 200% 100%;
+}
+
+.animate-locker-open {
+  animation: locker-open 0.5s ease-out forwards;
+}
+
+.animate-metal-gleam {
+  animation: metal-gleam 4s linear infinite;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%);
+  background-size: 200% 100%;
+}
+
+.animate-chain-sway {
+  animation: chain-sway 4s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+.animate-wet-shimmer {
+  animation: wet-shimmer 5s ease-in-out infinite;
+}
+
+/* ============================================
+   REDUCED MOTION SUPPORT
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-steam-rise,
+  .animate-steam-rise-slow,
+  .animate-steam-drift,
+  .animate-fog-drift,
+  .animate-water-ripple,
+  .animate-water-shimmer,
+  .animate-caustics,
+  .animate-water-drip,
+  .animate-pool-wave,
+  .animate-neon-buzz,
+  .animate-neon-pulse,
+  .animate-corridor-flicker,
+  .animate-red-pulse,
+  .animate-occupied-blink,
+  .animate-peek-glow,
+  .animate-brass-shine,
+  .animate-metal-gleam,
+  .animate-chain-sway,
+  .animate-wet-shimmer {
+    animation: none;
+  }
+
+  .animate-door-peek,
+  .animate-door-open,
+  .animate-locker-open {
+    animation-duration: 0.01s;
+  }
+}

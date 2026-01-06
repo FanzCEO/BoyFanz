@@ -1,0 +1,132 @@
+name: Deploy FANZ Ecosystem to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  REGISTRY: registry.digitalocean.com/fanz
+  NODE_VERSION: '20'
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [boyfanz, girlfanz, pupfanz, transfanz, taboofanz]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to DigitalOcean Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: registry.digitalocean.com
+          username: ${{ secrets.DO_REGISTRY_TOKEN }}
+          password: ${{ secrets.DO_REGISTRY_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ matrix.platform }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ matrix.platform }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ matrix.platform }}:buildcache,mode=max
+          build-args: |
+            PLATFORM_NAME=${{ matrix.platform }}
+
+  deploy-to-kubernetes:
+    name: Deploy to Kubernetes Cluster
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_API_TOKEN }}
+
+      - name: Save DigitalOcean kubeconfig
+        run: doctl kubernetes cluster kubeconfig save ${{ secrets.DO_CLUSTER_NAME }}
+
+      - name: Update deployment images
+        run: |
+          kubectl set image deployment/boyfanz boyfanz=${{ env.REGISTRY }}/boyfanz:latest -n fanz-ecosystem
+          kubectl set image deployment/girlfanz girlfanz=${{ env.REGISTRY }}/girlfanz:latest -n fanz-ecosystem
+          kubectl set image deployment/pupfanz pupfanz=${{ env.REGISTRY }}/pupfanz:latest -n fanz-ecosystem
+          kubectl set image deployment/transfanz transfanz=${{ env.REGISTRY }}/transfanz:latest -n fanz-ecosystem
+          kubectl set image deployment/taboofanz taboofanz=${{ env.REGISTRY }}/taboofanz:latest -n fanz-ecosystem
+
+      - name: Wait for rollout to complete
+        run: |
+          kubectl rollout status deployment/boyfanz -n fanz-ecosystem --timeout=10m
+          kubectl rollout status deployment/girlfanz -n fanz-ecosystem --timeout=10m
+          kubectl rollout status deployment/pupfanz -n fanz-ecosystem --timeout=10m
+          kubectl rollout status deployment/transfanz -n fanz-ecosystem --timeout=10m
+          kubectl rollout status deployment/taboofanz -n fanz-ecosystem --timeout=10m
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods -n fanz-ecosystem
+          kubectl get services -n fanz-ecosystem
+          kubectl get ingress -n fanz-ecosystem
+
+      - name: Notify Slack on success
+        if: success()
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "✅ FANZ Ecosystem deployed successfully to production!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Deployment Complete*\n✅ All platforms deployed successfully\n🚀 Commit: ${{ github.sha }}\n👤 Author: ${{ github.actor }}"
+                  }
+                }
+              ]
+            }
+
+      - name: Notify Slack on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "❌ FANZ Ecosystem deployment FAILED!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Deployment Failed*\n❌ Check GitHub Actions logs\n🚀 Commit: ${{ github.sha }}\n👤 Author: ${{ github.actor }}"
+                  }
+                }
+              ]
+            }

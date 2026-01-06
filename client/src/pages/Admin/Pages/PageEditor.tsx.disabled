@@ -1,0 +1,462 @@
+import { useState, useEffect } from "react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import TextAlign from "@tiptap/extension-text-align";
+import Highlight from "@tiptap/extension-highlight";
+import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
+import TextStyle from "@tiptap/extension-text-style";
+import Color from "@tiptap/extension-color";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useLocation, useSearch } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Bold,
+  Italic,
+  Underline as UnderlineIcon,
+  Strikethrough,
+  Code,
+  List,
+  ListOrdered,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Save,
+  Eye,
+  ArrowLeft,
+  Palette,
+  Settings,
+  Layout,
+} from "lucide-react";
+
+export default function PageEditor() {
+  const [, setLocation] = useLocation();
+  const searchParams = new URLSearchParams(useSearch());
+  const pageId = searchParams.get("id");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
+  const [type, setType] = useState("static");
+  const [status, setStatus] = useState("draft");
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+
+  // Visual customization
+  const [backgroundColor, setBackgroundColor] = useState("");
+  const [backgroundImage, setBackgroundImage] = useState("");
+  const [headerImage, setHeaderImage] = useState("");
+  const [logoImage, setLogoImage] = useState("");
+  const [customCss, setCustomCss] = useState("");
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Underline,
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      Highlight,
+      Link,
+      Image,
+      TextStyle,
+      Color,
+    ],
+    content: "",
+    editorProps: {
+      attributes: {
+        class: "prose prose-invert max-w-none min-h-[400px] focus:outline-none p-4",
+      },
+    },
+  });
+
+  // Fetch page data if editing
+  const { data: pageData } = useQuery({
+    queryKey: ["/api/admin/pages", pageId],
+    queryFn: async () => {
+      if (!pageId) return null;
+      const res = await apiRequest("GET", "/api/admin/pages/" + pageId);
+      return await res.json();
+    },
+    enabled: !!pageId,
+  });
+
+  // Load page data into form
+  useEffect(() => {
+    if (pageData?.data) {
+      const page = pageData.data;
+      setTitle(page.title || "");
+      setSlug(page.slug || "");
+      setType(page.type || "static");
+      setStatus(page.status || "draft");
+      setMetaTitle(page.metaTitle || "");
+      setMetaDescription(page.metaDescription || "");
+      setBackgroundColor(page.backgroundColor || "");
+      setBackgroundImage(page.backgroundImage || "");
+      setHeaderImage(page.headerImage || "");
+      setLogoImage(page.logoImage || "");
+      setCustomCss(page.customCss || "");
+
+      if (editor && page.content) {
+        editor.commands.setContent(page.content);
+      }
+    }
+  }, [pageData, editor]);
+
+  // Save mutation
+  const saveMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const url = pageId
+        ? "/api/admin/pages/" + pageId
+        : "/api/admin/pages";
+      const method = pageId ? "PUT" : "POST";
+      const res = await apiRequest(method, url, data);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pages"] });
+      toast({ title: "Success", description: "Page saved successfully" });
+      setLocation("/admin/pages");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save page",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSave = () => {
+    const content = editor?.getJSON();
+    const data = {
+      title,
+      slug,
+      type,
+      status,
+      content,
+      metaTitle,
+      metaDescription,
+      backgroundColor,
+      backgroundImage,
+      headerImage,
+      logoImage,
+      customCss,
+    };
+    saveMutation.mutate(data);
+  };
+
+  if (!editor) return null;
+
+  return (
+    <div className="min-h-screen bg-zinc-950">
+      {/* Header */}
+      <div className="border-b border-zinc-800 bg-zinc-900 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setLocation("/admin/pages")}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Pages
+            </Button>
+            <div>
+              <h1 className="text-xl font-bold">
+                {pageId ? "Edit Page" : "Create New Page"}
+              </h1>
+              <p className="text-sm text-zinc-400">
+                Full Adobe-level editing capabilities
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm">
+              <Eye className="w-4 h-4 mr-2" />
+              Preview
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={saveMutation.isPending}
+              className="bg-[#00e5ff] hover:bg-[#00bcd4] text-black"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {saveMutation.isPending ? "Saving..." : "Save Page"}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex">
+        {/* Main Editor */}
+        <div className="flex-1 p-6">
+          <div className="max-w-5xl mx-auto space-y-6">
+            {/* Basic Info */}
+            <div className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
+              <h2 className="text-lg font-bold mb-4">Basic Information</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Page Title</Label>
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Enter page title"
+                    className="bg-zinc-800 border-zinc-700"
+                  />
+                </div>
+                <div>
+                  <Label>URL Slug</Label>
+                  <Input
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value)}
+                    placeholder="page-url-slug"
+                    className="bg-zinc-800 border-zinc-700"
+                  />
+                </div>
+                <div>
+                  <Label>Page Type</Label>
+                  <Select value={type} onValueChange={setType}>
+                    <SelectTrigger className="bg-zinc-800 border-zinc-700">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="static">Static Page</SelectItem>
+                      <SelectItem value="policy">Policy Page</SelectItem>
+                      <SelectItem value="footer">Footer Content</SelectItem>
+                      <SelectItem value="landing">Landing Page</SelectItem>
+                      <SelectItem value="blog">Blog Post</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <Select value={status} onValueChange={setStatus}>
+                    <SelectTrigger className="bg-zinc-800 border-zinc-700">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Rich Text Editor */}
+            <div className="bg-zinc-900 rounded-lg border border-zinc-800">
+              <div className="border-b border-zinc-800 p-4">
+                <div className="flex flex-wrap gap-1">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => editor.chain().focus().toggleBold().run()}
+                    className={editor.isActive("bold") ? "bg-zinc-700" : ""}
+                  >
+                    <Bold className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => editor.chain().focus().toggleItalic().run()}
+                    className={editor.isActive("italic") ? "bg-zinc-700" : ""}
+                  >
+                    <Italic className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => editor.chain().focus().toggleUnderline().run()}
+                    className={editor.isActive("underline") ? "bg-zinc-700" : ""}
+                  >
+                    <UnderlineIcon className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => editor.chain().focus().toggleStrike().run()}
+                    className={editor.isActive("strike") ? "bg-zinc-700" : ""}
+                  >
+                    <Strikethrough className="w-4 h-4" />
+                  </Button>
+                  <div className="w-px bg-zinc-700 mx-1" />
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => editor.chain().focus().setTextAlign("left").run()}
+                  >
+                    <AlignLeft className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => editor.chain().focus().setTextAlign("center").run()}
+                  >
+                    <AlignCenter className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => editor.chain().focus().setTextAlign("right").run()}
+                  >
+                    <AlignRight className="w-4 h-4" />
+                  </Button>
+                  <div className="w-px bg-zinc-700 mx-1" />
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => editor.chain().focus().toggleBulletList().run()}
+                  >
+                    <List className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                  >
+                    <ListOrdered className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <EditorContent editor={editor} />
+            </div>
+
+            {/* Advanced Settings */}
+            <Tabs defaultValue="seo" className="bg-zinc-900 rounded-lg border border-zinc-800">
+              <TabsList className="w-full grid grid-cols-4 bg-zinc-800">
+                <TabsTrigger value="seo">SEO</TabsTrigger>
+                <TabsTrigger value="visual">Visual</TabsTrigger>
+                <TabsTrigger value="media">Media</TabsTrigger>
+                <TabsTrigger value="advanced">Advanced</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="seo" className="p-6 space-y-4">
+                <div>
+                  <Label>Meta Title</Label>
+                  <Input
+                    value={metaTitle}
+                    onChange={(e) => setMetaTitle(e.target.value)}
+                    placeholder="SEO title"
+                    className="bg-zinc-800 border-zinc-700"
+                  />
+                </div>
+                <div>
+                  <Label>Meta Description</Label>
+                  <Textarea
+                    value={metaDescription}
+                    onChange={(e) => setMetaDescription(e.target.value)}
+                    placeholder="SEO description"
+                    className="bg-zinc-800 border-zinc-700"
+                    rows={3}
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="visual" className="p-6 space-y-4">
+                <div>
+                  <Label>Background Color</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="color"
+                      value={backgroundColor}
+                      onChange={(e) => setBackgroundColor(e.target.value)}
+                      className="w-20 h-10"
+                    />
+                    <Input
+                      value={backgroundColor}
+                      onChange={(e) => setBackgroundColor(e.target.value)}
+                      placeholder="#000000"
+                      className="flex-1 bg-zinc-800 border-zinc-700"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label>Background Image URL</Label>
+                  <Input
+                    value={backgroundImage}
+                    onChange={(e) => setBackgroundImage(e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    className="bg-zinc-800 border-zinc-700"
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="media" className="p-6 space-y-4">
+                <div>
+                  <Label>Header/Banner Image</Label>
+                  <Input
+                    value={headerImage}
+                    onChange={(e) => setHeaderImage(e.target.value)}
+                    placeholder="https://example.com/header.jpg"
+                    className="bg-zinc-800 border-zinc-700"
+                  />
+                </div>
+                <div>
+                  <Label>Custom Logo Image</Label>
+                  <Input
+                    value={logoImage}
+                    onChange={(e) => setLogoImage(e.target.value)}
+                    placeholder="https://example.com/logo.png"
+                    className="bg-zinc-800 border-zinc-700"
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="advanced" className="p-6 space-y-4">
+                <div>
+                  <Label>Custom CSS</Label>
+                  <Textarea
+                    value={customCss}
+                    onChange={(e) => setCustomCss(e.target.value)}
+                    placeholder=".custom-class { color: #00e5ff; }"
+                    className="bg-zinc-800 border-zinc-700 font-mono text-sm"
+                    rows={8}
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
+
+        {/* Right Sidebar - Quick Settings */}
+        <div className="w-80 border-l border-zinc-800 p-6 bg-zinc-900">
+          <h3 className="font-bold mb-4 flex items-center gap-2">
+            <Settings className="w-4 h-4" />
+            Quick Settings
+          </h3>
+          <div className="space-y-4 text-sm">
+            <div className="p-3 bg-zinc-800 rounded">
+              <div className="text-zinc-400 mb-1">Status</div>
+              <div className="font-medium capitalize">{status}</div>
+            </div>
+            <div className="p-3 bg-zinc-800 rounded">
+              <div className="text-zinc-400 mb-1">Page Type</div>
+              <div className="font-medium capitalize">{type}</div>
+            </div>
+            <div className="p-3 bg-zinc-800 rounded">
+              <div className="text-zinc-400 mb-1">URL</div>
+              <div className="font-mono text-xs text-zinc-400">/{slug || "..."}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
