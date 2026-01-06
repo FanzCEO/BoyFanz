@@ -1,6 +1,0 @@
-{
-  "kill": false,
-  "reason": null,
-  "updated": "2024-12-31T00:00:00Z",
-  "message": "Service Worker operating normally. Set kill:true to force unregister across all clients."
-}

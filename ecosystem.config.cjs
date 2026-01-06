@@ -3,12 +3,12 @@ module.exports = {
     name: "boyfanz",
     script: "./dist/index.js",
     cwd: "/var/www/boyfanz",
-    instances: "max",
-    exec_mode: "cluster",
-    interpreter_args: "-r dotenv/config",
+    instances: 1,
+    exec_mode: "fork",
     env: {
       NODE_ENV: "production",
-      PORT: "3202"
+      PORT: "3202",
+      SSO_SHARED_SECRET: "fb7b900a70893b288cc46741c9715efc07f7dacc9cf873e97755643c156cc436"
     },
     max_memory_restart: "1G",
     kill_timeout: 5000,
