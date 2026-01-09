@@ -24,6 +24,7 @@ import safetyRoutes from './routes/safetyRoutes';
 import aiRoutes from './routes/aiRoutes';
 import aiGatewayRoutes from './routes/aiGatewayRoutes';
 import liveChatRoutes from './routes/liveChatRoutes';
+import mediaHubRoutes from './routes/mediaHubRoutes';
 // Admin Management Routes
 import brandingRoutes from './routes/admin/branding';
 import bookingsRoutes from './routes/admin/bookings';
