@@ -737,6 +737,8 @@ function MainContent({ user }: { user: any }) {
             <Route path="/spa" component={FanzSpa} />
             <Route path="/fanz-spa" component={FanzSpa} />
             <Route path="/infinity-feed" component={FanzSpa} /> {/* Legacy redirect */}
+            <Route path="/cock" component={FanzCock} />
+            <Route path="/cock/:category" component={FanzCock} />
             <Route path="/fanzccock" component={FanzCock} />
             <Route path="/reels" component={FanzCock} />
             <Route path="/bathhouse" component={Bathhouse} />
