@@ -303,6 +303,7 @@ export function registerRoutes(app: Express) {
   // Unified AI Gateway with Together AI support
   app.use("/api/ai-gateway", aiGatewayRoutes);
   app.use("/api/help", liveChatRoutes);
+  app.use("/api/mediahub", mediaHubRoutes);
 
   // ===== ADMIN MANAGEMENT ROUTES =====
   // Platform branding, bookings, site appearance, and gallery management
