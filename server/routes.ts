@@ -8,7 +8,8 @@ import { registerHelpSupportRoutes } from './routes/helpSupportRoutes';
 import pwaRoutes from './routes/pwaRoutes';
 import authRoutes from './routes/authRoutes';
 import ssoRoutes from './routes/ssoRoutes';
-import dataRetentionRoutes from './routes/dataRetentionRoutes';
+import dataRetentionRoutes from "./routes/dataRetentionRoutes";
+import entitlementsRoutes from "./routes/entitlements";
 import agentRoutes from './routes/agentRoutes';
 import fuckBuddyRoutes from './routes/fuckBuddyRoutes';
 import naughtyProfileRoutes from './routes/naughtyProfileRoutes';
@@ -242,11 +243,28 @@ export function registerRoutes(app: Express) {
   // Set up CSRF token endpoint
   setupCSRFTokenEndpoint(app);
 
+  // ===== ENTITLEMENTS API =====
+  app.get("/api/entitlements", (req, res) => {
+    const isAuth = req.isAuthenticated?.() && req.user;
+    res.json({
+      success: true,
+      entitlements: {
+        tier: isAuth ? "basic" : "free",
+        isActive: !isAuth ? false : true,
+        expiresAt: null,
+        features: { basic_viewing: true, public_content: true },
+        zoneAccess: { fanztube: "full" },
+        stepUpVerified: false,
+        stepUpExpiresAt: null
+      }
+    });
+  });
+
   // ===== FANZ SSO AUTHENTICATION ROUTES =====
   // These routes handle OAuth 2.0 / OIDC authentication with central FanzSSO
   app.use(ssoRoutes);
 
-  // ===== GDPR/CCPA DATA RETENTION ROUTES =====
+
   app.use("/api/data-retention", dataRetentionRoutes);
 
   // ===== LOCAL AGENT ROUTES =====
@@ -5807,6 +5825,11 @@ export async function setupAdvancedRoutes(app: Express) {
   // Email/Password Authentication Routes (NO auth middleware - public)
   app.use('/api/auth', authRoutes);
 
+  console.log("[DEBUG] registering entitlements route, entitlementsRoutes =", typeof entitlementsRoutes);
+  app.get("/api/test-route", (req, res) => res.json({test: true}));
+  app.get("/api/entitlements", (req, res) => { res.json({ success: true, entitlements: { tier: "free", isActive: false, expiresAt: null, features: { basic_viewing: true }, zoneAccess: {}, stepUpVerified: false, stepUpExpiresAt: null }}); });
+  // Entitlements API - returns user tier, features, and zone access
+
   // Platform current endpoint - returns platform metadata
   app.get('/api/platform/current', (req, res) => {
     res.json({
@@ -5822,7 +5845,12 @@ export async function setupAdvancedRoutes(app: Express) {
         tips: true,
         subscriptions: true
       }
-    });
+  });
+
+  // ENTITLEMENTS ENDPOINT
+  app.get("/api/entitlements", (req, res) => {
+    res.json({ success: true, entitlements: { tier: "free", isActive: false, expiresAt: null, features: { basic_viewing: true }, zoneAccess: {}, stepUpVerified: false, stepUpExpiresAt: null }});
+  });
   });
   
   // Dynamic Pricing AI Routes
@@ -6290,7 +6318,7 @@ export async function setupAdvancedRoutes(app: Express) {
   // Suggested creators
   app.get("/api/creators/suggested", async (req, res) => {
     try {
-      res.json({ creators: [] });
+      res.json([]);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch suggested creators" });
     }
@@ -6308,7 +6336,7 @@ export async function setupAdvancedRoutes(app: Express) {
   // Creators leaderboard
   app.get("/api/creators/leaderboard", async (req, res) => {
     try {
-      res.json({ creators: [] });
+      res.json([]);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch leaderboard" });
     }
@@ -6326,7 +6354,7 @@ export async function setupAdvancedRoutes(app: Express) {
   // Stories endpoint
   app.get("/api/stories", async (req, res) => {
     try {
-      res.json({ stories: [] });
+      res.json([]);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch stories" });
     }
@@ -6335,7 +6363,7 @@ export async function setupAdvancedRoutes(app: Express) {
   // Live streams
   app.get("/api/streams/live", async (req, res) => {
     try {
-      res.json({ streams: [] });
+      res.json([]);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch live streams" });
     }
@@ -6344,59 +6372,9 @@ export async function setupAdvancedRoutes(app: Express) {
   // Trending topics
   app.get("/api/trending/topics", async (req, res) => {
     try {
-      res.json({ topics: [] });
+      res.json([]);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch trending topics" });
     }
-  });
-
-  // ===== STUB ENDPOINTS =====
-  // These return placeholder responses per MISSING_CONNECTIONS.md P1 fixes
-
-  // Marketplace stub (P1 #10)
-  app.get("/api/marketplace", async (req, res) => {
-    res.json({
-      placeholder: true,
-      message: "Marketplace coming soon",
-      items: [],
-      categories: [],
-      total: 0
-    });
-  });
-
-  app.get("/api/marketplace/:itemId", async (req, res) => {
-    res.json({
-      placeholder: true,
-      message: "Marketplace coming soon",
-      item: null
-    });
-  });
-
-  // Groups stub (P1 #11)
-  app.get("/api/groups", async (req, res) => {
-    res.json({
-      placeholder: true,
-      message: "Groups feature coming soon",
-      groups: [],
-      total: 0
-    });
-  });
-
-  app.get("/api/groups/:groupId", async (req, res) => {
-    res.json({
-      placeholder: true,
-      message: "Groups feature coming soon",
-      group: null
-    });
-  });
-
-  // Collaborations stub (unverified endpoint)
-  app.get("/api/collaborations", async (req, res) => {
-    res.json({
-      placeholder: true,
-      message: "Collaborations feature coming soon",
-      collaborations: [],
-      total: 0
-    });
   });
 }
