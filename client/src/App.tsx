@@ -62,10 +62,11 @@ import {
   FanzWorldPage,
   FanzIncognitoPage,
   FanzCloudPage,
-  StarzCardzPage,
+  // StarzCardzPage, // imported separately
   WickedCRMPage,
   FanzTubePage
 } from "@/pages/ecosystem/EcosystemPlaceholder";
+import StarzCardzPage from "@/pages/StarzCardzPage";
 
 // Auth
 import { AuthProvider } from '@/contexts/AuthContext';

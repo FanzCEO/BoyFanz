@@ -545,7 +545,7 @@ export function TutorialBot() {
     <>
       {/* Floating Bot Button */}
       <motion.div
-        className="fixed bottom-6 right-6 z-50"
+        className="fixed top-1/2 -translate-y-1/2 right-6 z-50"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 1, type: 'spring' }}
@@ -594,7 +594,7 @@ export function TutorialBot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
             transition={{ type: 'spring', damping: 25 }}
-            className="fixed bottom-6 right-6 z-50 w-[380px] max-h-[600px]"
+            className="fixed top-1/2 -translate-y-1/2 right-6 z-50 w-[380px] max-h-[600px]"
           >
             <Card className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-primary/30 shadow-2xl shadow-primary/20 overflow-hidden">
               {/* Header */}
