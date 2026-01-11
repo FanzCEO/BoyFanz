@@ -1,0 +1,124 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   BOYFANZ THEME MODES - Dungeon / Night / Clean
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* DUNGEON MODE (Default) - Sex demon bathhouse aesthetic */
+:root.dungeon,
+:root:not(.night):not(.clean) {
+  --background: #030406;
+  --foreground: #ffffff;
+  --card: rgba(8, 14, 22, 0.85);
+  --card-foreground: #ffffff;
+  --popover: #0a0e14;
+  --popover-foreground: #ffffff;
+  --primary: #00f6ff;
+  --primary-foreground: #030406;
+  --secondary: #1a1a2e;
+  --secondary-foreground: #ffffff;
+  --muted: #1a1a2e;
+  --muted-foreground: #a0a0a0;
+  --accent: #ff1a1a;
+  --accent-foreground: #ffffff;
+  --destructive: #cc0000;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 246, 255, 0.15);
+  --input: #1a1a2e;
+  --ring: rgba(0, 246, 255, 0.5);
+  --sidebar: #050810;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #00f6ff;
+  --sidebar-primary-foreground: #030406;
+  --sidebar-accent: #ff1a1a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(0, 246, 255, 0.1);
+  --sidebar-ring: rgba(0, 246, 255, 0.3);
+  
+  /* Dungeon-specific tokens */
+  --dungeon-void: #030406;
+  --dungeon-deep: #050810;
+  --dungeon-smoke: #0a0e14;
+  --neon-cyan: #00f6ff;
+  --neon-cyan-dim: #00c4cc;
+  --neon-cyan-glow: rgba(0, 246, 255, 0.5);
+  --neon-red: #ff1a1a;
+  --neon-red-dim: #cc1515;
+  --neon-red-glow: rgba(255, 26, 26, 0.4);
+  --panel-surface: rgba(8, 14, 22, 0.85);
+  --glow-cyan: 0 0 20px rgba(0, 246, 255, 0.3), 0 0 60px rgba(0, 246, 255, 0.15);
+  --glow-red: 0 0 20px rgba(255, 26, 26, 0.25), 0 0 60px rgba(255, 26, 26, 0.12);
+}
+
+/* NIGHT MODE - Softer dark for extended use */
+:root.night {
+  --background: #0a0a0f;
+  --foreground: #e0e0e0;
+  --card: rgba(20, 20, 30, 0.9);
+  --card-foreground: #e0e0e0;
+  --popover: #141420;
+  --popover-foreground: #e0e0e0;
+  --primary: #6eb5ff;
+  --primary-foreground: #0a0a0f;
+  --secondary: #1f1f2e;
+  --secondary-foreground: #e0e0e0;
+  --muted: #1f1f2e;
+  --muted-foreground: #888888;
+  --accent: #ff6b6b;
+  --accent-foreground: #ffffff;
+  --destructive: #ff4444;
+  --destructive-foreground: #ffffff;
+  --border: rgba(110, 181, 255, 0.12);
+  --input: #1f1f2e;
+  --ring: rgba(110, 181, 255, 0.4);
+  --sidebar: #0d0d14;
+  --sidebar-foreground: #e0e0e0;
+  --sidebar-primary: #6eb5ff;
+  --sidebar-primary-foreground: #0a0a0f;
+  --sidebar-accent: #ff6b6b;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(110, 181, 255, 0.08);
+  --sidebar-ring: rgba(110, 181, 255, 0.25);
+}
+
+/* CLEAN MODE - Admin/testing only */
+:root.clean {
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --card: #f8f8f8;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #0066cc;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f0f0;
+  --secondary-foreground: #1a1a1a;
+  --muted: #f5f5f5;
+  --muted-foreground: #666666;
+  --accent: #cc0000;
+  --accent-foreground: #ffffff;
+  --destructive: #cc0000;
+  --destructive-foreground: #ffffff;
+  --border: #e0e0e0;
+  --input: #f5f5f5;
+  --ring: rgba(0, 102, 204, 0.3);
+  --sidebar: #f5f5f5;
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: #0066cc;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #cc0000;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #e0e0e0;
+  --sidebar-ring: rgba(0, 102, 204, 0.2);
+}
+
+/* Dungeon section base styling */
+.dungeon-section {
+  background: var(--dungeon-void, #030406);
+}
+
+.night-section {
+  background: #0a0a0f;
+}
+
+.clean-section {
+  background: #ffffff;
+}

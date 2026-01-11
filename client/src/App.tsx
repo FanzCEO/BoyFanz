@@ -51,8 +51,6 @@ import CompliancePage from "@/pages/admin/Compliance";
 import SecurityDashboard from "@/pages/admin/SecurityDashboard";
 
 // FANZ Ecosystem Pages
-import FanzCyberSecure from "@/pages/FanzCyberSecure";
-import FanzSingularity from "@/pages/FanzSingularity";
 import {
   StarzStudio,
   FanzDefendPage,
@@ -717,8 +715,6 @@ function MainContent({ user }: { user: any }) {
             <Route path="/profile/:userId" component={NaughtyProfile} />
             <Route path="/outlawz" component={Outlawz} />
             {/* FANZ Ecosystem Routes */}
-            <Route path="/fanz-cybersecure" component={FanzCyberSecure} />
-            <Route path="/fanz-singularity" component={FanzSingularity} />
             <Route path="/starz-studio" component={StarzStudio} />
             <Route path="/fanz-defend" component={FanzDefendPage} />
             <Route path="/fanz-forge" component={FanzForgePage} />
