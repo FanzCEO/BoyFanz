@@ -50,6 +50,25 @@ import AdminReports from "@/pages/admin/Reports";
 import CompliancePage from "@/pages/admin/Compliance";
 import SecurityDashboard from "@/pages/admin/SecurityDashboard";
 
+// FANZ Ecosystem Pages
+import FanzCyberSecure from "@/pages/FanzCyberSecure";
+import FanzSingularity from "@/pages/FanzSingularity";
+import {
+  StarzStudio,
+  FanzDefendPage,
+  FanzForgePage,
+  FanzFiliatePage,
+  FanzVarsityPage,
+  FanzMeetPage,
+  FanzSwipePage,
+  FanzWorldPage,
+  FanzIncognitoPage,
+  FanzCloudPage,
+  StarzCardzPage,
+  WickedCRMPage,
+  FanzTubePage
+} from "@/pages/ecosystem/EcosystemPlaceholder";
+
 // Auth
 import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -138,7 +157,7 @@ import PostView from "@/pages/PostView";
 import EarningsPage from "@/pages/Creator/EarningsPage";
 import FreeLinksPage from "@/pages/Creator/FreeLinksPage";
 import FreeLinkRedeem from "@/pages/FreeLinkRedeem";
-import BoyFanzSPA from "@/pages/BoyFanzSPA";
+import FanzSpa from "@/pages/FanzSpa";
 import FanzCock from "@/pages/FanzCock";
 import Bathhouse from "@/pages/Bathhouse";
 // Bathhouse Zone Pages
@@ -697,9 +716,29 @@ function MainContent({ user }: { user: any }) {
             <Route path="/creator/:userId" component={CreatorProfile} />
             <Route path="/profile/:userId" component={NaughtyProfile} />
             <Route path="/outlawz" component={Outlawz} />
+            {/* FANZ Ecosystem Routes */}
+            <Route path="/fanz-cybersecure" component={FanzCyberSecure} />
+            <Route path="/fanz-singularity" component={FanzSingularity} />
+            <Route path="/starz-studio" component={StarzStudio} />
+            <Route path="/fanz-defend" component={FanzDefendPage} />
+            <Route path="/fanz-forge" component={FanzForgePage} />
+            <Route path="/fanz-filiate" component={FanzFiliatePage} />
+            <Route path="/fanz-varsity" component={FanzVarsityPage} />
+            <Route path="/fanz-meet" component={FanzMeetPage} />
+            <Route path="/fanz-swipe" component={FanzSwipePage} />
+            <Route path="/fanz-world" component={FanzWorldPage} />
+            <Route path="/fanz-incognito" component={FanzIncognitoPage} />
+            <Route path="/fanz-cloud" component={FanzCloudPage} />
+            <Route path="/starz-cardz" component={StarzCardzPage} />
+            <Route path="/wicked-crm" component={WickedCRMPage} />
+            <Route path="/tube" component={FanzTubePage} />
+            <Route path="/tube/:category" component={FanzTubePage} />
             <Route path="/feed" component={PostsFeed} />
-            <Route path="/spa" component={BoyFanzSPA} />
-            <Route path="/infinity-feed" component={BoyFanzSPA} /> {/* Legacy redirect */}
+            <Route path="/spa" component={FanzSpa} />
+            <Route path="/fanz-spa" component={FanzSpa} />
+            <Route path="/infinity-feed" component={FanzSpa} /> {/* Legacy redirect */}
+            <Route path="/cock" component={FanzCock} />
+            <Route path="/cock/:category" component={FanzCock} />
             <Route path="/fanzccock" component={FanzCock} />
             <Route path="/reels" component={FanzCock} />
             <Route path="/bathhouse" component={Bathhouse} />
