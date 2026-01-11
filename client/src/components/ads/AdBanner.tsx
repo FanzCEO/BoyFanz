@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Ad Network Types
 type AdNetwork = "trafficstars" | "inhouse" | "affiliate";
@@ -441,9 +442,13 @@ export function MobileBanner({ className }: { className?: string }) {
 }
 
 // 4-Block Rotating Carousel Ad Banner - TOP (sticky at top of page)
+// MOBILE: Shows 1 ad at a time rotating (carousel style)
+// DESKTOP: Shows 4 ads in a grid rotating as a set
 export function StickyTopAd({ className }: { className?: string }) {
   const [isDismissed, setIsDismissed] = useState(false);
+  const isMobile = useIsMobile();
   const [currentSet, setCurrentSet] = useState(0);
+  const [mobileAdIndex, setMobileAdIndex] = useState(0);
 
   // Create sets of 4 ads to rotate through
   const adSets = [];
@@ -452,15 +457,71 @@ export function StickyTopAd({ className }: { className?: string }) {
   }
 
   useEffect(() => {
-    // Auto-rotate every 8 seconds
-    const interval = setInterval(() => {
-      setCurrentSet((prev) => (prev + 1) % adSets.length);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [adSets.length]);
+    if (isMobile) {
+      // Mobile: rotate single ads every 4 seconds
+      const interval = setInterval(() => {
+        setMobileAdIndex((prev) => (prev + 1) % inhouseAds.length);
+      }, 4000);
+      return () => clearInterval(interval);
+    } else {
+      // Desktop: rotate 4-block sets every 8 seconds
+      const interval = setInterval(() => {
+        setCurrentSet((prev) => (prev + 1) % adSets.length);
+      }, 8000);
+      return () => clearInterval(interval);
+    }
+  }, [adSets.length, isMobile]);
 
   if (isDismissed) return null;
 
+  // MOBILE: Single ad carousel
+  if (isMobile) {
+    const currentAd = inhouseAds[mobileAdIndex];
+    return (
+      <div className={cn("fixed top-0 left-0 right-0 z-50", className)}>
+        <div className="relative bg-black/40 backdrop-blur-lg border-b border-white/10">
+          <button
+            onClick={() => setIsDismissed(true)}
+            className="absolute top-2 right-2 z-50 p-1.5 hover:bg-white/10 rounded-full transition-colors"
+          >
+            <X className="w-4 h-4 text-white/60" />
+          </button>
+          <a
+            href={currentAd.link}
+            className="group relative flex items-center gap-3 px-4 py-3 transition-all duration-300"
+            style={{
+              background: `linear-gradient(135deg, ${currentAd.gradient.replace('from-', '').replace(' via-', ', ').replace(' to-', ', ')})`
+            }}
+          >
+            <span className="absolute top-1 left-2 text-[8px] text-white/30 uppercase tracking-wider">Ad</span>
+            <div className="flex-1 min-w-0 mt-3">
+              <h4 className="text-xs font-bold text-white truncate mb-0.5">{currentAd.title}</h4>
+              <p className="text-[10px] text-white/60 truncate">{currentAd.description}</p>
+            </div>
+            <div className="shrink-0">
+              <span className="inline-block px-3 py-1 bg-white/15 hover:bg-white/25 rounded-full text-[10px] text-white font-medium transition-colors">
+                {currentAd.cta}
+              </span>
+            </div>
+          </a>
+          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1">
+            {inhouseAds.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setMobileAdIndex(index)}
+                className={cn(
+                  "w-1.5 h-1.5 rounded-full transition-all",
+                  mobileAdIndex === index ? "bg-white/80 w-4" : "bg-white/30"
+                )}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // DESKTOP: 4-block grid carousel
   const currentAds = adSets[currentSet] || [];
 
   return (
@@ -536,10 +597,12 @@ export function StickyTopAd({ className }: { className?: string }) {
 }
 
 // 4-Block Rotating Carousel Ad Banner - BOTTOM (sticky footer)
+// DESKTOP ONLY - hidden on mobile
 export function StickyFooterAd({ className }: { className?: string }) {
   const [isDismissed, setIsDismissed] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [currentSet, setCurrentSet] = useState(0);
+  const isMobile = useIsMobile();
 
   // Create sets of 4 ads to rotate through
   const adSets = [];
@@ -561,7 +624,7 @@ export function StickyFooterAd({ className }: { className?: string }) {
     return () => clearInterval(interval);
   }, [adSets.length]);
 
-  if (isDismissed || !isVisible) return null;
+  if (isDismissed || !isVisible || isMobile) return null;
 
   const currentAds = adSets[currentSet] || [];
 
