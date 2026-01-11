@@ -328,6 +328,24 @@ async function syncUserToLocalDatabase(ssoUser: SSOUser): Promise<void> {
 }
 
 // Platform metadata endpoint
+
+// Entitlements API - returns user tier, features, zone access
+router.get("/api/entitlements", (req: Request, res: Response) => {
+  const isAuth = req.isAuthenticated?.() && req.user;
+  res.json({
+    success: true,
+    entitlements: {
+      tier: isAuth ? "basic" : "free",
+      isActive: !isAuth ? false : true,
+      expiresAt: null,
+      features: { basic_viewing: true, public_content: true },
+      zoneAccess: { fanztube: "full" },
+      stepUpVerified: false,
+      stepUpExpiresAt: null
+    }
+  });
+});
+
 router.get("/api/platform/current", (req: Request, res: Response) => {
   res.status(200).json({
     success: true,

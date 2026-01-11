@@ -130,6 +130,16 @@ export default function Sidebar({ user }: SidebarProps) {
     { path: "/tube/categories", icon: "fas fa-th-large", label: "All Categories", badge: "NEW" },
   ];
 
+  // FanzCock section items (TikTok-style reels)
+  const cockItems = [
+    { path: "/cock", icon: "fas fa-fire", label: "FanzCock", badge: "HOT" },
+    { path: "/cock/trending", icon: "fas fa-chart-line", label: "Trending" },
+    { path: "/cock/following", icon: "fas fa-heart", label: "Following" },
+    { path: "/cock/amateur", icon: "fas fa-video", label: "Amateur" },
+    { path: "/cock/verified", icon: "fas fa-check-circle", label: "Verified" },
+    { path: "/cock/categories", icon: "fas fa-th-large", label: "Categories" },
+  ];
+
   // FANZ Ecosystem - Auxiliary Platforms
   const ecosystemItems = [
     { path: "/starz-studio", icon: "fas fa-star", label: "Starz Studio", badge: "CREATOR" },
@@ -306,6 +316,39 @@ export default function Sidebar({ user }: SidebarProps) {
             </h3>
             <div className="mt-2 space-y-1">
               {tubeItems.map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  onClick={isMobile ? handleMobileLinkClick : undefined}
+                  className={cn(
+                    "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                    isActive(item.path)
+                      ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  <i className={`${item.icon} w-5 h-5 md:w-4 md:h-4`}></i>
+                  {item.label}
+                  {item.badge && (
+                    <span className="ml-auto text-xs px-2 py-0.5 bg-primary text-primary-foreground rounded-full">
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* FanzCock Section */}
+        {!isCollapsed && (
+          <div className="mt-6 md:mt-8">
+            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              FanzCock
+            </h3>
+            <div className="mt-2 space-y-1">
+              {cockItems.map((item) => (
                 <Link
                   key={item.path}
                   href={item.path}

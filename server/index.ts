@@ -132,6 +132,23 @@ setupHealthEndpoints(app);
 
 // CSRF token endpoint
 setupCSRFTokenEndpoint(app);
+console.log("[DEBUG] About to register /api/entitlements route");
+// Entitlements API - added synchronously to fix async route registration issue
+app.get("/api/entitlements", (req, res) => {
+  const isAuth = req.isAuthenticated?.() && req.user;
+  res.json({
+    success: true,
+    entitlements: {
+      tier: isAuth ? "basic" : "free",
+      isActive: !isAuth ? false : true,
+      expiresAt: null,
+      features: { basic_viewing: true, public_content: true },
+      zoneAccess: { fanztube: "full" },
+      stepUpVerified: false,
+      stepUpExpiresAt: null
+    }
+  });
+});
 
 (async () => {
   // Email/Password authentication is handled via API routes (server/routes/authRoutes.ts)
