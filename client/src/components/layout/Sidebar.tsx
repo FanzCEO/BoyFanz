@@ -130,32 +130,6 @@ export default function Sidebar({ user }: SidebarProps) {
     { path: "/tube/categories", icon: "fas fa-th-large", label: "All Categories", badge: "NEW" },
   ];
 
-  // FANZ Ecosystem - Auxiliary Platforms
-  const ecosystemItems = [
-    { path: "/starz-studio", icon: "fas fa-star", label: "Starz Studio", badge: "CREATOR" },
-    { path: "/fanz-defend", icon: "fas fa-shield-alt", label: "FanzDefend" },
-    { path: "/fanz-forge", icon: "fas fa-hammer", label: "FanzForge" },
-    { path: "/fanz-filiate", icon: "fas fa-handshake", label: "FanzFiliate" },
-    { path: "/fanz-varsity", icon: "fas fa-graduation-cap", label: "FanzVarsity" },
-    { path: "/fanz-meet", icon: "fas fa-video", label: "FanzMeet" },
-    { path: "/fanz-swipe", icon: "fas fa-heart", label: "FanzSwipe", badge: "DATING" },
-    { path: "/fanz-world", icon: "fas fa-globe-americas", label: "FanzWorld" },
-    { path: "/starz-cardz", icon: "fas fa-id-card", label: "StarzCardz" },
-    { path: "/wicked-crm", icon: "fas fa-address-book", label: "WickedCRM", badge: "PRO" },
-  ];
-
-  // FANZ Security & Architecture
-  const securityItems = [
-    { path: "/fanz-cybersecure", icon: "fas fa-lock", label: "FanzCyberSecure" },
-    { path: "/fanz-singularity", icon: "fas fa-atom", label: "FANZ Singularity" },
-  ];
-
-  // Mobile Apps
-  const mobileItems = [
-    { path: "/fanz-incognito", icon: "fas fa-user-secret", label: "FanzIncognito", badge: "APP" },
-    { path: "/fanz-cloud", icon: "fas fa-cloud", label: "FanzCloud", badge: "APP" },
-  ];
-
   // Add streaming and events items to main nav for easy access
   if (user?.role === 'creator' || user?.role === 'admin' || user?.role === 'moderator') {
     navItems.splice(2, 0, { path: "/streams", icon: "fas fa-broadcast-tower", label: "Live Streams" });
@@ -325,106 +299,6 @@ export default function Sidebar({ user }: SidebarProps) {
                       {item.badge}
                     </span>
                   )}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* FANZ Ecosystem Section */}
-        {!isCollapsed && (
-          <div className="mt-6 md:mt-8">
-            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              FANZ Ecosystem
-            </h3>
-            <div className="mt-2 space-y-1">
-              {ecosystemItems.map((item) => (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  onClick={isMobile ? handleMobileLinkClick : undefined}
-                  className={cn(
-                    "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
-                    isActive(item.path)
-                      ? "active bg-primary/10 text-primary border-r-2 border-primary"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                >
-                  <i className={`${item.icon} w-5 h-5 md:w-4 md:h-4`}></i>
-                  {item.label}
-                  {item.badge && (
-                    <span className={cn(
-                      "ml-auto text-xs px-2 py-0.5 rounded-full font-medium",
-                      item.badge === "CREATOR" ? "bg-purple-500 text-white" :
-                      item.badge === "DATING" ? "bg-pink-500 text-white" :
-                      item.badge === "PRO" ? "bg-amber-500 text-black" :
-                      "bg-primary text-primary-foreground"
-                    )}>
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Mobile Apps Section */}
-        {!isCollapsed && (
-          <div className="mt-6 md:mt-8">
-            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Mobile Apps
-            </h3>
-            <div className="mt-2 space-y-1">
-              {mobileItems.map((item) => (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  onClick={isMobile ? handleMobileLinkClick : undefined}
-                  className={cn(
-                    "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
-                    isActive(item.path)
-                      ? "active bg-primary/10 text-primary border-r-2 border-primary"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                >
-                  <i className={`${item.icon} w-5 h-5 md:w-4 md:h-4`}></i>
-                  {item.label}
-                  {item.badge && (
-                    <span className="ml-auto text-xs px-2 py-0.5 bg-blue-500 text-white rounded-full">
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Security & Architecture Section */}
-        {!isCollapsed && (
-          <div className="mt-6 md:mt-8">
-            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Security & Architecture
-            </h3>
-            <div className="mt-2 space-y-1">
-              {securityItems.map((item) => (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  onClick={isMobile ? handleMobileLinkClick : undefined}
-                  className={cn(
-                    "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
-                    isActive(item.path)
-                      ? "active bg-primary/10 text-primary border-r-2 border-primary"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                >
-                  <i className={`${item.icon} w-5 h-5 md:w-4 md:h-4`}></i>
-                  {item.label}
                 </Link>
               ))}
             </div>

@@ -39,30 +39,23 @@ Generated: 2026-01-06
 ### 5. Admin Placeholder Visible to Users
 - **Location**: Header banner "🔥 Ad Space - Configure in Admin → Announcements"
 - **Issue**: Admin-only message visible to all users
-- **STATUS**: ⚠️ NOT FOUND IN CODE - may be database content
-- **RECOMMENDATION**: Check `/api/admin/announcements` database entries
+- **FIX**: Conditional render based on user role or actual ad content
 
 ### 6. Missing Timestamps on Posts
-- **Location**: BoyFanzSPA.tsx:718
+- **Location**: All post cards in feed
 - **Issue**: No "2 hours ago", "Yesterday" timestamps
-- **STATUS**: ✅ ALREADY IMPLEMENTED
-- **CODE**: `<span>{timeAgo(post.createdAt)}</span>` with helper at line 639
-- **FORMAT**: "Just now", "Xm", "Xh", "Xd"
+- **Frontend Component**: PostsFeed.tsx, BoyFanzSPA.tsx
+- **FIX**: Add timestamp display, ensure backend returns createdAt
 
 ### 7. Live Stream Viewer Count Inconsistency
 - **Issue**: First stream shows "127" viewers, second shows only "LIVE"
-- **Location**: BoyFanzSPA.tsx:1432-1437
-- **STATUS**: ✅ ALREADY IMPLEMENTED
-- **CODE**: All streams show `<Eye icon> {stream.viewerCount}` + "LIVE" badge
-- **NOTE**: Issue may have been from missing API data, not code
+- **Location**: Live Now section in main feed
+- **FIX**: Standardize viewer count display
 
 ### 8. Multiple "Go Live Tonight" Banners
 - **Issue**: Same CTA appears multiple times in DOM
 - **Locations**: refs 131-134, refs 393-396
-- **STATUS**: ✅ FIXED - AdBanner.tsx expanded from 5 to 8 unique promos
-- **CODE**: Removed duplicate "promo-starz-membership", added 4 new promos:
-  - Custom Requests, Track Your Growth, Mass Messaging, Content Vault
-- **FILE**: client/src/components/ads/AdBanner.tsx:39-107
+- **FIX**: Deduplicate, render once in fixed position
 
 ### 9. Mobile Nav Renders with Desktop Sidebar
 - **Issue**: Both navigation patterns load simultaneously
@@ -186,21 +179,18 @@ These frontend API calls need backend verification:
 
 ## Summary
 
-| Priority | Total | Fixed/OK | Remaining | Progress |
-|----------|-------|----------|-----------|----------|
+| Priority | Total | Fixed | Remaining | Progress |
+|----------|-------|-------|-----------|----------|
 | P0 | 4 | 4 | 0 | ✅ 100% |
-| P1 | 7 | 5 | 2 | 🔄 71% |
+| P1 | 7 | 2 | 5 | 🔄 29% |
 | P2 | 9 | 0 | 9 | ⏳ 0% |
 | P3 | 10 | 0 | 10 | ⏳ 0% |
-| **Total** | **30** | **9** | **21** | **30%** |
+| **Total** | **30** | **6** | **24** | **20%** |
 
 ### Fix Log
-- 2026-01-06 17:00: P0 #1, #2 - Route collisions removed from authRoutes.ts
-- 2026-01-06 17:00: P0 #3 - setupLocalAuth() marked @deprecated
-- 2026-01-06 17:00: P0 #4 - Investigated, code correct (data issue)
-- 2026-01-06 17:15: P1 #10, #11 - Stub endpoints added for marketplace/groups
-- 2026-01-06 17:15: Updated CCBill (not Stripe) in CONNECTIONS_MATRIX.md
-- 2026-01-06 17:30: P1 #6 - Already implemented (timeAgo at BoyFanzSPA.tsx:718)
-- 2026-01-06 17:30: P1 #7 - Already implemented (viewerCount at BoyFanzSPA.tsx:1434)
-- 2026-01-06 17:30: P1 #5 - Not in code, likely database content
+- 2026-01-06: P0 #1, #2 - Route collisions removed from authRoutes.ts
+- 2026-01-06: P0 #3 - setupLocalAuth() marked @deprecated
+- 2026-01-06: P0 #4 - Investigated, code correct (data issue)
+- 2026-01-06: P1 #10, #11 - Stub endpoints added for marketplace/groups
+- 2026-01-06: Updated CCBill (not Stripe) in CONNECTIONS_MATRIX.md
 
