@@ -2,6 +2,9 @@ import { Router, type Request, type Response } from "express";
 import { z } from "zod";
 import { trackLoginAttempt, checkBruteForce } from "../middleware/bruteForceProtection";
 import { authRateLimit } from "../middleware/rateLimitingAdvanced";
+import { db } from "../db";
+import { sql } from "drizzle-orm";
+import bcrypt from "bcrypt";
 
 const router = Router();
 
@@ -98,13 +101,13 @@ router.post("/register", async (req, res) => {
 
 /**
  * POST /api/auth/login
- * Forward login to FanzSSO
+ * Forward login to FanzSSO with local fallback
  */
 router.post("/login", authRateLimit, async (req, res) => {
   try {
     const data = loginSchema.parse(req.body);
 
-    const ipAddress = (req.headers["x-forwarded-for"] as string)?.split(",")[0] || 
+    const ipAddress = (req.headers["x-forwarded-for"] as string)?.split(",")[0] ||
                      req.socket.remoteAddress || "unknown";
 
     // Check for brute force attacks
@@ -142,7 +145,7 @@ router.post("/login", authRateLimit, async (req, res) => {
     if (!response.ok) {
       trackLoginAttempt(ipAddress, false);
       trackLoginAttempt(`email:${data.email.toLowerCase()}`, false);
-      
+
       return res.status(response.status).json({
         success: false,
         error: result.error || result.message || "Login failed",
@@ -177,14 +180,14 @@ router.post("/login", authRateLimit, async (req, res) => {
       token: result.token,
     });
   } catch (error: any) {
-    const ipAddress = (req.headers["x-forwarded-for"] as string)?.split(",")[0] || 
+    const ipAddress = (req.headers["x-forwarded-for"] as string)?.split(",")[0] ||
                      req.socket.remoteAddress || "unknown";
     const email = req.body?.email?.toLowerCase();
-    
-    if (ipAddress) trackLoginAttempt(ipAddress, false);
-    if (email) trackLoginAttempt(`email:${email}`, false);
 
+    // Handle validation errors first
     if (error instanceof z.ZodError) {
+      if (ipAddress) trackLoginAttempt(ipAddress, false);
+      if (email) trackLoginAttempt(`email:${email}`, false);
       return res.status(400).json({
         success: false,
         error: "Validation failed",
@@ -192,11 +195,113 @@ router.post("/login", authRateLimit, async (req, res) => {
       });
     }
 
-    console.error("[Auth] Login error:", error);
-    res.status(500).json({
-      success: false,
-      error: "Authentication service unavailable",
-    });
+    // SSO unavailable - try local authentication fallback using accounts table
+    console.log("[Auth] SSO failed, trying local auth. Error:", error?.message);
+
+    try {
+      const data = loginSchema.parse(req.body);
+
+      // Query accounts table directly (production schema uses accounts with password_hash)
+      const accountResult = await db.execute(
+        sql`SELECT id, email, password_hash, status, email_verified, metadata
+            FROM accounts
+            WHERE LOWER(email) = LOWER(${data.email})
+            LIMIT 1`
+      );
+
+      const account = accountResult.rows?.[0] as any;
+
+      if (!account) {
+        trackLoginAttempt(ipAddress, false);
+        trackLoginAttempt(`email:${data.email.toLowerCase()}`, false);
+        return res.status(401).json({
+          success: false,
+          error: "Invalid email or password",
+        });
+      }
+
+      // Verify password using bcrypt against password_hash
+      let isValidPassword = false;
+      if (account.password_hash && account.password_hash.startsWith('$2')) {
+        isValidPassword = await bcrypt.compare(data.password, account.password_hash);
+      }
+
+      if (!isValidPassword) {
+        trackLoginAttempt(ipAddress, false);
+        trackLoginAttempt(`email:${data.email.toLowerCase()}`, false);
+        return res.status(401).json({
+          success: false,
+          error: "Invalid email or password",
+        });
+      }
+
+      // Check account status
+      if (account.status !== 'active') {
+        return res.status(403).json({
+          success: false,
+          error: "Account is not active",
+        });
+      }
+
+      // Track successful login
+      trackLoginAttempt(ipAddress, true);
+      trackLoginAttempt(`email:${data.email.toLowerCase()}`, true);
+
+      // Parse metadata for additional user info
+      const metadata = typeof account.metadata === 'string'
+        ? JSON.parse(account.metadata)
+        : (account.metadata || {});
+
+      // Create ssoUser object for session
+      const ssoUser = {
+        id: account.id,
+        email: account.email,
+        username: metadata.username || account.email.split('@')[0],
+        displayName: metadata.displayName || metadata.username || account.email.split('@')[0],
+        profileImageUrl: metadata.profileImageUrl || null,
+        emailVerified: account.email_verified || false,
+        role: metadata.role || 'fan',
+        isAdmin: metadata.role === 'admin' || metadata.role === 'superadmin',
+        isModerator: metadata.role === 'moderator',
+        roles: metadata.role ? [metadata.role] : ['fan'],
+      };
+
+      // Set session with ssoUser (required for ssoRoutes /api/auth/session check)
+      (req.session as any).ssoUser = ssoUser;
+      req.session.userId = account.id;
+      req.session.emailVerified = account.email_verified || false;
+
+      // Update last login
+      await db.execute(
+        sql`UPDATE accounts SET last_login_at = NOW() WHERE id = ${account.id}`
+      );
+
+      // Explicitly save session before responding
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          console.error("[Auth] Session save error:", saveErr);
+          return res.status(500).json({
+            success: false,
+            error: "Failed to create session",
+          });
+        }
+        console.log("[Auth] Local auth successful for account:", account.id);
+        return res.json({
+          success: true,
+          message: "Login successful",
+          user: ssoUser,
+        });
+      });
+    } catch (localError: any) {
+      console.error("[Auth] Local auth error:", localError?.message, localError?.stack);
+      if (ipAddress) trackLoginAttempt(ipAddress, false);
+      if (email) trackLoginAttempt(`email:${email}`, false);
+      return res.status(500).json({
+        success: false,
+        error: "Authentication service unavailable (local)",
+        localAuthError: localError?.message,
+      });
+    }
   }
 });
 
@@ -220,9 +325,19 @@ router.post("/logout", (req, res) => {
 
 /**
  * GET /api/auth/session
+ * Check session status - supports both SSO and local auth
  */
 router.get("/session", async (req, res) => {
-  // Check SSO token first
+  // Check for local session first (from local auth fallback)
+  if ((req.session as any).ssoUser) {
+    return res.json({
+      success: true,
+      authenticated: true,
+      user: (req.session as any).ssoUser,
+    });
+  }
+
+  // Check SSO token
   const ssoToken = req.cookies?.fanz_sso_token;
 
   if (ssoToken) {
@@ -266,12 +381,18 @@ router.get("/session", async (req, res) => {
 
 /**
  * GET /api/auth/user
- */
-/**
- * GET /api/auth/user
  * Always returns 200 - returns user:null when not authenticated
  */
 router.get("/user", async (req, res) => {
+  // Check for local session first (from local auth fallback)
+  if ((req.session as any).ssoUser) {
+    return res.json({
+      success: true,
+      authenticated: true,
+      user: (req.session as any).ssoUser,
+    });
+  }
+
   const ssoToken = req.cookies?.fanz_sso_token;
 
   if (!ssoToken) {
