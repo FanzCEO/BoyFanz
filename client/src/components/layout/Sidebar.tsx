@@ -73,7 +73,7 @@ export default function Sidebar({ user }: SidebarProps) {
   const [location, setLocation] = useLocation();
   const isMobile = useIsMobile();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isCollapsed, setIsCollapsed } = useSidebarCollapse();
   const { logoutMutation } = useAuth();
   const {
     hasAdminAccess,
@@ -1053,7 +1053,7 @@ export default function Sidebar({ user }: SidebarProps) {
 
   // Desktop sidebar
   return (
-    <SidebarCollapseContext.Provider value={{ isCollapsed, setIsCollapsed }}>
+    <>
       <aside
         className={cn(
           "fixed left-0 top-0 z-40 h-screen bg-card border-r retro-border smoky-bg transition-all duration-300",
@@ -1065,6 +1065,16 @@ export default function Sidebar({ user }: SidebarProps) {
       >
         {sidebarContent}
       </aside>
+    </>
+  );
+}
+// Export the provider for use in App.tsx
+export function SidebarCollapseProvider({ children }: { children: React.ReactNode }) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  
+  return (
+    <SidebarCollapseContext.Provider value={{ isCollapsed, setIsCollapsed }}>
+      {children}
     </SidebarCollapseContext.Provider>
   );
 }

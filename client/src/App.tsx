@@ -136,7 +136,7 @@ import GoogleSettings from "@/pages/admin/GoogleSettings";
 import CoStarVerify from "@/pages/CoStarVerify";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
-import Sidebar, { useSidebarCollapse } from "@/components/layout/Sidebar";
+import Sidebar, { useSidebarCollapse, SidebarCollapseProvider } from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 // Auth pages (Email/Password)
 import Register from "@/pages/auth/Register";
@@ -592,8 +592,10 @@ function Router() {
       <PWAInstallPrompt />
       <OfflineIndicator />
       
+      <SidebarCollapseProvider>
       <Sidebar user={user} />
       <MainContent user={user} />
+      </SidebarCollapseProvider>
     </div>
   );
 }
