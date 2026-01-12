@@ -1026,7 +1026,7 @@ export default function Sidebar({ user }: SidebarProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="fixed top-4 left-4 z-50 md:hidden bg-background/80 backdrop-blur border border-border"
+          className="fixed top-[70px] left-4 z-40 md:hidden bg-background/80 backdrop-blur border border-border"
           onClick={() => setMobileOpen(true)}
           aria-label="Open navigation menu"
           aria-expanded={mobileOpen}
