@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useEffect, useState, useRef } from "react";
 import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -345,14 +346,10 @@ export default function BoyFanzSPA() {
 
   const createPostMutation = useMutation({
     mutationFn: async (content: string) => {
-      const res = await fetch('/api/posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ content, type: 'text', visibility: 'public' }),
+      return await apiRequest("/api/posts", {
+        method: "POST",
+        body: { content, type: "text", visibility: "public" }
       });
-      if (!res.ok) throw new Error('Failed to create post');
-      return res.json();
     },
     onSuccess: () => {
       toast({ title: "Posted!", description: "Your post is now live" });

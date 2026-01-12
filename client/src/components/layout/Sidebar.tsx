@@ -156,8 +156,7 @@ export default function Sidebar({ user }: SidebarProps) {
 
   // FANZ Security & Architecture
   const securityItems = [
-    { path: "/fanz-cybersecure", icon: "fas fa-lock", label: "FanzCyberSecure" },
-    { path: "/fanz-singularity", icon: "fas fa-atom", label: "FANZ Singularity" },
+    { path: "/empire", icon: "fas fa-crown", label: "FANZ Empire" },
   ];
 
   // Mobile Apps
@@ -215,6 +214,7 @@ export default function Sidebar({ user }: SidebarProps) {
     { path: "/panel/admin/branding", icon: "fas fa-paint-brush", label: "Branding Assets" },
     { path: "/panel/admin/bookings", icon: "fas fa-calendar-check", label: "Booking Management" },
     { path: "/panel/admin/appearance", icon: "fas fa-magic", label: "Site Appearance" },
+    { path: "/panel/admin/cube-ads", icon: "fas fa-cube", label: "Floating Cube Ads" },
     { path: "/panel/admin/gallery", icon: "fas fa-images", label: "Gallery Management" },
     { path: "/panel/admin/oauth-settings", icon: "fas fa-key", label: "Social Login" },
     { path: "/panel/admin/storage", icon: "fas fa-hdd", label: "Storage Management" },

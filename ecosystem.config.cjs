@@ -7,8 +7,13 @@ module.exports = {
     exec_mode: "fork",
     env: {
       NODE_ENV: "production",
-      PORT: "3202",
-      SSO_SHARED_SECRET: "fb7b900a70893b288cc46741c9715efc07f7dacc9cf873e97755643c156cc436"
+      PORT: "3000",
+      SSO_SHARED_SECRET: "fb7b900a70893b288cc46741c9715efc07f7dacc9cf873e97755643c156cc436",
+      HEALTH_MONITORING_ENABLED: "false",
+      SERVICE_DISCOVERY_ENABLED: "false",
+      DATA_RETENTION_ENABLED: "false",
+      SCHEDULER_ENABLED: "false",
+      ENABLE_DATA_RETENTION_SCHEDULER: "false"
     },
     max_memory_restart: "1G",
     kill_timeout: 5000,

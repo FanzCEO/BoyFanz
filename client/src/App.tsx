@@ -4,6 +4,7 @@ import { ScreenshotProtectionProvider } from '@/components/security/ScreenshotPr
 import { PlatformProvider } from '@/contexts/PlatformContext';
 import screenshotProtectionConfig from './config/screenshot-protection';
 import { StickyFooterAd, StickyTopAd } from '@/components/ads/AdBanner';
+import FloatingAdCubes from '@/components/ads/FloatingAdCubes';
 import { UndergroundLoader } from '@/components/ui/underground-loader';
 import Footer from '@/components/Footer';
 import { Switch, Route, useLocation } from "wouter";
@@ -53,7 +54,7 @@ import SecurityDashboard from "@/pages/admin/SecurityDashboard";
 // FANZ Ecosystem Pages
 import {
   StarzStudio,
-  FanzDefendPage,
+  
   FanzForgePage,
   FanzFiliatePage,
   FanzVarsityPage,
@@ -67,6 +68,9 @@ import {
   FanzTubePage
 } from "@/pages/ecosystem/EcosystemPlaceholder";
 import StarzCardzPage from "@/pages/StarzCardzPage";
+
+// FANZ Empire Pages
+import { FanzEmpire, FanzSecure, FanzDefend } from "@/pages/FanzEmpire";
 
 // Auth
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -113,6 +117,7 @@ import ConsentForms from "@/pages/admin/ConsentForms";
 import ConsentWithdrawalForms from "@/pages/admin/ConsentWithdrawalForms";
 import LeaderboardScores from "@/pages/admin/LeaderboardScores";
 import UserAds from "@/pages/admin/UserAds";
+import CubeAdsManager from "@/pages/admin/CubeAdsManager";
 import SubscriptionsManagement from "@/pages/admin/SubscriptionsManagement";
 import LivestreamSettings from "@/pages/admin/LivestreamSettings";
 import LivestreamRequests from "@/pages/admin/LivestreamRequests";
@@ -562,6 +567,25 @@ function Router() {
     );
   }
 
+  // Check for full-screen Empire routes BEFORE rendering main layout
+  const empireRoutes = ['/empire', '/fanz-empire', '/secure', '/fanz-secure', '/fanz-defend', '/dominion', '/fanz-dominion'];
+  const isEmpireRoute = empireRoutes.some(route => location === route || location.startsWith(route + '/'));
+  
+  if (isEmpireRoute) {
+    return (
+      <Switch>
+        <Route path="/empire" component={FanzEmpire} />
+        <Route path="/fanz-empire" component={FanzEmpire} />
+        <Route path="/secure" component={FanzSecure} />
+        <Route path="/fanz-secure" component={FanzSecure} />
+        <Route path="/fanz-defend" component={FanzDefend} />
+        <Route path="/dominion" component={FanzEmpire} />
+        <Route path="/fanz-dominion" component={FanzEmpire} />
+      </Switch>
+    );
+  }
+
+
   return (
     <div className="min-h-screen homepage-bg">
       {/* PWA Components */}
@@ -582,6 +606,9 @@ function MainContent({ user }: { user: any }) {
     <>
       {/* Top banner - fixed at very top */}
       <StickyTopAd />
+
+      {/* Floating 3D Ad Cubes - appear when sidebar is collapsed */}
+      <FloatingAdCubes isVisible={isCollapsed} />
 
       <div className={cn(
         "transition-all duration-300 pt-[60px]", // Push content down for top banner
@@ -643,6 +670,7 @@ function MainContent({ user }: { user: any }) {
             {/* Subscriptions & Users */}
             <Route path="/panel/admin/subscriptions" component={SubscriptionsManagement} />
             <Route path="/panel/admin/user-ads" component={UserAds} />
+            <Route path="/panel/admin/cube-ads" component={CubeAdsManager} />
             <Route path="/panel/admin/referrals" component={ReferralsManagement} />
             <Route path="/panel/admin/leaderboard" component={LeaderboardScores} />
             {/* Livestreaming */}
@@ -717,7 +745,13 @@ function MainContent({ user }: { user: any }) {
             <Route path="/outlawz" component={Outlawz} />
             {/* FANZ Ecosystem Routes */}
             <Route path="/starz-studio" component={StarzStudio} />
-            <Route path="/fanz-defend" component={FanzDefendPage} />
+            <Route path="/fanz-defend" component={FanzDefend} />
+            <Route path="/empire" component={FanzEmpire} />
+            <Route path="/fanz-empire" component={FanzEmpire} />
+            <Route path="/secure" component={FanzSecure} />
+            <Route path="/fanz-secure" component={FanzSecure} />
+            <Route path="/dominion" component={FanzEmpire} />
+            <Route path="/fanz-dominion" component={FanzEmpire} />
             <Route path="/fanz-forge" component={FanzForgePage} />
             <Route path="/fanz-filiate" component={FanzFiliatePage} />
             <Route path="/fanz-varsity" component={FanzVarsityPage} />

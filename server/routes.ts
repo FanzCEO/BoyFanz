@@ -7,6 +7,8 @@ import { storage } from './storage';
 import { registerHelpSupportRoutes } from './routes/helpSupportRoutes';
 import pwaRoutes from './routes/pwaRoutes';
 import authRoutes from './routes/authRoutes';
+import stepUpAuthRoutes from './routes/stepUpAuthRoutes';
+import cubeAdsRoutes from './routes/cubeAdsRoutes';
 import ssoRoutes from './routes/ssoRoutes';
 import dataRetentionRoutes from "./routes/dataRetentionRoutes";
 import entitlementsRoutes from "./routes/entitlements";
@@ -5824,6 +5826,8 @@ export async function setupAdvancedRoutes(app: Express) {
   
   // Email/Password Authentication Routes (NO auth middleware - public)
   app.use('/api/auth', authRoutes);
+  app.use('/api/auth/step-up', stepUpAuthRoutes);
+  app.use('/api/cube-ads', cubeAdsRoutes);
 
   console.log("[DEBUG] registering entitlements route, entitlementsRoutes =", typeof entitlementsRoutes);
   app.get("/api/test-route", (req, res) => res.json({test: true}));
@@ -6290,6 +6294,35 @@ export async function setupAdvancedRoutes(app: Express) {
     }
   });
 
+  // Create post endpoint
+  app.post("/api/posts", csrfProtection, isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const { content, type = "text", mediaUrls = [], visibility = "free", priceCents = 0 } = req.body;
+      
+      if (!content && (!mediaUrls || mediaUrls.length === 0)) {
+        return res.status(400).json({ error: "Content or media is required" });
+      }
+      
+      const post = await storage.createPost({
+        creatorId: user.id,
+        content: content || "",
+        type,
+        visibility,
+        mediaUrls: mediaUrls || [],
+        priceCents: priceCents || 0
+      });
+      
+      res.status(201).json(post);
+    } catch (error) {
+      console.error("Create post error:", error);
+      res.status(500).json({ error: "Failed to create post" });
+    }
+  });
   // User permissions
   app.get("/api/user/permissions", isAuthenticated, async (req, res) => {
     try {
@@ -6377,4 +6410,114 @@ export async function setupAdvancedRoutes(app: Express) {
       res.status(500).json({ error: "Failed to fetch trending topics" });
     }
   });
+
+  // ===== MAP/NEARBY API ENDPOINTS =====
+  
+  // Get nearby users (fans or creators)
+  app.get("/api/map/nearby", isAuthenticated, async (req, res) => {
+    try {
+      const { lat, lng, radius = 50, type = "fans" } = req.query;
+      
+      if (!lat || !lng) {
+        return res.status(400).json({ error: "Latitude and longitude are required" });
+      }
+      
+      const latitude = parseFloat(lat as string);
+      const longitude = parseFloat(lng as string);
+      const radiusMiles = parseFloat(radius as string);
+      
+      // Convert miles to approximate degrees (1 degree ≈ 69 miles)
+      const latDelta = radiusMiles / 69;
+      const lngDelta = radiusMiles / (69 * Math.cos(latitude * Math.PI / 180));
+      
+      const result = await db.execute(sql`
+        SELECT 
+          ul.user_id as id,
+          ul.latitude,
+          ul.longitude,
+          a.email,
+          COALESCE(p.display_name, a.email) as displayName,
+          COALESCE(p.username, a.id) as username,
+          p.avatar_url as avatarUrl,
+          p.bio,
+          ar.role,
+          SQRT(POW((ul.latitude - ${latitude}) * 69, 2) + 
+               POW((ul.longitude - ${longitude}) * 69 * COS(${latitude} * PI() / 180), 2)) as distance
+        FROM user_locations ul
+        JOIN accounts a ON a.id = ul.user_id
+        LEFT JOIN profiles p ON p.account_id = a.id
+        LEFT JOIN account_role ar ON ar.account_id = a.id
+        WHERE ul.is_public = true
+          AND ul.latitude BETWEEN ${latitude - latDelta} AND ${latitude + latDelta}
+          AND ul.longitude BETWEEN ${longitude - lngDelta} AND ${longitude + lngDelta}
+          AND ul.user_id != ${(req as any).user?.id || ''}
+        ORDER BY distance ASC
+        LIMIT 100
+      `);
+      
+      res.json({ creators: result.rows || [] });
+    } catch (error) {
+      console.error("Get nearby users error:", error);
+      res.status(500).json({ error: "Failed to get nearby users" });
+    }
+  });
+  
+  // Update user location
+  app.post("/api/map/location", csrfProtection, isAuthenticated, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const { latitude, longitude, isLocationPublic = false } = req.body;
+      
+      if (latitude === undefined || longitude === undefined) {
+        return res.status(400).json({ error: "Latitude and longitude are required" });
+      }
+      
+      // Upsert user location
+      await db.execute(sql`
+        INSERT INTO user_locations (user_id, latitude, longitude, is_public, last_updated)
+        VALUES (${user.id}, ${latitude}, ${longitude}, ${isLocationPublic}, NOW())
+        ON CONFLICT (user_id) 
+        DO UPDATE SET 
+          latitude = EXCLUDED.latitude,
+          longitude = EXCLUDED.longitude,
+          is_public = EXCLUDED.is_public,
+          last_updated = NOW()
+      `);
+      
+      res.json({ success: true, message: "Location updated" });
+    } catch (error) {
+      console.error("Update location error:", error);
+      res.status(500).json({ error: "Failed to update location" });
+    }
+  });
+  
+  // Get user's own location
+  app.get("/api/map/my-location", isAuthenticated, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const result = await db.execute(sql`
+        SELECT latitude, longitude, is_public as "isPublic", last_updated as "lastUpdated"
+        FROM user_locations
+        WHERE user_id = ${user.id}
+      `);
+      
+      if (result.rows?.length === 0) {
+        return res.json({ location: null });
+      }
+      
+      res.json({ location: result.rows[0] });
+    } catch (error) {
+      console.error("Get my location error:", error);
+      res.status(500).json({ error: "Failed to get location" });
+    }
+  });
+
 }

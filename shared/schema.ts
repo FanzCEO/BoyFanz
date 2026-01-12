@@ -12083,3 +12083,95 @@ export const discountAnalytics = pgTable("discount_analytics", {
   retentionRate: decimal("retention_rate", { precision: 5, scale: 2 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// ========== StarzCardz Types ==========
+export type SwipeDirection = "left" | "right" | "star";
+export type OfferType = "percent" | "flat" | "free_trial" | "bundle";
+export type MessageTone = "flirty" | "classy" | "cheeky" | "vip";
+export type MessageTemplate = "branded" | "ai" | "custom";
+
+// StarzCardz Collaboration type (simplified for frontend)
+export type Collaboration = {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  title: string;
+  description: string;
+  status: "pending" | "accepted" | "declined";
+  createdAt: Date;
+};
+
+// ===== WEBAUTHN CREDENTIALS FOR STEP-UP AUTH =====
+
+export const webauthnCredentials = pgTable(
+  "webauthn_credentials",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    accountId: varchar("account_id")
+      .notNull()
+      .references(() => accounts.id, { onDelete: "cascade" }),
+    credentialId: text("credential_id").notNull(), // Base64URL encoded
+    publicKey: text("public_key").notNull(), // Base64URL encoded
+    counter: bigint("counter", { mode: "number" }).notNull().default(0),
+    deviceType: varchar("device_type").default("singleDevice"), // singleDevice or multiDevice
+    backedUp: boolean("backed_up").default(false),
+    transports: text("transports").array(), // usb, ble, nfc, internal, hybrid
+    friendlyName: varchar("friendly_name"), // User-provided name for the credential
+    lastUsedAt: timestamp("last_used_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_webauthn_account").on(table.accountId),
+    unique().on(table.credentialId),
+  ],
+);
+
+// Step-up auth sessions for Empire access
+export const stepUpSessions = pgTable(
+  "step_up_sessions",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    accountId: varchar("account_id")
+      .notNull()
+      .references(() => accounts.id, { onDelete: "cascade" }),
+    sessionId: varchar("session_id").notNull(), // Express session ID
+    verifiedAt: timestamp("verified_at").notNull().defaultNow(),
+    expiresAt: timestamp("expires_at").notNull(),
+    method: varchar("method").notNull(), // webauthn or password
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_stepup_account").on(table.accountId),
+    index("idx_stepup_session").on(table.sessionId),
+  ],
+);
+
+// ===== USER LOCATIONS FOR MAP FEATURE =====
+export const userLocations = pgTable(
+  "user_locations",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" })
+      .unique(),
+    latitude: decimal("latitude", { precision: 10, scale: 7 }).notNull(),
+    longitude: decimal("longitude", { precision: 10, scale: 7 }).notNull(),
+    isPublic: boolean("is_public").default(false),
+    lastUpdated: timestamp("last_updated").defaultNow(),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_user_locations_coords").on(table.latitude, table.longitude),
+    index("idx_user_locations_public").on(table.isPublic),
+  ]
+);
+
+export type UserLocation = typeof userLocations.$inferSelect;
+export type InsertUserLocation = typeof userLocations.$inferInsert;

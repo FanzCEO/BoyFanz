@@ -478,7 +478,7 @@ export function StickyTopAd({ className }: { className?: string }) {
   if (isMobile) {
     const currentAd = inhouseAds[mobileAdIndex];
     return (
-      <div className={cn("fixed top-0 left-0 right-0 z-50", className)}>
+      <div className={cn("fixed top-0 left-0 md:left-64 right-0 z-50", className)}>
         <div className="relative bg-black/40 backdrop-blur-lg border-b border-white/10">
           <button
             onClick={() => setIsDismissed(true)}
@@ -526,7 +526,7 @@ export function StickyTopAd({ className }: { className?: string }) {
 
   return (
     <div className={cn(
-      "fixed top-0 left-0 right-0 z-50",
+      "fixed top-0 left-0 md:left-64 right-0 z-50",
       className
     )}>
       <div className="relative bg-black/40 backdrop-blur-lg border-b border-white/10">
@@ -630,7 +630,7 @@ export function StickyFooterAd({ className }: { className?: string }) {
 
   return (
     <div className={cn(
-      "fixed bottom-0 left-0 right-0 z-40 transition-transform duration-500",
+      "fixed bottom-0 left-0 md:left-64 right-0 z-40 transition-transform duration-500",
       isVisible ? "translate-y-0" : "translate-y-full",
       className
     )}>

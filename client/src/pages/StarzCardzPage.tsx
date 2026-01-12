@@ -1,9 +1,24 @@
+/**
+ * StarzCardz - Creator Discovery & Networking
+ *
+ * Swipe-based creator discovery platform with:
+ * - Discover mode: Find and like creators
+ * - Collab mode: Manage collaboration requests
+ * - Network mode: Your creator network
+ */
+
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Users, Handshake, Network, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Star, LogOut, Users, Handshake, Network, Sparkles } from "lucide-react";
+import SwipeCard from "@/components/swipe-card";
+import CollabMode from "@/components/collab-mode";
+import NetworkMode from "@/components/network-mode";
 
 export default function StarzCardzPage() {
+  const { user } = useAuth();
   const [mode, setMode] = useState<"discover" | "collab" | "network">("discover");
 
   return (
@@ -19,19 +34,28 @@ export default function StarzCardzPage() {
             <p className="text-xs text-white/50">Creator Discovery Network</p>
           </div>
           <Badge className="ml-2 bg-amber-500/20 text-amber-200 border-amber-500/40">Live</Badge>
-          
+
           <div className="ml-auto flex items-center gap-4">
             <Tabs value={mode} onValueChange={(v) => setMode(v as any)}>
               <TabsList className="bg-white/5 border border-white/10">
-                <TabsTrigger value="discover" className="gap-1.5">
+                <TabsTrigger
+                  value="discover"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-400 data-[state=active]:to-orange-500 data-[state=active]:text-black gap-1.5"
+                >
                   <Users className="h-4 w-4" />
                   Discover
                 </TabsTrigger>
-                <TabsTrigger value="collab" className="gap-1.5">
+                <TabsTrigger
+                  value="collab"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-400 data-[state=active]:to-orange-500 data-[state=active]:text-black gap-1.5"
+                >
                   <Handshake className="h-4 w-4" />
                   Collab
                 </TabsTrigger>
-                <TabsTrigger value="network" className="gap-1.5">
+                <TabsTrigger
+                  value="network"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-400 data-[state=active]:to-orange-500 data-[state=active]:text-black gap-1.5"
+                >
                   <Network className="h-4 w-4" />
                   Network
                 </TabsTrigger>
@@ -42,14 +66,30 @@ export default function StarzCardzPage() {
       </header>
 
       {/* Main Content */}
-      <div className="p-8 text-center">
-        <h2 className="text-2xl font-bold mb-4">StarzCardz Mode: {mode}</h2>
-        <p className="text-white/60">Creator discovery platform coming soon...</p>
-      </div>
+      <Tabs value={mode} className="w-full">
+        <TabsContent value="discover" className="mt-0">
+          <SwipeCard />
+        </TabsContent>
+
+        <TabsContent value="collab" className="mt-0">
+          <CollabMode />
+        </TabsContent>
+
+        <TabsContent value="network" className="mt-0">
+          <NetworkMode />
+        </TabsContent>
+      </Tabs>
 
       {/* Footer */}
       <footer className="mx-auto max-w-6xl px-4 py-6 text-xs text-white/40 border-t border-white/5">
-        <span>StarzCardz · FANZ Ecosystem</span>
+        <div className="flex items-center justify-between">
+          <span>StarzCardz · FANZ Ecosystem · Privacy Grid Active</span>
+          {user && (
+            <span>
+              Logged in as {(user as any).displayName || (user as any).email}
+            </span>
+          )}
+        </div>
       </footer>
     </div>
   );

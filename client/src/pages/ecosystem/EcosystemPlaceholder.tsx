@@ -78,10 +78,10 @@ export default function EcosystemPlaceholder({
           transition={{ delay: 0.8 }}
           className="text-center mt-16"
         >
-          <Link href="/fanz-singularity">
+          <Link href="/empire">
             <a className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl transition-all">
               <i className="fas fa-atom" />
-              View in FANZ Singularity
+              View in FANZ Empire
             </a>
           </Link>
         </motion.div>

@@ -239,7 +239,8 @@ app.get("/api/entitlements", (req, res) => {
           app.locals.workflowEngine = workflowEngine;
           logger.info('Automated Workflow Engine initialized successfully');
           
-          // Initialize Service Discovery & Health Monitoring
+          // Initialize Service Discovery & Health Monitoring (if enabled)
+          if (process.env.HEALTH_MONITORING_ENABLED !== "false") {
           try {
             const ServiceDiscoveryHealth = (await import('./services/serviceDiscoveryHealth.js')).default;
             const serviceDiscovery = new ServiceDiscoveryHealth(orchestrationEngine, commandCenter, workflowEngine);
@@ -249,6 +250,9 @@ app.get("/api/entitlements", (req, res) => {
           } catch (serviceDiscoveryError) {
             logger.error({ err: serviceDiscoveryError }, 'Failed to initialize Service Discovery & Health Monitoring System');
             // Continue startup but with reduced service monitoring functionality
+          }
+          } else {
+            logger.info("Service Discovery & Health Monitoring disabled via env");
           }
 
           // Initialize FanzDash Central Command Connection
