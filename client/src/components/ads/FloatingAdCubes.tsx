@@ -319,7 +319,7 @@ export default function FloatingAdCubes({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed left-2 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center"
+          className="fixed left-20 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center"
         >
           {/* Dismiss button */}
           <motion.button
