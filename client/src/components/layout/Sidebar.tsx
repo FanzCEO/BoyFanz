@@ -23,6 +23,15 @@ export function useSidebarCollapse() {
   return context;
 }
 
+export function SidebarCollapseProvider({ children }: { children: React.ReactNode }) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  return (
+    <SidebarCollapseContext.Provider value={{ isCollapsed, setIsCollapsed }}>
+      {children}
+    </SidebarCollapseContext.Provider>
+  );
+}
+
 // Sidebar Promo Ad Component
 function SidebarPromoAd() {
   const promos = [
@@ -73,7 +82,7 @@ export default function Sidebar({ user }: SidebarProps) {
   const [location, setLocation] = useLocation();
   const isMobile = useIsMobile();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { isCollapsed, setIsCollapsed } = useSidebarCollapse();
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const { logoutMutation } = useAuth();
   const {
     hasAdminAccess,
@@ -144,6 +153,7 @@ export default function Sidebar({ user }: SidebarProps) {
   const ecosystemItems = [
     { path: "/starz-studio", icon: "fas fa-star", label: "Starz Studio", badge: "CREATOR" },
     { path: "/fanz-defend", icon: "fas fa-shield-alt", label: "FanzDefend" },
+    { path: "/fanz-cybersecure", icon: "fas fa-shield-virus", label: "FanzCybersecure", badge: "SECURITY" },
     { path: "/fanz-forge", icon: "fas fa-hammer", label: "FanzForge" },
     { path: "/fanz-filiate", icon: "fas fa-handshake", label: "FanzFiliate" },
     { path: "/fanz-varsity", icon: "fas fa-graduation-cap", label: "FanzVarsity" },
@@ -156,7 +166,9 @@ export default function Sidebar({ user }: SidebarProps) {
 
   // FANZ Security & Architecture
   const securityItems = [
-    { path: "/empire", icon: "fas fa-crown", label: "FANZ Empire" },
+    { path: "/fanz-cybersecure", icon: "fas fa-lock", label: "FanzCyberSecure" },
+    { path: "/fanz-nexus", icon: "fas fa-globe", label: "FANZ Nexus", badge: "MAP" },
+    { path: "/fanz-neuroverse", icon: "fas fa-brain", label: "FanzNeuroverse", badge: "AI" },
   ];
 
   // Mobile Apps
@@ -214,7 +226,6 @@ export default function Sidebar({ user }: SidebarProps) {
     { path: "/panel/admin/branding", icon: "fas fa-paint-brush", label: "Branding Assets" },
     { path: "/panel/admin/bookings", icon: "fas fa-calendar-check", label: "Booking Management" },
     { path: "/panel/admin/appearance", icon: "fas fa-magic", label: "Site Appearance" },
-    { path: "/panel/admin/cube-ads", icon: "fas fa-cube", label: "Floating Cube Ads" },
     { path: "/panel/admin/gallery", icon: "fas fa-images", label: "Gallery Management" },
     { path: "/panel/admin/oauth-settings", icon: "fas fa-key", label: "Social Login" },
     { path: "/panel/admin/storage", icon: "fas fa-hdd", label: "Storage Management" },
@@ -1026,7 +1037,7 @@ export default function Sidebar({ user }: SidebarProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="fixed top-[70px] left-4 z-40 md:hidden bg-background/80 backdrop-blur border border-border"
+          className="fixed top-4 left-4 z-50 md:hidden bg-background/80 backdrop-blur border border-border"
           onClick={() => setMobileOpen(true)}
           aria-label="Open navigation menu"
           aria-expanded={mobileOpen}
@@ -1053,7 +1064,7 @@ export default function Sidebar({ user }: SidebarProps) {
 
   // Desktop sidebar
   return (
-    <>
+    <SidebarCollapseContext.Provider value={{ isCollapsed, setIsCollapsed }}>
       <aside
         className={cn(
           "fixed left-0 top-0 z-40 h-screen bg-card border-r retro-border smoky-bg transition-all duration-300",
@@ -1065,16 +1076,6 @@ export default function Sidebar({ user }: SidebarProps) {
       >
         {sidebarContent}
       </aside>
-    </>
-  );
-}
-// Export the provider for use in App.tsx
-export function SidebarCollapseProvider({ children }: { children: React.ReactNode }) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  
-  return (
-    <SidebarCollapseContext.Provider value={{ isCollapsed, setIsCollapsed }}>
-      {children}
     </SidebarCollapseContext.Provider>
   );
 }

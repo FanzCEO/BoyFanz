@@ -443,7 +443,7 @@ export function MobileBanner({ className }: { className?: string }) {
 
 // 4-Block Rotating Carousel Ad Banner - TOP (sticky at top of page)
 // MOBILE: Shows 1 ad at a time rotating (carousel style)
-// DESKTOP: Shows 4 ads in a grid rotating as a set
+// DESKTOP: Shows 4 ads in a grid rotating as a set - respects sidebar
 export function StickyTopAd({ className }: { className?: string }) {
   const [isDismissed, setIsDismissed] = useState(false);
   const isMobile = useIsMobile();
@@ -478,7 +478,7 @@ export function StickyTopAd({ className }: { className?: string }) {
   if (isMobile) {
     const currentAd = inhouseAds[mobileAdIndex];
     return (
-      <div className={cn("fixed top-0 left-0 md:left-64 right-0 z-50", className)}>
+      <div className={cn("fixed top-0 left-0 right-0 z-40", className)}>
         <div className="relative bg-black/40 backdrop-blur-lg border-b border-white/10">
           <button
             onClick={() => setIsDismissed(true)}
@@ -521,12 +521,12 @@ export function StickyTopAd({ className }: { className?: string }) {
     );
   }
 
-  // DESKTOP: 4-block grid carousel
+  // DESKTOP: 4-block grid carousel - respects sidebar
   const currentAds = adSets[currentSet] || [];
 
   return (
     <div className={cn(
-      "fixed top-0 left-0 md:left-64 right-0 z-50",
+      "fixed top-0 right-0 z-40 left-0 md:left-64",
       className
     )}>
       <div className="relative bg-black/40 backdrop-blur-lg border-b border-white/10">
@@ -630,11 +630,11 @@ export function StickyFooterAd({ className }: { className?: string }) {
 
   return (
     <div className={cn(
-      "fixed bottom-0 left-0 md:left-64 right-0 z-40 transition-transform duration-500",
+      "fixed bottom-0 right-0 z-40 transition-transform duration-500 left-0 md:left-64",
       isVisible ? "translate-y-0" : "translate-y-full",
       className
     )}>
-      <div> {/* Sidebar margin handled by parent MainContent */}
+      <div>
         <div className="relative bg-black/40 backdrop-blur-lg border-t border-white/10">
           {/* Dismiss button */}
           <button

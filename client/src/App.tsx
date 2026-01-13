@@ -210,6 +210,7 @@ import ForumsHome from "@/pages/forums/ForumsHome";
 import ForumCategory from "@/pages/forums/ForumCategory";
 import ForumTopic from "@/pages/forums/ForumTopic";
 import CreateTopic from "@/pages/forums/CreateTopic";
+import CreateCategory from "@/pages/forums/CreateCategory";
 // New pages for sidebar navigation
 import Wallet from "@/pages/Wallet";
 import Referrals from "@/pages/Referrals";
@@ -572,6 +573,7 @@ function Router() {
         </Route>
         {/* Community Forums (public viewing) */}
         <Route path="/forums" component={ForumsHome} />
+        <Route path="/forums/categories/create" component={CreateCategory} />
         <Route path="/forums/category/:slug" component={ForumCategory} />
         <Route path="/forums/topic/:id" component={ForumTopic} />
         {/* Become Creator for existing fans */}
@@ -875,6 +877,7 @@ function MainContent({ user }: { user: any }) {
             <Route path="/analytics" component={AnalyticsDashboard} />
             {/* Community Forums - authenticated access */}
             <Route path="/forums" component={ForumsHome} />
+            <Route path="/forums/categories/create" component={CreateCategory} />
             <Route path="/forums/category/:slug" component={ForumCategory} />
             <Route path="/forums/topic/:id" component={ForumTopic} />
             <Route path="/forums/create" component={CreateTopic} />
