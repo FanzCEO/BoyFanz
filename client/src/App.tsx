@@ -65,7 +65,9 @@ import {
   FanzCloudPage,
   // StarzCardzPage, // imported separately
   WickedCRMPage,
-  FanzTubePage
+  FanzTubePage,
+  FanzCybersecurePage,
+  FanzNeurovorsePage
 } from "@/pages/ecosystem/EcosystemPlaceholder";
 import StarzCardzPage from "@/pages/StarzCardzPage";
 
@@ -163,6 +165,7 @@ import FreeLinksPage from "@/pages/Creator/FreeLinksPage";
 import FreeLinkRedeem from "@/pages/FreeLinkRedeem";
 import FanzSpa from "@/pages/FanzSpa";
 import FanzCock from "@/pages/FanzCock";
+import FanzNexus from "@/pages/FanzNexus";
 import Bathhouse from "@/pages/Bathhouse";
 // Bathhouse Zone Pages
 import LockerRoom from "@/pages/bathhouse/LockerRoom";
@@ -232,6 +235,9 @@ import { TicketsPage } from "@/pages/help/TicketsPage";
 import { ChatPage } from "@/pages/help/ChatPage";
 import { TicketCreationPage } from "@/pages/help/TicketCreationPage";
 import TicketDetailPage from "@/pages/help/TicketDetailPage";
+// Comprehensive Wiki & Documentation System
+import { WikiLayout, WikiPage as WikiDocPage } from "@/components/wiki";
+import WikiHome from "@/pages/wiki/WikiHome";
 import StreamCreation from "@/pages/StreamCreation";
 import StreamDashboard from "@/pages/StreamDashboard";
 import LiveViewer from "@/pages/LiveViewer";
@@ -255,6 +261,15 @@ import AnalyticsDashboard from "@/pages/AnalyticsDashboard";
 import FuckBuddies from "@/pages/FuckBuddies";
 import TutorialBot from "@/components/TutorialBot/TutorialBot";
 import { MobileBottomNav } from "@/components/mobile/MobileBottomNav";
+
+// Wiki wrapper components for public documentation
+function WikiHomeWrapper() {
+  return <WikiLayout><WikiHome /></WikiLayout>;
+}
+
+function WikiArticleWrapper({ slug }: { slug: string }) {
+  return <WikiLayout><WikiDocPage slug={slug} /></WikiLayout>;
+}
 
 // Redirect components for legacy routes
 function StarzStudioRedirect() {
@@ -550,6 +565,11 @@ function Router() {
         <Route path="/help/tickets/:id">
           {(params) => <TicketDetailPage />}
         </Route>
+        {/* Comprehensive Wiki & Documentation (public) */}
+        <Route path="/wiki" component={WikiHomeWrapper} />
+        <Route path="/wiki/:slug">
+          {(params) => <WikiArticleWrapper slug={params.slug} />}
+        </Route>
         {/* Community Forums (public viewing) */}
         <Route path="/forums" component={ForumsHome} />
         <Route path="/forums/category/:slug" component={ForumCategory} />
@@ -766,6 +786,10 @@ function MainContent({ user }: { user: any }) {
             <Route path="/wicked-crm" component={WickedCRMPage} />
             <Route path="/tube" component={FanzTubePage} />
             <Route path="/tube/:category" component={FanzTubePage} />
+            <Route path="/fanz-cybersecure" component={FanzCybersecurePage} />
+            <Route path="/fanz-neuroverse" component={FanzNeurovorsePage} />
+            <Route path="/fanz-nexus" component={FanzNexus} />
+            <Route path="/fanz-empire" component={FanzNexus} />
             <Route path="/feed" component={PostsFeed} />
             <Route path="/spa" component={FanzSpa} />
             <Route path="/fanz-spa" component={FanzSpa} />
