@@ -12,7 +12,11 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { GDPRConsentBanner } from "@/components/GDPRConsentBanner";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
+import { CookieConsentProvider } from "@/contexts/CookieConsentContext";
+import { AgeVerificationGate } from "@/components/AgeVerificationGate";
+import { AgeVerificationProvider } from "@/contexts/AgeVerificationContext";
+import DMCAPolicy from "@/pages/DMCAPolicy";
 import AIChatBot from "@/components/AIChatBot";
 import { FloatingSupportWidget } from "@/components/help/FloatingSupportWidget";
 import { useAuth } from "@/hooks/useAuth";
@@ -259,6 +263,7 @@ import CustomRequests from "@/pages/CustomRequests";
 import CreatorRequests from "@/pages/CreatorRequests";
 import CreateCustomRequest from "@/pages/CreateCustomRequest";
 import AnalyticsDashboard from "@/pages/AnalyticsDashboard";
+import VerificationDashboard from "@/pages/VerificationDashboard";
 import FuckBuddies from "@/pages/FuckBuddies";
 import TutorialBot from "@/components/TutorialBot/TutorialBot";
 import { MobileBottomNav } from "@/components/mobile/MobileBottomNav";
@@ -543,6 +548,7 @@ function Router() {
         <Route path="/resources" component={CivilResources} />
         <Route path="/terms" component={TermsOfService} />
         <Route path="/privacy" component={PrivacyPolicy} />
+        <Route path="/dmca" component={DMCAPolicy} />
         <Route path="/wittle-bear-foundation" component={WittleBearFoundation} />
         {/* Outlawz & Naughty Social Routes */}
         <Route path="/outlawz" component={Outlawz} />
@@ -644,6 +650,7 @@ function MainContent({ user }: { user: any }) {
             <Route path="/" component={SocialHome} />
             <Route path="/social" component={SocialHome} />
             <Route path="/dashboard" component={Dashboard} />
+            <Route path="/verification" component={VerificationDashboard} />
             <Route path="/breeding-zone" component={BreedingZone} />
             {/* Legacy redirects */}
             <Route path="/starz-studio" component={StarzStudioRedirect} />
@@ -888,6 +895,7 @@ function MainContent({ user }: { user: any }) {
             <Route path="/resources" component={CivilResources} />
             <Route path="/terms" component={TermsOfService} />
             <Route path="/privacy" component={PrivacyPolicy} />
+            <Route path="/dmca" component={DMCAPolicy} />
             <Route path="/about" component={AboutUs} />
             <Route path="/content-policy" component={ContentPolicy} />
             <Route path="/cookies" component={CookiesPolicy} />
@@ -924,22 +932,30 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Switch>
-          {/* Public Routes - No Layout */}
-          <Route path="/login" component={Login} />
-          <Route path="/auth/callback" component={AuthCallback} />
+        <AgeVerificationProvider>
+          <CookieConsentProvider>
+            <AgeVerificationGate>
+              <Switch>
+                {/* Public Routes - No Layout */}
+                <Route path="/login" component={Login} />
+                <Route path="/auth/callback" component={AuthCallback} />
 
-          {/* All other routes handled by Router */}
-          <Route path="/*">
-            <ScreenshotProtectionProvider config={screenshotProtectionConfig}>
-              <PlatformProvider>
-                <TooltipProvider>
-                  <Router />
-                </TooltipProvider>
-              </PlatformProvider>
-            </ScreenshotProtectionProvider>
-          </Route>
-        </Switch>
+                {/* All other routes handled by Router */}
+                <Route path="/*">
+                  <ScreenshotProtectionProvider config={screenshotProtectionConfig}>
+                    <PlatformProvider>
+                      <TooltipProvider>
+                        <Router />
+                      </TooltipProvider>
+                    </PlatformProvider>
+                  </ScreenshotProtectionProvider>
+                </Route>
+              </Switch>
+              {/* GDPR Cookie Consent Banner */}
+              <CookieConsentBanner />
+            </AgeVerificationGate>
+          </CookieConsentProvider>
+        </AgeVerificationProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

@@ -86,7 +86,7 @@ const FALLBACK_ADS: AdResponse[] = [
       description: 'Get ecosystem access for every creator who joins.',
       ctaText: 'Get Your Link',
       clickUrl: '/settings?tab=referrals',
-      gradient: 'from-emerald-600 to-cyan-600',
+      gradient: 'from-emerald-600 to-slate-600',
     },
     trackingUrls: {
       impression: '/api/fanzfiliate/track/impression/fallback-2',

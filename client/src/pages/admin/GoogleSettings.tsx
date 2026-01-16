@@ -37,7 +37,7 @@ export default function GoogleSettings() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-cyan-400 flex items-center gap-2">
+        <h1 className="text-3xl font-bold text-slate-400 flex items-center gap-2">
           <Globe className="h-8 w-8" />
           Google Settings
         </h1>
@@ -52,7 +52,7 @@ export default function GoogleSettings() {
       </Alert>
 
       <Tabs defaultValue="analytics" className="space-y-6">
-        <TabsList className="bg-gray-900 border border-cyan-500/20">
+        <TabsList className="bg-gray-900 border border-slate-500/20">
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="search">Search Console</TabsTrigger>
           <TabsTrigger value="recaptcha">reCAPTCHA</TabsTrigger>
@@ -60,9 +60,9 @@ export default function GoogleSettings() {
         </TabsList>
 
         <TabsContent value="analytics" className="space-y-4">
-          <Card className="bg-gray-900 border-cyan-500/20">
+          <Card className="bg-gray-900 border-slate-500/20">
             <CardHeader>
-              <CardTitle className="text-cyan-400 flex items-center gap-2">
+              <CardTitle className="text-slate-400 flex items-center gap-2">
                 <BarChart3 className="h-5 w-5" />
                 Google Analytics
               </CardTitle>
@@ -85,7 +85,7 @@ export default function GoogleSettings() {
                 <Input
                   value={settings.analyticsId}
                   onChange={(e) => setSettings({ ...settings, analyticsId: e.target.value })}
-                  className="bg-gray-800 border-cyan-500/20 font-mono"
+                  className="bg-gray-800 border-slate-500/20 font-mono"
                   placeholder="G-XXXXXXXXXX"
                 />
                 <p className="text-sm text-gray-500 mt-1">
@@ -102,9 +102,9 @@ export default function GoogleSettings() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-cyan-500/20">
+          <Card className="bg-gray-900 border-slate-500/20">
             <CardHeader>
-              <CardTitle className="text-cyan-400">Google Tag Manager</CardTitle>
+              <CardTitle className="text-slate-400">Google Tag Manager</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -124,7 +124,7 @@ export default function GoogleSettings() {
                 <Input
                   value={settings.tagManagerId}
                   onChange={(e) => setSettings({ ...settings, tagManagerId: e.target.value })}
-                  className="bg-gray-800 border-cyan-500/20 font-mono"
+                  className="bg-gray-800 border-slate-500/20 font-mono"
                   placeholder="GTM-XXXXXXX"
                 />
               </div>
@@ -133,9 +133,9 @@ export default function GoogleSettings() {
         </TabsContent>
 
         <TabsContent value="search" className="space-y-4">
-          <Card className="bg-gray-900 border-cyan-500/20">
+          <Card className="bg-gray-900 border-slate-500/20">
             <CardHeader>
-              <CardTitle className="text-cyan-400">Google Search Console</CardTitle>
+              <CardTitle className="text-slate-400">Google Search Console</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -157,15 +157,15 @@ export default function GoogleSettings() {
                   onChange={(e) =>
                     setSettings({ ...settings, searchConsoleVerification: e.target.value })
                   }
-                  className="bg-gray-800 border-cyan-500/20 font-mono"
+                  className="bg-gray-800 border-slate-500/20 font-mono"
                   placeholder="google1234567890abcdef.html"
                 />
                 <p className="text-sm text-gray-500 mt-1">
                   Verification file name from Google Search Console
                 </p>
               </div>
-              <Alert className="bg-cyan-900/20 border-cyan-500/30">
-                <Eye className="h-4 w-4 text-cyan-400" />
+              <Alert className="bg-cyan-900/20 border-slate-500/30">
+                <Eye className="h-4 w-4 text-slate-400" />
                 <AlertDescription className="text-cyan-200">
                   This file is automatically served at: https://boyfanz.fanz.website/{settings.searchConsoleVerification}
                 </AlertDescription>
@@ -175,9 +175,9 @@ export default function GoogleSettings() {
         </TabsContent>
 
         <TabsContent value="recaptcha" className="space-y-4">
-          <Card className="bg-gray-900 border-cyan-500/20">
+          <Card className="bg-gray-900 border-slate-500/20">
             <CardHeader>
-              <CardTitle className="text-cyan-400">Google reCAPTCHA</CardTitle>
+              <CardTitle className="text-slate-400">Google reCAPTCHA</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -199,7 +199,7 @@ export default function GoogleSettings() {
                   onChange={(e) =>
                     setSettings({ ...settings, recaptchaSiteKey: e.target.value })
                   }
-                  className="bg-gray-800 border-cyan-500/20 font-mono"
+                  className="bg-gray-800 border-slate-500/20 font-mono"
                   placeholder="6LeXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
                 />
                 <p className="text-sm text-gray-500 mt-1">Used in the frontend HTML</p>
@@ -212,14 +212,14 @@ export default function GoogleSettings() {
                   onChange={(e) =>
                     setSettings({ ...settings, recaptchaSecretKey: e.target.value })
                   }
-                  className="bg-gray-800 border-cyan-500/20 font-mono"
+                  className="bg-gray-800 border-slate-500/20 font-mono"
                   placeholder="6LeXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
                 />
                 <p className="text-sm text-gray-500 mt-1">Used for server-side verification</p>
               </div>
               <div className="p-4 bg-gray-800 rounded-lg">
                 <p className="text-sm text-gray-400 mb-2">reCAPTCHA version:</p>
-                <select className="w-full p-2 bg-gray-700 border border-cyan-500/20 rounded-md">
+                <select className="w-full p-2 bg-gray-700 border border-slate-500/20 rounded-md">
                   <option value="v3">reCAPTCHA v3 (Invisible)</option>
                   <option value="v2">reCAPTCHA v2 (Checkbox)</option>
                 </select>
@@ -229,9 +229,9 @@ export default function GoogleSettings() {
         </TabsContent>
 
         <TabsContent value="other" className="space-y-4">
-          <Card className="bg-gray-900 border-cyan-500/20">
+          <Card className="bg-gray-900 border-slate-500/20">
             <CardHeader>
-              <CardTitle className="text-cyan-400">Google AdSense</CardTitle>
+              <CardTitle className="text-slate-400">Google AdSense</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -253,16 +253,16 @@ export default function GoogleSettings() {
                   onChange={(e) =>
                     setSettings({ ...settings, adsensePublisherId: e.target.value })
                   }
-                  className="bg-gray-800 border-cyan-500/20 font-mono"
+                  className="bg-gray-800 border-slate-500/20 font-mono"
                   placeholder="ca-pub-XXXXXXXXXXXXXXXX"
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-cyan-500/20">
+          <Card className="bg-gray-900 border-slate-500/20">
             <CardHeader>
-              <CardTitle className="text-cyan-400">Google Maps</CardTitle>
+              <CardTitle className="text-slate-400">Google Maps</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -281,7 +281,7 @@ export default function GoogleSettings() {
                   type="password"
                   value={settings.mapsApiKey}
                   onChange={(e) => setSettings({ ...settings, mapsApiKey: e.target.value })}
-                  className="bg-gray-800 border-cyan-500/20 font-mono"
+                  className="bg-gray-800 border-slate-500/20 font-mono"
                   placeholder="AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
                 />
               </div>
@@ -291,7 +291,7 @@ export default function GoogleSettings() {
       </Tabs>
 
       <div className="flex justify-end">
-        <Button onClick={handleSave} className="bg-gradient-to-r from-cyan-500 to-blue-500">
+        <Button onClick={handleSave} className="bg-gradient-to-r from-slate-500 to-blue-500">
           <Save className="h-4 w-4 mr-2" />
           Save Settings
         </Button>

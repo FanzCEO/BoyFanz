@@ -26,7 +26,7 @@ const zoneConfig = {
   'control-room': {
     icon: BarChart3,
     label: 'MAIN CONTROL ROOM',
-    color: '#00e5ff',
+    color: '#475569',
     description: 'System Overview & Monitoring'
   },
   'security-booth': {
@@ -76,7 +76,7 @@ export function AdminLayout({
       <FogOverlay intensity="light" />
 
       {/* Fluorescent ceiling lights */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-slate-500/30 to-transparent" />
 
       {/* Zone indicator bar */}
       <div className="admin-zone-nav sticky top-0 z-10">
@@ -130,7 +130,7 @@ export function AdminLayout({
           <div className="flex items-center gap-4">
             {/* Room Number Plate */}
             <div className="control-panel-header rounded-lg px-4 py-3">
-              <ZoneIcon className="w-6 h-6 text-cyan-400" />
+              <ZoneIcon className="w-6 h-6 text-slate-400" />
             </div>
 
             <div>
@@ -176,7 +176,7 @@ export function AdminLayout({
           <span>{new Date().toLocaleTimeString()}</span>
         </div>
         <div className="flex items-center gap-4 text-gray-500">
-          <span className="text-cyan-400">ADMIN LEVEL: MASTER</span>
+          <span className="text-slate-400">ADMIN LEVEL: MASTER</span>
           <span>|</span>
           <span>BATHHOUSE CONTROL SYSTEM v2.0</span>
         </div>
@@ -200,7 +200,7 @@ function QuickAccessKey({
       href={href}
       className={`key-tag transition-all duration-150 ${
         active
-          ? 'bg-gradient-to-br from-cyan-400 to-cyan-600 text-gray-900 shadow-lg shadow-cyan-500/30'
+          ? 'bg-gradient-to-br from-slate-400 to-slate-600 text-gray-900 shadow-lg shadow-slate-500/30'
           : 'bg-gradient-to-br from-amber-200 to-amber-400 hover:from-amber-100 hover:to-amber-300'
       }`}
       style={{
@@ -251,7 +251,7 @@ export function ControlPanelCard({
     >
       {title && (
         <div className="control-panel-header">
-          {Icon && <Icon className="w-4 h-4 text-cyan-400" />}
+          {Icon && <Icon className="w-4 h-4 text-slate-400" />}
           <span className="control-panel-title">{title}</span>
         </div>
       )}
@@ -277,8 +277,8 @@ export function MonitorCard({
   return (
     <div className={`monitor-card ${showScanlines ? 'monitor-scanline' : ''} ${className}`}>
       {title && (
-        <div className="text-xs text-cyan-400 font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+        <div className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-slate-400 animate-pulse" />
           {title}
         </div>
       )}
@@ -304,7 +304,7 @@ export function AdminStatCard({
   color?: 'cyan' | 'green' | 'red' | 'yellow' | 'purple';
 }) {
   const colors = {
-    cyan: '#00e5ff',
+    cyan: '#475569',
     green: '#00ff88',
     red: '#ff4444',
     yellow: '#ffcc00',

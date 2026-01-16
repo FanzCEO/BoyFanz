@@ -137,7 +137,7 @@ export default function FanzSignup() {
           {/* STEP 1: Welcome Screen */}
           {currentStep === 'welcome' && (
             <div className="p-8 md:p-12 text-center">
-              <div className="mx-auto mb-6 w-20 h-20 bg-gradient-to-br from-[#d4a959]/20 to-[#00e5ff]/20 rounded-full flex items-center justify-center border border-[#d4a959]/30">
+              <div className="mx-auto mb-6 w-20 h-20 bg-gradient-to-br from-[#d4a959]/20 to-[#475569]/20 rounded-full flex items-center justify-center border border-[#d4a959]/30">
                 <Heart className="h-10 w-10 text-[#d4a959]" />
               </div>
               <h1 className="text-4xl md:text-5xl font-['Bebas_Neue'] text-white mb-4 tracking-wide">
@@ -154,7 +154,7 @@ export default function FanzSignup() {
                   <p className="text-sm text-zinc-400">Access unique creator posts</p>
                 </div>
                 <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700">
-                  <MessageCircle className="w-8 h-8 text-[#00e5ff] mx-auto mb-2" />
+                  <MessageCircle className="w-8 h-8 text-[#475569] mx-auto mb-2" />
                   <h3 className="text-white font-semibold mb-1">Direct Connection</h3>
                   <p className="text-sm text-zinc-400">Chat with your favorites</p>
                 </div>
@@ -404,7 +404,7 @@ export default function FanzSignup() {
           {/* STEP 4: Complete - Dashboard Intro */}
           {currentStep === 'complete' && (
             <div className="p-8 md:p-12 text-center">
-              <div className="mx-auto mb-6 w-20 h-20 bg-gradient-to-br from-[#d4a959]/20 to-[#00e5ff]/20 rounded-full flex items-center justify-center border border-[#d4a959]/30 animate-pulse">
+              <div className="mx-auto mb-6 w-20 h-20 bg-gradient-to-br from-[#d4a959]/20 to-[#475569]/20 rounded-full flex items-center justify-center border border-[#d4a959]/30 animate-pulse">
                 <Sparkles className="h-10 w-10 text-[#d4a959]" />
               </div>
               <h1 className="text-4xl md:text-5xl font-['Bebas_Neue'] text-white mb-4 tracking-wide">
@@ -421,7 +421,7 @@ export default function FanzSignup() {
                   <p className="text-sm text-zinc-400">Discover amazing creators</p>
                 </div>
                 <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700">
-                  <Heart className="w-8 h-8 text-[#00e5ff] mx-auto mb-2" />
+                  <Heart className="w-8 h-8 text-[#475569] mx-auto mb-2" />
                   <h3 className="text-white font-semibold mb-1">Follow & Like</h3>
                   <p className="text-sm text-zinc-400">Support your favorites</p>
                 </div>
@@ -444,7 +444,7 @@ export default function FanzSignup() {
 
               <p className="mt-6 text-sm text-zinc-500">
                 Want to become a creator?{" "}
-                <Link href="/auth/breeding-zone-signup" className="text-[#00e5ff] hover:underline">
+                <Link href="/auth/breeding-zone-signup" className="text-[#475569] hover:underline">
                   Join Breeding Zone
                 </Link>
               </p>

@@ -98,9 +98,9 @@ const tierData = [
   {
     tier: "diamond_star",
     name: "Diamond Star",
-    color: "from-cyan-400 to-cyan-500",
+    color: "from-slate-400 to-slate-500",
     textColor: "text-cyan-300",
-    borderColor: "border-cyan-400/30",
+    borderColor: "border-slate-400/30",
     requirements: {
       fans: 25000,
       referrals: 100,
@@ -127,15 +127,15 @@ export default function StarzSignup() {
 
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-purple-500/5 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-500/10 via-purple-500/5 to-transparent pointer-events-none" />
         <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="text-center max-w-4xl mx-auto relative">
-            <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 rounded-full px-6 py-2 mb-6">
-              <Zap className="w-4 h-4 text-cyan-400" />
+            <div className="inline-flex items-center gap-2 bg-slate-500/10 border border-slate-500/30 rounded-full px-6 py-2 mb-6">
+              <Zap className="w-4 h-4 text-slate-400" />
               <span className="text-sm text-cyan-300 font-medium">Performance-Based Membership</span>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-['Bebas_Neue'] mb-6 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent tracking-wide">
+            <h1 className="text-5xl md:text-7xl font-['Bebas_Neue'] mb-6 bg-gradient-to-r from-slate-400 via-purple-400 to-pink-400 bg-clip-text text-transparent tracking-wide">
               Earn Your Star Status
             </h1>
 
@@ -146,7 +146,7 @@ export default function StarzSignup() {
 
             <div className="flex flex-wrap justify-center gap-4 mb-12">
               <div className="flex items-center gap-2 bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-2">
-                <Users className="w-5 h-5 text-cyan-400" />
+                <Users className="w-5 h-5 text-slate-400" />
                 <span className="text-sm text-zinc-300">Fan Count</span>
               </div>
               <div className="flex items-center gap-2 bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-2">
@@ -165,7 +165,7 @@ export default function StarzSignup() {
 
             <Button
               asChild
-              className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 text-white px-8 py-6 text-lg rounded-full shadow-lg shadow-cyan-500/30"
+              className="bg-gradient-to-r from-slate-500 to-purple-500 hover:from-slate-400 hover:to-purple-400 text-white px-8 py-6 text-lg rounded-full shadow-lg shadow-slate-500/30"
             >
               <Link href="/auth/signup">
                 Start Your Creator Journey
@@ -186,11 +186,11 @@ export default function StarzSignup() {
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-            <Card className="bg-zinc-900/50 border-cyan-500/30 backdrop-blur-sm">
+            <Card className="bg-zinc-900/50 border-slate-500/30 backdrop-blur-sm">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-cyan-500/10 rounded-lg">
-                    <TrendingUp className="w-6 h-6 text-cyan-400" />
+                  <div className="p-3 bg-slate-500/10 rounded-lg">
+                    <TrendingUp className="w-6 h-6 text-slate-400" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-white mb-2">30-Day Rolling Period</h3>
@@ -256,9 +256,9 @@ export default function StarzSignup() {
           </div>
 
           {/* Important Info */}
-          <div className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/30 rounded-xl p-6 mb-12">
+          <div className="bg-gradient-to-r from-slate-500/10 to-purple-500/10 border border-slate-500/30 rounded-xl p-6 mb-12">
             <div className="flex items-start gap-4">
-              <Info className="w-6 h-6 text-cyan-400 flex-shrink-0 mt-1" />
+              <Info className="w-6 h-6 text-slate-400 flex-shrink-0 mt-1" />
               <div>
                 <h3 className="text-lg font-semibold text-white mb-2">Starz Program Rules</h3>
                 <ul className="space-y-2 text-sm text-zinc-300">
@@ -380,8 +380,8 @@ export default function StarzSignup() {
       {/* CTA Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="bg-gradient-to-br from-cyan-500/20 via-purple-500/20 to-pink-500/20 border border-cyan-500/30 rounded-2xl p-8 md:p-12">
-            <Crown className="w-16 h-16 text-cyan-400 mx-auto mb-6" />
+          <div className="bg-gradient-to-br from-slate-500/20 via-purple-500/20 to-pink-500/20 border border-slate-500/30 rounded-2xl p-8 md:p-12">
+            <Crown className="w-16 h-16 text-slate-400 mx-auto mb-6" />
             <h2 className="text-4xl font-['Bebas_Neue'] mb-4">Ready to Earn Your Stars?</h2>
             <p className="text-zinc-400 mb-8 text-lg">
               Create your creator account and start building your fanbase.
@@ -390,7 +390,7 @@ export default function StarzSignup() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 asChild
-                className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 text-white px-8 py-6 text-lg rounded-full shadow-lg shadow-cyan-500/30"
+                className="bg-gradient-to-r from-slate-500 to-purple-500 hover:from-slate-400 hover:to-purple-400 text-white px-8 py-6 text-lg rounded-full shadow-lg shadow-slate-500/30"
               >
                 <Link href="/auth/signup">
                   Start as Creator
@@ -414,7 +414,7 @@ export default function StarzSignup() {
       {/* Footer Note */}
       <div className="container mx-auto px-4 pb-16">
         <p className="text-center text-sm text-zinc-600">
-          Questions about Starz membership? <Link href="/contact" className="text-cyan-400 hover:underline">Contact Support</Link>
+          Questions about Starz membership? <Link href="/contact" className="text-slate-400 hover:underline">Contact Support</Link>
         </p>
       </div>
 

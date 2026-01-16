@@ -11,7 +11,7 @@
   --card-foreground: #ffffff;
   --popover: #0a0e14;
   --popover-foreground: #ffffff;
-  --primary: #00f6ff;
+  --primary: #0a1420;
   --primary-foreground: #030406;
   --secondary: #1a1a2e;
   --secondary-foreground: #ffffff;
@@ -21,30 +21,30 @@
   --accent-foreground: #ffffff;
   --destructive: #cc0000;
   --destructive-foreground: #ffffff;
-  --border: rgba(0, 246, 255, 0.15);
+  --border: rgba(100, 116, 139, 0.2);
   --input: #1a1a2e;
-  --ring: rgba(0, 246, 255, 0.5);
+  --ring: rgba(100, 116, 139, 0.4);
   --sidebar: #050810;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #00f6ff;
+  --sidebar-primary: #0a1420;
   --sidebar-primary-foreground: #030406;
   --sidebar-accent: #ff1a1a;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(0, 246, 255, 0.1);
-  --sidebar-ring: rgba(0, 246, 255, 0.3);
+  --sidebar-border: rgba(100, 116, 139, 0.15);
+  --sidebar-ring: rgba(100, 116, 139, 0.25);
   
   /* Dungeon-specific tokens */
   --dungeon-void: #030406;
   --dungeon-deep: #050810;
   --dungeon-smoke: #0a0e14;
-  --neon-cyan: #00f6ff;
-  --neon-cyan-dim: #00c4cc;
-  --neon-cyan-glow: rgba(0, 246, 255, 0.5);
+  --neon-cyan: #0a1420;
+  --neon-cyan-dim: #475569;
+  --neon-cyan-glow: rgba(71, 85, 105, 0.4);
   --neon-red: #ff1a1a;
   --neon-red-dim: #cc1515;
   --neon-red-glow: rgba(255, 26, 26, 0.4);
   --panel-surface: rgba(8, 14, 22, 0.85);
-  --glow-cyan: 0 0 20px rgba(0, 246, 255, 0.3), 0 0 60px rgba(0, 246, 255, 0.15);
+  --glow-cyan: 0 0 20px rgba(71, 85, 105, 0.2), 0 0 60px rgba(71, 85, 105, 0.1);
   --glow-red: 0 0 20px rgba(255, 26, 26, 0.25), 0 0 60px rgba(255, 26, 26, 0.12);
 }
 

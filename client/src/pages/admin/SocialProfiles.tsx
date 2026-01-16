@@ -60,7 +60,7 @@ export default function SocialProfiles() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-cyan-400 flex items-center gap-2">
+        <h1 className="text-3xl font-bold text-slate-400 flex items-center gap-2">
           <Share2 className="h-8 w-8" />
           Social Profiles
         </h1>
@@ -68,25 +68,25 @@ export default function SocialProfiles() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardContent className="pt-6">
-            <div className="text-3xl font-bold text-cyan-400">4</div>
+            <div className="text-3xl font-bold text-slate-400">4</div>
             <p className="text-gray-400">Connected Platforms</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardContent className="pt-6">
             <div className="text-3xl font-bold text-green-400">55.9K</div>
             <p className="text-gray-400">Total Followers</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardContent className="pt-6">
-            <div className="text-3xl font-bold text-cyan-400">2,847</div>
+            <div className="text-3xl font-bold text-slate-400">2,847</div>
             <p className="text-gray-400">Social Shares</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardContent className="pt-6">
             <div className="text-3xl font-bold text-yellow-400">1,234</div>
             <p className="text-gray-400">Social Signups</p>
@@ -95,16 +95,16 @@ export default function SocialProfiles() {
       </div>
 
       <Tabs defaultValue="profiles" className="space-y-6">
-        <TabsList className="bg-gray-900 border border-cyan-500/20">
+        <TabsList className="bg-gray-900 border border-slate-500/20">
           <TabsTrigger value="profiles">Profiles</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
           <TabsTrigger value="sharing">Sharing Options</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profiles" className="space-y-4">
-          <Card className="bg-gray-900 border-cyan-500/20">
+          <Card className="bg-gray-900 border-slate-500/20">
             <CardHeader>
-              <CardTitle className="text-cyan-400 flex items-center gap-2">
+              <CardTitle className="text-slate-400 flex items-center gap-2">
                 <Twitter className="h-5 w-5" />
                 Twitter / X
               </CardTitle>
@@ -126,7 +126,7 @@ export default function SocialProfiles() {
                   onChange={(e) =>
                     setProfiles({ ...profiles, twitter: { ...profiles.twitter, handle: e.target.value } })
                   }
-                  className="bg-gray-800 border-cyan-500/20"
+                  className="bg-gray-800 border-slate-500/20"
                   placeholder="@boyfanz"
                 />
               </div>
@@ -137,7 +137,7 @@ export default function SocialProfiles() {
                   onChange={(e) =>
                     setProfiles({ ...profiles, twitter: { ...profiles.twitter, url: e.target.value } })
                   }
-                  className="bg-gray-800 border-cyan-500/20"
+                  className="bg-gray-800 border-slate-500/20"
                   placeholder="https://twitter.com/boyfanz"
                 />
               </div>
@@ -148,9 +148,9 @@ export default function SocialProfiles() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-cyan-500/20">
+          <Card className="bg-gray-900 border-slate-500/20">
             <CardHeader>
-              <CardTitle className="text-cyan-400 flex items-center gap-2">
+              <CardTitle className="text-slate-400 flex items-center gap-2">
                 <Facebook className="h-5 w-5" />
                 Facebook
               </CardTitle>
@@ -172,7 +172,7 @@ export default function SocialProfiles() {
                   onChange={(e) =>
                     setProfiles({ ...profiles, facebook: { ...profiles.facebook, handle: e.target.value } })
                   }
-                  className="bg-gray-800 border-cyan-500/20"
+                  className="bg-gray-800 border-slate-500/20"
                   placeholder="BoyFanzOfficial"
                 />
               </div>
@@ -183,7 +183,7 @@ export default function SocialProfiles() {
                   onChange={(e) =>
                     setProfiles({ ...profiles, facebook: { ...profiles.facebook, url: e.target.value } })
                   }
-                  className="bg-gray-800 border-cyan-500/20"
+                  className="bg-gray-800 border-slate-500/20"
                   placeholder="https://facebook.com/boyfanz"
                 />
               </div>
@@ -194,9 +194,9 @@ export default function SocialProfiles() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-cyan-500/20">
+          <Card className="bg-gray-900 border-slate-500/20">
             <CardHeader>
-              <CardTitle className="text-cyan-400 flex items-center gap-2">
+              <CardTitle className="text-slate-400 flex items-center gap-2">
                 <Instagram className="h-5 w-5" />
                 Instagram
               </CardTitle>
@@ -218,7 +218,7 @@ export default function SocialProfiles() {
                   onChange={(e) =>
                     setProfiles({ ...profiles, instagram: { ...profiles.instagram, handle: e.target.value } })
                   }
-                  className="bg-gray-800 border-cyan-500/20"
+                  className="bg-gray-800 border-slate-500/20"
                   placeholder="@boyfanz_official"
                 />
               </div>
@@ -229,7 +229,7 @@ export default function SocialProfiles() {
                   onChange={(e) =>
                     setProfiles({ ...profiles, instagram: { ...profiles.instagram, url: e.target.value } })
                   }
-                  className="bg-gray-800 border-cyan-500/20"
+                  className="bg-gray-800 border-slate-500/20"
                   placeholder="https://instagram.com/boyfanz_official"
                 />
               </div>
@@ -240,9 +240,9 @@ export default function SocialProfiles() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-cyan-500/20">
+          <Card className="bg-gray-900 border-slate-500/20">
             <CardHeader>
-              <CardTitle className="text-cyan-400 flex items-center gap-2">
+              <CardTitle className="text-slate-400 flex items-center gap-2">
                 <Youtube className="h-5 w-5" />
                 YouTube
               </CardTitle>
@@ -264,7 +264,7 @@ export default function SocialProfiles() {
                   onChange={(e) =>
                     setProfiles({ ...profiles, youtube: { ...profiles.youtube, handle: e.target.value } })
                   }
-                  className="bg-gray-800 border-cyan-500/20"
+                  className="bg-gray-800 border-slate-500/20"
                   placeholder="BoyFanz"
                 />
               </div>
@@ -275,7 +275,7 @@ export default function SocialProfiles() {
                   onChange={(e) =>
                     setProfiles({ ...profiles, youtube: { ...profiles.youtube, url: e.target.value } })
                   }
-                  className="bg-gray-800 border-cyan-500/20"
+                  className="bg-gray-800 border-slate-500/20"
                   placeholder="https://youtube.com/@boyfanz"
                 />
               </div>
@@ -284,9 +284,9 @@ export default function SocialProfiles() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
-          <Card className="bg-gray-900 border-cyan-500/20">
+          <Card className="bg-gray-900 border-slate-500/20">
             <CardHeader>
-              <CardTitle className="text-cyan-400">Social Media Settings</CardTitle>
+              <CardTitle className="text-slate-400">Social Media Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -330,9 +330,9 @@ export default function SocialProfiles() {
         </TabsContent>
 
         <TabsContent value="sharing" className="space-y-4">
-          <Card className="bg-gray-900 border-cyan-500/20">
+          <Card className="bg-gray-900 border-slate-500/20">
             <CardHeader>
-              <CardTitle className="text-cyan-400">Auto-Posting Settings</CardTitle>
+              <CardTitle className="text-slate-400">Auto-Posting Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -356,7 +356,7 @@ export default function SocialProfiles() {
       </Tabs>
 
       <div className="flex justify-end">
-        <Button onClick={handleSave} className="bg-gradient-to-r from-cyan-500 to-blue-500">
+        <Button onClick={handleSave} className="bg-gradient-to-r from-slate-500 to-blue-500">
           <Save className="h-4 w-4 mr-2" />
           Save Settings
         </Button>

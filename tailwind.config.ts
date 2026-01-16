@@ -12,9 +12,9 @@ export default {
       },
       colors: {
         // BoyFanz Brand Colors
-        "fanz-red": "#00e5ff", // Changed to cyan (brand color)
+        "fanz-red": "#475569", // Changed to cyan (brand color)
         "fanz-gold": "#ffd700", // Gold accent
-        "fanz-cyan": "#00e5ff", // Primary brand color
+        "fanz-cyan": "#475569", // Primary brand color
         background: "var(--background)",
         foreground: "var(--foreground)",
         card: {
@@ -198,26 +198,26 @@ export default {
           textShadow: '0 0 20px rgba(0, 229, 255, 0.6), 0 0 40px rgba(0, 229, 255, 0.4), 0 2px 4px rgba(0, 0, 0, 0.8)',
         },
         '.bg-gradient-neon': {
-          background: 'linear-gradient(135deg, #00e5ff 0%, #00bcd4 100%)',
+          background: 'linear-gradient(135deg, #475569 0%, #334155 100%)',
         },
         '.bg-gradient-red-golden': {
-          background: 'linear-gradient(135deg, #00e5ff 0%, #00bcd4 100%)',
+          background: 'linear-gradient(135deg, #475569 0%, #334155 100%)',
         },
         '.bg-gradient-fight': {
           background: 'linear-gradient(135deg, rgba(0, 20, 25, 0.9) 0%, rgba(0, 10, 12, 0.95) 100%)',
         },
         '.border-gradient-neon': {
           border: '2px solid transparent',
-          backgroundImage: 'linear-gradient(#000, #000), linear-gradient(135deg, #00e5ff, #00bcd4)',
+          backgroundImage: 'linear-gradient(#000, #000), linear-gradient(135deg, #475569, #334155)',
           backgroundOrigin: 'border-box',
           backgroundClip: 'content-box, border-box',
         },
         '.border-golden-glow': {
-          border: '2px solid #00e5ff',
+          border: '2px solid #475569',
           boxShadow: '0 0 20px rgba(0, 229, 255, 0.4), 0 0 40px rgba(0, 229, 255, 0.2)',
         },
         '.border-blood-glow': {
-          border: '2px solid #00e5ff',
+          border: '2px solid #475569',
           boxShadow: '0 0 20px rgba(0, 229, 255, 0.5), 0 0 40px rgba(0, 229, 255, 0.3)',
         },
       }

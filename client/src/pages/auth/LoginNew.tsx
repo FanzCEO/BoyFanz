@@ -65,7 +65,7 @@ export default function LoginNew() {
         {/* Logo/Header */}
         <div className="text-center mb-8">
           <h1 className="font-display text-5xl font-bold mb-2">
-            <span className="text-[#00e5ff]">Boy</span>
+            <span className="text-[#475569]">Boy</span>
             <span className="text-[#d4a959]">Fanz</span>
           </h1>
           <p className="text-zinc-400 text-sm">Welcome back</p>
@@ -79,7 +79,7 @@ export default function LoginNew() {
           }}
         >
           {/* Neon glow effect */}
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#00e5ff]/5 via-transparent to-[#d4a959]/5 pointer-events-none" />
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#475569]/5 via-transparent to-[#d4a959]/5 pointer-events-none" />
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 relative z-10">
@@ -97,7 +97,7 @@ export default function LoginNew() {
                           type="email"
                           placeholder="you@example.com"
                           data-testid="input-email"
-                          className="pl-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#00e5ff]/50 focus:ring-[#00e5ff]/20"
+                          className="pl-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#475569]/50 focus:ring-[#475569]/20"
                         />
                       </div>
                     </FormControl>
@@ -130,7 +130,7 @@ export default function LoginNew() {
                           type={showPassword ? "text" : "password"}
                           placeholder="Enter your password"
                           data-testid="input-password"
-                          className="pl-10 pr-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#00e5ff]/50 focus:ring-[#00e5ff]/20"
+                          className="pl-10 pr-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#475569]/50 focus:ring-[#475569]/20"
                         />
                         <button
                           type="button"
@@ -151,7 +151,7 @@ export default function LoginNew() {
                 type="submit"
                 disabled={loginMutation.isPending}
                 data-testid="button-login"
-                className="w-full h-12 bg-[#00e5ff] hover:bg-[#00bcd4] text-white font-bold text-base shadow-lg shadow-cyan-500/20 transition-all"
+                className="w-full h-12 bg-[#475569] hover:bg-[#334155] text-white font-bold text-base shadow-lg shadow-slate-500/20 transition-all"
               >
                 {loginMutation.isPending ? (
                   <>

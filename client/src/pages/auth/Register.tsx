@@ -127,7 +127,7 @@ export default function Register() {
         {/* Logo/Header */}
         <div className="text-center mb-8">
           <h1 className="font-display text-5xl font-bold mb-2">
-            <span className="text-[#00e5ff]">Boy</span>
+            <span className="text-[#475569]">Boy</span>
             <span className="text-[#d4a959]">Fanz</span>
           </h1>
           <p className="text-zinc-400 text-sm">Create your account</p>
@@ -141,7 +141,7 @@ export default function Register() {
           }}
         >
           {/* Neon glow effect */}
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#00e5ff]/5 via-transparent to-[#d4a959]/5 pointer-events-none" />
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#475569]/5 via-transparent to-[#d4a959]/5 pointer-events-none" />
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 relative z-10">
@@ -159,7 +159,7 @@ export default function Register() {
                           type="email"
                           placeholder="you@example.com"
                           data-testid="input-email"
-                          className="pl-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#00e5ff]/50 focus:ring-[#00e5ff]/20"
+                          className="pl-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#475569]/50 focus:ring-[#475569]/20"
                         />
                       </div>
                     </FormControl>
@@ -182,7 +182,7 @@ export default function Register() {
                           type={showPassword ? "text" : "password"}
                           placeholder="Create a strong password"
                           data-testid="input-password"
-                          className="pl-10 pr-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#00e5ff]/50 focus:ring-[#00e5ff]/20"
+                          className="pl-10 pr-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#475569]/50 focus:ring-[#475569]/20"
                         />
                         <button
                           type="button"
@@ -214,7 +214,7 @@ export default function Register() {
                           type={showConfirmPassword ? "text" : "password"}
                           placeholder="Re-enter your password"
                           data-testid="input-confirm-password"
-                          className="pl-10 pr-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#00e5ff]/50 focus:ring-[#00e5ff]/20"
+                          className="pl-10 pr-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#475569]/50 focus:ring-[#475569]/20"
                         />
                         <button
                           type="button"
@@ -235,7 +235,7 @@ export default function Register() {
                 type="submit"
                 disabled={registerMutation.isPending}
                 data-testid="button-register"
-                className="w-full h-12 bg-[#00e5ff] hover:bg-[#00bcd4] text-white font-bold text-base shadow-lg shadow-cyan-500/20 transition-all"
+                className="w-full h-12 bg-[#475569] hover:bg-[#334155] text-white font-bold text-base shadow-lg shadow-slate-500/20 transition-all"
               >
                 {registerMutation.isPending ? (
                   <>

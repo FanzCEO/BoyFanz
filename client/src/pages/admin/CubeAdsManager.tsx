@@ -45,8 +45,8 @@ interface CubeAd {
 
 // Predefined gradients for easy selection
 const GRADIENT_PRESETS = [
-  { name: "Cyan Empire", value: "from-cyan-600 via-blue-700 to-purple-800" },
-  { name: "Emerald Shield", value: "from-emerald-600 via-teal-600 to-cyan-700" },
+  { name: "Cyan Empire", value: "from-slate-600 via-blue-700 to-purple-800" },
+  { name: "Emerald Shield", value: "from-emerald-600 via-teal-600 to-slate-700" },
   { name: "Fire Defense", value: "from-red-600 via-orange-600 to-amber-600" },
   { name: "Royal Vault", value: "from-violet-600 via-purple-600 to-fuchsia-600" },
   { name: "Deep Analytics", value: "from-blue-600 via-indigo-600 to-violet-600" },
@@ -83,7 +83,7 @@ function CubePreview({ ad }: { ad: Partial<CubeAd> }) {
           style={{
             transform: "translateZ(48px)",
             backfaceVisibility: "hidden",
-            background: `linear-gradient(135deg, ${ad.gradient?.replace('from-', '').split(' ')[0] || '#06b6d4'}, ${ad.gradient?.includes('to-') ? ad.gradient.split('to-')[1] : '#8b5cf6'})`,
+            background: `linear-gradient(135deg, ${ad.gradient?.replace('from-', '').split(' ')[0] || '#64748b'}, ${ad.gradient?.includes('to-') ? ad.gradient.split('to-')[1] : '#8b5cf6'})`,
           }}
         >
           <span className="text-[8px] text-white/40 uppercase tracking-wider absolute top-1 left-2">Ad</span>
@@ -147,7 +147,7 @@ function AdFormDialog({
       <DialogContent className="max-w-2xl bg-gray-900 border-gray-700">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-cyan-400" />
+            <Sparkles className="w-5 h-5 text-slate-400" />
             {ad?.id ? "Edit Cube Ad" : "Create New Cube Ad"}
           </DialogTitle>
         </DialogHeader>
@@ -253,7 +253,7 @@ function AdFormDialog({
           </Button>
           <Button 
             onClick={() => onSave(formData)}
-            className="bg-cyan-600 hover:bg-cyan-700"
+            className="bg-slate-600 hover:bg-slate-700"
           >
             <Save className="w-4 h-4 mr-2" />
             {ad?.id ? "Update Ad" : "Create Ad"}
@@ -359,7 +359,7 @@ export default function CubeAdsManager() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-cyan-600 to-purple-600 rounded-lg">
+            <div className="p-2 bg-gradient-to-br from-slate-600 to-purple-600 rounded-lg">
               <Sparkles className="w-6 h-6" />
             </div>
             Floating Cube Ads
@@ -373,7 +373,7 @@ export default function CubeAdsManager() {
             setEditingAd(null);
             setIsFormOpen(true);
           }}
-          className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500"
+          className="bg-gradient-to-r from-slate-600 to-purple-600 hover:from-slate-500 hover:to-purple-500"
         >
           <Plus className="w-4 h-4 mr-2" />
           New Cube Ad
@@ -389,7 +389,7 @@ export default function CubeAdsManager() {
                 <p className="text-gray-400 text-sm">Total Ads</p>
                 <p className="text-2xl font-bold text-white">{stats.total_ads || 0}</p>
               </div>
-              <Sparkles className="w-8 h-8 text-cyan-400 opacity-50" />
+              <Sparkles className="w-8 h-8 text-slate-400 opacity-50" />
             </div>
           </CardContent>
         </Card>

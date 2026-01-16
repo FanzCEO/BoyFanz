@@ -46,7 +46,7 @@ export const NEON_COLORS = {
   // Blues - cool, trustworthy
   cyan: {
     light: '#4facfe',
-    base: '#00d2ff',
+    base: '#475569',
     dark: '#00b4d8',
     glow: 'rgba(0, 210, 255, VAR)',
     contrast: '#000000',

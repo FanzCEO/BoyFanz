@@ -105,7 +105,7 @@ export function UndergroundLoader({
         {/* Underground club lighting */}
         <div className="absolute inset-0 bg-gradient-radial from-red-900/20 via-transparent to-transparent animate-pulse" />
         <div className="absolute top-10 left-10 w-32 h-32 bg-red-500/10 rounded-full blur-3xl animate-ping" />
-        <div className="absolute bottom-20 right-16 w-24 h-24 bg-cyan-500/15 rounded-full blur-2xl animate-bounce" />
+        <div className="absolute bottom-20 right-16 w-24 h-24 bg-slate-500/15 rounded-full blur-2xl animate-bounce" />
         <div className="absolute top-1/2 left-1/3 w-40 h-40 bg-purple-600/8 rounded-full blur-3xl animate-pulse" />
 
         {/* Film grain overlay */}
@@ -169,7 +169,7 @@ export function UndergroundLoader({
           {Array.from({ length: 20 }, (_, i) => (
             <div
               key={i}
-              className="w-1 bg-gradient-to-t from-red-600 to-cyan-400 rounded-full"
+              className="w-1 bg-gradient-to-t from-red-600 to-slate-400 rounded-full"
               style={{
                 height: `${Math.random() * 40 + 10}px`,
                 animation: `audioBar ${0.5 + Math.random() * 1}s ease-in-out infinite alternate`
@@ -194,7 +194,7 @@ function FullExperienceContent({
       {/* Neon BoyFanz logo */}
       <div className="relative">
         <h1 
-          className="text-6xl font-black uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-pink-500 to-cyan-500"
+          className="text-6xl font-black uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-pink-500 to-slate-500"
           style={{
             textShadow: '0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(239,68,68,0.5), 0 0 60px rgba(239,68,68,0.3)',
             filter: `brightness(${0.8 + atmosphereIntensity * 0.4})`
@@ -246,11 +246,11 @@ function FullExperienceContent({
         </div>
         <div className="h-2 bg-gray-800 rounded-full overflow-hidden border border-red-900">
           <div 
-            className="h-full bg-gradient-to-r from-red-600 via-pink-500 to-cyan-400 rounded-full transition-all duration-300 relative"
+            className="h-full bg-gradient-to-r from-red-600 via-pink-500 to-slate-400 rounded-full transition-all duration-300 relative"
             style={{ width: `${progress}%` }}
           >
             {/* Glowing effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-red-400/50 via-pink-400/50 to-cyan-400/50 rounded-full blur-sm animate-pulse" />
+            <div className="absolute inset-0 bg-gradient-to-r from-red-400/50 via-pink-400/50 to-slate-400/50 rounded-full blur-sm animate-pulse" />
           </div>
         </div>
       </div>
@@ -267,7 +267,7 @@ function QuickLoadContent({ progress }: { progress: number }) {
       </div>
       <div className="w-48 h-2 bg-gray-800 rounded-full overflow-hidden mx-auto">
         <div 
-          className="h-full bg-gradient-to-r from-red-500 to-cyan-500 rounded-full transition-all duration-200"
+          className="h-full bg-gradient-to-r from-red-500 to-slate-500 rounded-full transition-all duration-200"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -282,7 +282,7 @@ function NeonPulseContent() {
     <div className="text-center">
       <div className="relative">
         <div className="w-32 h-32 mx-auto border-4 border-red-500 rounded-full animate-ping opacity-75" />
-        <div className="absolute inset-0 w-32 h-32 mx-auto border-2 border-cyan-500 rounded-full animate-ping opacity-50" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute inset-0 w-32 h-32 mx-auto border-2 border-slate-500 rounded-full animate-ping opacity-50" style={{ animationDelay: '0.5s' }} />
         <div className="absolute inset-0 w-32 h-32 mx-auto flex items-center justify-center">
           <div className="text-2xl font-bold text-white uppercase">BF</div>
         </div>

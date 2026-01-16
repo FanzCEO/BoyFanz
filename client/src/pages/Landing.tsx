@@ -347,7 +347,7 @@ function ShowerEffect({ isActive }: { isActive: boolean }) {
       {isActive && [...Array(12)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute w-0.5 bg-gradient-to-b from-cyan-400/60 to-transparent"
+          className="absolute w-0.5 bg-gradient-to-b from-slate-400/60 to-transparent"
           style={{
             left: `${10 + (i * 7)}%`,
             height: '30px',
@@ -702,7 +702,7 @@ export default function Landing() {
         {[...Array(12)].map((_, i) => (
           <motion.div
             key={`drip-${i}`}
-            className="absolute w-0.5 bg-gradient-to-b from-cyan-400/60 via-cyan-300/40 to-transparent"
+            className="absolute w-0.5 bg-gradient-to-b from-slate-400/60 via-cyan-300/40 to-transparent"
             style={{
               left: `${5 + i * 8}%`,
               height: '60px',
@@ -939,19 +939,19 @@ export default function Landing() {
               <div
                 className="relative group rounded-xl p-8 overflow-hidden cursor-default transition-all duration-300 hover:scale-[1.02]"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.08) 0%, rgba(0, 100, 150, 0.12) 100%)',
-                  border: '2px solid rgba(0, 229, 255, 0.3)',
-                  boxShadow: '0 0 40px rgba(0, 229, 255, 0.15)',
+                  background: 'linear-gradient(135deg, rgba(71, 85, 105, 0.08) 0%, rgba(0, 100, 150, 0.12) 100%)',
+                  border: '2px solid rgba(71, 85, 105, 0.3)',
+                  boxShadow: '0 0 40px rgba(71, 85, 105, 0.15)',
                 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-400/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="relative flex items-center gap-4">
                   <div className="flex-shrink-0">
                     <div
                       className="rounded-full p-4"
                       style={{
-                        background: 'linear-gradient(135deg, #00e5ff 0%, #00bcd4 100%)',
-                        boxShadow: '0 0 30px rgba(0, 229, 255, 0.5)',
+                        background: 'linear-gradient(135deg, #475569 0%, #334155 100%)',
+                        boxShadow: '0 0 30px rgba(71, 85, 105, 0.5)',
                       }}
                     >
                       <Zap className="w-8 h-8 text-black fill-black" />
@@ -961,10 +961,10 @@ export default function Landing() {
                     <h3
                       className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-1"
                       style={{
-                        background: 'linear-gradient(135deg, #00e5ff 0%, #18ffff 100%)',
+                        background: 'linear-gradient(135deg, #475569 0%, #18ffff 100%)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
-                        textShadow: '0 0 40px rgba(0, 229, 255, 0.3)',
+                        textShadow: '0 0 40px rgba(71, 85, 105, 0.3)',
                       }}
                     >
                       Free to Join
@@ -1072,14 +1072,14 @@ export default function Landing() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight">
-                  Featured <span className="text-cyan-400">Creators</span>
+                  Featured <span className="text-slate-400">Creators</span>
                 </h2>
                 <p className="text-gray-500 mt-1">Discover the hottest creators on BoyFanz</p>
               </div>
               <Button
                 onClick={() => setLocation('/search')}
                 variant="outline"
-                className="border-cyan-400/30 text-cyan-400 hover:bg-cyan-400/10"
+                className="border-slate-400/30 text-slate-400 hover:bg-slate-400/10"
               >
                 View All <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
@@ -1099,7 +1099,7 @@ export default function Landing() {
                       className="group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
                       style={{
                         background: 'linear-gradient(135deg, rgba(20, 15, 15, 0.9) 0%, rgba(10, 8, 8, 0.95) 100%)',
-                        border: '1px solid rgba(0, 229, 255, 0.2)',
+                        border: '1px solid rgba(71, 85, 105, 0.2)',
                       }}
                       onClick={() => setLocation(`/creator/${creator.username}`)}
                     >
@@ -1114,7 +1114,7 @@ export default function Landing() {
 
                         {/* Verified badge */}
                         {creator.verified && (
-                          <div className="absolute top-3 right-3 bg-cyan-400 rounded-full p-1.5">
+                          <div className="absolute top-3 right-3 bg-slate-400 rounded-full p-1.5">
                             <Star className="w-4 h-4 text-black fill-black" />
                           </div>
                         )}
@@ -1133,20 +1133,20 @@ export default function Landing() {
                         </p>
 
                         {/* Stats */}
-                        <div className="flex items-center gap-2 text-xs text-cyan-400">
+                        <div className="flex items-center gap-2 text-xs text-slate-400">
                           <Users className="w-3 h-3" />
                           <span>{creator.subscriberCount.toLocaleString()} fans</span>
                         </div>
                       </div>
 
                       {/* Hover overlay */}
-                      <div className="absolute inset-0 bg-cyan-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                      <div className="absolute inset-0 bg-slate-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                     </div>
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious className="left-0 md:-left-12 bg-black/80 border-cyan-400/30 text-cyan-400" />
-              <CarouselNext className="right-0 md:-right-12 bg-black/80 border-cyan-400/30 text-cyan-400" />
+              <CarouselPrevious className="left-0 md:-left-12 bg-black/80 border-slate-400/30 text-slate-400" />
+              <CarouselNext className="right-0 md:-right-12 bg-black/80 border-slate-400/30 text-slate-400" />
             </Carousel>
           </motion.div>
 

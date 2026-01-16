@@ -384,7 +384,7 @@ export default function ThemeManager() {
                 <div className="flex gap-2">
                   <div 
                     className="w-8 h-8 rounded border" 
-                    style={{ backgroundColor: (theme.colors as any)?.primary || '#00e5ff' }}
+                    style={{ backgroundColor: (theme.colors as any)?.primary || '#475569' }}
                     title="Primary Color"
                   />
                   <div 

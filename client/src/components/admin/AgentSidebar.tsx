@@ -105,7 +105,7 @@ export function AgentSidebar() {
     if (name.toLowerCase().includes("database") || name.toLowerCase().includes("db")) {
       return <Database className="w-4 h-4 text-blue-400" />;
     }
-    return <Bot className="w-4 h-4 text-cyan-400" />;
+    return <Bot className="w-4 h-4 text-slate-400" />;
   };
 
   // Default local bots for this platform
@@ -131,7 +131,7 @@ export function AgentSidebar() {
       <div className="p-4 border-b border-gray-800">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Bot className="w-5 h-5 text-cyan-400" />
+            <Bot className="w-5 h-5 text-slate-400" />
             <span className="font-semibold text-white">Agent Status</span>
           </div>
           <div className="flex items-center gap-2">
@@ -181,7 +181,7 @@ export function AgentSidebar() {
         <Collapsible defaultOpen>
           <CollapsibleTrigger className="flex items-center justify-between w-full p-2 rounded-lg hover:bg-gray-800/50 transition-colors">
             <div className="flex items-center gap-2">
-              <Database className="w-4 h-4 text-cyan-400" />
+              <Database className="w-4 h-4 text-slate-400" />
               <span className="text-sm font-medium text-white">Central Bots</span>
               <Badge className="bg-gray-700 text-gray-300 text-[10px]">{centralBotsList.length}</Badge>
             </div>
@@ -215,7 +215,7 @@ export function AgentSidebar() {
       {/* Footer */}
       <div className="p-3 border-t border-gray-800">
         <Link href="/panel/admin/agents">
-          <a className="flex items-center justify-center gap-2 w-full p-2 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 text-sm font-medium transition-colors">
+          <a className="flex items-center justify-center gap-2 w-full p-2 rounded-lg bg-slate-500/10 hover:bg-slate-500/20 text-slate-400 text-sm font-medium transition-colors">
             <Activity className="w-4 h-4" />
             <span>Manage Agents</span>
             <ChevronRight className="w-4 h-4" />

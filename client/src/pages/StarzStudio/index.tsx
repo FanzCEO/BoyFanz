@@ -31,7 +31,7 @@ const TIER_COLORS: Record<string, string> = {
   silver_star: 'bg-gray-400',
   gold_star: 'bg-yellow-500',
   platinum_star: 'bg-gray-300',
-  diamond_star: 'bg-cyan-400',
+  diamond_star: 'bg-slate-400',
 };
 
 const TIER_ICONS: Record<string, React.ReactNode> = {

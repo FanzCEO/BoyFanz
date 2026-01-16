@@ -417,7 +417,7 @@ export default function Settings() {
 
                     <div className="space-y-2">
                       <Label htmlFor="fanzlink" className="flex items-center gap-2">
-                        <Link2 className="h-4 w-4 text-cyan-500" />
+                        <Link2 className="h-4 w-4 text-slate-500" />
                         FanzLink Bio
                       </Label>
                       <Input

@@ -171,16 +171,16 @@ export function CoStarVerificationForm({
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
       {/* Header */}
-      <Card className="cyber-card border-cyan-500/30">
+      <Card className="cyber-card border-slate-500/30">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <Shield className="w-12 h-12 text-cyan-400 mr-3" />
+            <Shield className="w-12 h-12 text-slate-400 mr-3" />
             <div className="text-left">
               <h1 className="text-2xl font-bold cyber-text-glow">FANZ™ Group Holdings LLC</h1>
               <p className="text-sm text-gray-400">Adult Co-Star Model Release + 2257 Compliance</p>
             </div>
           </div>
-          <Badge variant="outline" className="mx-auto border-cyan-500 text-cyan-400">
+          <Badge variant="outline" className="mx-auto border-slate-500 text-slate-400">
             Effective Date: February 6, 2025 | Last Updated: February 6, 2025
           </Badge>
         </CardHeader>
@@ -201,7 +201,7 @@ export function CoStarVerificationForm({
       {/* Purpose Notice */}
       <Card className="cyber-card">
         <CardHeader>
-          <CardTitle className="flex items-center text-cyan-400">
+          <CardTitle className="flex items-center text-slate-400">
             <FileText className="w-5 h-5 mr-2" />
             Purpose and Legal Scope
           </CardTitle>
@@ -228,7 +228,7 @@ export function CoStarVerificationForm({
           {/* Co-Star Information */}
           <Card className="cyber-card">
             <CardHeader>
-              <CardTitle className="text-cyan-400">Co-Star Information</CardTitle>
+              <CardTitle className="text-slate-400">Co-Star Information</CardTitle>
               <CardDescription>All fields are required unless marked optional</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -377,10 +377,10 @@ export function CoStarVerificationForm({
                 />
               </div>
 
-              <Separator className="my-4 bg-cyan-500/20" />
+              <Separator className="my-4 bg-slate-500/20" />
 
               {/* Identification Section */}
-              <h3 className="text-lg font-semibold text-cyan-400 mt-4">Identification</h3>
+              <h3 className="text-lg font-semibold text-slate-400 mt-4">Identification</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -454,10 +454,10 @@ export function CoStarVerificationForm({
                 )}
               </div>
 
-              <Separator className="my-4 bg-cyan-500/20" />
+              <Separator className="my-4 bg-slate-500/20" />
 
               {/* Address Section */}
-              <h3 className="text-lg font-semibold text-cyan-400 mt-4">Address</h3>
+              <h3 className="text-lg font-semibold text-slate-400 mt-4">Address</h3>
               <div className="grid grid-cols-1 gap-4">
                 <div className="grid grid-cols-12 gap-4">
                   <div className="col-span-10">
@@ -572,7 +572,7 @@ export function CoStarVerificationForm({
           {/* Primary Creator Information */}
           <Card className="cyber-card">
             <CardHeader>
-              <CardTitle className="text-cyan-400">Primary Creator Information</CardTitle>
+              <CardTitle className="text-slate-400">Primary Creator Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -624,7 +624,7 @@ export function CoStarVerificationForm({
           {/* Document Upload Section */}
           <Card className="cyber-card">
             <CardHeader>
-              <CardTitle className="text-cyan-400 flex items-center">
+              <CardTitle className="text-slate-400 flex items-center">
                 <Upload className="w-5 h-5 mr-2" />
                 Required Documentation
               </CardTitle>
@@ -792,7 +792,7 @@ export function CoStarVerificationForm({
               </Alert>
 
               <div className="space-y-4">
-                <h3 className="font-semibold text-cyan-400">Co-Star Acknowledgment</h3>
+                <h3 className="font-semibold text-slate-400">Co-Star Acknowledgment</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -827,10 +827,10 @@ export function CoStarVerificationForm({
                 </div>
               </div>
 
-              <Separator className="my-4 bg-cyan-500/20" />
+              <Separator className="my-4 bg-slate-500/20" />
 
               <div className="space-y-4">
-                <h3 className="font-semibold text-cyan-400">Primary Creator Verification</h3>
+                <h3 className="font-semibold text-slate-400">Primary Creator Verification</h3>
                 <FormField
                   control={form.control}
                   name="primaryCreatorSignatureDate"
@@ -849,7 +849,7 @@ export function CoStarVerificationForm({
                 />
               </div>
 
-              <Separator className="my-4 bg-cyan-500/20" />
+              <Separator className="my-4 bg-slate-500/20" />
 
               <FormField
                 control={form.control}
@@ -871,7 +871,7 @@ export function CoStarVerificationForm({
           <Card className="cyber-card">
             <CardContent className="pt-6">
               <div className="text-sm text-gray-400 space-y-2">
-                <h4 className="font-semibold text-cyan-400">Jurisdiction</h4>
+                <h4 className="font-semibold text-slate-400">Jurisdiction</h4>
                 <p>
                   This Agreement is governed by and enforceable under the laws of the State of Wyoming, USA.
                 </p>
@@ -888,7 +888,7 @@ export function CoStarVerificationForm({
             <Button
               type="submit"
               size="lg"
-              className="w-full md:w-auto px-12 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
+              className="w-full md:w-auto px-12 bg-gradient-to-r from-slate-500 to-blue-500 hover:from-slate-600 hover:to-blue-600"
               disabled={isSubmitting}
             >
               {isSubmitting ? (

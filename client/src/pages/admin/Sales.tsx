@@ -9,7 +9,7 @@ export default function Sales() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-cyan-400 flex items-center gap-2">
+        <h1 className="text-3xl font-bold text-slate-400 flex items-center gap-2">
           <ShoppingCart className="h-8 w-8" />
           Sales Management
         </h1>
@@ -17,25 +17,25 @@ export default function Sales() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardContent className="pt-6">
-            <div className="text-3xl font-bold text-cyan-400">$12,458</div>
+            <div className="text-3xl font-bold text-slate-400">$12,458</div>
             <p className="text-gray-400">Total Revenue</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardContent className="pt-6">
-            <div className="text-3xl font-bold text-cyan-400">156</div>
+            <div className="text-3xl font-bold text-slate-400">156</div>
             <p className="text-gray-400">Total Orders</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardContent className="pt-6">
             <div className="text-3xl font-bold text-green-400">142</div>
             <p className="text-gray-400">Completed</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardContent className="pt-6">
             <div className="text-3xl font-bold text-yellow-400">14</div>
             <p className="text-gray-400">Pending</p>
@@ -43,14 +43,14 @@ export default function Sales() {
         </Card>
       </div>
 
-      <Card className="bg-gray-900 border-cyan-500/20">
+      <Card className="bg-gray-900 border-slate-500/20">
         <CardHeader>
-          <CardTitle className="text-cyan-400">Recent Orders</CardTitle>
+          <CardTitle className="text-slate-400">Recent Orders</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow className="border-cyan-500/20">
+              <TableRow className="border-slate-500/20">
                 <TableHead>Order ID</TableHead>
                 <TableHead>Customer</TableHead>
                 <TableHead>Product</TableHead>
@@ -60,7 +60,7 @@ export default function Sales() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow className="border-cyan-500/10">
+              <TableRow className="border-slate-500/10">
                 <TableCell colSpan={6} className="text-center text-gray-500 py-8">
                   No sales data available
                 </TableCell>

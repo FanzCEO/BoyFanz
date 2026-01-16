@@ -400,7 +400,7 @@ export default function EventLive() {
 }
 
 function TipCard({ tip }: { tip: EventTip }) {
-  const highlightColor = tip.highlightColor || "#00e5ff";
+  const highlightColor = tip.highlightColor || "#475569";
   const amountUSD = (tip.amountCents / 100).toFixed(2);
 
   return (

@@ -66,7 +66,7 @@ export default function ForgotPassword() {
               boxShadow: "0 8px 32px 0 rgba(255, 0, 0, 0.1), inset 0 0 20px rgba(212, 169, 89, 0.05)",
             }}
           >
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#00e5ff]/5 via-transparent to-[#d4a959]/5 pointer-events-none" />
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#475569]/5 via-transparent to-[#d4a959]/5 pointer-events-none" />
             
             <div className="relative z-10">
               <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -83,7 +83,7 @@ export default function ForgotPassword() {
               <Button
                 onClick={() => setLocation("/auth/login")}
                 data-testid="button-back-to-login"
-                className="w-full bg-[#00e5ff] hover:bg-[#00bcd4] text-white font-bold"
+                className="w-full bg-[#475569] hover:bg-[#334155] text-white font-bold"
               >
                 Back to Login
               </Button>
@@ -99,7 +99,7 @@ export default function ForgotPassword() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="font-display text-5xl font-bold mb-2">
-            <span className="text-[#00e5ff]">Boy</span>
+            <span className="text-[#475569]">Boy</span>
             <span className="text-[#d4a959]">Fanz</span>
           </h1>
           <p className="text-zinc-400 text-sm">Reset your password</p>
@@ -111,7 +111,7 @@ export default function ForgotPassword() {
             boxShadow: "0 8px 32px 0 rgba(255, 0, 0, 0.1), inset 0 0 20px rgba(212, 169, 89, 0.05)",
           }}
         >
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#00e5ff]/5 via-transparent to-[#d4a959]/5 pointer-events-none" />
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#475569]/5 via-transparent to-[#d4a959]/5 pointer-events-none" />
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 relative z-10">
@@ -135,7 +135,7 @@ export default function ForgotPassword() {
                           type="email"
                           placeholder="you@example.com"
                           data-testid="input-email"
-                          className="pl-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#00e5ff]/50 focus:ring-[#00e5ff]/20"
+                          className="pl-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#475569]/50 focus:ring-[#475569]/20"
                         />
                       </div>
                     </FormControl>
@@ -148,7 +148,7 @@ export default function ForgotPassword() {
                 type="submit"
                 disabled={forgotPasswordMutation.isPending}
                 data-testid="button-send-reset-link"
-                className="w-full h-12 bg-[#00e5ff] hover:bg-[#00bcd4] text-white font-bold text-base shadow-lg shadow-cyan-500/20 transition-all"
+                className="w-full h-12 bg-[#475569] hover:bg-[#334155] text-white font-bold text-base shadow-lg shadow-slate-500/20 transition-all"
               >
                 {forgotPasswordMutation.isPending ? (
                   <>

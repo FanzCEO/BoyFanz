@@ -94,7 +94,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: any }> 
   accepted: { label: 'Awaiting Payment', color: 'bg-orange-500', icon: DollarSign },
   paid: { label: 'Ready to Start', color: 'bg-green-500', icon: PlayCircle },
   in_progress: { label: 'In Progress', color: 'bg-purple-500', icon: Package },
-  delivered: { label: 'Delivered', color: 'bg-cyan-500', icon: Send },
+  delivered: { label: 'Delivered', color: 'bg-slate-500', icon: Send },
   approved: { label: 'Completed', color: 'bg-green-600', icon: CheckCircle },
   disputed: { label: 'Disputed', color: 'bg-red-500', icon: AlertCircle },
   refunded: { label: 'Refunded', color: 'bg-gray-500', icon: XCircle },
@@ -359,7 +359,7 @@ export default function CreatorRequests() {
             )}
             {request.status === 'in_progress' && (
               <Button
-                className="flex-1 bg-cyan-600 hover:bg-cyan-700"
+                className="flex-1 bg-slate-600 hover:bg-slate-700"
                 onClick={() => {
                   setSelectedRequest(data);
                   setDeliverDialogOpen(true);
@@ -370,7 +370,7 @@ export default function CreatorRequests() {
               </Button>
             )}
             {request.status === 'delivered' && (
-              <Badge className="flex-1 justify-center py-2 bg-cyan-500 text-white">
+              <Badge className="flex-1 justify-center py-2 bg-slate-500 text-white">
                 Awaiting Fan Approval
               </Badge>
             )}
@@ -630,7 +630,7 @@ export default function CreatorRequests() {
 
           <DialogFooter>
             <Button
-              className="bg-cyan-600 hover:bg-cyan-700"
+              className="bg-slate-600 hover:bg-slate-700"
               onClick={() => deliverMutation.mutate({
                 requestId: selectedRequest!.request.id,
                 message: deliveryMessage,

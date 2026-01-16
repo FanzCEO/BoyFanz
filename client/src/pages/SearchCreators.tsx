@@ -132,11 +132,11 @@ const CreatorDoor = ({ creator, roomNumber }: { creator: Creator; roomNumber: nu
                   style={{
                     background: creator.verificationBadge === 'featured'
                       ? 'linear-gradient(135deg, rgba(255, 50, 50, 0.3) 0%, rgba(200, 30, 30, 0.4) 100%)'
-                      : 'linear-gradient(135deg, rgba(0, 229, 255, 0.2) 0%, rgba(0, 180, 200, 0.3) 100%)',
+                      : 'linear-gradient(135deg, rgba(71, 85, 105, 0.2) 0%, rgba(51, 65, 85, 0.3) 100%)',
                     border: creator.verificationBadge === 'featured'
                       ? '1px solid rgba(255, 100, 100, 0.5)'
-                      : '1px solid rgba(0, 229, 255, 0.4)',
-                    color: creator.verificationBadge === 'featured' ? '#ff6666' : '#00e5ff'
+                      : '1px solid rgba(71, 85, 105, 0.4)',
+                    color: creator.verificationBadge === 'featured' ? '#ff6666' : '#475569'
                   }}
                 >
                   <Flame className="h-3 w-3 mr-1" />

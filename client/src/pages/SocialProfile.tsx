@@ -201,7 +201,7 @@ const MOOD_OPTIONS = [
   { emoji: '💦', label: 'Wet & Wild', color: '#3b82f6' },
   { emoji: '👀', label: 'Cruising', color: '#8b5cf6' },
   { emoji: '🍑', label: 'Thicc Thoughts', color: '#f97316' },
-  { emoji: '🛁', label: 'At the Bathhouse', color: '#06b6d4' },
+  { emoji: '🛁', label: 'At the Bathhouse', color: '#64748b' },
   { emoji: '🏋️', label: 'Post-Gym Pump', color: '#22c55e' },
 ];
 
@@ -225,7 +225,7 @@ const CREATOR_CATEGORIES = [
   { id: 'dl', label: 'DL', emoji: '🤫', color: '#374151' },
   { id: 'fem', label: 'Fem', emoji: '💅', color: '#f9a8d4' },
   { id: 'fisting', label: 'Fisting', emoji: '✊', color: '#dc2626' },
-  { id: 'gay', label: 'Gay', emoji: '🏳️‍🌈', color: '#06b6d4' },
+  { id: 'gay', label: 'Gay', emoji: '🏳️‍🌈', color: '#64748b' },
   { id: 'jock', label: 'Jock', emoji: '🏈', color: '#16a34a' },
   { id: 'kink', label: 'Kink', emoji: '🔥', color: '#b91c1c' },
   { id: 'public', label: 'Public', emoji: '🌳', color: '#65a30d' },
@@ -233,7 +233,7 @@ const CREATOR_CATEGORIES = [
   { id: 'sissy', label: 'Sissy', emoji: '🎀', color: '#f472b6' },
   { id: 'southern', label: 'Southern', emoji: '🤠', color: '#92400e' },
   { id: 'straight', label: 'Straight Guyz', emoji: '🔥', color: '#1e40af' },
-  { id: 'trans', label: 'Trans', emoji: '🏳️‍⚧️', color: '#67e8f9' },
+  { id: 'trans', label: 'Trans', emoji: '🏳️‍⚧️', color: '#cbd5e1' },
   { id: 'twinkz', label: 'Twinkz', emoji: '✨', color: '#fbbf24' },
 ];
 
@@ -439,8 +439,8 @@ const GloryPostCard = ({
 
       {/* Repost Badge */}
       {post.isRepost && (
-        <div className="px-4 py-2 bg-gradient-to-r from-cyan-600/20 to-transparent border-b border-cyan-500/20">
-          <span className="text-xs text-cyan-400 flex items-center gap-1">
+        <div className="px-4 py-2 bg-gradient-to-r from-slate-600/20 to-transparent border-b border-slate-500/20">
+          <span className="text-xs text-slate-400 flex items-center gap-1">
             <Share2 className="h-3 w-3" /> {post.authorUsername} passed this around
           </span>
         </div>
@@ -490,7 +490,7 @@ const GloryPostCard = ({
                 </span>
               )}
               {post.location && (
-                <span className="text-cyan-400">
+                <span className="text-slate-400">
                   • <MapPin className="h-3 w-3 inline" /> {post.location}
                 </span>
               )}
@@ -738,7 +738,7 @@ const GloryPostCard = ({
           <Button
             variant="ghost"
             size="sm"
-            className="text-gray-400 hover:text-cyan-400"
+            className="text-gray-400 hover:text-slate-400"
             onClick={onPassAround}
           >
             <Share2 className="h-4 w-4 mr-1" />
@@ -1472,7 +1472,7 @@ const SchedulePostModal = ({
         }}
       >
         <DialogHeader>
-          <DialogTitle className="text-lg text-cyan-400 flex items-center gap-2">
+          <DialogTitle className="text-lg text-slate-400 flex items-center gap-2">
             <Calendar className="h-5 w-5" />
             Schedule Post
           </DialogTitle>
@@ -1500,7 +1500,7 @@ const SchedulePostModal = ({
           <Button
             disabled={!datetime}
             onClick={() => onSchedule(datetime)}
-            className="bg-cyan-600 hover:bg-cyan-700"
+            className="bg-slate-600 hover:bg-slate-700"
           >
             <Calendar className="h-4 w-4 mr-2" />
             Schedule
@@ -2404,7 +2404,7 @@ const EnhancedPostComposer = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-900/20"
+                className="text-slate-400 hover:text-cyan-300 hover:bg-cyan-900/20"
                 onClick={() => setShowScheduleModal(true)}
               >
                 <Calendar className="h-4 w-4 mr-1" /> Schedule
@@ -3144,7 +3144,7 @@ export default function SocialProfile() {
             {/* Cruising - Discovery + AI Recommendations */}
             <TabsTrigger
               value="cruising"
-              className="data-[state=active]:bg-cyan-900/50 data-[state=active]:text-cyan-400 text-gray-500 py-2 sm:py-3 text-xs sm:text-sm"
+              className="data-[state=active]:bg-cyan-900/50 data-[state=active]:text-slate-400 text-gray-500 py-2 sm:py-3 text-xs sm:text-sm"
             >
               <Compass className="h-4 w-4 sm:mr-2" />
               <span className="hidden sm:inline">{SEXY_LABELS.cruising}</span>
@@ -3351,18 +3351,18 @@ export default function SocialProfile() {
                 <motion.div
                   className="p-4 rounded-lg"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.1) 0%, rgba(139, 69, 255, 0.1) 100%)',
-                    border: '1px solid rgba(0, 229, 255, 0.3)',
+                    background: 'linear-gradient(135deg, rgba(71, 85, 105, 0.1) 0%, rgba(139, 69, 255, 0.1) 100%)',
+                    border: '1px solid rgba(71, 85, 105, 0.3)',
                   }}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="p-2 rounded-full bg-cyan-500/20">
-                      <Zap className="h-5 w-5 text-cyan-400" />
+                    <div className="p-2 rounded-full bg-slate-500/20">
+                      <Zap className="h-5 w-5 text-slate-400" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-cyan-400">AI-Powered Outreach</h3>
+                      <h3 className="text-lg font-semibold text-slate-400">AI-Powered Outreach</h3>
                       <p className="text-xs text-gray-400">Recommended fans to offer your content</p>
                     </div>
                   </div>
@@ -3380,17 +3380,17 @@ export default function SocialProfile() {
                         className="p-3 rounded-lg cursor-pointer hover:scale-102"
                         style={{
                           background: 'rgba(0, 0, 0, 0.4)',
-                          border: '1px solid rgba(0, 229, 255, 0.2)',
+                          border: '1px solid rgba(71, 85, 105, 0.2)',
                         }}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        whileHover={{ borderColor: 'rgba(0, 229, 255, 0.5)' }}
+                        whileHover={{ borderColor: 'rgba(71, 85, 105, 0.5)' }}
                       >
                         <div className="flex items-center gap-2 mb-2">
                           <div className="relative">
-                            <Avatar className="h-8 w-8 ring-1 ring-cyan-500/50">
-                              <AvatarFallback className="bg-cyan-900 text-cyan-400 text-xs">
+                            <Avatar className="h-8 w-8 ring-1 ring-slate-500/50">
+                              <AvatarFallback className="bg-cyan-900 text-slate-400 text-xs">
                                 {fan.name[0]}
                               </AvatarFallback>
                             </Avatar>
@@ -3400,7 +3400,7 @@ export default function SocialProfile() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="text-sm text-gray-300 truncate">{fan.name}</div>
-                            <div className="text-xs text-cyan-400">{fan.match}% match</div>
+                            <div className="text-xs text-slate-400">{fan.match}% match</div>
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-1 mb-2">
@@ -3412,7 +3412,7 @@ export default function SocialProfile() {
                         </div>
                         <Button
                           size="sm"
-                          className="w-full text-xs bg-cyan-600/80 hover:bg-cyan-600"
+                          className="w-full text-xs bg-slate-600/80 hover:bg-slate-600"
                         >
                           <Gift className="h-3 w-3 mr-1" />
                           Offer Free Trial
@@ -3423,7 +3423,7 @@ export default function SocialProfile() {
 
                   <div className="flex justify-between items-center text-xs text-gray-400">
                     <span>AI analyzes viewer patterns to find your ideal fans</span>
-                    <Button variant="ghost" size="sm" className="text-cyan-400 hover:text-cyan-300">
+                    <Button variant="ghost" size="sm" className="text-slate-400 hover:text-cyan-300">
                       View All Recommendations →
                     </Button>
                   </div>
@@ -3433,7 +3433,7 @@ export default function SocialProfile() {
               {/* Discover Other Creators */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
-                  <Compass className="h-5 w-5 text-cyan-400" />
+                  <Compass className="h-5 w-5 text-slate-400" />
                   Discover Creators
                 </h3>
                 <p className="text-gray-500 mb-4 text-sm">
@@ -3444,7 +3444,7 @@ export default function SocialProfile() {
                 {selectedFilter && (
                   <Badge
                     className="mb-4"
-                    style={{ background: 'rgba(0, 229, 255, 0.2)', color: '#00e5ff' }}
+                    style={{ background: 'rgba(71, 85, 105, 0.2)', color: '#475569' }}
                   >
                     Filter: {selectedFilter.charAt(0).toUpperCase() + selectedFilter.slice(1)}
                   </Badge>
@@ -3458,9 +3458,9 @@ export default function SocialProfile() {
                       className="rounded-lg overflow-hidden cursor-pointer group"
                       style={{
                         background: 'linear-gradient(135deg, rgba(20, 10, 15, 0.95) 0%, rgba(10, 5, 8, 0.98) 100%)',
-                        border: '1px solid rgba(0, 229, 255, 0.2)',
+                        border: '1px solid rgba(71, 85, 105, 0.2)',
                       }}
-                      whileHover={{ scale: 1.02, borderColor: 'rgba(0, 229, 255, 0.5)' }}
+                      whileHover={{ scale: 1.02, borderColor: 'rgba(71, 85, 105, 0.5)' }}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.05 }}
@@ -3477,8 +3477,8 @@ export default function SocialProfile() {
                         </div>
                         <div className="absolute bottom-2 left-2 right-2">
                           <div className="flex items-center gap-2">
-                            <Avatar className="h-6 w-6 ring-1 ring-cyan-500/50">
-                              <AvatarFallback className="bg-cyan-900 text-cyan-400 text-xs">
+                            <Avatar className="h-6 w-6 ring-1 ring-slate-500/50">
+                              <AvatarFallback className="bg-cyan-900 text-slate-400 text-xs">
                                 {String.fromCharCode(65 + i)}
                               </AvatarFallback>
                             </Avatar>
@@ -3489,11 +3489,11 @@ export default function SocialProfile() {
                       <div className="p-3">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs text-gray-400">{Math.floor(Math.random() * 500)}K {SEXY_LABELS.followers}</span>
-                          <span className="text-xs text-cyan-400">${(Math.random() * 15 + 5).toFixed(2)}/mo</span>
+                          <span className="text-xs text-slate-400">${(Math.random() * 15 + 5).toFixed(2)}/mo</span>
                         </div>
                         <Button
                           size="sm"
-                          className="w-full text-xs bg-cyan-600/80 hover:bg-cyan-600"
+                          className="w-full text-xs bg-slate-600/80 hover:bg-slate-600"
                         >
                           View Profile
                         </Button>
@@ -3504,11 +3504,11 @@ export default function SocialProfile() {
 
                 {/* Quick Actions */}
                 <div className="flex justify-center gap-3 mt-6">
-                  <Button className="bg-cyan-600 hover:bg-cyan-700">
+                  <Button className="bg-slate-600 hover:bg-slate-700">
                     <TrendingUp className="h-4 w-4 mr-2" />
                     {SEXY_LABELS.trending}
                   </Button>
-                  <Button variant="outline" className="border-cyan-600/50 text-cyan-400 hover:bg-cyan-900/20">
+                  <Button variant="outline" className="border-slate-600/50 text-slate-400 hover:bg-cyan-900/20">
                     <Sparkles className="h-4 w-4 mr-2" />
                     {SEXY_LABELS.newUsers}
                   </Button>

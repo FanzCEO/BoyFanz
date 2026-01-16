@@ -19,21 +19,21 @@ export default function ConsentWithdrawalForms() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-cyan-400 flex items-center gap-2">
+        <h1 className="text-3xl font-bold text-slate-400 flex items-center gap-2">
           <FileX className="h-8 w-8" />
           Consent Withdrawal Forms
         </h1>
         <p className="text-gray-400 mt-2">Manage consent revocation requests</p>
       </div>
 
-      <Card className="bg-gray-900 border-cyan-500/20">
+      <Card className="bg-gray-900 border-slate-500/20">
         <CardHeader>
-          <CardTitle className="text-cyan-400">Withdrawal Requests</CardTitle>
+          <CardTitle className="text-slate-400">Withdrawal Requests</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow className="border-cyan-500/20">
+              <TableRow className="border-slate-500/20">
                 <TableHead>Request ID</TableHead>
                 <TableHead>Costar Name</TableHead>
                 <TableHead>Content Affected</TableHead>
@@ -43,7 +43,7 @@ export default function ConsentWithdrawalForms() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow className="border-cyan-500/10">
+              <TableRow className="border-slate-500/10">
                 <TableCell colSpan={6} className="text-center text-gray-500 py-8">
                   No withdrawal requests submitted
                 </TableCell>

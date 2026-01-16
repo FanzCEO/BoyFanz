@@ -491,7 +491,7 @@ export default function Sidebar({ user }: SidebarProps) {
             <Link
               href="/become-creator"
               onClick={isMobile ? handleMobileLinkClick : undefined}
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-semibold transition-all shadow-lg hover:shadow-cyan-500/25 group"
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-semibold transition-all shadow-lg hover:shadow-slate-500/25 group"
               data-testid="nav-become-creator"
             >
               <i className="fas fa-star w-5 h-5 group-hover:animate-pulse"></i>

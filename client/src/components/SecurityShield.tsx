@@ -85,13 +85,13 @@ export function SecurityShield({ variant = "badge", className }: SecurityShieldP
     return (
       <div
         className={cn(
-          "p-4 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-cyan-500/20",
+          "p-4 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-slate-500/20",
           className
         )}
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-green-600 to-cyan-600">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-green-600 to-slate-600">
               <Shield className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -116,7 +116,7 @@ export function SecurityShield({ variant = "badge", className }: SecurityShieldP
 
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="flex items-center gap-2 text-gray-300">
-              <Lock className="w-3 h-3 text-cyan-400" />
+              <Lock className="w-3 h-3 text-slate-400" />
               <span>Military-Grade Encryption</span>
             </div>
             <div className="flex items-center gap-2 text-gray-300">
@@ -153,27 +153,27 @@ export function SecurityShield({ variant = "badge", className }: SecurityShieldP
   return (
     <div
       className={cn(
-        "rounded-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-cyan-500/30 overflow-hidden",
+        "rounded-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-slate-500/30 overflow-hidden",
         className
       )}
     >
       {/* Header with animated shield */}
       <div className="relative p-6 bg-gradient-to-r from-green-900/30 via-cyan-900/30 to-purple-900/30">
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-slate-500/10 rounded-full blur-3xl animate-pulse" />
         </div>
 
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-cyan-500 rounded-2xl blur animate-pulse" />
-              <div className="relative p-4 rounded-2xl bg-gradient-to-br from-green-600 to-cyan-600">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-slate-500 rounded-2xl blur animate-pulse" />
+              <div className="relative p-4 rounded-2xl bg-gradient-to-br from-green-600 to-slate-600">
                 <Shield className="w-8 h-8 text-white" />
               </div>
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white">FANZ FORTRESS</h2>
-              <p className="text-sm text-cyan-400">Platform Security Status: MAXIMUM</p>
+              <p className="text-sm text-slate-400">Platform Security Status: MAXIMUM</p>
             </div>
           </div>
           <div className="text-right">
@@ -193,7 +193,7 @@ export function SecurityShield({ variant = "badge", className }: SecurityShieldP
         <div className="grid grid-cols-2 gap-4">
           <div className="p-4 rounded-xl bg-gray-800/50 border border-gray-700">
             <div className="flex items-center gap-2 mb-2">
-              <Lock className="w-5 h-5 text-cyan-400" />
+              <Lock className="w-5 h-5 text-slate-400" />
               <span className="text-sm font-medium text-white">Encryption</span>
             </div>
             <p className="text-xs text-gray-400">Military-grade AES-256</p>
@@ -239,7 +239,7 @@ export function SecurityShield({ variant = "badge", className }: SecurityShieldP
             {security.complianceBadges.map((badge: string) => (
               <Badge
                 key={badge}
-                className="bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
+                className="bg-slate-500/10 text-slate-400 border-slate-500/30"
               >
                 <CheckCircle className="w-3 h-3 mr-1" />
                 {badge}

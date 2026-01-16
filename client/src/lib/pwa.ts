@@ -411,7 +411,7 @@ class BoyFanzPWAManager {
         position: fixed;
         top: 20px;
         right: 20px;
-        background: linear-gradient(135deg, #00e5ff, #00bcd4);
+        background: linear-gradient(135deg, #475569, #334155);
         color: white;
         padding: 16px 20px;
         border-radius: 12px;
@@ -430,7 +430,7 @@ class BoyFanzPWAManager {
         <div style="display: flex; gap: 8px;">
           <button id="pwa-install-btn" style="
             background: white;
-            color: #00e5ff;
+            color: #475569;
             border: none;
             padding: 8px 16px;
             border-radius: 6px;
@@ -483,7 +483,7 @@ class BoyFanzPWAManager {
         color: white;
         padding: 16px 24px;
         border-radius: 8px;
-        border: 1px solid #00e5ff;
+        border: 1px solid #475569;
         box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         z-index: 10000;
       ">
@@ -491,7 +491,7 @@ class BoyFanzPWAManager {
           🔄 App Update Available
         </div>
         <button onclick="window.location.reload()" style="
-          background: #00e5ff;
+          background: #475569;
           color: white;
           border: none;
           padding: 8px 16px;

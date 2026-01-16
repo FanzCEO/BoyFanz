@@ -773,12 +773,12 @@ export default function CategoriesManagement() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-cyan-500/10 rounded-lg flex items-center justify-center">
-                <Layers className="h-5 w-5 text-cyan-500" />
+              <div className="h-10 w-10 bg-slate-500/10 rounded-lg flex items-center justify-center">
+                <Layers className="h-5 w-5 text-slate-500" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Max Depth</p>
-                <p className="text-xl font-bold text-cyan-500" data-testid="max-depth">
+                <p className="text-xl font-bold text-slate-500" data-testid="max-depth">
                   {categoryStats?.maxDepth || 0}
                 </p>
               </div>

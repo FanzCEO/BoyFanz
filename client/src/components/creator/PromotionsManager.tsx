@@ -207,7 +207,7 @@ function CouponCard({ coupon, onCopy, onToggle, onDelete }: { coupon: Coupon; on
     <Card className="bg-zinc-900 border-zinc-800">
       <CardContent className="p-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="p-3 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20"><Tag className="h-5 w-5 text-blue-400" /></div>
+          <div className="p-3 rounded-full bg-gradient-to-r from-blue-500/20 to-slate-500/20"><Tag className="h-5 w-5 text-blue-400" /></div>
           <div>
             <div className="flex items-center gap-2"><h3 className="font-semibold">{coupon.name}</h3><StatusBadge status={coupon.status} /></div>
             <div className="flex items-center gap-2 mt-1">

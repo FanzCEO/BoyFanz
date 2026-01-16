@@ -68,7 +68,7 @@ const PLATFORM_COLORS: Record<string, string> = {
   boyfanz: 'bg-blue-500',
   girlfanz: 'bg-pink-500',
   gayfanz: 'bg-rainbow-gradient',
-  transfanz: 'bg-cyan-500',
+  transfanz: 'bg-slate-500',
   milffanz: 'bg-red-500',
   cougarfanz: 'bg-amber-600',
   bearfanz: 'bg-amber-800',
@@ -90,7 +90,7 @@ const TIER_COLORS: Record<string, { bg: string; text: string; icon: React.ReactN
   silver: { bg: 'bg-gray-200', text: 'text-gray-700', icon: <Star className="h-3 w-3" /> },
   gold: { bg: 'bg-yellow-100', text: 'text-yellow-700', icon: <Crown className="h-3 w-3" /> },
   platinum: { bg: 'bg-slate-200', text: 'text-slate-700', icon: <Crown className="h-3 w-3" /> },
-  diamond: { bg: 'bg-cyan-100', text: 'text-cyan-700', icon: <Sparkles className="h-3 w-3" /> },
+  diamond: { bg: 'bg-cyan-100', text: 'text-slate-700', icon: <Sparkles className="h-3 w-3" /> },
   vip: { bg: 'bg-purple-100', text: 'text-purple-700', icon: <Sparkles className="h-3 w-3" /> },
   royal_creator: { bg: 'bg-gradient-to-r from-purple-500 to-pink-500', text: 'text-white', icon: <Crown className="h-3 w-3" /> },
 };

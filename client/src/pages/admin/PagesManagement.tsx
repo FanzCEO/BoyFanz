@@ -35,53 +35,53 @@ export default function PagesManagement() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-cyan-400 flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-slate-400 flex items-center gap-2">
             <FileText className="h-8 w-8" />
             Pages Management
           </h1>
           <p className="text-gray-400 mt-2">Create and manage static pages</p>
         </div>
-        <Button className="bg-gradient-to-r from-cyan-500 to-blue-500">
+        <Button className="bg-gradient-to-r from-slate-500 to-blue-500">
           <Plus className="h-4 w-4 mr-2" />
           New Page
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardContent className="pt-6">
-            <div className="text-3xl font-bold text-cyan-400">5</div>
+            <div className="text-3xl font-bold text-slate-400">5</div>
             <p className="text-gray-400">Total Pages</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardContent className="pt-6">
             <div className="text-3xl font-bold text-green-400">4</div>
             <p className="text-gray-400">Published</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardContent className="pt-6">
             <div className="text-3xl font-bold text-yellow-400">1</div>
             <p className="text-gray-400">Drafts</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardContent className="pt-6">
-            <div className="text-3xl font-bold text-cyan-400">23.4K</div>
+            <div className="text-3xl font-bold text-slate-400">23.4K</div>
             <p className="text-gray-400">Total Views</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="bg-gray-900 border-cyan-500/20">
+      <Card className="bg-gray-900 border-slate-500/20">
         <CardHeader>
-          <CardTitle className="text-cyan-400">All Pages</CardTitle>
+          <CardTitle className="text-slate-400">All Pages</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow className="border-cyan-500/20">
+              <TableRow className="border-slate-500/20">
                 <TableHead>Title</TableHead>
                 <TableHead>Slug</TableHead>
                 <TableHead>Status</TableHead>
@@ -92,7 +92,7 @@ export default function PagesManagement() {
             </TableHeader>
             <TableBody>
               {pages.map((page) => (
-                <TableRow key={page.id} className="border-cyan-500/10">
+                <TableRow key={page.id} className="border-slate-500/10">
                   <TableCell className="font-medium">{page.title}</TableCell>
                   <TableCell className="text-gray-400">{page.slug}</TableCell>
                   <TableCell>
@@ -116,7 +116,7 @@ export default function PagesManagement() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-cyan-500/20"
+                        className="border-slate-500/20"
                         onClick={() => setEditingPage(page.id)}
                       >
                         <Edit className="h-3 w-3" />
@@ -138,9 +138,9 @@ export default function PagesManagement() {
       </Card>
 
       {editingPage && (
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardHeader>
-            <CardTitle className="text-cyan-400">Edit Page</CardTitle>
+            <CardTitle className="text-slate-400">Edit Page</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -148,7 +148,7 @@ export default function PagesManagement() {
                 <Label>Page Title</Label>
                 <Input
                   defaultValue={pages.find(p => p.id === editingPage)?.title}
-                  className="bg-gray-800 border-cyan-500/20"
+                  className="bg-gray-800 border-slate-500/20"
                   placeholder="Enter page title"
                 />
               </div>
@@ -156,7 +156,7 @@ export default function PagesManagement() {
                 <Label>Slug</Label>
                 <Input
                   defaultValue={pages.find(p => p.id === editingPage)?.slug}
-                  className="bg-gray-800 border-cyan-500/20"
+                  className="bg-gray-800 border-slate-500/20"
                   placeholder="/page-url"
                 />
               </div>
@@ -166,7 +166,7 @@ export default function PagesManagement() {
               <Label>Page Content</Label>
               <Textarea
                 placeholder="Enter page content (supports Markdown)"
-                className="bg-gray-800 border-cyan-500/20 min-h-[300px] font-mono"
+                className="bg-gray-800 border-slate-500/20 min-h-[300px] font-mono"
                 defaultValue="# Page Content\n\nYour content goes here..."
               />
             </div>
@@ -179,13 +179,13 @@ export default function PagesManagement() {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  className="border-cyan-500/20"
+                  className="border-slate-500/20"
                   onClick={() => setEditingPage(null)}
                 >
                   Cancel
                 </Button>
                 <Button
-                  className="bg-gradient-to-r from-cyan-500 to-blue-500"
+                  className="bg-gradient-to-r from-slate-500 to-blue-500"
                   onClick={() => {
                     toast({
                       title: "Page Saved",

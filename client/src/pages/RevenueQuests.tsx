@@ -151,7 +151,7 @@ export default function RevenueQuests() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-['Bebas_Neue'] text-white mb-2 tracking-wide flex items-center gap-3">
-                <Target className="h-10 w-10 text-[#00e5ff]" />
+                <Target className="h-10 w-10 text-[#475569]" />
                 Revenue Quests
               </h1>
               <p className="text-zinc-400 text-lg">
@@ -161,7 +161,7 @@ export default function RevenueQuests() {
             {user?.role === "creator" && (
               <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-[#00e5ff] hover:bg-[#00bcd4]" data-testid="button-create-quest">
+                  <Button className="bg-[#475569] hover:bg-[#334155]" data-testid="button-create-quest">
                     <Plus className="mr-2 h-4 w-4" />
                     Create Quest
                   </Button>
@@ -273,7 +273,7 @@ export default function RevenueQuests() {
                     <Button
                       onClick={handleCreateQuest}
                       disabled={createQuestMutation.isPending}
-                      className="w-full bg-[#00e5ff] hover:bg-[#00bcd4]"
+                      className="w-full bg-[#475569] hover:bg-[#334155]"
                       data-testid="button-submit-quest"
                     >
                       {createQuestMutation.isPending ? "Creating..." : "Create Quest"}
@@ -315,7 +315,7 @@ export default function RevenueQuests() {
                         <CardTitle className="text-xl text-white">{quest.title}</CardTitle>
                         <CardDescription className="text-zinc-400">{quest.description}</CardDescription>
                       </div>
-                      <Badge className="bg-[#00e5ff]/20 text-[#00e5ff] border-[#00e5ff]/30">
+                      <Badge className="bg-[#475569]/20 text-[#475569] border-[#475569]/30">
                         {quest.questType.replace("_", " ")}
                       </Badge>
                     </div>
@@ -373,7 +373,7 @@ export default function RevenueQuests() {
                         <CardTitle className="text-xl text-white">{quest.title}</CardTitle>
                         <Badge className={
                           quest.status === "completed" ? "bg-green-500/20 text-green-500" :
-                          quest.status === "active" ? "bg-[#00e5ff]/20 text-[#00e5ff]" :
+                          quest.status === "active" ? "bg-[#475569]/20 text-[#475569]" :
                           "bg-zinc-700 text-zinc-400"
                         }>
                           {quest.status}

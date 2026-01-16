@@ -393,7 +393,7 @@ export default function FanzSingularity() {
               </span>
             </div>
             <h1 className="text-7xl md:text-9xl font-black tracking-tighter mb-4">
-              <span className="bg-gradient-to-r from-green-400 via-cyan-400 to-purple-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-green-400 via-slate-400 to-purple-500 bg-clip-text text-transparent">
                 FANZ
               </span>
             </h1>
@@ -455,7 +455,7 @@ export default function FanzSingularity() {
               title="FANZ NEXUS"
               subtitle="The Core Infrastructure"
               description="The foundational infrastructure synchronizing identity, compliance, content, and payments."
-              color="from-cyan-500 to-blue-600"
+              color="from-slate-500 to-blue-600"
               icon="fas fa-server"
               delay={0.4}
             />
@@ -487,7 +487,7 @@ export default function FanzSingularity() {
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Core Infrastructure:</span>
-              <span className="text-cyan-400">FANZ NEXUS</span>
+              <span className="text-slate-400">FANZ NEXUS</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Status:</span>
@@ -549,7 +549,7 @@ export default function FanzSingularity() {
             "FANZ operates as a unified digital ecosystem built for scale, security, and creator sovereignty.
             The system functions within the <span className="text-green-400 font-medium">FANZ SINGULARITY</span>,
             powered by <span className="text-purple-400 font-medium">FANZ NEUROVERSE</span>,
-            and executed through the <span className="text-cyan-400 font-medium">FANZ NEXUS</span>."
+            and executed through the <span className="text-slate-400 font-medium">FANZ NEXUS</span>."
           </blockquote>
 
           <div className="flex items-center justify-center gap-4 text-sm text-gray-600">

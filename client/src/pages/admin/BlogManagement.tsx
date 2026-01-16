@@ -74,38 +74,38 @@ export default function BlogManagement() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-cyan-400 flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-slate-400 flex items-center gap-2">
             <BookOpen className="h-8 w-8" />
             Blog Management
           </h1>
           <p className="text-gray-400 mt-2">Create and manage blog posts</p>
         </div>
-        <Button className="bg-gradient-to-r from-cyan-500 to-blue-500">
+        <Button className="bg-gradient-to-r from-slate-500 to-blue-500">
           <Plus className="h-4 w-4 mr-2" />
           New Post
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardContent className="pt-6">
-            <div className="text-3xl font-bold text-cyan-400">4</div>
+            <div className="text-3xl font-bold text-slate-400">4</div>
             <p className="text-gray-400">Total Posts</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardContent className="pt-6">
             <div className="text-3xl font-bold text-green-400">3</div>
             <p className="text-gray-400">Published</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardContent className="pt-6">
-            <div className="text-3xl font-bold text-cyan-400">26.8K</div>
+            <div className="text-3xl font-bold text-slate-400">26.8K</div>
             <p className="text-gray-400">Total Views</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardContent className="pt-6">
             <div className="text-3xl font-bold text-yellow-400">256</div>
             <p className="text-gray-400">Total Comments</p>
@@ -113,16 +113,16 @@ export default function BlogManagement() {
         </Card>
       </div>
 
-      <Card className="bg-gray-900 border-cyan-500/20">
+      <Card className="bg-gray-900 border-slate-500/20">
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle className="text-cyan-400">All Blog Posts</CardTitle>
+            <CardTitle className="text-slate-400">All Blog Posts</CardTitle>
             <div className="flex gap-2">
               <Input
                 placeholder="Search posts..."
-                className="bg-gray-800 border-cyan-500/20 w-64"
+                className="bg-gray-800 border-slate-500/20 w-64"
               />
-              <select className="px-3 py-2 bg-gray-800 border border-cyan-500/20 rounded-md text-sm">
+              <select className="px-3 py-2 bg-gray-800 border border-slate-500/20 rounded-md text-sm">
                 <option value="">All Categories</option>
                 <option value="announcements">Announcements</option>
                 <option value="tips">Creator Tips</option>
@@ -135,7 +135,7 @@ export default function BlogManagement() {
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow className="border-cyan-500/20">
+              <TableRow className="border-slate-500/20">
                 <TableHead>Title</TableHead>
                 <TableHead>Author</TableHead>
                 <TableHead>Category</TableHead>
@@ -148,13 +148,13 @@ export default function BlogManagement() {
             </TableHeader>
             <TableBody>
               {posts.map((post) => (
-                <TableRow key={post.id} className="border-cyan-500/10">
+                <TableRow key={post.id} className="border-slate-500/10">
                   <TableCell className="font-medium max-w-xs">
                     {post.title}
                   </TableCell>
                   <TableCell className="text-gray-400">{post.author}</TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="border-cyan-500/30">
+                    <Badge variant="outline" className="border-slate-500/30">
                       {post.category}
                     </Badge>
                   </TableCell>
@@ -190,7 +190,7 @@ export default function BlogManagement() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-cyan-500/20"
+                        className="border-slate-500/20"
                       >
                         <Edit className="h-3 w-3" />
                       </Button>
@@ -211,16 +211,16 @@ export default function BlogManagement() {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardHeader>
-            <CardTitle className="text-cyan-400">Top Posts This Month</CardTitle>
+            <CardTitle className="text-slate-400">Top Posts This Month</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {posts.slice(0, 3).map((post, index) => (
                 <div key={post.id} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <div className="text-2xl font-bold text-cyan-400">#{index + 1}</div>
+                    <div className="text-2xl font-bold text-slate-400">#{index + 1}</div>
                     <div>
                       <div className="font-medium">{post.title}</div>
                       <div className="text-sm text-gray-400">{post.views.toLocaleString()} views</div>
@@ -232,27 +232,27 @@ export default function BlogManagement() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gray-900 border-cyan-500/20">
+        <Card className="bg-gray-900 border-slate-500/20">
           <CardHeader>
-            <CardTitle className="text-cyan-400">Categories</CardTitle>
+            <CardTitle className="text-slate-400">Categories</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg">
                 <span className="text-gray-300">Announcements</span>
-                <Badge className="bg-cyan-500">1 post</Badge>
+                <Badge className="bg-slate-500">1 post</Badge>
               </div>
               <div className="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg">
                 <span className="text-gray-300">Creator Tips</span>
-                <Badge className="bg-cyan-500">1 post</Badge>
+                <Badge className="bg-slate-500">1 post</Badge>
               </div>
               <div className="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg">
                 <span className="text-gray-300">Updates</span>
-                <Badge className="bg-cyan-500">1 post</Badge>
+                <Badge className="bg-slate-500">1 post</Badge>
               </div>
               <div className="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg">
                 <span className="text-gray-300">Guidelines</span>
-                <Badge className="bg-cyan-500">1 post</Badge>
+                <Badge className="bg-slate-500">1 post</Badge>
               </div>
             </div>
           </CardContent>

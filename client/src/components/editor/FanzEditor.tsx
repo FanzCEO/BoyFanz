@@ -560,7 +560,7 @@ export const FanzEditor = forwardRef<FanzEditorRef, FanzEditorProps>(
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <div className="grid grid-cols-5 gap-1 p-2">
-                {['#000000', '#00e5ff', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#8800ff', '#ffffff'].map((color) => (
+                {['#000000', '#475569', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#8800ff', '#ffffff'].map((color) => (
                   <button
                     key={color}
                     className="w-6 h-6 rounded border border-border"

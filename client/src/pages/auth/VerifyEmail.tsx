@@ -57,7 +57,7 @@ export default function VerifyEmail() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="font-display text-5xl font-bold mb-2">
-            <span className="text-[#00e5ff]">Boy</span>
+            <span className="text-[#475569]">Boy</span>
             <span className="text-[#d4a959]">Fanz</span>
           </h1>
         </div>
@@ -68,13 +68,13 @@ export default function VerifyEmail() {
             boxShadow: "0 8px 32px 0 rgba(255, 0, 0, 0.1), inset 0 0 20px rgba(212, 169, 89, 0.05)",
           }}
         >
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#00e5ff]/5 via-transparent to-[#d4a959]/5 pointer-events-none" />
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#475569]/5 via-transparent to-[#d4a959]/5 pointer-events-none" />
 
           <div className="relative z-10">
             {status === "verifying" && (
               <>
-                <div className="w-16 h-16 bg-[#00e5ff]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Loader2 className="w-8 h-8 text-[#00e5ff] animate-spin" />
+                <div className="w-16 h-16 bg-[#475569]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Loader2 className="w-8 h-8 text-[#475569] animate-spin" />
                 </div>
                 <h2 className="text-2xl font-bold text-white mb-2" data-testid="text-verifying">
                   Verifying Your Email
@@ -97,7 +97,7 @@ export default function VerifyEmail() {
                 <Button
                   onClick={() => setLocation("/auth/login")}
                   data-testid="button-login"
-                  className="w-full bg-[#00e5ff] hover:bg-[#00bcd4] text-white font-bold"
+                  className="w-full bg-[#475569] hover:bg-[#334155] text-white font-bold"
                 >
                   Go to Login
                 </Button>
@@ -119,7 +119,7 @@ export default function VerifyEmail() {
                   <Button
                     onClick={() => setLocation("/auth/resend-verification")}
                     data-testid="button-resend"
-                    className="w-full bg-[#00e5ff] hover:bg-[#00bcd4] text-white font-bold"
+                    className="w-full bg-[#475569] hover:bg-[#334155] text-white font-bold"
                   >
                     <Mail className="w-4 h-4 mr-2" />
                     Resend Verification Email

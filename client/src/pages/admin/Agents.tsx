@@ -178,7 +178,7 @@ export default function AgentsPage() {
       case "orchestration":
         return <Zap className="w-5 h-5 text-yellow-400" />;
       default:
-        return <Bot className="w-5 h-5 text-cyan-400" />;
+        return <Bot className="w-5 h-5 text-slate-400" />;
     }
   };
 
@@ -193,7 +193,7 @@ export default function AgentsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Bot className="w-8 h-8 text-cyan-400" />
+              <Bot className="w-8 h-8 text-slate-400" />
               Agent Management
             </h1>
             <p className="text-gray-400 mt-1">Monitor and manage platform bots and AI agents</p>
@@ -213,7 +213,7 @@ export default function AgentsPage() {
                   <p className="text-sm text-gray-400">Total Agents</p>
                   <p className="text-2xl font-bold text-white">{allBots.length}</p>
                 </div>
-                <Bot className="w-8 h-8 text-cyan-400" />
+                <Bot className="w-8 h-8 text-slate-400" />
               </div>
             </CardContent>
           </Card>
@@ -349,7 +349,7 @@ function AgentGrid({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {bots.map((bot) => (
-        <Card key={bot.id} className="bg-gray-900 border-gray-800 hover:border-cyan-500/30 transition-colors">
+        <Card key={bot.id} className="bg-gray-900 border-gray-800 hover:border-slate-500/30 transition-colors">
           <CardContent className="p-4">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
@@ -381,7 +381,7 @@ function AgentGrid({
               <Badge variant="outline" className="text-xs text-gray-400">
                 Autonomy: L{bot.autonomyLevel}
               </Badge>
-              <Button variant="ghost" size="sm" className="text-cyan-400 hover:text-cyan-300">
+              <Button variant="ghost" size="sm" className="text-slate-400 hover:text-cyan-300">
                 <Settings className="w-4 h-4 mr-1" />
                 Config
               </Button>

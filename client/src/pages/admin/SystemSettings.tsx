@@ -1410,7 +1410,7 @@ export default function SystemSettingsManagement() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent">
+                    <CardTitle className="bg-gradient-to-r from-slate-400 to-pink-500 bg-clip-text text-transparent">
                       API Keys
                     </CardTitle>
                     <CardDescription>
@@ -1420,7 +1420,7 @@ export default function SystemSettingsManagement() {
                   <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
                     <DialogTrigger asChild>
                       <Button
-                        className="bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-cyan-600 hover:to-pink-600"
+                        className="bg-gradient-to-r from-slate-500 to-pink-500 hover:from-slate-600 hover:to-pink-600"
                         onClick={() => {
                           setSelectedApiKey(null);
                           apiKeyForm.reset();
@@ -1433,7 +1433,7 @@ export default function SystemSettingsManagement() {
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl">
                       <DialogHeader>
-                        <DialogTitle className="bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent">
+                        <DialogTitle className="bg-gradient-to-r from-slate-400 to-pink-500 bg-clip-text text-transparent">
                           Create API Key
                         </DialogTitle>
                         <DialogDescription>
@@ -1450,17 +1450,17 @@ export default function SystemSettingsManagement() {
                             </AlertDescription>
                           </Alert>
 
-                          <div className="p-4 bg-gray-900 rounded-lg border border-cyan-500/30">
+                          <div className="p-4 bg-gray-900 rounded-lg border border-slate-500/30">
                             <label className="text-sm text-muted-foreground mb-2 block">API Key</label>
                             <div className="flex items-center gap-2">
-                              <code className="flex-1 font-mono text-sm text-cyan-400 break-all">
+                              <code className="flex-1 font-mono text-sm text-slate-400 break-all">
                                 {selectedApiKey.key}
                               </code>
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleCopyKey(selectedApiKey.key)}
-                                className="border-cyan-500/30"
+                                className="border-slate-500/30"
                               >
                                 <Copy className="h-4 w-4" />
                               </Button>
@@ -1609,7 +1609,7 @@ export default function SystemSettingsManagement() {
                               <Button
                                 type="submit"
                                 disabled={createApiKeyMutation.isPending}
-                                className="bg-gradient-to-r from-cyan-500 to-pink-500"
+                                className="bg-gradient-to-r from-slate-500 to-pink-500"
                               >
                                 Generate Key
                               </Button>
@@ -1658,7 +1658,7 @@ export default function SystemSettingsManagement() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <code className="text-xs font-mono text-cyan-400">
+                            <code className="text-xs font-mono text-slate-400">
                               {apiKey.prefix}•••
                             </code>
                           </TableCell>
@@ -1728,7 +1728,7 @@ export default function SystemSettingsManagement() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="bg-gradient-to-r from-pink-400 to-cyan-500 bg-clip-text text-transparent">
+                    <CardTitle className="bg-gradient-to-r from-pink-400 to-slate-500 bg-clip-text text-transparent">
                       Webhooks
                     </CardTitle>
                     <CardDescription>
@@ -1738,7 +1738,7 @@ export default function SystemSettingsManagement() {
                   <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
                     <DialogTrigger asChild>
                       <Button
-                        className="bg-gradient-to-r from-pink-500 to-cyan-500 hover:from-pink-600 hover:to-cyan-600"
+                        className="bg-gradient-to-r from-pink-500 to-slate-500 hover:from-pink-600 hover:to-slate-600"
                         data-testid="button-create-webhook"
                       >
                         <Plus className="h-4 w-4 mr-2" />
@@ -1747,7 +1747,7 @@ export default function SystemSettingsManagement() {
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl">
                       <DialogHeader>
-                        <DialogTitle className="bg-gradient-to-r from-pink-400 to-cyan-500 bg-clip-text text-transparent">
+                        <DialogTitle className="bg-gradient-to-r from-pink-400 to-slate-500 bg-clip-text text-transparent">
                           Add Webhook
                         </DialogTitle>
                         <DialogDescription>
@@ -1895,7 +1895,7 @@ export default function SystemSettingsManagement() {
                             <Button
                               type="submit"
                               disabled={createWebhookMutation.isPending}
-                              className="bg-gradient-to-r from-pink-500 to-cyan-500"
+                              className="bg-gradient-to-r from-pink-500 to-slate-500"
                             >
                               Create Webhook
                             </Button>
@@ -1984,7 +1984,7 @@ export default function SystemSettingsManagement() {
                               size="sm"
                               onClick={() => testWebhookMutation.mutate(webhook.id)}
                               disabled={testWebhookMutation.isPending}
-                              className="border-cyan-500/30"
+                              className="border-slate-500/30"
                             >
                               <Send className="h-4 w-4 mr-1" />
                               Test

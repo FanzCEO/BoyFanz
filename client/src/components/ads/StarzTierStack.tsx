@@ -6,9 +6,9 @@ const TIERS = [
     id: 'diamond_star', 
     name: 'Diamond Starz', 
     icon: Diamond, 
-    color: 'from-cyan-400 to-blue-500',
-    bgColor: 'bg-gradient-to-r from-cyan-400/20 to-blue-500/20',
-    borderColor: 'border-cyan-400/50',
+    color: 'from-slate-400 to-blue-500',
+    bgColor: 'bg-gradient-to-r from-slate-400/20 to-blue-500/20',
+    borderColor: 'border-slate-400/50',
     perks: ['All platform access', 'Priority AI tools', 'Custom analytics']
   },
   { 
