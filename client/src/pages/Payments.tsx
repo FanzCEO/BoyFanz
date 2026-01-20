@@ -313,7 +313,7 @@ export default function Payments() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="p-4 border rounded-lg flex items-center gap-4">
-              <div className="h-12 w-20 bg-gradient-to-r from-blue-500 to-slate-500 rounded flex items-center justify-center text-white font-bold text-xs">NowPay</div>
+              <div className="h-12 w-20 bg-gradient-to-r from-blue-500 to-cyan-500 rounded flex items-center justify-center text-white font-bold text-xs">NowPay</div>
               <div className="flex-1">
                 <p className="font-medium">NOWPayments</p>
                 <p className="text-xs text-muted-foreground">BTC, ETH, USDT, 100+ coins</p>

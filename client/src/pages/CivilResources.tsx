@@ -32,28 +32,28 @@ interface Resource {
 }
 
 const ResourceCard = ({ resource }: { resource: Resource }) => (
-  <Card className="bg-gray-900 border-slate-500/20 hover:border-slate-500/40 transition-all">
+  <Card className="bg-gray-900 border-cyan-500/20 hover:border-cyan-500/40 transition-all">
     <CardHeader>
-      <CardTitle className="text-slate-400 text-lg">{resource.name}</CardTitle>
+      <CardTitle className="text-cyan-400 text-lg">{resource.name}</CardTitle>
       <CardDescription className="text-gray-400">{resource.description}</CardDescription>
     </CardHeader>
     <CardContent className="space-y-3">
       {resource.phone && (
         <div className="flex items-center gap-2 text-sm">
-          <Phone className="h-4 w-4 text-slate-400" />
-          <a href={`tel:${resource.phone}`} className="text-white hover:text-slate-400">
+          <Phone className="h-4 w-4 text-cyan-400" />
+          <a href={`tel:${resource.phone}`} className="text-white hover:text-cyan-400">
             {resource.phone}
           </a>
         </div>
       )}
       {resource.website && (
         <div className="flex items-center gap-2 text-sm">
-          <Globe className="h-4 w-4 text-slate-400" />
+          <Globe className="h-4 w-4 text-cyan-400" />
           <a
             href={resource.website}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-white hover:text-slate-400 flex items-center gap-1"
+            className="text-white hover:text-cyan-400 flex items-center gap-1"
           >
             Visit Website
             <ExternalLink className="h-3 w-3" />
@@ -66,7 +66,7 @@ const ResourceCard = ({ resource }: { resource: Resource }) => (
           {resource.hours}
         </div>
       )}
-      <Badge variant="outline" className="border-slate-500/30 text-slate-400">
+      <Badge variant="outline" className="border-cyan-500/30 text-cyan-400">
         {resource.type}
       </Badge>
     </CardContent>
@@ -293,10 +293,10 @@ export default function CivilResources() {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center gap-2 mb-4">
-            <Rainbow className="h-10 w-10 text-slate-400" />
+            <Rainbow className="h-10 w-10 text-cyan-400" />
             <Heart className="h-10 w-10 text-pink-400" />
           </div>
-          <h1 className="text-4xl font-bold text-slate-400 mb-4">
+          <h1 className="text-4xl font-bold text-cyan-400 mb-4">
             Civil Resources & Community Support
           </h1>
           <p className="text-lg text-gray-400 max-w-3xl mx-auto">
@@ -306,7 +306,7 @@ export default function CivilResources() {
         </div>
 
         {/* Featured Resource */}
-        <Card className="bg-gradient-to-r from-cyan-900/40 to-pink-900/40 border-slate-500/50 mb-8">
+        <Card className="bg-gradient-to-r from-cyan-900/40 to-pink-900/40 border-cyan-500/50 mb-8">
           <CardContent className="p-8 text-center">
             <Heart className="h-12 w-12 mx-auto mb-4 text-pink-400" />
             <h2 className="text-2xl font-bold text-white mb-2">RecoveryFanz.com</h2>
@@ -315,7 +315,7 @@ export default function CivilResources() {
               and a safe space for your journey.
             </p>
             <Button
-              className="bg-gradient-to-r from-slate-500 to-pink-500"
+              className="bg-gradient-to-r from-cyan-500 to-pink-500"
               onClick={() => window.open('https://recoveryfanz.com', '_blank')}
             >
               Visit RecoveryFanz.com
@@ -326,7 +326,7 @@ export default function CivilResources() {
 
         {/* Resources Tabs */}
         <Tabs defaultValue="crisis" className="space-y-6">
-          <TabsList className="bg-gray-900 border border-slate-500/20 grid grid-cols-3 md:grid-cols-6 gap-2">
+          <TabsList className="bg-gray-900 border border-cyan-500/20 grid grid-cols-3 md:grid-cols-6 gap-2">
             <TabsTrigger value="crisis">Crisis</TabsTrigger>
             <TabsTrigger value="lgbtq">LGBTQ+</TabsTrigger>
             <TabsTrigger value="recovery">Recovery</TabsTrigger>
@@ -349,7 +349,7 @@ export default function CivilResources() {
 
           <TabsContent value="lgbtq" className="space-y-4">
             <div className="flex items-center gap-2 mb-4">
-              <Rainbow className="h-6 w-6 text-slate-400" />
+              <Rainbow className="h-6 w-6 text-cyan-400" />
               <h2 className="text-2xl font-bold text-white">LGBTQ+ Support & Advocacy</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -409,7 +409,7 @@ export default function CivilResources() {
         </Tabs>
 
         {/* Footer Message */}
-        <Card className="bg-gray-900 border-slate-500/20 mt-8">
+        <Card className="bg-gray-900 border-cyan-500/20 mt-8">
           <CardContent className="p-6 text-center">
             <Heart className="h-8 w-8 mx-auto mb-3 text-pink-400" />
             <p className="text-gray-400">

@@ -57,7 +57,7 @@ export default function SettingsLimits() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-slate-400 flex items-center gap-2">
+        <h1 className="text-3xl font-bold text-cyan-400 flex items-center gap-2">
           <Settings className="h-8 w-8" />
           Platform Limits
         </h1>
@@ -65,7 +65,7 @@ export default function SettingsLimits() {
       </div>
 
       <Tabs defaultValue="content" className="space-y-6">
-        <TabsList className="bg-gray-900 border border-slate-500/20">
+        <TabsList className="bg-gray-900 border border-cyan-500/20">
           <TabsTrigger value="content">Content Limits</TabsTrigger>
           <TabsTrigger value="user">User Limits</TabsTrigger>
           <TabsTrigger value="financial">Financial Limits</TabsTrigger>
@@ -73,9 +73,9 @@ export default function SettingsLimits() {
         </TabsList>
 
         <TabsContent value="content" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400 flex items-center gap-2">
+              <CardTitle className="text-cyan-400 flex items-center gap-2">
                 <Upload className="h-5 w-5" />
                 Content Upload Limits
               </CardTitle>
@@ -87,7 +87,7 @@ export default function SettingsLimits() {
                   type="number"
                   value={limits.maxUploadSizeMB}
                   onChange={(e) => setLimits({ ...limits, maxUploadSizeMB: Number(e.target.value) })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                 />
               </div>
               <div>
@@ -96,7 +96,7 @@ export default function SettingsLimits() {
                   type="number"
                   value={limits.maxVideoLengthMinutes}
                   onChange={(e) => setLimits({ ...limits, maxVideoLengthMinutes: Number(e.target.value) })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                 />
               </div>
               <div>
@@ -105,7 +105,7 @@ export default function SettingsLimits() {
                   type="number"
                   value={limits.maxPostsPerDay}
                   onChange={(e) => setLimits({ ...limits, maxPostsPerDay: Number(e.target.value) })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                 />
               </div>
               <div>
@@ -114,7 +114,7 @@ export default function SettingsLimits() {
                   type="number"
                   value={limits.maxStoragePerUserGB}
                   onChange={(e) => setLimits({ ...limits, maxStoragePerUserGB: Number(e.target.value) })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                 />
               </div>
             </CardContent>
@@ -122,9 +122,9 @@ export default function SettingsLimits() {
         </TabsContent>
 
         <TabsContent value="user" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400 flex items-center gap-2">
+              <CardTitle className="text-cyan-400 flex items-center gap-2">
                 <Users className="h-5 w-5" />
                 User Activity Limits
               </CardTitle>
@@ -136,7 +136,7 @@ export default function SettingsLimits() {
                   type="number"
                   value={limits.maxMessagesPerHour}
                   onChange={(e) => setLimits({ ...limits, maxMessagesPerHour: Number(e.target.value) })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                 />
               </div>
               <div>
@@ -145,7 +145,7 @@ export default function SettingsLimits() {
                   type="number"
                   value={limits.maxSubscriptionsPerUser}
                   onChange={(e) => setLimits({ ...limits, maxSubscriptionsPerUser: Number(e.target.value) })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                 />
               </div>
               <div>
@@ -154,7 +154,7 @@ export default function SettingsLimits() {
                   type="number"
                   value={limits.maxFollowsPerDay}
                   onChange={(e) => setLimits({ ...limits, maxFollowsPerDay: Number(e.target.value) })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                 />
               </div>
             </CardContent>
@@ -162,9 +162,9 @@ export default function SettingsLimits() {
         </TabsContent>
 
         <TabsContent value="financial" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400 flex items-center gap-2">
+              <CardTitle className="text-cyan-400 flex items-center gap-2">
                 <DollarSign className="h-5 w-5" />
                 Financial Limits
               </CardTitle>
@@ -176,7 +176,7 @@ export default function SettingsLimits() {
                   type="number"
                   value={limits.maxWithdrawalPerDay}
                   onChange={(e) => setLimits({ ...limits, maxWithdrawalPerDay: Number(e.target.value) })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                 />
               </div>
               <div>
@@ -185,7 +185,7 @@ export default function SettingsLimits() {
                   type="number"
                   value={limits.minWithdrawalAmount}
                   onChange={(e) => setLimits({ ...limits, minWithdrawalAmount: Number(e.target.value) })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                 />
               </div>
             </CardContent>
@@ -193,9 +193,9 @@ export default function SettingsLimits() {
         </TabsContent>
 
         <TabsContent value="security" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400 flex items-center gap-2">
+              <CardTitle className="text-cyan-400 flex items-center gap-2">
                 <Shield className="h-5 w-5" />
                 Security Limits
               </CardTitle>
@@ -207,7 +207,7 @@ export default function SettingsLimits() {
                   type="number"
                   value={limits.rateLimitRequestsPerMinute}
                   onChange={(e) => setLimits({ ...limits, rateLimitRequestsPerMinute: Number(e.target.value) })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                 />
               </div>
               <div>
@@ -216,7 +216,7 @@ export default function SettingsLimits() {
                   type="number"
                   value={limits.sessionTimeoutMinutes}
                   onChange={(e) => setLimits({ ...limits, sessionTimeoutMinutes: Number(e.target.value) })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                 />
               </div>
               <div>
@@ -225,7 +225,7 @@ export default function SettingsLimits() {
                   type="number"
                   value={limits.maxLoginAttempts}
                   onChange={(e) => setLimits({ ...limits, maxLoginAttempts: Number(e.target.value) })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                 />
               </div>
             </CardContent>
@@ -237,7 +237,7 @@ export default function SettingsLimits() {
         <Button
           onClick={() => saveMutation.mutate(limits)}
           disabled={saveMutation.isPending}
-          className="bg-gradient-to-r from-slate-500 to-blue-500 hover:from-slate-600 hover:to-blue-600"
+          className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
         >
           {saveMutation.isPending ? "Saving..." : "Save Limits"}
         </Button>

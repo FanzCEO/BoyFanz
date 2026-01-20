@@ -55,7 +55,7 @@ export default function VideoEncoding() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-slate-400 flex items-center gap-2">
+        <h1 className="text-3xl font-bold text-cyan-400 flex items-center gap-2">
           <Video className="h-8 w-8" />
           Video Encoding Settings
         </h1>
@@ -63,7 +63,7 @@ export default function VideoEncoding() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="bg-gray-900 border border-slate-500/20">
+        <TabsList className="bg-gray-900 border border-cyan-500/20">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="presets">Encoding Presets</TabsTrigger>
           <TabsTrigger value="streaming">Streaming</TabsTrigger>
@@ -71,9 +71,9 @@ export default function VideoEncoding() {
         </TabsList>
 
         <TabsContent value="general" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">General Settings</CardTitle>
+              <CardTitle className="text-cyan-400">General Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -86,7 +86,7 @@ export default function VideoEncoding() {
               <div>
                 <Label>Default Codec</Label>
                 <Select value={config.defaultCodec} onValueChange={(value) => setConfig({ ...config, defaultCodec: value })}>
-                  <SelectTrigger className="bg-gray-800 border-slate-500/20">
+                  <SelectTrigger className="bg-gray-800 border-cyan-500/20">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -100,7 +100,7 @@ export default function VideoEncoding() {
               <div>
                 <Label>Default Resolution</Label>
                 <Select value={config.defaultResolution} onValueChange={(value) => setConfig({ ...config, defaultResolution: value })}>
-                  <SelectTrigger className="bg-gray-800 border-slate-500/20">
+                  <SelectTrigger className="bg-gray-800 border-cyan-500/20">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -124,7 +124,7 @@ export default function VideoEncoding() {
                   type="number"
                   value={config.thumbnailInterval}
                   onChange={(e) => setConfig({ ...config, thumbnailInterval: Number(e.target.value) })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                 />
               </div>
             </CardContent>
@@ -132,20 +132,20 @@ export default function VideoEncoding() {
         </TabsContent>
 
         <TabsContent value="presets" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">Encoding Presets</CardTitle>
+              <CardTitle className="text-cyan-400">Encoding Presets</CardTitle>
               <CardDescription>Pre-configured quality settings for video encoding</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {presets.map((preset) => (
-                  <div key={preset.name} className="flex items-center justify-between p-4 bg-gray-800 rounded-lg border border-slate-500/10">
+                  <div key={preset.name} className="flex items-center justify-between p-4 bg-gray-800 rounded-lg border border-cyan-500/10">
                     <div>
-                      <h3 className="font-semibold text-slate-400">{preset.name}</h3>
+                      <h3 className="font-semibold text-cyan-400">{preset.name}</h3>
                       <p className="text-sm text-gray-400">{preset.resolution} • {preset.bitrate}kbps • {preset.fps}fps</p>
                     </div>
-                    <Badge className="bg-slate-500/20 text-slate-400">{preset.codec.toUpperCase()}</Badge>
+                    <Badge className="bg-cyan-500/20 text-cyan-400">{preset.codec.toUpperCase()}</Badge>
                   </div>
                 ))}
               </div>
@@ -154,9 +154,9 @@ export default function VideoEncoding() {
         </TabsContent>
 
         <TabsContent value="streaming" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">Streaming Formats</CardTitle>
+              <CardTitle className="text-cyan-400">Streaming Formats</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -184,9 +184,9 @@ export default function VideoEncoding() {
         </TabsContent>
 
         <TabsContent value="performance" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">Performance Settings</CardTitle>
+              <CardTitle className="text-cyan-400">Performance Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -195,7 +195,7 @@ export default function VideoEncoding() {
                   type="number"
                   value={config.maxConcurrentJobs}
                   onChange={(e) => setConfig({ ...config, maxConcurrentJobs: Number(e.target.value) })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                 />
               </div>
               <div className="flex items-center justify-between">
@@ -214,7 +214,7 @@ export default function VideoEncoding() {
         <Button
           onClick={() => saveMutation.mutate(config)}
           disabled={saveMutation.isPending}
-          className="bg-gradient-to-r from-slate-500 to-blue-500 hover:from-slate-600 hover:to-blue-600"
+          className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
         >
           {saveMutation.isPending ? "Saving..." : "Save Configuration"}
         </Button>

@@ -26,7 +26,7 @@ export function LockerCard({
       className={`locker-card relative overflow-hidden ${className}`}
       whileHover={{
         scale: 1.02,
-        boxShadow: '0 0 25px rgba(71, 85, 105, 0.2), inset 0 0 15px rgba(71, 85, 105, 0.05)'
+        boxShadow: '0 0 25px rgba(0, 229, 255, 0.2), inset 0 0 15px rgba(0, 229, 255, 0.05)'
       }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
@@ -76,7 +76,7 @@ export function LockerCard({
       <motion.div
         className="absolute top-12 right-4 text-gray-400"
         animate={{
-          color: isOpen ? 'rgba(71, 85, 105, 0.8)' : 'rgba(156, 163, 175, 0.6)'
+          color: isOpen ? 'rgba(0, 229, 255, 0.8)' : 'rgba(156, 163, 175, 0.6)'
         }}
       >
         {isOpen ? (

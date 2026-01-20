@@ -491,7 +491,7 @@ export default function DepositsManagement() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-400 to-pink-500 bg-clip-text text-transparent" data-testid="page-title">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent" data-testid="page-title">
             Deposits Management
           </h1>
           <p className="text-muted-foreground">Monitor deposits, verify compliance, and manage AML requirements</p>
@@ -500,10 +500,10 @@ export default function DepositsManagement() {
           <Button
             onClick={() => setShowQuickActions(true)}
             variant="outline"
-            className="border-slate-500/30 hover:bg-slate-500/10"
+            className="border-cyan-500/30 hover:bg-cyan-500/10"
             data-testid="button-quick-actions"
           >
-            <Zap className="h-4 w-4 mr-2 text-slate-400" />
+            <Zap className="h-4 w-4 mr-2 text-cyan-400" />
             Quick Actions
           </Button>
           <Button
@@ -1102,7 +1102,7 @@ export default function DepositsManagement() {
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" data-testid="dialog-quick-actions">
           <DialogHeader>
             <DialogTitle className="flex items-center">
-              <Zap className="h-5 w-5 mr-2 text-slate-400" />
+              <Zap className="h-5 w-5 mr-2 text-cyan-400" />
               Quick Action Templates
             </DialogTitle>
             <DialogDescription>
@@ -1116,9 +1116,9 @@ export default function DepositsManagement() {
               return (
                 <Card
                   key={template.id}
-                  className={`cursor-pointer transition-all hover:border-slate-500/50 ${
+                  className={`cursor-pointer transition-all hover:border-cyan-500/50 ${
                     selectedQuickAction === template.id
-                      ? 'border-slate-500 bg-slate-500/5'
+                      ? 'border-cyan-500 bg-cyan-500/5'
                       : 'border-border'
                   }`}
                   onClick={() => setSelectedQuickAction(template.id)}
@@ -1145,7 +1145,7 @@ export default function DepositsManagement() {
                         </div>
                       </div>
                       {selectedQuickAction === template.id && (
-                        <CheckCircle className="h-5 w-5 text-slate-400 ml-2" />
+                        <CheckCircle className="h-5 w-5 text-cyan-400 ml-2" />
                       )}
                     </div>
                   </CardContent>
@@ -1171,7 +1171,7 @@ export default function DepositsManagement() {
                 }
               }}
               disabled={!selectedQuickAction || executeQuickActionMutation.isPending}
-              className="bg-gradient-to-r from-slate-500 to-pink-500 hover:from-slate-600 hover:to-pink-600"
+              className="bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-cyan-600 hover:to-pink-600"
             >
               {executeQuickActionMutation.isPending ? 'Executing...' : 'Execute Action'}
             </Button>
@@ -1250,7 +1250,7 @@ export default function DepositsManagement() {
                 }
               }}
               disabled={!selectedReport || generateReportMutation.isPending}
-              className="bg-gradient-to-r from-slate-500 to-pink-500 hover:from-slate-600 hover:to-pink-600"
+              className="bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-cyan-600 hover:to-pink-600"
             >
               {generateReportMutation.isPending ? 'Generating...' : 'Generate Report'}
             </Button>

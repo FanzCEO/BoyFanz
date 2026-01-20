@@ -158,7 +158,7 @@ export const EMPIRE_PLATFORMS = [
   { id: "milffanz", name: "MilfFanz", domain: "milffanz.fanz.website", color: "#f43f5e" },
   { id: "cougarfanz", name: "CougarFanz", domain: "cougarfanz.fanz.website", color: "#d946ef" },
   { id: "femmefanz", name: "FemmeFanz", domain: "femmefanz.fanz.website", color: "#8b5cf6" },
-  { id: "brofanz", name: "BroFanz", domain: "brofanz.fanz.website", color: "#64748b" },
+  { id: "brofanz", name: "BroFanz", domain: "brofanz.fanz.website", color: "#06b6d4" },
   { id: "gayfanz", name: "GayFanz", domain: "gayfanz.fanz.website", color: "#14b8a6" },
   { id: "southernfanz", name: "SouthernFanz", domain: "southernfanz.fanz.website", color: "#84cc16" },
 ] as const;

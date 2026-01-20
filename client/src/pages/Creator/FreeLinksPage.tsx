@@ -598,7 +598,7 @@ export default function FreeLinksPage() {
                         <span className="ml-1 capitalize">{link.status}</span>
                       </Badge>
                       {link.newSubscribersOnly && (
-                        <Badge variant="outline" className="border-slate-500/30 text-slate-400">
+                        <Badge variant="outline" className="border-cyan-500/30 text-cyan-400">
                           New Fans Only
                         </Badge>
                       )}
@@ -646,7 +646,7 @@ export default function FreeLinksPage() {
                       <div className="text-xs text-muted-foreground">views</div>
                     </div>
                     <div className="text-center">
-                      <div className="font-semibold text-slate-400">{link.scanCount}</div>
+                      <div className="font-semibold text-cyan-400">{link.scanCount}</div>
                       <div className="text-xs text-muted-foreground">QR scans</div>
                     </div>
                   </div>
@@ -847,7 +847,7 @@ export default function FreeLinksPage() {
                     <div className="text-xs text-muted-foreground">Total Views</div>
                   </Card>
                   <Card className="p-4 text-center">
-                    <QrCode className="h-5 w-5 mx-auto text-slate-400 mb-2" />
+                    <QrCode className="h-5 w-5 mx-auto text-cyan-400 mb-2" />
                     <div className="text-2xl font-bold">{analyticsData.totalScans}</div>
                     <div className="text-xs text-muted-foreground">QR Scans</div>
                   </Card>

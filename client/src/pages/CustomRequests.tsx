@@ -81,7 +81,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: any }> 
   accepted: { label: 'Accepted - Pay Now', color: 'bg-green-500', icon: DollarSign },
   paid: { label: 'Paid - In Production', color: 'bg-purple-500', icon: Package },
   in_progress: { label: 'In Progress', color: 'bg-purple-500', icon: Package },
-  delivered: { label: 'Delivered - Review', color: 'bg-slate-500', icon: Eye },
+  delivered: { label: 'Delivered - Review', color: 'bg-cyan-500', icon: Eye },
   approved: { label: 'Completed', color: 'bg-green-600', icon: CheckCircle },
   disputed: { label: 'Disputed', color: 'bg-red-500', icon: AlertTriangle },
   refunded: { label: 'Refunded', color: 'bg-gray-500', icon: XCircle },

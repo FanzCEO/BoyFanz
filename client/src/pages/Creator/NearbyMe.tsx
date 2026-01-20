@@ -49,10 +49,10 @@ const STADIA_API_KEY = "16ac6691-38f3-40f4-9cdc-ea4667fe3716";
 
 // Platform theme colors (from platform.identity.json)
 const PLATFORM_COLORS = {
-  boyfanz: { primary: "#475569", accent: "#64748b", neon: "#475569" },
+  boyfanz: { primary: "#00e5ff", accent: "#06b6d4", neon: "#00d2ff" },
   girlfanz: { primary: "#ff49db", accent: "#ff69b4", neon: "#ff1493" },
   gayfanz: { primary: "#9333ea", accent: "#a855f7", neon: "#c084fc" },
-  transfanz: { primary: "#64748b", accent: "#94a3b8", neon: "#cbd5e1" },
+  transfanz: { primary: "#06b6d4", accent: "#22d3ee", neon: "#67e8f9" },
   milffanz: { primary: "#dc2626", accent: "#ef4444", neon: "#f87171" },
   bearfanz: { primary: "#92400e", accent: "#b45309", neon: "#f59e0b" },
   cougarfanz: { primary: "#be123c", accent: "#e11d48", neon: "#fb7185" },
@@ -60,7 +60,7 @@ const PLATFORM_COLORS = {
   pupfanz: { primary: "#c2410c", accent: "#ea580c", neon: "#fb923c" },
   taboofanz: { primary: "#7c2d12", accent: "#9a3412", neon: "#c2410c" },
   femmefanz: { primary: "#db2777", accent: "#ec4899", neon: "#f472b6" },
-  brofanz: { primary: "#0891b2", accent: "#64748b", neon: "#94a3b8" },
+  brofanz: { primary: "#0891b2", accent: "#06b6d4", neon: "#22d3ee" },
   southernfanz: { primary: "#16a34a", accent: "#22c55e", neon: "#4ade80" },
   dlbroz: { primary: "#6366f1", accent: "#818cf8", neon: "#a5b4fc" },
 };

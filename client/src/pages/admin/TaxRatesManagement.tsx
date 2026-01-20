@@ -565,7 +565,7 @@ export default function TaxRatesManagement() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-400 to-pink-500 bg-clip-text text-transparent" data-testid="page-title">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent" data-testid="page-title">
             Tax Rates Management
           </h1>
           <p className="text-muted-foreground">Configure tax rates by jurisdiction and manage compliance</p>
@@ -574,10 +574,10 @@ export default function TaxRatesManagement() {
           <Button
             onClick={() => setShowTemplates(true)}
             variant="outline"
-            className="border-slate-500/30 hover:bg-slate-500/10"
+            className="border-cyan-500/30 hover:bg-cyan-500/10"
             data-testid="button-templates"
           >
-            <Zap className="h-4 w-4 mr-2 text-slate-400" />
+            <Zap className="h-4 w-4 mr-2 text-cyan-400" />
             Templates
           </Button>
           <DropdownMenu>
@@ -608,7 +608,7 @@ export default function TaxRatesManagement() {
           </DropdownMenu>
           <Button
             onClick={() => setShowCreateRate(true)}
-            className="bg-gradient-to-r from-slate-500 to-pink-500 hover:from-slate-600 hover:to-pink-600"
+            className="bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-cyan-600 hover:to-pink-600"
             data-testid="button-create-rate"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -1389,7 +1389,7 @@ export default function TaxRatesManagement() {
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" data-testid="dialog-templates">
           <DialogHeader>
             <DialogTitle className="flex items-center">
-              <Zap className="h-5 w-5 mr-2 text-slate-400" />
+              <Zap className="h-5 w-5 mr-2 text-cyan-400" />
               Tax Rate Templates
             </DialogTitle>
             <DialogDescription>
@@ -1401,9 +1401,9 @@ export default function TaxRatesManagement() {
             {TAX_TEMPLATES.map((template) => (
               <Card
                 key={template.id}
-                className={`cursor-pointer transition-all hover:border-slate-500/50 ${
+                className={`cursor-pointer transition-all hover:border-cyan-500/50 ${
                   selectedTemplate === template.id
-                    ? 'border-slate-500 bg-slate-500/5'
+                    ? 'border-cyan-500 bg-cyan-500/5'
                     : 'border-border'
                 }`}
                 onClick={() => setSelectedTemplate(template.id)}
@@ -1421,18 +1421,18 @@ export default function TaxRatesManagement() {
                       <p className="text-sm text-muted-foreground">{template.description}</p>
                       <div className="flex items-center space-x-4 text-sm">
                         <div className="flex items-center">
-                          <Flag className="h-3 w-3 mr-1 text-slate-400" />
+                          <Flag className="h-3 w-3 mr-1 text-cyan-400" />
                           <span>{getCountryName(template.country)}</span>
                           {template.state && <span className="ml-1 text-muted-foreground">({template.state})</span>}
                         </div>
-                        <div className="flex items-center font-semibold text-slate-400">
+                        <div className="flex items-center font-semibold text-cyan-400">
                           <Percent className="h-3 w-3 mr-1" />
                           <span>{template.rate}%</span>
                         </div>
                       </div>
                     </div>
                     {selectedTemplate === template.id && (
-                      <CheckCircle className="h-5 w-5 text-slate-400 ml-2" />
+                      <CheckCircle className="h-5 w-5 text-cyan-400 ml-2" />
                     )}
                   </div>
                 </CardContent>
@@ -1453,7 +1453,7 @@ export default function TaxRatesManagement() {
             <Button
               onClick={handleApplyTemplate}
               disabled={!selectedTemplate || applyTemplateMutation.isPending}
-              className="bg-gradient-to-r from-slate-500 to-pink-500 hover:from-slate-600 hover:to-pink-600"
+              className="bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-cyan-600 hover:to-pink-600"
             >
               {applyTemplateMutation.isPending ? 'Applying...' : 'Apply Template'}
             </Button>
@@ -1501,8 +1501,8 @@ export default function TaxRatesManagement() {
                 <p className="text-xs text-muted-foreground mt-1">CSV or Excel files up to 10MB</p>
               </label>
               {bulkImportFile && (
-                <div className="mt-4 p-3 bg-slate-500/10 border border-slate-500/30 rounded">
-                  <p className="text-sm font-medium text-slate-400">{bulkImportFile.name}</p>
+                <div className="mt-4 p-3 bg-cyan-500/10 border border-cyan-500/30 rounded">
+                  <p className="text-sm font-medium text-cyan-400">{bulkImportFile.name}</p>
                   <p className="text-xs text-muted-foreground">
                     {(bulkImportFile.size / 1024).toFixed(2)} KB
                   </p>
@@ -1531,7 +1531,7 @@ export default function TaxRatesManagement() {
             <Button
               onClick={handleBulkImport}
               disabled={!bulkImportFile || bulkImportMutation.isPending}
-              className="bg-gradient-to-r from-slate-500 to-pink-500 hover:from-slate-600 hover:to-pink-600"
+              className="bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-cyan-600 hover:to-pink-600"
             >
               {bulkImportMutation.isPending ? 'Importing...' : 'Import Tax Rates'}
             </Button>

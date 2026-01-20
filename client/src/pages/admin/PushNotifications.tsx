@@ -707,7 +707,7 @@ export default function PushNotificationsManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-400 to-pink-500 bg-clip-text text-transparent" data-testid="page-title">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent" data-testid="page-title">
             Push Notifications Management
           </h1>
           <p className="text-muted-foreground mt-1" data-testid="page-description">
@@ -720,10 +720,10 @@ export default function PushNotificationsManagement() {
             variant="outline"
             size="sm"
             onClick={() => setShowTemplateDialog(true)}
-            className="border-slate-500/30 hover:bg-slate-500/10"
+            className="border-cyan-500/30 hover:bg-cyan-500/10"
             data-testid="button-templates"
           >
-            <Zap className="h-4 w-4 mr-2 text-slate-400" />
+            <Zap className="h-4 w-4 mr-2 text-cyan-400" />
             Templates
           </Button>
 
@@ -1600,7 +1600,7 @@ export default function PushNotificationsManagement() {
       <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl bg-gradient-to-r from-slate-400 to-pink-500 bg-clip-text text-transparent">
+            <DialogTitle className="text-2xl bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent">
               ⚡ Notification Templates
             </DialogTitle>
             <DialogDescription>
@@ -1613,7 +1613,7 @@ export default function PushNotificationsManagement() {
               const IconComponent = template.icon;
               const colorClasses = {
                 pink: "border-pink-500/30 hover:bg-pink-500/10",
-                cyan: "border-slate-500/30 hover:bg-slate-500/10",
+                cyan: "border-cyan-500/30 hover:bg-cyan-500/10",
                 blue: "border-blue-500/30 hover:bg-blue-500/10",
                 red: "border-red-500/30 hover:bg-red-500/10",
                 green: "border-green-500/30 hover:bg-green-500/10",
@@ -1624,7 +1624,7 @@ export default function PushNotificationsManagement() {
               };
 
               const badgeColors = {
-                onboarding: "bg-slate-500/10 text-slate-400 border-slate-500/30",
+                onboarding: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
                 engagement: "bg-blue-500/10 text-blue-400 border-blue-500/30",
                 transaction: "bg-green-500/10 text-green-400 border-green-500/30",
                 retention: "bg-purple-500/10 text-purple-400 border-purple-500/30",
@@ -1638,7 +1638,7 @@ export default function PushNotificationsManagement() {
               return (
                 <Card
                   key={template.id}
-                  className={`cursor-pointer transition-all hover:shadow-lg ${colorClasses[template.color as keyof typeof colorClasses]} ${isSelected ? 'ring-2 ring-slate-500' : ''}`}
+                  className={`cursor-pointer transition-all hover:shadow-lg ${colorClasses[template.color as keyof typeof colorClasses]} ${isSelected ? 'ring-2 ring-cyan-500' : ''}`}
                   onClick={() => handleApplyTemplate(template.id)}
                   data-testid={`template-card-${template.id}`}
                 >
@@ -1655,7 +1655,7 @@ export default function PushNotificationsManagement() {
                           </Badge>
                         </div>
                       </div>
-                      {isSelected && <CheckCircle className="h-5 w-5 text-slate-400" />}
+                      {isSelected && <CheckCircle className="h-5 w-5 text-cyan-400" />}
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-2">

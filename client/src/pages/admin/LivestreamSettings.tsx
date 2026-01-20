@@ -24,7 +24,7 @@ export default function LivestreamSettings() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-slate-400 flex items-center gap-2">
+        <h1 className="text-3xl font-bold text-cyan-400 flex items-center gap-2">
           <Radio className="h-8 w-8" />
           Live Streaming Settings
         </h1>
@@ -32,16 +32,16 @@ export default function LivestreamSettings() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="bg-gray-900 border border-slate-500/20">
+        <TabsList className="bg-gray-900 border border-cyan-500/20">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="quality">Quality</TabsTrigger>
           <TabsTrigger value="features">Features</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">General Settings</CardTitle>
+              <CardTitle className="text-cyan-400">General Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -54,21 +54,21 @@ export default function LivestreamSettings() {
               </div>
               <div>
                 <Label>Max Concurrent Viewers</Label>
-                <Input type="number" value={config.maxViewers} onChange={(e) => setConfig({ ...config, maxViewers: Number(e.target.value) })} className="bg-gray-800 border-slate-500/20" />
+                <Input type="number" value={config.maxViewers} onChange={(e) => setConfig({ ...config, maxViewers: Number(e.target.value) })} className="bg-gray-800 border-cyan-500/20" />
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="quality" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">Stream Quality</CardTitle>
+              <CardTitle className="text-cyan-400">Stream Quality</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <Label>Max Bitrate (kbps)</Label>
-                <Input type="number" value={config.maxBitrate} onChange={(e) => setConfig({ ...config, maxBitrate: Number(e.target.value) })} className="bg-gray-800 border-slate-500/20" />
+                <Input type="number" value={config.maxBitrate} onChange={(e) => setConfig({ ...config, maxBitrate: Number(e.target.value) })} className="bg-gray-800 border-cyan-500/20" />
               </div>
               <div className="flex items-center justify-between">
                 <Label>Low Latency Mode</Label>
@@ -79,9 +79,9 @@ export default function LivestreamSettings() {
         </TabsContent>
 
         <TabsContent value="features" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">Stream Features</CardTitle>
+              <CardTitle className="text-cyan-400">Stream Features</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -102,7 +102,7 @@ export default function LivestreamSettings() {
       </Tabs>
 
       <div className="flex justify-end">
-        <Button className="bg-gradient-to-r from-slate-500 to-blue-500">Save Settings</Button>
+        <Button className="bg-gradient-to-r from-cyan-500 to-blue-500">Save Settings</Button>
       </div>
     </div>
   );

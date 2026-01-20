@@ -28,7 +28,7 @@ export default function FanzCyberSecure() {
       name: "FanzForensics",
       description: "Real-time threat detection and incident response system",
       status: "MONITORING",
-      color: "from-blue-500 to-slate-600"
+      color: "from-blue-500 to-cyan-600"
     },
     {
       icon: Fingerprint,
@@ -105,7 +105,7 @@ export default function FanzCyberSecure() {
           </div>
 
           <h1 className="text-6xl md:text-8xl font-black mb-4 tracking-tighter">
-            <span className="bg-gradient-to-r from-green-400 via-slate-400 to-blue-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-green-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent">
               FANZ
             </span>
             <span className="text-white">CYBERSECURE</span>
@@ -129,7 +129,7 @@ export default function FanzCyberSecure() {
               <div className="text-gray-500 text-sm uppercase tracking-wider">Systems Online</div>
             </div>
             <div>
-              <div className="text-4xl font-black text-slate-400 font-mono">256-BIT</div>
+              <div className="text-4xl font-black text-cyan-400 font-mono">256-BIT</div>
               <div className="text-gray-500 text-sm uppercase tracking-wider">Encryption</div>
             </div>
             <div>
@@ -226,10 +226,10 @@ export default function FanzCyberSecure() {
             <div className="bg-black/50 rounded-xl p-6 font-mono text-sm">
               <div className="text-green-400 mb-2">$ fanzforensics --status</div>
               <div className="text-gray-500">
-                <span className="text-slate-400">[INFO]</span> Scanning 47 active nodes...<br/>
-                <span className="text-slate-400">[INFO]</span> Neural network: ONLINE<br/>
+                <span className="text-cyan-400">[INFO]</span> Scanning 47 active nodes...<br/>
+                <span className="text-cyan-400">[INFO]</span> Neural network: ONLINE<br/>
                 <span className="text-green-400">[OK]</span> No threats detected<br/>
-                <span className="text-slate-400">[INFO]</span> Last scan: 0.3s ago<br/>
+                <span className="text-cyan-400">[INFO]</span> Last scan: 0.3s ago<br/>
                 <span className="text-yellow-400">[ACTIVE]</span> Real-time monitoring enabled<br/>
                 <span className="text-green-400">[SECURE]</span> All systems nominal_<span className="animate-pulse">|</span>
               </div>
@@ -307,7 +307,7 @@ export default function FanzCyberSecure() {
           className="text-center py-12 border-t border-gray-800"
         >
           <p className="text-gray-500 text-sm font-mono">
-            Built on the <span className="text-slate-400">FANZ NEXUS</span> • Powered by <span className="text-purple-400">FANZ NEUROVERSE</span> • Within the <span className="text-green-400">FANZ SINGULARITY</span>
+            Built on the <span className="text-cyan-400">FANZ NEXUS</span> • Powered by <span className="text-purple-400">FANZ NEUROVERSE</span> • Within the <span className="text-green-400">FANZ SINGULARITY</span>
           </p>
         </motion.div>
       </div>

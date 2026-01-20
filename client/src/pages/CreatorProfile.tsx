@@ -671,7 +671,7 @@ export default function CreatorProfile() {
                       )}
                       {creator.socialLinks.fanzlink && (
                         <a href={creator.socialLinks.fanzlink} target="_blank" rel="noopener noreferrer">
-                          <Button variant="outline" size="icon" className="border-slate-500/30 text-slate-400 hover:bg-cyan-950/30" title="FanzLink Bio">
+                          <Button variant="outline" size="icon" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-950/30" title="FanzLink Bio">
                             <Link2 className="h-5 w-5" />
                           </Button>
                         </a>

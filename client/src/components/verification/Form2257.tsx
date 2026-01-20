@@ -1,11 +1,11 @@
 /**
  * 2257 Compliance Form
- * For creators to submit record-keeping information with photo ID uploads
+ * For creators to submit record-keeping information
  */
 
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, CheckCircle, AlertCircle, Lock, Upload, X, Image } from "lucide-react";
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { FileText, CheckCircle, AlertCircle, Lock } from 'lucide-react';
 
 interface Form2257Data {
   legalFirstName: string;
@@ -17,11 +17,6 @@ interface Form2257Data {
   primaryIdIssuer: string;
   primaryIdExpiryDate?: string;
   currentAddress: string;
-  // Photo uploads
-  idFrontImageUrl?: string;
-  idBackImageUrl?: string;
-  selfieWithIdUrl?: string;
-  // Attestations
   attestsOver18: boolean;
   attestsIdentityAccurate: boolean;
   consentToRecordKeeping: boolean;
@@ -31,111 +26,51 @@ export function Form2257() {
   const queryClient = useQueryClient();
 
   const { data: status } = useQuery({
-    queryKey: ["/api/verification/status"],
+    queryKey: ['/api/verification/status'],
     staleTime: 60000,
   });
 
   const { data: record2257Status } = useQuery({
-    queryKey: ["/api/verification/2257/status"],
+    queryKey: ['/api/verification/2257/status'],
     staleTime: 60000,
   });
 
   const [formData, setFormData] = useState<Form2257Data>({
-    legalFirstName: "",
-    legalLastName: "",
-    legalMiddleName: "",
-    dateOfBirth: "",
-    primaryIdType: "drivers_license",
-    primaryIdNumber: "",
-    primaryIdIssuer: "",
-    primaryIdExpiryDate: "",
-    currentAddress: "",
-    idFrontImageUrl: "",
-    idBackImageUrl: "",
-    selfieWithIdUrl: "",
+    legalFirstName: '',
+    legalLastName: '',
+    legalMiddleName: '',
+    dateOfBirth: '',
+    primaryIdType: 'drivers_license',
+    primaryIdNumber: '',
+    primaryIdIssuer: '',
+    primaryIdExpiryDate: '',
+    currentAddress: '',
     attestsOver18: false,
     attestsIdentityAccurate: false,
     consentToRecordKeeping: false,
   });
 
-  const [uploadingField, setUploadingField] = useState<string | null>(null);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-
   const submitForm = useMutation({
     mutationFn: async (data: Form2257Data) => {
-      const response = await fetch("/api/verification/2257/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+      const response = await fetch('/api/verification/2257/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(data),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to submit form");
+        throw new Error(error.message || 'Failed to submit form');
       }
 
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/verification/2257/status"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/verification/status"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/verification/2257/status'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/verification/status'] });
     },
   });
-
-  const handleFileUpload = async (field: keyof Form2257Data, file: File) => {
-    setUploadingField(field);
-    setUploadError(null);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("path", `verification/2257/${Date.now()}-${file.name}`);
-
-      const response = await fetch("/api/bunny/upload", {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Upload failed");
-      }
-
-      const result = await response.json();
-      
-      if (result.success && result.data?.url) {
-        setFormData((prev) => ({ ...prev, [field]: result.data.url }));
-      } else {
-        throw new Error("Invalid response from server");
-      }
-    } catch (error: any) {
-      setUploadError(error.message || "Failed to upload file");
-    } finally {
-      setUploadingField(null);
-    }
-  };
-
-  const handleFileChange = (field: keyof Form2257Data) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        setUploadError("Please upload an image file (JPG, PNG, etc.)");
-        return;
-      }
-      // Validate file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        setUploadError("File size must be less than 10MB");
-        return;
-      }
-      handleFileUpload(field, file);
-    }
-  };
-
-  const clearUpload = (field: keyof Form2257Data) => {
-    setFormData((prev) => ({ ...prev, [field]: "" }));
-  };
 
   // Need identity verification first
   if (!status?.identityVerified) {
@@ -158,7 +93,7 @@ export function Form2257() {
   }
 
   // Already submitted and approved
-  if (record2257Status?.status === "approved") {
+  if (record2257Status?.status === 'approved') {
     return (
       <div className="bg-green-50 border border-green-200 rounded-lg p-6">
         <div className="flex items-start gap-3">
@@ -183,7 +118,7 @@ export function Form2257() {
   }
 
   // Pending review
-  if (record2257Status?.status === "pending_review") {
+  if (record2257Status?.status === 'pending_review') {
     return (
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
         <div className="flex items-start gap-3">
@@ -219,9 +154,6 @@ export function Form2257() {
     formData.primaryIdNumber &&
     formData.primaryIdIssuer &&
     formData.currentAddress &&
-    formData.idFrontImageUrl &&
-    formData.idBackImageUrl &&
-    formData.selfieWithIdUrl &&
     formData.attestsOver18 &&
     formData.attestsIdentityAccurate &&
     formData.consentToRecordKeeping;
@@ -242,7 +174,7 @@ export function Form2257() {
       {/* Form */}
       <form onSubmit={handleSubmit} className="p-6">
         {/* Rejection notice */}
-        {record2257Status?.status === "rejected" && (
+        {record2257Status?.status === 'rejected' && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
             <div className="flex items-start gap-2">
               <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
@@ -252,7 +184,7 @@ export function Form2257() {
                 </h4>
                 <p className="text-sm text-red-700">
                   {record2257Status.rejectionReason ||
-                    "Please review and resubmit your information."}
+                    'Please review and resubmit your information.'}
                 </p>
               </div>
             </div>
@@ -419,172 +351,6 @@ export function Form2257() {
             />
           </div>
 
-          {/* Photo Uploads */}
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <Image className="w-4 h-4" />
-              Required Photo Documentation
-            </h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Upload clear photos of your ID documents. All photos must be legible and match your information above.
-            </p>
-            
-            {uploadError && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                <p className="text-sm text-red-700">{uploadError}</p>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* ID Front */}
-              <div className="border border-gray-300 rounded-lg p-4 bg-white">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  ID Front *
-                </label>
-                {formData.idFrontImageUrl ? (
-                  <div className="relative">
-                    <img
-                      src={formData.idFrontImageUrl}
-                      alt="ID Front"
-                      className="w-full h-32 object-cover rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => clearUpload("idFrontImageUrl")}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                    <p className="text-green-600 text-xs mt-1 flex items-center gap-1">
-                      <CheckCircle className="w-3 h-3" /> Uploaded
-                    </p>
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange("idFrontImageUrl")}
-                      disabled={uploadingField === "idFrontImageUrl"}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-purple-400 transition">
-                      {uploadingField === "idFrontImageUrl" ? (
-                        <div className="animate-pulse">
-                          <div className="w-8 h-8 border-2 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                          <p className="text-sm text-gray-500">Uploading...</p>
-                        </div>
-                      ) : (
-                        <>
-                          <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                          <p className="text-sm text-gray-500">Click to upload</p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* ID Back */}
-              <div className="border border-gray-300 rounded-lg p-4 bg-white">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  ID Back *
-                </label>
-                {formData.idBackImageUrl ? (
-                  <div className="relative">
-                    <img
-                      src={formData.idBackImageUrl}
-                      alt="ID Back"
-                      className="w-full h-32 object-cover rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => clearUpload("idBackImageUrl")}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                    <p className="text-green-600 text-xs mt-1 flex items-center gap-1">
-                      <CheckCircle className="w-3 h-3" /> Uploaded
-                    </p>
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange("idBackImageUrl")}
-                      disabled={uploadingField === "idBackImageUrl"}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-purple-400 transition">
-                      {uploadingField === "idBackImageUrl" ? (
-                        <div className="animate-pulse">
-                          <div className="w-8 h-8 border-2 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                          <p className="text-sm text-gray-500">Uploading...</p>
-                        </div>
-                      ) : (
-                        <>
-                          <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                          <p className="text-sm text-gray-500">Click to upload</p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Selfie with ID */}
-              <div className="border border-gray-300 rounded-lg p-4 bg-white">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Selfie Holding ID *
-                </label>
-                {formData.selfieWithIdUrl ? (
-                  <div className="relative">
-                    <img
-                      src={formData.selfieWithIdUrl}
-                      alt="Selfie with ID"
-                      className="w-full h-32 object-cover rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => clearUpload("selfieWithIdUrl")}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                    <p className="text-green-600 text-xs mt-1 flex items-center gap-1">
-                      <CheckCircle className="w-3 h-3" /> Uploaded
-                    </p>
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange("selfieWithIdUrl")}
-                      disabled={uploadingField === "selfieWithIdUrl"}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-purple-400 transition">
-                      {uploadingField === "selfieWithIdUrl" ? (
-                        <div className="animate-pulse">
-                          <div className="w-8 h-8 border-2 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                          <p className="text-sm text-gray-500">Uploading...</p>
-                        </div>
-                      ) : (
-                        <>
-                          <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                          <p className="text-sm text-gray-500">Click to upload</p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
           {/* Attestations */}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -651,7 +417,7 @@ export function Form2257() {
           {submitForm.isError && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <p className="text-sm text-red-700">
-                {submitForm.error?.message || "Failed to submit form. Please try again."}
+                {submitForm.error?.message || 'Failed to submit form. Please try again.'}
               </p>
             </div>
           )}
@@ -689,7 +455,7 @@ export function Form2257() {
             disabled={!isFormValid || submitForm.isPending}
             className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitForm.isPending ? "Submitting for review..." : "Submit & Go Live"}
+            {submitForm.isPending ? 'Submitting for review...' : 'Submit & Go Live'}
           </button>
 
           <p className="text-xs text-gray-500 text-center">

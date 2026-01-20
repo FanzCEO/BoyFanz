@@ -51,8 +51,8 @@ const bathhouseZones: BathhouseZone[] = [
     description: 'Get clean... or dirty. Open showers with plenty of eye candy.',
     icon: <Droplets className="h-8 w-8" />,
     path: '/bathhouse/showers',
-    color: 'text-slate-400',
-    gradient: 'from-slate-600 to-blue-800',
+    color: 'text-cyan-400',
+    gradient: 'from-cyan-600 to-blue-800',
     occupancy: 34,
     maxOccupancy: 50,
     isHot: true,
@@ -270,7 +270,7 @@ function ZoneCard({ zone }: { zone: BathhouseZone }) {
               </Badge>
             )}
             {zone.isNew && (
-              <Badge className="bg-slate-600/80 text-white border-0">
+              <Badge className="bg-cyan-600/80 text-white border-0">
                 <Sparkles className="h-3 w-3 mr-1" />
                 NEW
               </Badge>
@@ -370,7 +370,7 @@ export default function Bathhouse() {
           {/* Stats bar */}
           <div className="inline-flex items-center gap-6 px-6 py-3 rounded-full bg-black/60 backdrop-blur-sm border border-red-900/30">
             <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-slate-400" />
+              <Users className="h-5 w-5 text-cyan-400" />
               <span className="text-white font-semibold">{totalOnline}</span>
               <span className="text-gray-400">online</span>
             </div>
@@ -424,7 +424,7 @@ export default function Bathhouse() {
         {/* All Zones Grid */}
         <div className="px-4">
           <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <DoorOpen className="h-5 w-5 text-slate-400" />
+            <DoorOpen className="h-5 w-5 text-cyan-400" />
             All Zones
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -448,7 +448,7 @@ export default function Bathhouse() {
                 <Link href="/bathhouse/locker-room" className="col-span-1 row-span-1 bg-zinc-700/50 rounded-lg flex items-center justify-center hover:bg-zinc-600/50 transition-colors cursor-pointer">
                   <span className="text-xs text-white">Locker Room</span>
                 </Link>
-                <Link href="/bathhouse/showers" className="col-span-1 row-span-1 bg-slate-700/50 rounded-lg flex items-center justify-center hover:bg-slate-600/50 transition-colors cursor-pointer">
+                <Link href="/bathhouse/showers" className="col-span-1 row-span-1 bg-cyan-700/50 rounded-lg flex items-center justify-center hover:bg-cyan-600/50 transition-colors cursor-pointer">
                   <span className="text-xs text-white">Showers</span>
                 </Link>
                 <Link href="/bathhouse/gym" className="col-span-1 row-span-1 bg-green-700/50 rounded-lg flex items-center justify-center hover:bg-green-600/50 transition-colors cursor-pointer">

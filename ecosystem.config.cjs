@@ -8,7 +8,6 @@ module.exports = {
     env: {
       NODE_ENV: "production",
       PORT: "3000",
-      DATABASE_URL: "postgresql://fanz_master:FanzSecure2025db@64.20.46.122:5432/boyfanz_db",
       SSO_SHARED_SECRET: "fb7b900a70893b288cc46741c9715efc07f7dacc9cf873e97755643c156cc436",
       HEALTH_MONITORING_ENABLED: "false",
       SERVICE_DISCOVERY_ENABLED: "false",

@@ -37,8 +37,8 @@ const zoneConfigs: Record<string, {
   'showers': {
     name: 'Showers',
     icon: <Droplets className="h-6 w-6" />,
-    gradient: 'from-slate-600 to-blue-800',
-    color: 'text-slate-400',
+    gradient: 'from-cyan-600 to-blue-800',
+    color: 'text-cyan-400',
     description: 'Open communal showers with hot water. Get clean, show off, or just enjoy the view.',
     ambiance: 'Steam rising, water cascading, tile floors, shared shower heads along the walls.',
     features: ['Open Showers', 'Private Stalls', 'Soap Dispensers', 'Towel Racks']
@@ -249,7 +249,7 @@ export default function ZonePage({ zoneName }: ZonePageProps) {
                 {/* Stats */}
                 <div className="flex items-center gap-6">
                   <div className="flex items-center gap-2 text-sm">
-                    <Users className="h-4 w-4 text-slate-400" />
+                    <Users className="h-4 w-4 text-cyan-400" />
                     <span className="text-white font-semibold">{onlineCount}</span>
                     <span className="text-gray-400">online now</span>
                   </div>
@@ -408,7 +408,7 @@ export default function ZonePage({ zoneName }: ZonePageProps) {
                       <div>
                         <div className="flex items-center gap-1">
                           <span className="font-semibold text-white text-sm">{user.name}</span>
-                          {user.isVerified && <Sparkles className="h-3 w-3 text-slate-400" />}
+                          {user.isVerified && <Sparkles className="h-3 w-3 text-cyan-400" />}
                         </div>
                         <p className="text-xs text-gray-500">Live in {config.name}</p>
                       </div>
@@ -437,7 +437,7 @@ export default function ZonePage({ zoneName }: ZonePageProps) {
                         </Avatar>
                         <div className="flex items-center justify-center gap-1 mb-1">
                           <span className="font-semibold text-white text-sm">{member.name}</span>
-                          {member.isVerified && <Sparkles className="h-3 w-3 text-slate-400" />}
+                          {member.isVerified && <Sparkles className="h-3 w-3 text-cyan-400" />}
                         </div>
                         {member.isLive && (
                           <Badge className="bg-red-600/80 border-0 text-xs">
@@ -458,7 +458,7 @@ export default function ZonePage({ zoneName }: ZonePageProps) {
                         <div className="flex-1">
                           <div className="flex items-center gap-1">
                             <span className="font-semibold text-white">{member.name}</span>
-                            {member.isVerified && <Sparkles className="h-3 w-3 text-slate-400" />}
+                            {member.isVerified && <Sparkles className="h-3 w-3 text-cyan-400" />}
                           </div>
                           <p className="text-xs text-gray-500">Online in {config.name}</p>
                         </div>

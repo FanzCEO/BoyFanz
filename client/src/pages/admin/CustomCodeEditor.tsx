@@ -49,7 +49,7 @@ export default function CustomCodeEditor() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-slate-400 flex items-center gap-2">
+        <h1 className="text-3xl font-bold text-cyan-400 flex items-center gap-2">
           <Code className="h-8 w-8" />
           Custom Code Editor
         </h1>
@@ -64,35 +64,35 @@ export default function CustomCodeEditor() {
       </Alert>
 
       <Tabs defaultValue="css" className="space-y-6">
-        <TabsList className="bg-gray-900 border border-slate-500/20">
+        <TabsList className="bg-gray-900 border border-cyan-500/20">
           <TabsTrigger value="css">Custom CSS</TabsTrigger>
           <TabsTrigger value="javascript">Custom JavaScript</TabsTrigger>
         </TabsList>
 
         <TabsContent value="css" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">Custom CSS Code</CardTitle>
+              <CardTitle className="text-cyan-400">Custom CSS Code</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Textarea
                 value={customCSS}
                 onChange={(e) => setCustomCSS(e.target.value)}
-                placeholder="/* Enter your custom CSS here */&#10;.my-custom-class {&#10;  color: #475569;&#10;  font-weight: bold;&#10;}"
-                className="font-mono text-sm bg-gray-800 border-slate-500/20 min-h-[400px]"
+                placeholder="/* Enter your custom CSS here */&#10;.my-custom-class {&#10;  color: #00e5ff;&#10;  font-weight: bold;&#10;}"
+                className="font-mono text-sm bg-gray-800 border-cyan-500/20 min-h-[400px]"
               />
               <div className="flex gap-2 justify-end">
                 <Button
                   variant="outline"
                   onClick={handleResetCSS}
-                  className="border-slate-500/20 text-gray-400 hover:text-white"
+                  className="border-cyan-500/20 text-gray-400 hover:text-white"
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Reset
                 </Button>
                 <Button
                   onClick={handleSaveCSS}
-                  className="bg-gradient-to-r from-slate-500 to-blue-500"
+                  className="bg-gradient-to-r from-cyan-500 to-blue-500"
                 >
                   <Save className="h-4 w-4 mr-2" />
                   Save CSS
@@ -103,9 +103,9 @@ export default function CustomCodeEditor() {
         </TabsContent>
 
         <TabsContent value="javascript" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">Custom JavaScript Code</CardTitle>
+              <CardTitle className="text-cyan-400">Custom JavaScript Code</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Alert className="bg-red-900/20 border-red-500/30">
@@ -118,20 +118,20 @@ export default function CustomCodeEditor() {
                 value={customJS}
                 onChange={(e) => setCustomJS(e.target.value)}
                 placeholder="// Enter your custom JavaScript here&#10;(function() {&#10;  console.log('Custom JS loaded');&#10;})();"
-                className="font-mono text-sm bg-gray-800 border-slate-500/20 min-h-[400px]"
+                className="font-mono text-sm bg-gray-800 border-cyan-500/20 min-h-[400px]"
               />
               <div className="flex gap-2 justify-end">
                 <Button
                   variant="outline"
                   onClick={handleResetJS}
-                  className="border-slate-500/20 text-gray-400 hover:text-white"
+                  className="border-cyan-500/20 text-gray-400 hover:text-white"
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Reset
                 </Button>
                 <Button
                   onClick={handleSaveJS}
-                  className="bg-gradient-to-r from-slate-500 to-blue-500"
+                  className="bg-gradient-to-r from-cyan-500 to-blue-500"
                 >
                   <Save className="h-4 w-4 mr-2" />
                   Save JavaScript
@@ -142,14 +142,14 @@ export default function CustomCodeEditor() {
         </TabsContent>
       </Tabs>
 
-      <Card className="bg-gray-900 border-slate-500/20">
+      <Card className="bg-gray-900 border-cyan-500/20">
         <CardHeader>
-          <CardTitle className="text-slate-400">Usage Guidelines</CardTitle>
+          <CardTitle className="text-cyan-400">Usage Guidelines</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-gray-400">
           <p>• CSS code will be injected into the platform's stylesheet</p>
           <p>• JavaScript code will execute after DOM content is loaded</p>
-          <p>• Use the BoyFanz theme variable: --cyan-primary: #475569</p>
+          <p>• Use the BoyFanz theme variable: --cyan-primary: #00e5ff</p>
           <p>• Test changes in a development environment first</p>
           <p>• Avoid conflicting with existing platform styles and scripts</p>
         </CardContent>

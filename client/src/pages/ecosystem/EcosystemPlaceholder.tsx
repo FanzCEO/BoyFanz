@@ -234,7 +234,7 @@ export function FanzFiliatePage() {
       name="FanzFiliate"
       tagline="Grow your network, earn commissions"
       icon="fas fa-handshake"
-      color="from-blue-500 to-slate-600"
+      color="from-blue-500 to-cyan-600"
       status="LIVE"
       features={[
         "Affiliate tracking dashboard",
@@ -272,7 +272,7 @@ export function FanzMeetPage() {
       name="FanzMeet"
       tagline="Video calls for creators and fans"
       icon="fas fa-video"
-      color="from-slate-500 to-blue-600"
+      color="from-cyan-500 to-blue-600"
       status="LIVE"
       features={[
         "1-on-1 video calls",

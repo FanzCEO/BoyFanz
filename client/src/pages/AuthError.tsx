@@ -95,7 +95,7 @@ export default function AuthError() {
           <div className="space-y-3">
             <button
               onClick={handleRetry}
-              className="w-full bg-slate-500 hover:bg-slate-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200"
+              className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200"
             >
               Try Again
             </button>
@@ -116,7 +116,7 @@ export default function AuthError() {
         <div className="mt-6 text-center">
           <p className="text-gray-400 text-sm">
             Need help?{' '}
-            <a href="/support" className="text-slate-400 hover:text-cyan-300 underline">
+            <a href="/support" className="text-cyan-400 hover:text-cyan-300 underline">
               Contact Support
             </a>
           </p>

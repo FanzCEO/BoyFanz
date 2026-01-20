@@ -262,10 +262,10 @@ export function Compliance2257Form({ onComplete }: Compliance2257FormProps) {
   return (
     <div className="min-h-screen cyber-bg p-6">
       <div className="container mx-auto max-w-4xl">
-        <Card className="bg-gray-900/50 border-slate-500/20">
-          <CardHeader className="text-center border-b border-slate-500/20">
+        <Card className="bg-gray-900/50 border-cyan-500/20">
+          <CardHeader className="text-center border-b border-cyan-500/20">
             <div className="flex justify-center mb-4">
-              <Shield className="w-16 h-16 text-slate-400 cyber-pulse" />
+              <Shield className="w-16 h-16 text-cyan-400 cyber-pulse" />
             </div>
             <CardTitle className="text-3xl font-bold cyber-text-glow">
               USC 2257 Record-Keeping Compliance
@@ -299,7 +299,7 @@ export function Compliance2257Form({ onComplete }: Compliance2257FormProps) {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 {/* Personal Information */}
                 <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-slate-400 border-b border-slate-500/20 pb-2">
+                  <h3 className="text-xl font-semibold text-cyan-400 border-b border-cyan-500/20 pb-2">
                     Personal Information
                   </h3>
 
@@ -455,7 +455,7 @@ export function Compliance2257Form({ onComplete }: Compliance2257FormProps) {
 
                 {/* Identification */}
                 <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-slate-400 border-b border-slate-500/20 pb-2">
+                  <h3 className="text-xl font-semibold text-cyan-400 border-b border-cyan-500/20 pb-2">
                     Identification
                   </h3>
 
@@ -533,7 +533,7 @@ export function Compliance2257Form({ onComplete }: Compliance2257FormProps) {
 
                 {/* Contact Information */}
                 <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-slate-400 border-b border-slate-500/20 pb-2">
+                  <h3 className="text-xl font-semibold text-cyan-400 border-b border-cyan-500/20 pb-2">
                     Contact Information
                   </h3>
 
@@ -676,7 +676,7 @@ export function Compliance2257Form({ onComplete }: Compliance2257FormProps) {
 
                 {/* Document Uploads */}
                 <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-slate-400 border-b border-slate-500/20 pb-2">
+                  <h3 className="text-xl font-semibold text-cyan-400 border-b border-cyan-500/20 pb-2">
                     Required Documentation
                   </h3>
 
@@ -739,7 +739,7 @@ export function Compliance2257Form({ onComplete }: Compliance2257FormProps) {
 
                 {/* Certifications */}
                 <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-slate-400 border-b border-slate-500/20 pb-2">
+                  <h3 className="text-xl font-semibold text-cyan-400 border-b border-cyan-500/20 pb-2">
                     Certification and Agreement
                   </h3>
 
@@ -796,7 +796,7 @@ export function Compliance2257Form({ onComplete }: Compliance2257FormProps) {
 
                 {/* Signatures */}
                 <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-slate-400 border-b border-slate-500/20 pb-2">
+                  <h3 className="text-xl font-semibold text-cyan-400 border-b border-cyan-500/20 pb-2">
                     Signature
                   </h3>
 
@@ -894,7 +894,7 @@ export function Compliance2257Form({ onComplete }: Compliance2257FormProps) {
                   <Button
                     type="submit"
                     disabled={isSubmitting || calculatedAge < 18}
-                    className="w-full md:w-auto px-12 py-6 text-lg bg-gradient-to-r from-slate-500 to-blue-500 hover:from-slate-600 hover:to-blue-600 text-white font-semibold"
+                    className="w-full md:w-auto px-12 py-6 text-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold"
                   >
                     {isSubmitting
                       ? "Submitting Verification..."
@@ -913,9 +913,9 @@ export function Compliance2257Form({ onComplete }: Compliance2257FormProps) {
         </Card>
 
         {/* Record Custodian Info */}
-        <Card className="mt-6 bg-gray-900/50 border-slate-500/20">
+        <Card className="mt-6 bg-gray-900/50 border-cyan-500/20">
           <CardContent className="p-6">
-            <h3 className="font-semibold text-slate-400 mb-2">
+            <h3 className="font-semibold text-cyan-400 mb-2">
               Custodian of Records
             </h3>
             <p className="text-sm text-gray-300">

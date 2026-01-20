@@ -197,16 +197,16 @@ export function ContentCreatorVerificationForm({
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
       {/* Header */}
-      <Card className="cyber-card border-slate-500/30">
+      <Card className="cyber-card border-cyan-500/30">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <Shield className="w-12 h-12 text-slate-400 mr-3" />
+            <Shield className="w-12 h-12 text-cyan-400 mr-3" />
             <div className="text-left">
               <h1 className="text-2xl font-bold cyber-text-glow">FANZ™ Group Holdings LLC</h1>
               <p className="text-sm text-gray-400">Content Creator Verification, 2257 Compliance & Platform Agreement</p>
             </div>
           </div>
-          <Badge variant="outline" className="mx-auto border-slate-500 text-slate-400">
+          <Badge variant="outline" className="mx-auto border-cyan-500 text-cyan-400">
             Effective Date: February 6, 2025 | Last Updated: February 6, 2025
           </Badge>
         </CardHeader>
@@ -218,7 +218,7 @@ export function ContentCreatorVerificationForm({
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-400">Progress: Step {currentStep} of {totalSteps}</span>
-              <span className="text-slate-400">{Math.round(progressPercentage)}%</span>
+              <span className="text-cyan-400">{Math.round(progressPercentage)}%</span>
             </div>
             <Progress value={progressPercentage} className="h-2" />
           </div>
@@ -245,7 +245,7 @@ export function ContentCreatorVerificationForm({
           {currentStep === 1 && (
             <Card className="cyber-card">
               <CardHeader>
-                <CardTitle className="text-slate-400">1. Creator Identification Information</CardTitle>
+                <CardTitle className="text-cyan-400">1. Creator Identification Information</CardTitle>
                 <CardDescription>Provide your complete legal identification details</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -380,7 +380,7 @@ export function ContentCreatorVerificationForm({
                   />
                 </div>
 
-                <Separator className="my-4 bg-slate-500/20" />
+                <Separator className="my-4 bg-cyan-500/20" />
 
                 <div className="grid grid-cols-1 gap-4">
                   <FormField
@@ -473,7 +473,7 @@ export function ContentCreatorVerificationForm({
                 </div>
 
                 <div className="flex justify-end mt-6">
-                  <Button type="button" onClick={() => setCurrentStep(2)} className="bg-slate-500">
+                  <Button type="button" onClick={() => setCurrentStep(2)} className="bg-cyan-500">
                     Next Step →
                   </Button>
                 </div>
@@ -485,7 +485,7 @@ export function ContentCreatorVerificationForm({
           {currentStep === 2 && (
             <Card className="cyber-card">
               <CardHeader>
-                <CardTitle className="text-slate-400">2. Identification Verification</CardTitle>
+                <CardTitle className="text-cyan-400">2. Identification Verification</CardTitle>
                 <CardDescription>Select and provide details for one or more valid forms of identification</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -549,7 +549,7 @@ export function ContentCreatorVerificationForm({
                 />
 
                 {form.watch("identificationType")?.includes("drivers_license") && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-slate-500/30 rounded-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-cyan-500/30 rounded-lg">
                     <FormField
                       control={form.control}
                       name="driversLicenseNumber"
@@ -580,7 +580,7 @@ export function ContentCreatorVerificationForm({
                 )}
 
                 {form.watch("identificationType")?.includes("passport") && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-slate-500/30 rounded-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-cyan-500/30 rounded-lg">
                     <FormField
                       control={form.control}
                       name="passportNumber"
@@ -611,7 +611,7 @@ export function ContentCreatorVerificationForm({
                 )}
 
                 {form.watch("identificationType")?.includes("national_id") && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-slate-500/30 rounded-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-cyan-500/30 rounded-lg">
                     <FormField
                       control={form.control}
                       name="nationalIdNumber"
@@ -642,7 +642,7 @@ export function ContentCreatorVerificationForm({
                 )}
 
                 {form.watch("identificationType")?.includes("other") && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-slate-500/30 rounded-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-cyan-500/30 rounded-lg">
                     <FormField
                       control={form.control}
                       name="otherIdType"
@@ -676,7 +676,7 @@ export function ContentCreatorVerificationForm({
                   <Button type="button" variant="outline" onClick={() => setCurrentStep(1)}>
                     ← Previous
                   </Button>
-                  <Button type="button" onClick={() => setCurrentStep(3)} className="bg-slate-500">
+                  <Button type="button" onClick={() => setCurrentStep(3)} className="bg-cyan-500">
                     Next Step →
                   </Button>
                 </div>
@@ -688,7 +688,7 @@ export function ContentCreatorVerificationForm({
           {currentStep === 3 && (
             <Card className="cyber-card">
               <CardHeader>
-                <CardTitle className="text-slate-400 flex items-center">
+                <CardTitle className="text-cyan-400 flex items-center">
                   <Fingerprint className="w-5 h-5 mr-2" />
                   3. Digital & Biometric Verification (Tech Layer)
                 </CardTitle>
@@ -702,7 +702,7 @@ export function ContentCreatorVerificationForm({
                     control={form.control}
                     name="photoIdUploaded"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border border-slate-500/30 rounded-lg">
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border border-cyan-500/30 rounded-lg">
                         <FormControl>
                           <Checkbox
                             checked={field.value}
@@ -711,7 +711,7 @@ export function ContentCreatorVerificationForm({
                         </FormControl>
                         <div className="space-y-1 leading-none flex-1">
                           <FormLabel className="flex items-center">
-                            <Upload className="w-4 h-4 mr-2 text-slate-400" />
+                            <Upload className="w-4 h-4 mr-2 text-cyan-400" />
                             Photo ID Upload *
                           </FormLabel>
                           <FormDescription className="text-xs">
@@ -728,7 +728,7 @@ export function ContentCreatorVerificationForm({
                     control={form.control}
                     name="selfieVerified"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border border-slate-500/30 rounded-lg">
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border border-cyan-500/30 rounded-lg">
                         <FormControl>
                           <Checkbox
                             checked={field.value}
@@ -737,7 +737,7 @@ export function ContentCreatorVerificationForm({
                         </FormControl>
                         <div className="space-y-1 leading-none flex-1">
                           <FormLabel className="flex items-center">
-                            <Camera className="w-4 h-4 mr-2 text-slate-400" />
+                            <Camera className="w-4 h-4 mr-2 text-cyan-400" />
                             Selfie Verification *
                           </FormLabel>
                           <FormDescription className="text-xs">
@@ -757,7 +757,7 @@ export function ContentCreatorVerificationForm({
                     control={form.control}
                     name="ageMetadataValidated"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border border-slate-500/30 rounded-lg">
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border border-cyan-500/30 rounded-lg">
                         <FormControl>
                           <Checkbox
                             checked={field.value}
@@ -766,7 +766,7 @@ export function ContentCreatorVerificationForm({
                         </FormControl>
                         <div className="space-y-1 leading-none">
                           <FormLabel className="flex items-center">
-                            <Database className="w-4 h-4 mr-2 text-slate-400" />
+                            <Database className="w-4 h-4 mr-2 text-cyan-400" />
                             Age Metadata Validation *
                           </FormLabel>
                           <FormDescription className="text-xs">
@@ -806,7 +806,7 @@ export function ContentCreatorVerificationForm({
                     control={form.control}
                     name="signatureCaptured"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border border-slate-500/30 rounded-lg">
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border border-cyan-500/30 rounded-lg">
                         <FormControl>
                           <Checkbox
                             checked={field.value}
@@ -815,7 +815,7 @@ export function ContentCreatorVerificationForm({
                         </FormControl>
                         <div className="space-y-1 leading-none">
                           <FormLabel className="flex items-center">
-                            <FileText className="w-4 h-4 mr-2 text-slate-400" />
+                            <FileText className="w-4 h-4 mr-2 text-cyan-400" />
                             Signature Capture *
                           </FormLabel>
                           <FormDescription className="text-xs">
@@ -831,7 +831,7 @@ export function ContentCreatorVerificationForm({
                     control={form.control}
                     name="twoFactorSetup"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border border-slate-500/30 rounded-lg">
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border border-cyan-500/30 rounded-lg">
                         <FormControl>
                           <Checkbox
                             checked={field.value}
@@ -840,7 +840,7 @@ export function ContentCreatorVerificationForm({
                         </FormControl>
                         <div className="space-y-1 leading-none">
                           <FormLabel className="flex items-center">
-                            <Shield className="w-4 h-4 mr-2 text-slate-400" />
+                            <Shield className="w-4 h-4 mr-2 text-cyan-400" />
                             2FA Setup *
                           </FormLabel>
                           <FormDescription className="text-xs">
@@ -857,7 +857,7 @@ export function ContentCreatorVerificationForm({
                   <Button type="button" variant="outline" onClick={() => setCurrentStep(2)}>
                     ← Previous
                   </Button>
-                  <Button type="button" onClick={() => setCurrentStep(4)} className="bg-slate-500">
+                  <Button type="button" onClick={() => setCurrentStep(4)} className="bg-cyan-500">
                     Next Step →
                   </Button>
                 </div>
@@ -873,8 +873,8 @@ export function ContentCreatorVerificationForm({
                 <CardDescription>Acknowledge your responsibilities as an independent content creator</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Alert className="border-slate-500/50 bg-slate-500/10">
-                  <Shield className="h-4 w-4 text-slate-500" />
+                <Alert className="border-cyan-500/50 bg-cyan-500/10">
+                  <Shield className="h-4 w-4 text-cyan-500" />
                   <AlertDescription className="text-gray-300 text-sm">
                     By signing this Agreement, you confirm that you are an independent content producer operating
                     under your own name or brand. You acknowledge that FANZ™ Group Holdings LLC and its subsidiaries
@@ -993,7 +993,7 @@ export function ContentCreatorVerificationForm({
                   <Button type="button" variant="outline" onClick={() => setCurrentStep(3)}>
                     ← Previous
                   </Button>
-                  <Button type="button" onClick={() => setCurrentStep(5)} className="bg-slate-500">
+                  <Button type="button" onClick={() => setCurrentStep(5)} className="bg-cyan-500">
                     Next Step →
                   </Button>
                 </div>
@@ -1114,7 +1114,7 @@ export function ContentCreatorVerificationForm({
                   <Button type="button" variant="outline" onClick={() => setCurrentStep(4)}>
                     ← Previous
                   </Button>
-                  <Button type="button" onClick={() => setCurrentStep(6)} className="bg-slate-500">
+                  <Button type="button" onClick={() => setCurrentStep(6)} className="bg-cyan-500">
                     Next Step →
                   </Button>
                 </div>
@@ -1133,8 +1133,8 @@ export function ContentCreatorVerificationForm({
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Content Rights */}
-                <div className="p-4 border border-slate-500/30 rounded-lg">
-                  <h4 className="font-semibold text-slate-400 mb-2">Content Rights, Ownership, & Monetization</h4>
+                <div className="p-4 border border-cyan-500/30 rounded-lg">
+                  <h4 className="font-semibold text-cyan-400 mb-2">Content Rights, Ownership, & Monetization</h4>
                   <ul className="text-sm text-gray-300 space-y-1 list-disc list-inside">
                     <li>You own all content you upload</li>
                     <li>FANZ™ provides hosting, distribution, and monetization tools only</li>
@@ -1276,7 +1276,7 @@ export function ContentCreatorVerificationForm({
                   <Button type="button" variant="outline" onClick={() => setCurrentStep(5)}>
                     ← Previous
                   </Button>
-                  <Button type="button" onClick={() => setCurrentStep(7)} className="bg-slate-500">
+                  <Button type="button" onClick={() => setCurrentStep(7)} className="bg-cyan-500">
                     Next Step →
                   </Button>
                 </div>
@@ -1303,8 +1303,8 @@ export function ContentCreatorVerificationForm({
                   </AlertDescription>
                 </Alert>
 
-                <div className="p-4 border border-slate-500/30 rounded-lg bg-slate-500/5">
-                  <h4 className="font-semibold text-slate-400 mb-3">Sworn Declaration by Content Creator</h4>
+                <div className="p-4 border border-cyan-500/30 rounded-lg bg-cyan-500/5">
+                  <h4 className="font-semibold text-cyan-400 mb-3">Sworn Declaration by Content Creator</h4>
                   <p className="text-sm text-gray-300 mb-3">Under 28 U.S.C. § 1746 and penalty of perjury, I declare:</p>
 
                   <div className="space-y-3">
@@ -1394,11 +1394,11 @@ export function ContentCreatorVerificationForm({
                   </div>
                 </div>
 
-                <Separator className="my-4 bg-slate-500/20" />
+                <Separator className="my-4 bg-cyan-500/20" />
 
                 {/* Electronic Signature */}
                 <div className="space-y-4">
-                  <h4 className="font-semibold text-slate-400">Electronic Signature & Legal Effect</h4>
+                  <h4 className="font-semibold text-cyan-400">Electronic Signature & Legal Effect</h4>
                   <p className="text-sm text-gray-300">
                     By signing this Agreement electronically, you confirm your digital signature holds the same legal
                     weight as a handwritten one. You have read, understood, and accepted all terms herein.
@@ -1422,7 +1422,7 @@ export function ContentCreatorVerificationForm({
                     control={form.control}
                     name="electronicSignatureAcknowledged"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border border-slate-500/30 rounded-lg">
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border border-cyan-500/30 rounded-lg">
                         <FormControl>
                           <Checkbox
                             checked={field.value}
@@ -1448,7 +1448,7 @@ export function ContentCreatorVerificationForm({
                   <Button
                     type="submit"
                     size="lg"
-                    className="px-12 bg-gradient-to-r from-slate-500 to-blue-500 hover:from-slate-600 hover:to-blue-600"
+                    className="px-12 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -1474,7 +1474,7 @@ export function ContentCreatorVerificationForm({
       <Card className="cyber-card">
         <CardContent className="pt-6">
           <div className="text-sm text-gray-400 space-y-2 text-center">
-            <p className="font-semibold text-slate-400">Jurisdiction</p>
+            <p className="font-semibold text-cyan-400">Jurisdiction</p>
             <p>
               This Agreement is governed by and enforceable under the laws of the State of Wyoming, USA.
             </p>

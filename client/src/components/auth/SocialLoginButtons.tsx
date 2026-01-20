@@ -71,7 +71,7 @@ export function SocialLoginButtons({
   return (
     <div className={`space-y-4 ${className}`}>
       <div className="relative">
-        <Separator className="bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-slate-500/20" />
+        <Separator className="bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-cyan-500/20" />
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="bg-black dark:bg-gray-900 px-4 text-sm text-gray-400 uppercase tracking-wider font-medium">
             {mode === "login" ? "Or sign in with" : "Or sign up with"}
@@ -105,7 +105,7 @@ export function SocialLoginButtons({
               `}
             >
               {/* Background glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-purple-500/0 to-slate-500/0 group-hover:from-pink-500/10 group-hover:via-purple-500/10 group-hover:to-slate-500/10 transition-all duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-purple-500/0 to-cyan-500/0 group-hover:from-pink-500/10 group-hover:via-purple-500/10 group-hover:to-cyan-500/10 transition-all duration-500" />
               
               <div className="relative flex items-center justify-center space-x-2">
                 <Icon className={`text-lg ${isLoading ? 'animate-spin' : ''}`} />
@@ -116,7 +116,7 @@ export function SocialLoginButtons({
 
               {/* Animated border for BoyFanz neon effect */}
               <div className="absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute inset-0 rounded-md border border-gradient-to-r from-pink-500 via-purple-500 to-slate-500 animate-pulse" />
+                <div className="absolute inset-0 rounded-md border border-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 animate-pulse" />
               </div>
             </Button>
           );

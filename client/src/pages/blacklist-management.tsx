@@ -344,10 +344,10 @@ export default function BlacklistManagement() {
                 </div>
 
                 {/* Blacklist Table */}
-                <div className="border border-slate-500/30 rounded-lg overflow-hidden">
+                <div className="border border-cyan-500/30 rounded-lg overflow-hidden">
                   <Table>
                     <TableHeader>
-                      <TableRow className="bg-slate-500/10">
+                      <TableRow className="bg-cyan-500/10">
                         <TableHead>ID</TableHead>
                         <TableHead>Type</TableHead>
                         <TableHead>Value</TableHead>
@@ -369,7 +369,7 @@ export default function BlacklistManagement() {
                         </TableRow>
                       ) : (
                         filteredEntries.map((entry) => (
-                          <TableRow key={entry.id} className="hover:bg-slate-500/5">
+                          <TableRow key={entry.id} className="hover:bg-cyan-500/5">
                             <TableCell className="font-mono text-xs">{entry.id.slice(0, 8)}</TableCell>
                             <TableCell>
                               <Badge variant={
@@ -435,7 +435,7 @@ export default function BlacklistManagement() {
             <Card className="cyber-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-slate-500" />
+                  <Globe className="w-5 h-5 text-cyan-500" />
                   IP Address Tracking & Logs
                 </CardTitle>
                 <CardDescription>
@@ -443,10 +443,10 @@ export default function BlacklistManagement() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="border border-slate-500/30 rounded-lg overflow-hidden">
+                <div className="border border-cyan-500/30 rounded-lg overflow-hidden">
                   <Table>
                     <TableHeader>
-                      <TableRow className="bg-slate-500/10">
+                      <TableRow className="bg-cyan-500/10">
                         <TableHead>IP Address</TableHead>
                         <TableHead>User</TableHead>
                         <TableHead>Location</TableHead>
@@ -466,7 +466,7 @@ export default function BlacklistManagement() {
                         </TableRow>
                       ) : (
                         ipLogs.slice(0, 50).map((log) => (
-                          <TableRow key={log.id} className={log.isBlocked ? "bg-red-500/10" : "hover:bg-slate-500/5"}>
+                          <TableRow key={log.id} className={log.isBlocked ? "bg-red-500/10" : "hover:bg-cyan-500/5"}>
                             <TableCell className="font-mono text-sm">{log.ip}</TableCell>
                             <TableCell>{log.username || "Anonymous"}</TableCell>
                             <TableCell className="text-sm text-gray-400">
@@ -529,10 +529,10 @@ export default function BlacklistManagement() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="border border-slate-500/30 rounded-lg overflow-hidden">
+                <div className="border border-cyan-500/30 rounded-lg overflow-hidden">
                   <Table>
                     <TableHeader>
-                      <TableRow className="bg-slate-500/10">
+                      <TableRow className="bg-cyan-500/10">
                         <TableHead>Timestamp</TableHead>
                         <TableHead>User</TableHead>
                         <TableHead>IP</TableHead>
@@ -551,13 +551,13 @@ export default function BlacklistManagement() {
                         </TableRow>
                       ) : (
                         userActivity.slice(0, 50).map((activity) => (
-                          <TableRow key={activity.id} className="hover:bg-slate-500/5">
+                          <TableRow key={activity.id} className="hover:bg-cyan-500/5">
                             <TableCell className="text-sm text-gray-400">
                               {new Date(activity.timestamp).toLocaleString()}
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
-                                <User className="w-4 h-4 text-slate-400" />
+                                <User className="w-4 h-4 text-cyan-400" />
                                 <div>
                                   <div className="font-medium">{activity.username}</div>
                                   <div className="text-xs text-gray-400">{activity.email}</div>
@@ -598,10 +598,10 @@ export default function BlacklistManagement() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="border border-slate-500/30 rounded-lg overflow-hidden">
+                <div className="border border-cyan-500/30 rounded-lg overflow-hidden">
                   <Table>
                     <TableHeader>
-                      <TableRow className="bg-slate-500/10">
+                      <TableRow className="bg-cyan-500/10">
                         <TableHead>Login Time</TableHead>
                         <TableHead>User</TableHead>
                         <TableHead>IP & Location</TableHead>
@@ -622,7 +622,7 @@ export default function BlacklistManagement() {
                         loginHistory.slice(0, 50).map((login) => (
                           <TableRow
                             key={login.id}
-                            className={!login.isSuccessful ? "bg-red-500/10" : "hover:bg-slate-500/5"}
+                            className={!login.isSuccessful ? "bg-red-500/10" : "hover:bg-cyan-500/5"}
                           >
                             <TableCell className="text-sm">
                               {new Date(login.loginTime).toLocaleString()}

@@ -212,7 +212,7 @@ const FANZ_COMING_SOON: Omit<FanzPlatform, 'userHasAccess'>[] = [
     slug: 'fanztube',
     domain: 'fanztube.com',
     logoUrl: '/platforms/fanztube-logo.png',
-    primaryColor: '#475569',
+    primaryColor: '#00e5ff',
     description: 'Video streaming platform',
     category: 'coming_soon',
     isActive: false,

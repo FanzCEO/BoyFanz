@@ -70,8 +70,3 @@ id_ed25519*
 config.local.js
 config.local.ts
 local.settings.json
-# Backup files
-*.bak
-*.bak2
-*.backup
-*.bkp

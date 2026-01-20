@@ -40,7 +40,7 @@ function EmpireAuthorization({
       {/* Back/Exit Button */}
       <button
         onClick={onBack}
-        className="absolute top-6 left-6 z-50 flex items-center gap-2 px-4 py-2 text-slate-400/60 hover:text-slate-400 font-mono text-sm tracking-wider transition-colors border border-slate-500/20 hover:border-slate-500/40 rounded"
+        className="absolute top-6 left-6 z-50 flex items-center gap-2 px-4 py-2 text-cyan-400/60 hover:text-cyan-400 font-mono text-sm tracking-wider transition-colors border border-cyan-500/20 hover:border-cyan-500/40 rounded"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -72,14 +72,14 @@ function EmpireAuthorization({
                 opacity: [0.5, 1, 0.5]
               }}
               transition={{ duration: 1.5, repeat: Infinity }}
-              className="w-16 h-16 mx-auto mb-6 rounded-full border-2 border-slate-500/50 flex items-center justify-center"
+              className="w-16 h-16 mx-auto mb-6 rounded-full border-2 border-cyan-500/50 flex items-center justify-center"
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-400 to-slate-600" />
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600" />
             </motion.div>
             <div className="text-cyan-200/80 text-lg tracking-[0.2em]">
               VERIFYING CREDENTIALS
             </div>
-            <div className="text-slate-400/40 text-xs tracking-wider mt-2">
+            <div className="text-cyan-400/40 text-xs tracking-wider mt-2">
               PLEASE STAND BY
             </div>
           </motion.div>
@@ -91,20 +91,20 @@ function EmpireAuthorization({
             exit={{ opacity: 0 }}
             className="max-w-md w-full mx-4"
           >
-            <div className="border border-slate-500/30 bg-black/90 backdrop-blur rounded-lg p-8 text-center">
+            <div className="border border-cyan-500/30 bg-black/90 backdrop-blur rounded-lg p-8 text-center">
               {/* Logo/Icon */}
               <div className="w-20 h-20 mx-auto mb-6 relative">
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-0 rounded-full border border-slate-500/30"
+                  className="absolute inset-0 rounded-full border border-cyan-500/30"
                 />
                 <motion.div
                   animate={{ rotate: -360 }}
                   transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-2 rounded-full border border-slate-400/40"
+                  className="absolute inset-2 rounded-full border border-cyan-400/40"
                 />
-                <div className="absolute inset-4 rounded-full bg-gradient-to-br from-slate-500/20 to-purple-500/20 flex items-center justify-center">
+                <div className="absolute inset-4 rounded-full bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center">
                   <span className="text-cyan-300 text-2xl">E</span>
                 </div>
               </div>
@@ -122,7 +122,7 @@ function EmpireAuthorization({
               <div className="space-y-3">
                 <button
                   onClick={handleAuthorize}
-                  className="w-full px-6 py-4 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-bold rounded font-mono tracking-wider transition-all disabled:opacity-50 transform hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full px-6 py-4 bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-500 hover:to-cyan-600 text-white font-bold rounded font-mono tracking-wider transition-all disabled:opacity-50 transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <span className="flex items-center justify-center gap-3">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,7 +198,7 @@ export default function FanzEmpire() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-slate-400/60 text-sm tracking-[0.3em] mb-2"
+                className="text-cyan-400/60 text-sm tracking-[0.3em] mb-2"
               >
                 — IDENTITY VERIFIED —
               </motion.div>

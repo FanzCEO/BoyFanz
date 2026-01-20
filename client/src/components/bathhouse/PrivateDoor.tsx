@@ -44,7 +44,7 @@ export function PrivateDoor({
       }}
       whileHover={{
         rotateY: -5,
-        boxShadow: '-10px 0 30px rgba(71, 85, 105, 0.15), 0 0 20px rgba(71, 85, 105, 0.1)'
+        boxShadow: '-10px 0 30px rgba(0, 229, 255, 0.15), 0 0 20px rgba(0, 229, 255, 0.1)'
       }}
       transition={{ duration: 0.3 }}
       onClick={onClick}
@@ -124,17 +124,17 @@ export function PrivateDoor({
           background: 'rgba(0, 0, 0, 0.9)',
           border: '3px solid rgba(100, 100, 110, 0.6)',
           borderRadius: '4px',
-          boxShadow: 'inset 0 0 25px rgba(71, 85, 105, 0.08), 0 0 10px rgba(0, 0, 0, 0.5)'
+          boxShadow: 'inset 0 0 25px rgba(0, 229, 255, 0.08), 0 0 10px rgba(0, 0, 0, 0.5)'
         }}
         whileHover={{
-          boxShadow: 'inset 0 0 35px rgba(71, 85, 105, 0.15), 0 0 15px rgba(71, 85, 105, 0.2)'
+          boxShadow: 'inset 0 0 35px rgba(0, 229, 255, 0.15), 0 0 15px rgba(0, 229, 255, 0.2)'
         }}
       >
         {/* Avatar inside peek window */}
         <div className="w-full h-full flex items-center justify-center p-2">
-          <Avatar className="w-14 h-14 ring-2 ring-slate-500/30">
+          <Avatar className="w-14 h-14 ring-2 ring-cyan-500/30">
             <AvatarImage src={avatarUrl} />
-            <AvatarFallback className="bg-cyan-900/50 text-slate-400 text-lg">
+            <AvatarFallback className="bg-cyan-900/50 text-cyan-400 text-lg">
               {avatarFallback}
             </AvatarFallback>
           </Avatar>
@@ -144,7 +144,7 @@ export function PrivateDoor({
         <motion.div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'linear-gradient(180deg, rgba(200, 220, 255, 0.05) 0%, transparent 50%, rgba(71, 85, 105, 0.03) 100%)'
+            background: 'linear-gradient(180deg, rgba(200, 220, 255, 0.05) 0%, transparent 50%, rgba(0, 229, 255, 0.03) 100%)'
           }}
           whileHover={{
             opacity: 0.5
@@ -190,8 +190,8 @@ export function PrivateDoor({
           }}
         >
           <span
-            className="text-sm text-slate-400 font-medium"
-            style={{ textShadow: '0 0 10px rgba(71, 85, 105, 0.5)' }}
+            className="text-sm text-cyan-400 font-medium"
+            style={{ textShadow: '0 0 10px rgba(0, 229, 255, 0.5)' }}
           >
             {creatorName}
           </span>
@@ -223,7 +223,7 @@ export function PrivateDoor({
         initial={{ opacity: 0 }}
         whileHover={{
           opacity: 0.6,
-          background: 'linear-gradient(90deg, rgba(71, 85, 105, 0.3) 0%, transparent 100%)'
+          background: 'linear-gradient(90deg, rgba(0, 229, 255, 0.3) 0%, transparent 100%)'
         }}
       />
     </motion.div>

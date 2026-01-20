@@ -86,7 +86,7 @@ const inhouseAds = [
     title: "Track Your Growth",
     description: "Powerful analytics to understand what your fans love",
     cta: "View Stats",
-    gradient: "from-slate-600/90 via-teal-600/80 to-emerald-600/90",
+    gradient: "from-cyan-600/90 via-teal-600/80 to-emerald-600/90",
     link: "/creator/analytics"
   },
   {

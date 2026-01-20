@@ -47,12 +47,12 @@ export function NeonSign({
   }, [flickering]);
 
   const colorClasses = {
-    red: 'text-red-400 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] shadow-slate-500/50',
+    red: 'text-red-400 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] shadow-cyan-500/50',
     blue: 'text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)] shadow-blue-500/50',
     pink: 'text-pink-400 drop-shadow-[0_0_15px_rgba(236,72,153,0.8)] shadow-pink-500/50',
     purple: 'text-purple-400 drop-shadow-[0_0_15px_rgba(147,51,234,0.8)] shadow-purple-500/50',
     gold: 'text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)] shadow-yellow-500/50',
-    cyan: 'text-slate-400 drop-shadow-[0_0_15px_rgba(34,211,238,0.8)] shadow-slate-500/50'
+    cyan: 'text-cyan-400 drop-shadow-[0_0_15px_rgba(34,211,238,0.8)] shadow-cyan-500/50'
   };
 
   const sizeClasses = {
@@ -185,7 +185,7 @@ export function UndergroundLoader({
                     key={color}
                     className={cn(
                       'w-3 h-3 rounded-full animate-pulse',
-                      color === 'red' && 'bg-red-500 shadow-slate-500/50',
+                      color === 'red' && 'bg-red-500 shadow-cyan-500/50',
                       color === 'blue' && 'bg-blue-500 shadow-blue-500/50',
                       color === 'pink' && 'bg-pink-500 shadow-pink-500/50',
                       color === 'gold' && 'bg-yellow-500 shadow-yellow-500/50'
@@ -210,9 +210,9 @@ export function UndergroundLoader({
           
           {/* Progress bar */}
           <div className="w-64 h-1 mx-auto bg-gray-800 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-red-500 via-pink-500 to-slate-500 animate-pulse rounded-full" 
+            <div className="h-full bg-gradient-to-r from-red-500 via-pink-500 to-cyan-500 animate-pulse rounded-full" 
                  style={{
-                   background: 'linear-gradient(90deg, #ef4444, #ec4899, #64748b)',
+                   background: 'linear-gradient(90deg, #ef4444, #ec4899, #06b6d4)',
                    animation: 'loading-bar 2s ease-in-out infinite'
                  }} />
           </div>
@@ -239,7 +239,7 @@ export function VintageCard({
       className={cn(
         'relative overflow-hidden transition-all duration-300',
         // Base styling
-        variant === 'default' && 'bg-gray-900 border border-gray-700 rounded-lg shadow-2xl hover:shadow-slate-500/20',
+        variant === 'default' && 'bg-gray-900 border border-gray-700 rounded-lg shadow-2xl hover:shadow-cyan-500/20',
         variant === 'polaroid' && 'bg-yellow-50 p-4 shadow-2xl transform rotate-1 hover:rotate-0 border-4 border-white',
         variant === 'matchbook' && 'bg-gradient-to-b from-red-900 to-red-800 rounded-sm border-l-4 border-gold-400',
         variant === 'poster' && 'bg-gray-100 border-8 border-gray-200 shadow-2xl transform -rotate-2 hover:rotate-0',
@@ -360,8 +360,8 @@ export function NeonButton({
   className?: string;
 }) {
   const variantStyles = {
-    primary: 'border-red-500 text-red-400 hover:bg-red-500/20 shadow-slate-500/50',
-    secondary: 'border-slate-500 text-slate-400 hover:bg-slate-500/20 shadow-slate-500/50',
+    primary: 'border-red-500 text-red-400 hover:bg-red-500/20 shadow-cyan-500/50',
+    secondary: 'border-cyan-500 text-cyan-400 hover:bg-cyan-500/20 shadow-cyan-500/50',
     danger: 'border-pink-500 text-pink-400 hover:bg-pink-500/20 shadow-pink-500/50',
     success: 'border-green-500 text-green-400 hover:bg-green-500/20 shadow-green-500/50',
     gold: 'border-yellow-500 text-yellow-400 hover:bg-yellow-500/20 shadow-yellow-500/50'

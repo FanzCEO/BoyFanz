@@ -16,7 +16,7 @@ export default function PWASettings() {
     appName: "BoyFanz",
     shortName: "BoyFanz",
     description: "Premium content creation platform for male creators",
-    themeColor: "#475569",
+    themeColor: "#00e5ff",
     backgroundColor: "#050a0c",
     displayMode: "standalone",
     orientation: "portrait",
@@ -35,7 +35,7 @@ export default function PWASettings() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-slate-400 flex items-center gap-2">
+        <h1 className="text-3xl font-bold text-cyan-400 flex items-center gap-2">
           <Smartphone className="h-8 w-8" />
           PWA Settings
         </h1>
@@ -43,25 +43,25 @@ export default function PWASettings() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gray-900 border-slate-500/20">
+        <Card className="bg-gray-900 border-cyan-500/20">
           <CardContent className="pt-6">
-            <div className="text-3xl font-bold text-slate-400">2,847</div>
+            <div className="text-3xl font-bold text-cyan-400">2,847</div>
             <p className="text-gray-400">PWA Installs</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-slate-500/20">
+        <Card className="bg-gray-900 border-cyan-500/20">
           <CardContent className="pt-6">
             <div className="text-3xl font-bold text-green-400">1,234</div>
             <p className="text-gray-400">Active Users</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-slate-500/20">
+        <Card className="bg-gray-900 border-cyan-500/20">
           <CardContent className="pt-6">
-            <div className="text-3xl font-bold text-slate-400">43.4%</div>
+            <div className="text-3xl font-bold text-cyan-400">43.4%</div>
             <p className="text-gray-400">Install Rate</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-slate-500/20">
+        <Card className="bg-gray-900 border-cyan-500/20">
           <CardContent className="pt-6">
             <div className="text-3xl font-bold text-yellow-400">89.2%</div>
             <p className="text-gray-400">Retention Rate</p>
@@ -70,7 +70,7 @@ export default function PWASettings() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="bg-gray-900 border border-slate-500/20">
+        <TabsList className="bg-gray-900 border border-cyan-500/20">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
           <TabsTrigger value="features">Features</TabsTrigger>
@@ -78,9 +78,9 @@ export default function PWASettings() {
         </TabsList>
 
         <TabsContent value="general" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">General Settings</CardTitle>
+              <CardTitle className="text-cyan-400">General Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -95,7 +95,7 @@ export default function PWASettings() {
                 <Input
                   value={config.appName}
                   onChange={(e) => setConfig({ ...config, appName: e.target.value })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                   placeholder="Full application name"
                 />
                 <p className="text-sm text-gray-500 mt-1">Displayed on the home screen</p>
@@ -105,7 +105,7 @@ export default function PWASettings() {
                 <Input
                   value={config.shortName}
                   onChange={(e) => setConfig({ ...config, shortName: e.target.value })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                   placeholder="Short app name (12 chars max)"
                 />
                 <p className="text-sm text-gray-500 mt-1">Used when space is limited</p>
@@ -115,7 +115,7 @@ export default function PWASettings() {
                 <Textarea
                   value={config.description}
                   onChange={(e) => setConfig({ ...config, description: e.target.value })}
-                  className="bg-gray-800 border-slate-500/20"
+                  className="bg-gray-800 border-cyan-500/20"
                   placeholder="Brief description of the app"
                 />
               </div>
@@ -124,9 +124,9 @@ export default function PWASettings() {
         </TabsContent>
 
         <TabsContent value="appearance" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">Visual Appearance</CardTitle>
+              <CardTitle className="text-cyan-400">Visual Appearance</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -136,13 +136,13 @@ export default function PWASettings() {
                     type="color"
                     value={config.themeColor}
                     onChange={(e) => setConfig({ ...config, themeColor: e.target.value })}
-                    className="w-16 h-10 bg-gray-800 border-slate-500/20"
+                    className="w-16 h-10 bg-gray-800 border-cyan-500/20"
                   />
                   <Input
                     value={config.themeColor}
                     onChange={(e) => setConfig({ ...config, themeColor: e.target.value })}
-                    className="bg-gray-800 border-slate-500/20"
-                    placeholder="#475569"
+                    className="bg-gray-800 border-cyan-500/20"
+                    placeholder="#00e5ff"
                   />
                 </div>
                 <p className="text-sm text-gray-500 mt-1">Status bar and browser UI color</p>
@@ -154,12 +154,12 @@ export default function PWASettings() {
                     type="color"
                     value={config.backgroundColor}
                     onChange={(e) => setConfig({ ...config, backgroundColor: e.target.value })}
-                    className="w-16 h-10 bg-gray-800 border-slate-500/20"
+                    className="w-16 h-10 bg-gray-800 border-cyan-500/20"
                   />
                   <Input
                     value={config.backgroundColor}
                     onChange={(e) => setConfig({ ...config, backgroundColor: e.target.value })}
-                    className="bg-gray-800 border-slate-500/20"
+                    className="bg-gray-800 border-cyan-500/20"
                     placeholder="#050a0c"
                   />
                 </div>
@@ -170,7 +170,7 @@ export default function PWASettings() {
                 <select
                   value={config.displayMode}
                   onChange={(e) => setConfig({ ...config, displayMode: e.target.value })}
-                  className="w-full p-2 bg-gray-800 border border-slate-500/20 rounded-md"
+                  className="w-full p-2 bg-gray-800 border border-cyan-500/20 rounded-md"
                 >
                   <option value="standalone">Standalone (No browser UI)</option>
                   <option value="fullscreen">Fullscreen</option>
@@ -183,7 +183,7 @@ export default function PWASettings() {
                 <select
                   value={config.orientation}
                   onChange={(e) => setConfig({ ...config, orientation: e.target.value })}
-                  className="w-full p-2 bg-gray-800 border border-slate-500/20 rounded-md"
+                  className="w-full p-2 bg-gray-800 border border-cyan-500/20 rounded-md"
                 >
                   <option value="any">Any</option>
                   <option value="portrait">Portrait</option>
@@ -195,9 +195,9 @@ export default function PWASettings() {
         </TabsContent>
 
         <TabsContent value="features" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">PWA Features</CardTitle>
+              <CardTitle className="text-cyan-400">PWA Features</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -225,7 +225,7 @@ export default function PWASettings() {
                 <select
                   value={config.cacheStrategy}
                   onChange={(e) => setConfig({ ...config, cacheStrategy: e.target.value })}
-                  className="w-full p-2 bg-gray-800 border border-slate-500/20 rounded-md"
+                  className="w-full p-2 bg-gray-800 border border-cyan-500/20 rounded-md"
                 >
                   <option value="networkFirst">Network First (Online priority)</option>
                   <option value="cacheFirst">Cache First (Offline priority)</option>
@@ -240,37 +240,37 @@ export default function PWASettings() {
         </TabsContent>
 
         <TabsContent value="icons" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">App Icons</CardTitle>
+              <CardTitle className="text-cyan-400">App Icons</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <Label>App Icon (512x512)</Label>
-                <div className="mt-2 border-2 border-dashed border-slate-500/20 rounded-lg p-8 text-center">
-                  <Upload className="h-12 w-12 mx-auto text-slate-400 mb-4" />
+                <div className="mt-2 border-2 border-dashed border-cyan-500/20 rounded-lg p-8 text-center">
+                  <Upload className="h-12 w-12 mx-auto text-cyan-400 mb-4" />
                   <p className="text-gray-400 mb-2">Drop icon here or click to upload</p>
-                  <Button variant="outline" className="border-slate-500/20">
+                  <Button variant="outline" className="border-cyan-500/20">
                     Choose File
                   </Button>
                 </div>
               </div>
               <div>
                 <Label>App Icon (192x192)</Label>
-                <div className="mt-2 border-2 border-dashed border-slate-500/20 rounded-lg p-8 text-center">
-                  <Upload className="h-12 w-12 mx-auto text-slate-400 mb-4" />
+                <div className="mt-2 border-2 border-dashed border-cyan-500/20 rounded-lg p-8 text-center">
+                  <Upload className="h-12 w-12 mx-auto text-cyan-400 mb-4" />
                   <p className="text-gray-400 mb-2">Drop icon here or click to upload</p>
-                  <Button variant="outline" className="border-slate-500/20">
+                  <Button variant="outline" className="border-cyan-500/20">
                     Choose File
                   </Button>
                 </div>
               </div>
               <div>
                 <Label>Splash Screen Image</Label>
-                <div className="mt-2 border-2 border-dashed border-slate-500/20 rounded-lg p-8 text-center">
-                  <Upload className="h-12 w-12 mx-auto text-slate-400 mb-4" />
+                <div className="mt-2 border-2 border-dashed border-cyan-500/20 rounded-lg p-8 text-center">
+                  <Upload className="h-12 w-12 mx-auto text-cyan-400 mb-4" />
                   <p className="text-gray-400 mb-2">Drop image here or click to upload</p>
-                  <Button variant="outline" className="border-slate-500/20">
+                  <Button variant="outline" className="border-cyan-500/20">
                     Choose File
                   </Button>
                 </div>
@@ -281,7 +281,7 @@ export default function PWASettings() {
       </Tabs>
 
       <div className="flex justify-end">
-        <Button onClick={handleSave} className="bg-gradient-to-r from-slate-500 to-blue-500">
+        <Button onClick={handleSave} className="bg-gradient-to-r from-cyan-500 to-blue-500">
           <Save className="h-4 w-4 mr-2" />
           Save Settings
         </Button>

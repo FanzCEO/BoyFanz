@@ -52,31 +52,31 @@ export default function ConsentForms() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-slate-400 flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-cyan-400 flex items-center gap-2">
             <FileCheck className="h-8 w-8" />
             Costar Consent Forms
           </h1>
           <p className="text-gray-400 mt-2">Model release and consent documentation</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="border-slate-500/20">
+          <Button variant="outline" className="border-cyan-500/20">
             <Download className="h-4 w-4 mr-2" />
             Export CSV
           </Button>
         </div>
       </div>
 
-      <Card className="bg-gray-900 border-slate-500/20">
+      <Card className="bg-gray-900 border-cyan-500/20">
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle className="text-slate-400">Submitted Forms</CardTitle>
+            <CardTitle className="text-cyan-400">Submitted Forms</CardTitle>
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search by creator or costar..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-gray-800 border-slate-500/20"
+                className="pl-10 bg-gray-800 border-cyan-500/20"
               />
             </div>
           </div>
@@ -84,7 +84,7 @@ export default function ConsentForms() {
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow className="border-slate-500/20">
+              <TableRow className="border-cyan-500/20">
                 <TableHead>Form ID</TableHead>
                 <TableHead>Creator</TableHead>
                 <TableHead>Costar</TableHead>
@@ -97,13 +97,13 @@ export default function ConsentForms() {
             </TableHeader>
             <TableBody>
               {filteredForms.map((form) => (
-                <TableRow key={form.id} className="border-slate-500/10">
-                  <TableCell className="font-mono text-slate-400">{form.id}</TableCell>
+                <TableRow key={form.id} className="border-cyan-500/10">
+                  <TableCell className="font-mono text-cyan-400">{form.id}</TableCell>
                   <TableCell>{form.creatorName}</TableCell>
                   <TableCell>{form.costarName}</TableCell>
                   <TableCell className="font-mono">{form.contentId}</TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="border-slate-500/20">
+                    <Badge variant="outline" className="border-cyan-500/20">
                       {form.formType}
                     </Badge>
                   </TableCell>
@@ -129,7 +129,7 @@ export default function ConsentForms() {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm" className="text-slate-400">
+                    <Button variant="ghost" size="sm" className="text-cyan-400">
                       <Eye className="h-4 w-4" />
                     </Button>
                   </TableCell>

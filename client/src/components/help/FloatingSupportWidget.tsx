@@ -330,12 +330,12 @@ export function FloatingSupportWidget() {
       )}>
         <Button
           onClick={() => setIsOpen(true)}
-          className="h-14 w-14 rounded-full bg-gradient-to-r from-slate-600 to-slate-500 hover:from-slate-700 hover:to-slate-600 shadow-lg hover:shadow-xl transition-all relative"
+          className="h-14 w-14 rounded-full bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-700 hover:to-cyan-600 shadow-lg hover:shadow-xl transition-all relative"
           data-testid="button-open-support"
         >
           <MessageCircle className="h-6 w-6 text-white" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-slate-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 bg-cyan-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
               {unreadCount}
             </span>
           )}
@@ -358,7 +358,7 @@ export function FloatingSupportWidget() {
         )}>
           <Card className="h-full flex flex-col bg-gray-900 border-gray-700 shadow-2xl overflow-hidden">
             {/* Header */}
-            <CardHeader className="p-3 bg-gradient-to-r from-slate-600 to-slate-500 flex-shrink-0">
+            <CardHeader className="p-3 bg-gradient-to-r from-cyan-600 to-cyan-500 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="bg-white/20 p-1.5 rounded-full">
@@ -405,7 +405,7 @@ export function FloatingSupportWidget() {
                   <TabsList className="grid grid-cols-3 bg-gray-800 border-b border-gray-700 rounded-none">
                     <TabsTrigger
                       value="ai"
-                      className="data-[state=active]:bg-slate-600/20 data-[state=active]:text-slate-400"
+                      className="data-[state=active]:bg-cyan-600/20 data-[state=active]:text-cyan-400"
                     >
                       <Bot className="h-3 w-3 mr-1" />
                       AI Chat
@@ -441,14 +441,14 @@ export function FloatingSupportWidget() {
                             <div className={cn(
                               "max-w-[85%] rounded-lg p-2.5 text-sm",
                               msg.type === 'user'
-                                ? 'bg-slate-600 text-white'
+                                ? 'bg-cyan-600 text-white'
                                 : msg.type === 'system'
                                 ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'
                                 : 'bg-gray-800 text-gray-100'
                             )}>
                               {msg.type === 'bot' && (
                                 <div className="flex items-center gap-1 mb-1">
-                                  <Bot className="h-3 w-3 text-slate-400" />
+                                  <Bot className="h-3 w-3 text-cyan-400" />
                                   <span className="text-xs text-gray-400">AI Assistant</span>
                                 </div>
                               )}
@@ -461,7 +461,7 @@ export function FloatingSupportWidget() {
                                       key={i}
                                       size="sm"
                                       variant="outline"
-                                      className="text-xs h-6 px-2 border-gray-600 hover:bg-slate-500/20"
+                                      className="text-xs h-6 px-2 border-gray-600 hover:bg-cyan-500/20"
                                       onClick={() => setLocation(action.url)}
                                     >
                                       {action.title}
@@ -477,7 +477,7 @@ export function FloatingSupportWidget() {
                           <div className="flex justify-start">
                             <div className="bg-gray-800 rounded-lg p-2.5">
                               <div className="flex items-center gap-2">
-                                <Bot className="h-3 w-3 text-slate-400" />
+                                <Bot className="h-3 w-3 text-cyan-400" />
                                 <div className="flex gap-1">
                                   <div className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce"></div>
                                   <div className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -505,7 +505,7 @@ export function FloatingSupportWidget() {
                         <Button
                           onClick={handleSendMessage}
                           disabled={!message.trim() || aiChatMutation.isPending}
-                          className="bg-slate-600 hover:bg-slate-700 h-9 w-9 p-0"
+                          className="bg-cyan-600 hover:bg-cyan-700 h-9 w-9 p-0"
                         >
                           {aiChatMutation.isPending ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -679,8 +679,8 @@ export function FloatingSupportWidget() {
                             }}
                           >
                             <div className="flex items-center gap-3">
-                              <div className="bg-slate-500/20 p-2 rounded-lg">
-                                <link.icon className="h-4 w-4 text-slate-400" />
+                              <div className="bg-cyan-500/20 p-2 rounded-lg">
+                                <link.icon className="h-4 w-4 text-cyan-400" />
                               </div>
                               <div>
                                 <div className="font-medium text-white text-sm">{link.title}</div>
@@ -694,7 +694,7 @@ export function FloatingSupportWidget() {
                         <div className="pt-4 border-t border-gray-700 mt-4">
                           <Button
                             variant="outline"
-                            className="w-full border-gray-600 text-gray-300 hover:bg-slate-500/10 hover:border-slate-500/50"
+                            className="w-full border-gray-600 text-gray-300 hover:bg-cyan-500/10 hover:border-cyan-500/50"
                             onClick={() => {
                               setLocation('/help');
                               setIsOpen(false);

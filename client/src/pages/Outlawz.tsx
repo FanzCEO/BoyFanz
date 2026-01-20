@@ -242,7 +242,7 @@ export default function Outlawz() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {displayOutlawz.map((creator) => (
               <Link href={`/creator/${creator.id}`} key={creator.id}>
-                <Card className="group overflow-hidden bg-gradient-to-br from-black via-red-950/20 to-black border-red-500/30 hover:border-red-500 transition-all duration-300 cursor-pointer hover:shadow-lg hover:shadow-slate-500/20">
+                <Card className="group overflow-hidden bg-gradient-to-br from-black via-red-950/20 to-black border-red-500/30 hover:border-red-500 transition-all duration-300 cursor-pointer hover:shadow-lg hover:shadow-cyan-500/20">
                   <CardContent className="p-6">
                     {/* Header */}
                     <div className="flex items-start gap-4 mb-4">

@@ -81,7 +81,7 @@ function ProtectedCore() {
           ],
         }}
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        className="w-20 h-20 rounded-xl bg-gradient-to-br from-sky-500 to-slate-600"
+        className="w-20 h-20 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-600"
         style={{
           clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
         }}
@@ -112,7 +112,7 @@ function FloatingParticles() {
             delay: Math.random() * 5,
             ease: "linear",
           }}
-          className="absolute w-1 h-1 bg-slate-400 rounded-full"
+          className="absolute w-1 h-1 bg-cyan-400 rounded-full"
           style={{
             boxShadow: "0 0 6px rgba(34, 211, 238, 0.8)",
           }}
@@ -127,8 +127,8 @@ export default function FanzSecure() {
   const [visibleLines, setVisibleLines] = useState<number[]>([]);
 
   const layers = [
-    { radius: 80, opacity: 0.4, rotationDuration: 20, color: "#94a3b8" },
-    { radius: 110, opacity: 0.35, rotationDuration: -25, color: "#64748b" },
+    { radius: 80, opacity: 0.4, rotationDuration: 20, color: "#22d3ee" },
+    { radius: 110, opacity: 0.35, rotationDuration: -25, color: "#06b6d4" },
     { radius: 140, opacity: 0.3, rotationDuration: 30, color: "#0891b2" },
     { radius: 170, opacity: 0.25, rotationDuration: -35, color: "#0e7490" },
     { radius: 200, opacity: 0.2, rotationDuration: 40, color: "#155e75" },
@@ -173,7 +173,7 @@ export default function FanzSecure() {
           <h1 className="text-cyan-200/90 text-2xl font-light tracking-[0.3em] font-mono">
             SECURE
           </h1>
-          <div className="text-slate-400/40 text-xs font-mono tracking-wider mt-2">
+          <div className="text-cyan-400/40 text-xs font-mono tracking-wider mt-2">
             ARCHITECTURE-BASED PROTECTION
           </div>
         </div>
@@ -193,7 +193,7 @@ export default function FanzSecure() {
                 >
                   <div
                     className={`w-1 h-1 rounded-full mt-2 ${
-                      i === activeLayer ? "bg-slate-400" : "bg-slate-600/50"
+                      i === activeLayer ? "bg-cyan-400" : "bg-cyan-600/50"
                     }`}
                   />
                   <p
@@ -223,7 +223,7 @@ export default function FanzSecure() {
               }}
               className={`w-3 h-3 rounded-full border-2 transition-colors duration-300 ${
                 i <= activeLayer
-                  ? "border-slate-400 bg-slate-400/30"
+                  ? "border-cyan-400 bg-cyan-400/30"
                   : "border-gray-700 bg-transparent"
               }`}
             />

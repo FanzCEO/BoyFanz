@@ -52,7 +52,7 @@ export function SteamParticles({
   const getColor = () => {
     switch (color) {
       case 'cyan':
-        return 'rgba(71, 85, 105, VAR)';
+        return 'rgba(0, 229, 255, VAR)';
       case 'warm':
         return 'rgba(255, 220, 200, VAR)';
       default:
@@ -140,7 +140,7 @@ export function FogOverlay({
           rgba(200, 220, 255, ${getOpacity()}) 0%,
           rgba(150, 180, 220, ${getOpacity() * 0.5}) 30%,
           transparent 60%,
-          rgba(71, 85, 105, ${getOpacity() * 0.3}) 100%)`
+          rgba(0, 229, 255, ${getOpacity() * 0.3}) 100%)`
       }}
       animate={{
         x: ['-5%', '5%', '-5%'],
@@ -169,7 +169,7 @@ export function WaterRipples({ className = '' }: { className?: string }) {
           className="absolute inset-0"
           style={{
             background: `radial-gradient(ellipse 100% 50% at 50% 100%,
-              rgba(71, 85, 105, ${0.05 - i * 0.01}) 0%,
+              rgba(0, 229, 255, ${0.05 - i * 0.01}) 0%,
               transparent ${50 + i * 15}%)`
           }}
           animate={{
@@ -190,9 +190,9 @@ export function WaterRipples({ className = '' }: { className?: string }) {
         className="absolute inset-0"
         style={{
           backgroundImage: `
-            radial-gradient(ellipse 30% 20% at 20% 80%, rgba(71, 85, 105, 0.1) 0%, transparent 50%),
+            radial-gradient(ellipse 30% 20% at 20% 80%, rgba(0, 229, 255, 0.1) 0%, transparent 50%),
             radial-gradient(ellipse 25% 15% at 70% 85%, rgba(0, 200, 220, 0.08) 0%, transparent 50%),
-            radial-gradient(ellipse 35% 25% at 40% 90%, rgba(51, 65, 85, 0.06) 0%, transparent 50%)
+            radial-gradient(ellipse 35% 25% at 40% 90%, rgba(0, 180, 200, 0.06) 0%, transparent 50%)
           `
         }}
         animate={{

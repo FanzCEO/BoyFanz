@@ -34,38 +34,38 @@ export default function Languages() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-slate-400 flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-cyan-400 flex items-center gap-2">
             <Globe className="h-8 w-8" />
             Languages & Localization
           </h1>
           <p className="text-gray-400 mt-2">Manage platform languages and translations</p>
         </div>
-        <Button className="bg-gradient-to-r from-slate-500 to-blue-500">
+        <Button className="bg-gradient-to-r from-cyan-500 to-blue-500">
           <Plus className="h-4 w-4 mr-2" />
           Add Language
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gray-900 border-slate-500/20">
+        <Card className="bg-gray-900 border-cyan-500/20">
           <CardContent className="pt-6">
-            <div className="text-3xl font-bold text-slate-400">5</div>
+            <div className="text-3xl font-bold text-cyan-400">5</div>
             <p className="text-gray-400">Available Languages</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-slate-500/20">
+        <Card className="bg-gray-900 border-cyan-500/20">
           <CardContent className="pt-6">
             <div className="text-3xl font-bold text-green-400">3</div>
             <p className="text-gray-400">Active Languages</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-slate-500/20">
+        <Card className="bg-gray-900 border-cyan-500/20">
           <CardContent className="pt-6">
-            <div className="text-3xl font-bold text-slate-400">76.4%</div>
+            <div className="text-3xl font-bold text-cyan-400">76.4%</div>
             <p className="text-gray-400">Avg. Translation</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-900 border-slate-500/20">
+        <Card className="bg-gray-900 border-cyan-500/20">
           <CardContent className="pt-6">
             <div className="text-3xl font-bold text-yellow-400">124</div>
             <p className="text-gray-400">Missing Keys</p>
@@ -74,21 +74,21 @@ export default function Languages() {
       </div>
 
       <Tabs defaultValue="languages" className="space-y-6">
-        <TabsList className="bg-gray-900 border border-slate-500/20">
+        <TabsList className="bg-gray-900 border border-cyan-500/20">
           <TabsTrigger value="languages">Languages</TabsTrigger>
           <TabsTrigger value="translations">Translations</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="languages" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">Available Languages</CardTitle>
+              <CardTitle className="text-cyan-400">Available Languages</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
-                  <TableRow className="border-slate-500/20">
+                  <TableRow className="border-cyan-500/20">
                     <TableHead>Language</TableHead>
                     <TableHead>Code</TableHead>
                     <TableHead>Progress</TableHead>
@@ -99,14 +99,14 @@ export default function Languages() {
                 </TableHeader>
                 <TableBody>
                   {languages.map((lang) => (
-                    <TableRow key={lang.code} className="border-slate-500/10">
+                    <TableRow key={lang.code} className="border-cyan-500/10">
                       <TableCell className="font-medium">{lang.name}</TableCell>
                       <TableCell className="uppercase">{lang.code}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div className="w-24 h-2 bg-gray-700 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-slate-500"
+                              className="h-full bg-cyan-500"
                               style={{ width: `${lang.progress}%` }}
                             />
                           </div>
@@ -119,14 +119,14 @@ export default function Languages() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {lang.default && <CheckCircle className="h-4 w-4 text-slate-400" />}
+                        {lang.default && <CheckCircle className="h-4 w-4 text-cyan-400" />}
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
                             size="sm"
                             variant="outline"
-                            className="border-slate-500/20"
+                            className="border-cyan-500/20"
                             onClick={() => handleToggleLanguage(lang.code)}
                           >
                             {lang.enabled ? "Disable" : "Enable"}
@@ -134,7 +134,7 @@ export default function Languages() {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="border-slate-500/20"
+                            className="border-cyan-500/20"
                           >
                             <Edit className="h-3 w-3" />
                           </Button>
@@ -149,24 +149,24 @@ export default function Languages() {
         </TabsContent>
 
         <TabsContent value="translations" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">Translation Keys</CardTitle>
+              <CardTitle className="text-cyan-400">Translation Keys</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <Input
                     placeholder="Search translation keys..."
-                    className="bg-gray-800 border-slate-500/20"
+                    className="bg-gray-800 border-cyan-500/20"
                   />
-                  <Button className="bg-gradient-to-r from-slate-500 to-blue-500">
+                  <Button className="bg-gradient-to-r from-cyan-500 to-blue-500">
                     Search
                   </Button>
                 </div>
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-slate-500/20">
+                    <TableRow className="border-cyan-500/20">
                       <TableHead>Key</TableHead>
                       <TableHead>English</TableHead>
                       <TableHead>Spanish</TableHead>
@@ -175,7 +175,7 @@ export default function Languages() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow className="border-slate-500/10">
+                    <TableRow className="border-cyan-500/10">
                       <TableCell colSpan={5} className="text-center text-gray-500 py-8">
                         Select a language to view translations
                       </TableCell>
@@ -188,9 +188,9 @@ export default function Languages() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">Localization Settings</CardTitle>
+              <CardTitle className="text-cyan-400">Localization Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -207,7 +207,7 @@ export default function Languages() {
               </div>
               <div>
                 <Label>Default Language</Label>
-                <select className="w-full mt-2 p-2 bg-gray-800 border border-slate-500/20 rounded-md">
+                <select className="w-full mt-2 p-2 bg-gray-800 border border-cyan-500/20 rounded-md">
                   <option value="en">English</option>
                   <option value="es">Spanish</option>
                   <option value="pt">Portuguese</option>
@@ -216,17 +216,17 @@ export default function Languages() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-slate-500/20">
+          <Card className="bg-gray-900 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-slate-400">Import/Export</CardTitle>
+              <CardTitle className="text-cyan-400">Import/Export</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex gap-2">
-                <Button variant="outline" className="border-slate-500/20">
+                <Button variant="outline" className="border-cyan-500/20">
                   <Download className="h-4 w-4 mr-2" />
                   Export Translations
                 </Button>
-                <Button variant="outline" className="border-slate-500/20">
+                <Button variant="outline" className="border-cyan-500/20">
                   <Upload className="h-4 w-4 mr-2" />
                   Import Translations
                 </Button>
