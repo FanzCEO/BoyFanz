@@ -3578,11 +3578,11 @@ export function registerRoutes(app: Express) {
         'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
         'Content-Security-Policy': `
           default-src 'self';
-          script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com;
+          script-src 'self' 'unsafe-inline' 'unsafe-eval';
           style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
           font-src 'self' https://fonts.gstatic.com;
           img-src 'self' data: https: blob:;
-          connect-src 'self' https://api.stripe.com wss: ws:;
+          connect-src 'self' wss: ws:;
           media-src 'self' blob:;
           object-src 'none';
           base-uri 'self';
