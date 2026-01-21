@@ -1160,10 +1160,11 @@ export const GatewayConfigSchema = z.object({
 export type GatewayConfigInput = z.infer<typeof GatewayConfigSchema>;
 
 // Create and export a default instance with default config
+// Health checks disabled for monolith deployment (all services are in-process)
 const defaultGatewayConfig = GatewayConfigSchema.parse({
   rateLimiting: {},
   authentication: {},
-  loadBalancing: { healthCheck: {} },
+  loadBalancing: { healthCheck: { enabled: false } },
   circuitBreaker: {},
   logging: {},
   caching: {},
