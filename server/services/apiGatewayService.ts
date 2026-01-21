@@ -806,10 +806,10 @@ export class APIGatewayService extends EventEmitter {
   registerService(service: ServiceRegistry) {
     this.services.set(service.id, service);
     
-    // Register routes
+    // Register routes (target stays as relative path, baseUrl added in buildTargetUrl)
     service.routes.forEach(route => {
       const routeKey = `${route.method}:${route.path}`;
-      this.routes.set(routeKey, { ...route, target: `${service.baseUrl}${route.target}` });
+      this.routes.set(routeKey, { ...route, _serviceId: service.id } as any);
     });
 
     // Register with load balancer
@@ -930,11 +930,9 @@ export class APIGatewayService extends EventEmitter {
   }
 
   private getServiceIdFromRoute(route: RouteDefinition): string {
-    // Extract service ID from target URL or route
-    for (const [serviceId, service] of this.services.entries()) {
-      if (route.target.startsWith(service.baseUrl)) {
-        return serviceId;
-      }
+    // Extract service ID from route metadata (added during registration)
+    if ((route as any)._serviceId) {
+      return (route as any)._serviceId;
     }
     return 'unknown';
   }
