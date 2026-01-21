@@ -19,7 +19,7 @@ export default function Login() {
       const returnTo = searchParams.get('returnTo') || '/';
       setLocation(returnTo);
     }
-  }, [navigate, searchParams]);
+  }, [setLocation, searchParams]);
 
   const handleLogin = async () => {
     try {
