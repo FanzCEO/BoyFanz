@@ -44,44 +44,10 @@ export function ScreenshotProtectionProvider({
       }
     };
 
-    const logCaptureAttempt = async (captureType: string) => {
-      try {
-        const response = await fetch('/api/public/capture-attempt', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            captureType,
-            pageUrl: window.location.pathname,
-            userAgent: navigator.userAgent,
-            deviceInfo: {
-              platform: navigator.platform,
-              language: navigator.language,
-              screenWidth: window.screen.width,
-              screenHeight: window.screen.height,
-            },
-          }),
-        });
-
-        const data = await response.json();
-
-        // Show warning if server flagged excessive attempts
-        if (data.warning) {
-          alert(`⚠️ SECURITY WARNING\n\n${data.warning}\n\nAttempt #${data.attemptCount}`);
-        }
-      } catch (error) {
-        console.error('Failed to log capture attempt:', error);
-      }
-    };
-
     const handleKeyDown = (e: KeyboardEvent) => {
       // Detect print screen attempts
-      if (e.key === 'PrintScreen') {
-        logCaptureAttempt('screenshot');
-        if (config.showWarning) {
-          alert(config.warningMessage);
-        }
+      if (e.key === 'PrintScreen' && config.showWarning) {
+        alert(config.warningMessage);
       }
     };
 

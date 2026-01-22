@@ -24,8 +24,7 @@ import {
   Languages, Database, Clock, AlertTriangle, CheckCircle, XCircle,
   Monitor, Key, Globe, Server, HardDrive, Wifi, Eye, EyeOff,
   Download, Upload, RefreshCw, TestTube, Play, Pause, Calendar,
-  User, Lock, Zap, FileText, Image, Video, Archive, History,
-  Copy, Trash2, Plus, Activity, Link2, Send
+  User, Lock, Zap, FileText, Image, Video, Archive, History
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
@@ -74,38 +73,6 @@ interface MaintenanceSchedule {
   createdBy: string;
 }
 
-interface ApiKey {
-  id: string;
-  name: string;
-  key: string;
-  prefix: string;
-  scopes: string[];
-  rateLimit: number;
-  rateLimitWindow: string;
-  isActive: boolean;
-  lastUsedAt?: string;
-  requestCount: number;
-  createdBy: string;
-  createdAt: string;
-  expiresAt?: string;
-}
-
-interface Webhook {
-  id: string;
-  name: string;
-  url: string;
-  events: string[];
-  secret: string;
-  isActive: boolean;
-  retryAttempts: number;
-  successCount: number;
-  failureCount: number;
-  lastTriggeredAt?: string;
-  lastStatus?: string;
-  createdBy: string;
-  createdAt: string;
-}
-
 // Form schemas
 const systemSettingFormSchema = z.object({
   key: z.string().min(1, "Key is required").regex(/^[a-z0-9_]+$/, "Key must contain only lowercase letters, numbers, and underscores"),
@@ -141,27 +108,9 @@ const maintenanceFormSchema = z.object({
   isActive: z.boolean().default(false),
 });
 
-const apiKeyFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  scopes: z.array(z.string()).min(1, "At least one scope is required"),
-  rateLimit: z.number().min(1).default(1000),
-  rateLimitWindow: z.enum(["minute", "hour", "day"]).default("hour"),
-  expiresAt: z.string().optional(),
-});
-
-const webhookFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  url: z.string().url("Valid URL is required"),
-  events: z.array(z.string()).min(1, "At least one event is required"),
-  retryAttempts: z.number().min(0).max(5).default(3),
-  isActive: z.boolean().default(true),
-});
-
 type SystemSettingFormData = z.infer<typeof systemSettingFormSchema>;
 type EmailSettingsFormData = z.infer<typeof emailSettingsFormSchema>;
 type MaintenanceFormData = z.infer<typeof maintenanceFormSchema>;
-type ApiKeyFormData = z.infer<typeof apiKeyFormSchema>;
-type WebhookFormData = z.infer<typeof webhookFormSchema>;
 
 export default function SystemSettingsManagement() {
   const { user } = useAuth();
@@ -179,11 +128,7 @@ export default function SystemSettingsManagement() {
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [showMaintenanceDialog, setShowMaintenanceDialog] = useState(false);
   const [showBackupDialog, setShowBackupDialog] = useState(false);
-  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
-  const [showWebhookDialog, setShowWebhookDialog] = useState(false);
   const [selectedSetting, setSelectedSetting] = useState<SystemSetting | null>(null);
-  const [selectedApiKey, setSelectedApiKey] = useState<ApiKey | null>(null);
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   
   // Forms
   const settingForm = useForm<SystemSettingFormData>({
@@ -229,56 +174,28 @@ export default function SystemSettingsManagement() {
     },
   });
 
-  const apiKeyForm = useForm<ApiKeyFormData>({
-    resolver: zodResolver(apiKeyFormSchema),
-    defaultValues: {
-      name: "",
-      scopes: [],
-      rateLimit: 1000,
-      rateLimitWindow: "hour",
-      expiresAt: "",
-    },
-  });
-
-  const webhookForm = useForm<WebhookFormData>({
-    resolver: zodResolver(webhookFormSchema),
-    defaultValues: {
-      name: "",
-      url: "",
-      events: [],
-      retryAttempts: 3,
-      isActive: true,
-    },
-  });
-
   // Fetch system settings
   const { data: settings = [], isLoading: settingsLoading, refetch: refetchSettings } = useQuery<any[]>({
-    queryKey: ['/api/admin/system-settings', { search: searchQuery, category: categoryFilter !== 'all' ? categoryFilter : undefined }]
+    queryKey: ['/api/admin/system-settings', { search: searchQuery, category: categoryFilter !== 'all' ? categoryFilter : undefined }],
+    enabled: user?.role === 'admin'
   });
 
   // Fetch email settings
   const { data: emailSettings, isLoading: emailLoading, refetch: refetchEmail } = useQuery<any>({
-    queryKey: ['/api/admin/email-settings'] && activeTab === 'email'
+    queryKey: ['/api/admin/email-settings'],
+    enabled: user?.role === 'admin' && activeTab === 'email'
   });
 
   // Fetch maintenance schedules
   const { data: maintenanceSchedules = [], isLoading: maintenanceLoading, refetch: refetchMaintenance } = useQuery<any[]>({
-    queryKey: ['/api/admin/maintenance-schedules'] && activeTab === 'maintenance'
+    queryKey: ['/api/admin/maintenance-schedules'],
+    enabled: user?.role === 'admin' && activeTab === 'maintenance'
   });
 
   // Fetch system info
   const { data: systemInfo, isLoading: systemInfoLoading } = useQuery<any>({
-    queryKey: ['/api/admin/system-info'] && activeTab === 'general'
-  });
-
-  // Fetch API keys
-  const { data: apiKeys = [], isLoading: apiKeysLoading, refetch: refetchApiKeys } = useQuery<ApiKey[]>({
-    queryKey: ['/api/admin/api-keys'] && activeTab === 'api'
-  });
-
-  // Fetch webhooks
-  const { data: webhooks = [], isLoading: webhooksLoading, refetch: refetchWebhooks } = useQuery<Webhook[]>({
-    queryKey: ['/api/admin/webhooks'] && activeTab === 'api'
+    queryKey: ['/api/admin/system-info'],
+    enabled: user?.role === 'admin' && activeTab === 'general'
   });
 
   // Mutations
@@ -378,7 +295,7 @@ export default function SystemSettingsManagement() {
   });
 
   const backupMutation = useMutation({
-    mutationFn: (type: string) =>
+    mutationFn: (type: string) => 
       apiRequest('/api/admin/backup', {
         method: 'POST',
         body: { type }
@@ -388,84 +305,6 @@ export default function SystemSettingsManagement() {
     },
     onError: (error: any) => {
       toast({ variant: "destructive", title: "Backup Failed", description: error.message || "Failed to start backup" });
-    }
-  });
-
-  const createApiKeyMutation = useMutation({
-    mutationFn: (data: ApiKeyFormData) =>
-      apiRequest('/api/admin/api-keys', {
-        method: 'POST',
-        body: data
-      }),
-    onSuccess: (data: any) => {
-      toast({
-        title: "API Key Created",
-        description: "API key has been generated successfully. Copy it now - it won't be shown again."
-      });
-      setSelectedApiKey(data);
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/api-keys'] });
-      apiKeyForm.reset();
-    },
-    onError: (error: any) => {
-      toast({ variant: "destructive", title: "Error", description: error.message || "Failed to create API key" });
-    }
-  });
-
-  const revokeApiKeyMutation = useMutation({
-    mutationFn: (id: string) =>
-      apiRequest(`/api/admin/api-keys/${id}`, {
-        method: 'DELETE'
-      }),
-    onSuccess: () => {
-      toast({ title: "Success", description: "API key revoked successfully" });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/api-keys'] });
-    },
-    onError: (error: any) => {
-      toast({ variant: "destructive", title: "Error", description: error.message || "Failed to revoke API key" });
-    }
-  });
-
-  const createWebhookMutation = useMutation({
-    mutationFn: (data: WebhookFormData) =>
-      apiRequest('/api/admin/webhooks', {
-        method: 'POST',
-        body: data
-      }),
-    onSuccess: () => {
-      toast({ title: "Success", description: "Webhook created successfully" });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/webhooks'] });
-      setShowWebhookDialog(false);
-      webhookForm.reset();
-    },
-    onError: (error: any) => {
-      toast({ variant: "destructive", title: "Error", description: error.message || "Failed to create webhook" });
-    }
-  });
-
-  const deleteWebhookMutation = useMutation({
-    mutationFn: (id: string) =>
-      apiRequest(`/api/admin/webhooks/${id}`, {
-        method: 'DELETE'
-      }),
-    onSuccess: () => {
-      toast({ title: "Success", description: "Webhook deleted successfully" });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/webhooks'] });
-    },
-    onError: (error: any) => {
-      toast({ variant: "destructive", title: "Error", description: error.message || "Failed to delete webhook" });
-    }
-  });
-
-  const testWebhookMutation = useMutation({
-    mutationFn: (id: string) =>
-      apiRequest(`/api/admin/webhooks/${id}/test`, {
-        method: 'POST'
-      }),
-    onSuccess: () => {
-      toast({ title: "Test Sent", description: "Webhook test payload delivered successfully" });
-    },
-    onError: (error: any) => {
-      toast({ variant: "destructive", title: "Test Failed", description: error.message || "Failed to send test webhook" });
     }
   });
 
@@ -529,21 +368,6 @@ export default function SystemSettingsManagement() {
 
   const handleSubmitMaintenance = (data: MaintenanceFormData) => {
     createMaintenanceMutation.mutate(data);
-  };
-
-  const handleSubmitApiKey = (data: ApiKeyFormData) => {
-    createApiKeyMutation.mutate(data);
-  };
-
-  const handleSubmitWebhook = (data: WebhookFormData) => {
-    createWebhookMutation.mutate(data);
-  };
-
-  const handleCopyKey = (key: string) => {
-    navigator.clipboard.writeText(key);
-    setCopiedKey(key);
-    toast({ title: "Copied", description: "API key copied to clipboard" });
-    setTimeout(() => setCopiedKey(null), 2000);
   };
 
   // Load email settings into form when data is available
@@ -819,11 +643,10 @@ export default function SystemSettingsManagement() {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-8" data-testid="main-tabs">
+        <TabsList className="grid w-full grid-cols-7" data-testid="main-tabs">
           <TabsTrigger value="general" data-testid="tab-general">General</TabsTrigger>
           <TabsTrigger value="maintenance" data-testid="tab-maintenance">Maintenance</TabsTrigger>
           <TabsTrigger value="email" data-testid="tab-email">Email</TabsTrigger>
-          <TabsTrigger value="api" data-testid="tab-api">API & Webhooks</TabsTrigger>
           <TabsTrigger value="theme" data-testid="tab-theme">Theme</TabsTrigger>
           <TabsTrigger value="security" data-testid="tab-security">Security</TabsTrigger>
           <TabsTrigger value="backup" data-testid="tab-backup">Backup</TabsTrigger>
@@ -862,7 +685,7 @@ export default function SystemSettingsManagement() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Memory Usage:</span>
-                      <span>{systemInfo?.memoryUsage || "N/A"}</span>
+                      <span>{systemInfo?.memoryUsage ? `${Math.round(systemInfo.memoryUsage.heapUsed / 1024 / 1024)}/${Math.round(systemInfo.memoryUsage.heapTotal / 1024 / 1024)} MB` : "N/A"}</span>
                     </div>
                   </div>
                 )}
@@ -1400,612 +1223,6 @@ export default function SystemSettingsManagement() {
               )}
             </CardContent>
           </Card>
-        </TabsContent>
-
-        {/* API & Webhooks Tab */}
-        <TabsContent value="api" className="space-y-4">
-          <div className="grid grid-cols-1 gap-6">
-            {/* API Keys Section */}
-            <Card data-testid="card-api-keys">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent">
-                      API Keys
-                    </CardTitle>
-                    <CardDescription>
-                      Manage API keys for platform integration and third-party access
-                    </CardDescription>
-                  </div>
-                  <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
-                    <DialogTrigger asChild>
-                      <Button
-                        className="bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-cyan-600 hover:to-pink-600"
-                        onClick={() => {
-                          setSelectedApiKey(null);
-                          apiKeyForm.reset();
-                        }}
-                        data-testid="button-create-api-key"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create API Key
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
-                      <DialogHeader>
-                        <DialogTitle className="bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent">
-                          Create API Key
-                        </DialogTitle>
-                        <DialogDescription>
-                          Generate a new API key with specific scopes and rate limits
-                        </DialogDescription>
-                      </DialogHeader>
-
-                      {selectedApiKey ? (
-                        <div className="space-y-4">
-                          <Alert className="border-green-500/30 bg-green-500/10">
-                            <CheckCircle className="h-4 w-4 text-green-400" />
-                            <AlertDescription>
-                              API key created successfully! Copy it now - it won't be shown again.
-                            </AlertDescription>
-                          </Alert>
-
-                          <div className="p-4 bg-gray-900 rounded-lg border border-cyan-500/30">
-                            <label className="text-sm text-muted-foreground mb-2 block">API Key</label>
-                            <div className="flex items-center gap-2">
-                              <code className="flex-1 font-mono text-sm text-cyan-400 break-all">
-                                {selectedApiKey.key}
-                              </code>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleCopyKey(selectedApiKey.key)}
-                                className="border-cyan-500/30"
-                              >
-                                <Copy className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-
-                          <DialogFooter>
-                            <Button
-                              onClick={() => {
-                                setSelectedApiKey(null);
-                                setShowApiKeyDialog(false);
-                              }}
-                            >
-                              Done
-                            </Button>
-                          </DialogFooter>
-                        </div>
-                      ) : (
-                        <Form {...apiKeyForm}>
-                          <form onSubmit={apiKeyForm.handleSubmit(handleSubmitApiKey)} className="space-y-4">
-                            <FormField
-                              control={apiKeyForm.control}
-                              name="name"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Key Name</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      placeholder="My Integration Key"
-                                      {...field}
-                                      data-testid="input-api-key-name"
-                                    />
-                                  </FormControl>
-                                  <FormDescription>
-                                    A descriptive name to identify this API key
-                                  </FormDescription>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <FormField
-                              control={apiKeyForm.control}
-                              name="scopes"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Scopes</FormLabel>
-                                  <FormDescription>
-                                    Select which API endpoints this key can access
-                                  </FormDescription>
-                                  <div className="grid grid-cols-2 gap-3 mt-2">
-                                    {['read:users', 'write:users', 'read:posts', 'write:posts', 'read:messages', 'write:messages', 'read:payments', 'admin:all'].map((scope) => (
-                                      <label key={scope} className="flex items-center space-x-2">
-                                        <Checkbox
-                                          checked={field.value?.includes(scope)}
-                                          onCheckedChange={(checked) => {
-                                            const current = field.value || [];
-                                            if (checked) {
-                                              field.onChange([...current, scope]);
-                                            } else {
-                                              field.onChange(current.filter((s: string) => s !== scope));
-                                            }
-                                          }}
-                                        />
-                                        <span className="text-sm font-mono">{scope}</span>
-                                      </label>
-                                    ))}
-                                  </div>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <div className="grid grid-cols-2 gap-4">
-                              <FormField
-                                control={apiKeyForm.control}
-                                name="rateLimit"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Rate Limit</FormLabel>
-                                    <FormControl>
-                                      <Input
-                                        type="number"
-                                        placeholder="1000"
-                                        {...field}
-                                        onChange={(e) => field.onChange(parseInt(e.target.value))}
-                                        data-testid="input-rate-limit"
-                                      />
-                                    </FormControl>
-                                    <FormDescription>Requests allowed</FormDescription>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-
-                              <FormField
-                                control={apiKeyForm.control}
-                                name="rateLimitWindow"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Per</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                      <FormControl>
-                                        <SelectTrigger>
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        <SelectItem value="minute">Minute</SelectItem>
-                                        <SelectItem value="hour">Hour</SelectItem>
-                                        <SelectItem value="day">Day</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                    <FormDescription>Time window</FormDescription>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-
-                            <FormField
-                              control={apiKeyForm.control}
-                              name="expiresAt"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Expiration Date (Optional)</FormLabel>
-                                  <FormControl>
-                                    <Input type="datetime-local" {...field} />
-                                  </FormControl>
-                                  <FormDescription>
-                                    Leave blank for no expiration
-                                  </FormDescription>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <DialogFooter>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => setShowApiKeyDialog(false)}
-                              >
-                                Cancel
-                              </Button>
-                              <Button
-                                type="submit"
-                                disabled={createApiKeyMutation.isPending}
-                                className="bg-gradient-to-r from-cyan-500 to-pink-500"
-                              >
-                                Generate Key
-                              </Button>
-                            </DialogFooter>
-                          </form>
-                        </Form>
-                      )}
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {apiKeysLoading ? (
-                  <div className="text-center py-8">Loading API keys...</div>
-                ) : apiKeys.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Key className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-muted-foreground">No API keys created yet</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Create an API key to enable programmatic access to the platform
-                    </p>
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Key Prefix</TableHead>
-                        <TableHead>Scopes</TableHead>
-                        <TableHead>Rate Limit</TableHead>
-                        <TableHead>Last Used</TableHead>
-                        <TableHead>Requests</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {apiKeys.map((apiKey) => (
-                        <TableRow key={apiKey.id}>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{apiKey.name}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {format(new Date(apiKey.createdAt), 'MMM dd, yyyy')}
-                              </p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <code className="text-xs font-mono text-cyan-400">
-                              {apiKey.prefix}•••
-                            </code>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-wrap gap-1">
-                              {apiKey.scopes.slice(0, 2).map((scope) => (
-                                <Badge key={scope} variant="outline" className="text-xs">
-                                  {scope}
-                                </Badge>
-                              ))}
-                              {apiKey.scopes.length > 2 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{apiKey.scopes.length - 2}
-                                </Badge>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-sm">
-                              {apiKey.rateLimit}/{apiKey.rateLimitWindow}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            {apiKey.lastUsedAt ? (
-                              <span className="text-sm">
-                                {format(new Date(apiKey.lastUsedAt), 'MMM dd, HH:mm')}
-                              </span>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">Never</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-sm font-mono">{apiKey.requestCount}</span>
-                          </TableCell>
-                          <TableCell>
-                            {apiKey.isActive ? (
-                              apiKey.expiresAt && new Date(apiKey.expiresAt) < new Date() ? (
-                                <Badge className="bg-red-100 text-red-800">Expired</Badge>
-                              ) : (
-                                <Badge className="bg-green-100 text-green-800">Active</Badge>
-                              )
-                            ) : (
-                              <Badge className="bg-gray-100 text-gray-800">Revoked</Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => revokeApiKeyMutation.mutate(apiKey.id)}
-                              disabled={!apiKey.isActive}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Webhooks Section */}
-            <Card data-testid="card-webhooks">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="bg-gradient-to-r from-pink-400 to-cyan-500 bg-clip-text text-transparent">
-                      Webhooks
-                    </CardTitle>
-                    <CardDescription>
-                      Configure webhooks to receive real-time event notifications
-                    </CardDescription>
-                  </div>
-                  <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
-                    <DialogTrigger asChild>
-                      <Button
-                        className="bg-gradient-to-r from-pink-500 to-cyan-500 hover:from-pink-600 hover:to-cyan-600"
-                        data-testid="button-create-webhook"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Webhook
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
-                      <DialogHeader>
-                        <DialogTitle className="bg-gradient-to-r from-pink-400 to-cyan-500 bg-clip-text text-transparent">
-                          Add Webhook
-                        </DialogTitle>
-                        <DialogDescription>
-                          Configure a webhook endpoint to receive event notifications
-                        </DialogDescription>
-                      </DialogHeader>
-
-                      <Form {...webhookForm}>
-                        <form onSubmit={webhookForm.handleSubmit(handleSubmitWebhook)} className="space-y-4">
-                          <FormField
-                            control={webhookForm.control}
-                            name="name"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Webhook Name</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Production Events Webhook"
-                                    {...field}
-                                    data-testid="input-webhook-name"
-                                  />
-                                </FormControl>
-                                <FormDescription>
-                                  A descriptive name for this webhook
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={webhookForm.control}
-                            name="url"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Endpoint URL</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="https://yourapp.com/webhooks/boyfanz"
-                                    {...field}
-                                    data-testid="input-webhook-url"
-                                  />
-                                </FormControl>
-                                <FormDescription>
-                                  The URL where webhook payloads will be sent
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={webhookForm.control}
-                            name="events"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Events</FormLabel>
-                                <FormDescription>
-                                  Select which events should trigger this webhook
-                                </FormDescription>
-                                <div className="grid grid-cols-2 gap-3 mt-2">
-                                  {[
-                                    'user.created', 'user.updated', 'user.deleted',
-                                    'post.created', 'post.updated', 'post.deleted',
-                                    'payment.succeeded', 'payment.failed',
-                                    'subscription.created', 'subscription.cancelled',
-                                    'message.created', 'livestream.started'
-                                  ].map((event) => (
-                                    <label key={event} className="flex items-center space-x-2">
-                                      <Checkbox
-                                        checked={field.value?.includes(event)}
-                                        onCheckedChange={(checked) => {
-                                          const current = field.value || [];
-                                          if (checked) {
-                                            field.onChange([...current, event]);
-                                          } else {
-                                            field.onChange(current.filter((e: string) => e !== event));
-                                          }
-                                        }}
-                                      />
-                                      <span className="text-sm font-mono">{event}</span>
-                                    </label>
-                                  ))}
-                                </div>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={webhookForm.control}
-                            name="retryAttempts"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Retry Attempts</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    min="0"
-                                    max="5"
-                                    placeholder="3"
-                                    {...field}
-                                    onChange={(e) => field.onChange(parseInt(e.target.value))}
-                                    data-testid="input-retry-attempts"
-                                  />
-                                </FormControl>
-                                <FormDescription>
-                                  Number of times to retry failed webhook deliveries (0-5)
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={webhookForm.control}
-                            name="isActive"
-                            render={({ field }) => (
-                              <FormItem className="flex items-center space-x-3 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                    data-testid="checkbox-webhook-active"
-                                  />
-                                </FormControl>
-                                <div>
-                                  <FormLabel>Active</FormLabel>
-                                  <FormDescription>
-                                    Enable this webhook to start receiving events
-                                  </FormDescription>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-
-                          <DialogFooter>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => setShowWebhookDialog(false)}
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              type="submit"
-                              disabled={createWebhookMutation.isPending}
-                              className="bg-gradient-to-r from-pink-500 to-cyan-500"
-                            >
-                              Create Webhook
-                            </Button>
-                          </DialogFooter>
-                        </form>
-                      </Form>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {webhooksLoading ? (
-                  <div className="text-center py-8">Loading webhooks...</div>
-                ) : webhooks.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Link2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-muted-foreground">No webhooks configured</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Add a webhook to receive real-time event notifications
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {webhooks.map((webhook) => (
-                      <div
-                        key={webhook.id}
-                        className="border rounded-lg p-4 hover:border-pink-500/30 transition-colors"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <h4 className="font-medium">{webhook.name}</h4>
-                              {webhook.isActive ? (
-                                <Badge className="bg-green-100 text-green-800">Active</Badge>
-                              ) : (
-                                <Badge className="bg-gray-100 text-gray-800">Inactive</Badge>
-                              )}
-                              {webhook.lastStatus === 'success' && (
-                                <Badge className="bg-blue-100 text-blue-800">
-                                  <CheckCircle className="h-3 w-3 mr-1" />
-                                  Last Success
-                                </Badge>
-                              )}
-                              {webhook.lastStatus === 'failed' && (
-                                <Badge className="bg-red-100 text-red-800">
-                                  <XCircle className="h-3 w-3 mr-1" />
-                                  Last Failed
-                                </Badge>
-                              )}
-                            </div>
-                            <code className="text-sm text-muted-foreground break-all">
-                              {webhook.url}
-                            </code>
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {webhook.events.slice(0, 4).map((event) => (
-                                <Badge key={event} variant="outline" className="text-xs font-mono">
-                                  {event}
-                                </Badge>
-                              ))}
-                              {webhook.events.length > 4 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{webhook.events.length - 4} more
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-6 mt-3 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <CheckCircle className="h-4 w-4 text-green-500" />
-                                <span>{webhook.successCount} success</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <XCircle className="h-4 w-4 text-red-500" />
-                                <span>{webhook.failureCount} failed</span>
-                              </div>
-                              {webhook.lastTriggeredAt && (
-                                <div className="flex items-center gap-1">
-                                  <Activity className="h-4 w-4" />
-                                  <span>Last: {format(new Date(webhook.lastTriggeredAt), 'MMM dd, HH:mm')}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => testWebhookMutation.mutate(webhook.id)}
-                              disabled={testWebhookMutation.isPending}
-                              className="border-cyan-500/30"
-                            >
-                              <Send className="h-4 w-4 mr-1" />
-                              Test
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => deleteWebhookMutation.mutate(webhook.id)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
         </TabsContent>
 
         {/* Theme Tab */}

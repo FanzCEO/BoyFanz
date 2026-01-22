@@ -36,12 +36,8 @@ class ServiceOrchestrationEngine extends EventEmitter {
     
     this.circuitBreakers = new Map();
     
-    // Start health monitoring (if enabled)
-    if (process.env.HEALTH_MONITORING_ENABLED !== "false") {
-      this.startHealthMonitoring();
-    } else {
-      console.log("🚫 Health monitoring disabled via env");
-    }
+    // Start health monitoring
+    this.startHealthMonitoring();
     
     console.log('🎭 Service Orchestration Engine initialized');
   }

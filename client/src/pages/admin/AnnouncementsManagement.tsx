@@ -142,17 +142,20 @@ export default function AnnouncementsManagement() {
         sortBy,
         sortOrder
       }
-    ]
+    ],
+    enabled: user?.role === 'admin'
   });
 
   // Fetch announcement templates
   const { data: templates = [], isLoading: templatesLoading } = useQuery<AnnouncementTemplate[]>({
-    queryKey: ['/api/admin/announcement-templates'] && activeTab === 'templates'
+    queryKey: ['/api/admin/announcement-templates'],
+    enabled: user?.role === 'admin' && activeTab === 'templates'
   });
 
   // Fetch announcement analytics
   const { data: analytics, isLoading: analyticsLoading } = useQuery<AnnouncementAnalytics>({
-    queryKey: ['/api/admin/announcements/analytics', { dateFrom: analyticsDateFrom, dateTo: analyticsDateTo }] && showAnalyticsDialog
+    queryKey: ['/api/admin/announcements/analytics', { dateFrom: analyticsDateFrom, dateTo: analyticsDateTo }],
+    enabled: user?.role === 'admin' && showAnalyticsDialog
   });
 
   // Mutations

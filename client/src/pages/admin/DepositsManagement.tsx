@@ -30,7 +30,7 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import {
+import { 
   Wallet,
   Shield,
   AlertTriangle,
@@ -54,13 +54,7 @@ import {
   Banknote,
   Bitcoin,
   Globe,
-  Settings,
-  Zap,
-  Play,
-  FileSpreadsheet,
-  Save,
-  Copy,
-  Target
+  Settings
 } from "lucide-react";
 
 // TypeScript interfaces
@@ -151,122 +145,6 @@ const RISK_COLORS = {
   critical: "bg-red-500"
 };
 
-// Quick Action Templates
-const QUICK_ACTION_TEMPLATES = [
-  {
-    id: "approve-low-risk",
-    name: "Approve Low-Risk Deposits",
-    description: "Auto-approve all pending deposits with risk score < 25",
-    icon: CheckCircle,
-    color: "green",
-    filters: { status: "pending", maxRiskScore: 25 },
-    action: "approve",
-    requiresConfirmation: false
-  },
-  {
-    id: "flag-high-risk",
-    name: "Flag High-Risk Deposits",
-    description: "Flag deposits with risk score > 75 for manual review",
-    icon: Flag,
-    color: "orange",
-    filters: { minRiskScore: 75 },
-    action: "flag_review",
-    requiresConfirmation: true
-  },
-  {
-    id: "review-large-amounts",
-    name: "Review Large Deposits",
-    description: "Flag deposits over $10,000 for AML compliance review",
-    icon: DollarSign,
-    color: "purple",
-    filters: { minAmount: 1000000 }, // in cents
-    action: "flag_review",
-    requiresConfirmation: true
-  },
-  {
-    id: "crypto-enhanced-review",
-    name: "Enhanced Crypto Review",
-    description: "Apply enhanced due diligence to all cryptocurrency deposits",
-    icon: Bitcoin,
-    color: "blue",
-    filters: { method: "crypto" },
-    action: "enhanced_review",
-    requiresConfirmation: true
-  },
-  {
-    id: "approve-verified-users",
-    name: "Approve Verified Users",
-    description: "Auto-approve deposits from KYC-verified users with good history",
-    icon: Shield,
-    color: "cyan",
-    filters: { kycStatus: "verified", maxRiskScore: 50 },
-    action: "approve",
-    requiresConfirmation: false
-  },
-  {
-    id: "export-suspicious",
-    name: "Export Suspicious Activity",
-    description: "Export all flagged deposits for SAR filing",
-    icon: Download,
-    color: "red",
-    filters: { amlStatus: "flagged" },
-    action: "export_sar",
-    requiresConfirmation: false
-  }
-];
-
-// AML Report Templates
-const AML_REPORT_TEMPLATES = [
-  {
-    id: "daily-summary",
-    name: "Daily Deposit Summary",
-    description: "Summary of all deposits in the last 24 hours",
-    period: "24h",
-    format: "pdf",
-    includes: ["total_volume", "count", "avg_amount", "risk_distribution"]
-  },
-  {
-    id: "weekly-aml",
-    name: "Weekly AML Compliance Report",
-    description: "Comprehensive AML review for the past week",
-    period: "7d",
-    format: "pdf",
-    includes: ["flagged_transactions", "high_risk_users", "kyc_status", "sar_filed"]
-  },
-  {
-    id: "monthly-regulatory",
-    name: "Monthly Regulatory Filing",
-    description: "Complete regulatory compliance report for the month",
-    period: "30d",
-    format: "excel",
-    includes: ["all_deposits", "aml_checks", "blocked_users", "refunds"]
-  },
-  {
-    id: "suspicious-activity",
-    name: "Suspicious Activity Report (SAR)",
-    description: "SAR-compliant report for flagged transactions",
-    period: "custom",
-    format: "pdf",
-    includes: ["flagged_only", "user_details", "source_of_funds", "investigation_notes"]
-  },
-  {
-    id: "large-transactions",
-    name: "Large Transaction Report (CTR)",
-    description: "Currency Transaction Report for deposits over $10,000",
-    period: "custom",
-    format: "pdf",
-    includes: ["large_deposits", "user_identification", "purpose"]
-  },
-  {
-    id: "risk-analysis",
-    name: "Risk Analysis Dashboard",
-    description: "Detailed risk scoring analysis and trends",
-    period: "30d",
-    format: "excel",
-    includes: ["risk_scores", "trends", "anomalies", "recommendations"]
-  }
-];
-
 export default function DepositsManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -275,10 +153,6 @@ export default function DepositsManagement() {
   const [activeTab, setActiveTab] = useState("deposits");
   const [selectedDeposit, setSelectedDeposit] = useState<Deposit | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [showQuickActions, setShowQuickActions] = useState(false);
-  const [showReportTemplates, setShowReportTemplates] = useState(false);
-  const [selectedQuickAction, setSelectedQuickAction] = useState<string>("");
-  const [selectedReport, setSelectedReport] = useState<string>("");
   const [filters, setFilters] = useState<DepositFilters>({
     page: 1,
     limit: 50
@@ -340,72 +214,6 @@ export default function DepositsManagement() {
     },
     onError: (error: any) => {
       toast({ title: "Error", description: error.message || "Bulk operation failed", variant: "destructive" });
-    }
-  });
-
-  const executeQuickActionMutation = useMutation({
-    mutationFn: (templateId: string) => {
-      const template = QUICK_ACTION_TEMPLATES.find(t => t.id === templateId);
-      if (!template) throw new Error("Template not found");
-
-      return apiRequest('/api/admin/financial/deposits/quick-action', {
-        method: 'POST',
-        body: JSON.stringify({
-          action: template.action,
-          filters: template.filters
-        })
-      });
-    },
-    onSuccess: (result) => {
-      toast({
-        title: "Success",
-        description: `Quick action completed. Processed ${result.affected} deposits.`
-      });
-      refetchDeposits();
-      setShowQuickActions(false);
-      setSelectedQuickAction("");
-    },
-    onError: (error: any) => {
-      toast({ title: "Error", description: error.message || "Quick action failed", variant: "destructive" });
-    }
-  });
-
-  const generateReportMutation = useMutation({
-    mutationFn: (templateId: string) => {
-      const template = AML_REPORT_TEMPLATES.find(t => t.id === templateId);
-      if (!template) throw new Error("Report template not found");
-
-      return apiRequest('/api/admin/financial/deposits/generate-report', {
-        method: 'POST',
-        body: JSON.stringify({
-          templateId,
-          period: template.period,
-          format: template.format,
-          includes: template.includes
-        })
-      });
-    },
-    onSuccess: (data, templateId) => {
-      const template = AML_REPORT_TEMPLATES.find(t => t.id === templateId);
-      // Download report
-      const blob = new Blob([data], {
-        type: template?.format === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${templateId}-${new Date().toISOString().split('T')[0]}.${template?.format}`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      toast({ title: "Success", description: "Report generated successfully" });
-      setShowReportTemplates(false);
-      setSelectedReport("");
-    },
-    onError: (error: any) => {
-      toast({ title: "Error", description: error.message || "Report generation failed", variant: "destructive" });
     }
   });
 
@@ -491,30 +299,10 @@ export default function DepositsManagement() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent" data-testid="page-title">
-            Deposits Management
-          </h1>
+          <h1 className="text-3xl font-bold" data-testid="page-title">Deposits Management</h1>
           <p className="text-muted-foreground">Monitor deposits, verify compliance, and manage AML requirements</p>
         </div>
         <div className="flex space-x-2">
-          <Button
-            onClick={() => setShowQuickActions(true)}
-            variant="outline"
-            className="border-cyan-500/30 hover:bg-cyan-500/10"
-            data-testid="button-quick-actions"
-          >
-            <Zap className="h-4 w-4 mr-2 text-cyan-400" />
-            Quick Actions
-          </Button>
-          <Button
-            onClick={() => setShowReportTemplates(true)}
-            variant="outline"
-            className="border-pink-500/30 hover:bg-pink-500/10"
-            data-testid="button-report-templates"
-          >
-            <FileSpreadsheet className="h-4 w-4 mr-2 text-pink-400" />
-            AML Reports
-          </Button>
           <Button
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
@@ -528,6 +316,7 @@ export default function DepositsManagement() {
             data-testid="button-refresh"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
           </Button>
         </div>
       </div>
@@ -1094,167 +883,6 @@ export default function DepositsManagement() {
               </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Quick Actions Dialog */}
-      <Dialog open={showQuickActions} onOpenChange={setShowQuickActions}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" data-testid="dialog-quick-actions">
-          <DialogHeader>
-            <DialogTitle className="flex items-center">
-              <Zap className="h-5 w-5 mr-2 text-cyan-400" />
-              Quick Action Templates
-            </DialogTitle>
-            <DialogDescription>
-              Automated workflows for common deposit management tasks
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-3 md:grid-cols-2">
-            {QUICK_ACTION_TEMPLATES.map((template) => {
-              const Icon = template.icon;
-              return (
-                <Card
-                  key={template.id}
-                  className={`cursor-pointer transition-all hover:border-cyan-500/50 ${
-                    selectedQuickAction === template.id
-                      ? 'border-cyan-500 bg-cyan-500/5'
-                      : 'border-border'
-                  }`}
-                  onClick={() => setSelectedQuickAction(template.id)}
-                  data-testid={`quick-action-${template.id}`}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-2 flex-1">
-                        <div className="flex items-center space-x-2">
-                          <Icon className={`h-5 w-5 text-${template.color}-400`} />
-                          <h4 className="font-semibold">{template.name}</h4>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{template.description}</p>
-                        <div className="flex items-center space-x-2">
-                          {template.requiresConfirmation && (
-                            <Badge variant="outline" className="text-xs text-orange-400">
-                              <AlertTriangle className="h-3 w-3 mr-1" />
-                              Requires Confirmation
-                            </Badge>
-                          )}
-                          <Badge variant="secondary" className="text-xs">
-                            {template.action.replace('_', ' ').toUpperCase()}
-                          </Badge>
-                        </div>
-                      </div>
-                      {selectedQuickAction === template.id && (
-                        <CheckCircle className="h-5 w-5 text-cyan-400 ml-2" />
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
-          <div className="flex justify-end space-x-2 pt-4 border-t">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowQuickActions(false);
-                setSelectedQuickAction("");
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                if (selectedQuickAction) {
-                  executeQuickActionMutation.mutate(selectedQuickAction);
-                }
-              }}
-              disabled={!selectedQuickAction || executeQuickActionMutation.isPending}
-              className="bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-cyan-600 hover:to-pink-600"
-            >
-              {executeQuickActionMutation.isPending ? 'Executing...' : 'Execute Action'}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* AML Report Templates Dialog */}
-      <Dialog open={showReportTemplates} onOpenChange={setShowReportTemplates}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" data-testid="dialog-report-templates">
-          <DialogHeader>
-            <DialogTitle className="flex items-center">
-              <FileSpreadsheet className="h-5 w-5 mr-2 text-pink-400" />
-              AML Compliance Report Templates
-            </DialogTitle>
-            <DialogDescription>
-              Generate regulatory-compliant reports for deposits and AML monitoring
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-3">
-            {AML_REPORT_TEMPLATES.map((template) => (
-              <Card
-                key={template.id}
-                className={`cursor-pointer transition-all hover:border-pink-500/50 ${
-                  selectedReport === template.id
-                    ? 'border-pink-500 bg-pink-500/5'
-                    : 'border-border'
-                }`}
-                onClick={() => setSelectedReport(template.id)}
-                data-testid={`report-${template.id}`}
-              >
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="h-5 w-5 text-pink-400" />
-                        <h4 className="font-semibold">{template.name}</h4>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{template.description}</p>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="outline" className="text-xs">
-                          {template.period}
-                        </Badge>
-                        <Badge variant="secondary" className="text-xs uppercase">
-                          {template.format}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          Includes: {template.includes.length} sections
-                        </span>
-                      </div>
-                    </div>
-                    {selectedReport === template.id && (
-                      <CheckCircle className="h-5 w-5 text-pink-400 ml-2" />
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="flex justify-end space-x-2 pt-4 border-t">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowReportTemplates(false);
-                setSelectedReport("");
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                if (selectedReport) {
-                  generateReportMutation.mutate(selectedReport);
-                }
-              }}
-              disabled={!selectedReport || generateReportMutation.isPending}
-              className="bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-cyan-600 hover:to-pink-600"
-            >
-              {generateReportMutation.isPending ? 'Generating...' : 'Generate Report'}
-            </Button>
-          </div>
         </DialogContent>
       </Dialog>
     </div>

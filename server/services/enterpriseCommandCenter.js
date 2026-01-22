@@ -25,7 +25,7 @@ class EnterpriseCommandCenter extends EventEmitter {
         errorRate: 0.05, // 5%
         responseTime: 1000, // 1 second
         cpuUsage: 80, // 80%
-        memoryUsage: 99, // 99% - V8 heap stays near full, PM2 handles actual limit
+        memoryUsage: 85, // 85%
         diskUsage: 90 // 90%
       }
     };

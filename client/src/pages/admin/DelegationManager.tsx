@@ -120,12 +120,29 @@ export default function DelegationManager() {
     );
   }
 
+  // Only admins can access delegation management
+  if (user?.role !== 'admin') {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Shield className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
+            <p className="text-muted-foreground">Only administrators can access delegation management.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ['/api/admin/users'],
+    enabled: user?.role === 'admin',
   });
 
   const { data: delegations, isLoading: delegationsLoading } = useQuery({
     queryKey: ['/api/admin/delegations'],
+    enabled: user?.role === 'admin',
   });
 
   const updateRoleMutation = useMutation({

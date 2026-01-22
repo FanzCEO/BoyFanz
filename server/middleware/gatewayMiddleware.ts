@@ -8,12 +8,11 @@ import { apiGateway } from '../services/apiGatewayInit.js';
 export function setupGatewayMiddleware(app: Express) {
   console.log('🚪 Setting up API Gateway middleware...');
 
-  // Skip gateway forwarding if disabled or in development (all routes are handled by this Express server)
+  // In development, skip gateway forwarding as all routes are handled by this Express server
   const isDevelopment = process.env.NODE_ENV !== 'production';
-  const gatewayForwardingDisabled = process.env.GATEWAY_FORWARDING_ENABLED === 'false';
 
-  if (isDevelopment || gatewayForwardingDisabled) {
-    console.log('ℹ️  Gateway forwarding disabled, using local Express routes');
+  if (isDevelopment) {
+    console.log('ℹ️  Development mode: Gateway forwarding disabled, using local Express routes');
     console.log('✅ API Gateway middleware configured');
     return;
   }

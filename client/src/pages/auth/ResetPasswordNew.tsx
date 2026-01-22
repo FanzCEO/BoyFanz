@@ -95,7 +95,7 @@ export default function ResetPasswordNew() {
               boxShadow: "0 8px 32px 0 rgba(255, 0, 0, 0.1), inset 0 0 20px rgba(212, 169, 89, 0.05)",
             }}
           >
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#00e5ff]/5 via-transparent to-[#d4a959]/5 pointer-events-none" />
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#ff0000]/5 via-transparent to-[#d4a959]/5 pointer-events-none" />
             
             <div className="relative z-10">
               <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -108,7 +108,7 @@ export default function ResetPasswordNew() {
               <Button
                 onClick={() => setLocation("/auth/login")}
                 data-testid="button-login"
-                className="w-full bg-[#00e5ff] hover:bg-[#00bcd4] text-white font-bold"
+                className="w-full bg-[#ff0000] hover:bg-[#cc0000] text-white font-bold"
               >
                 Go to Login
               </Button>
@@ -124,7 +124,7 @@ export default function ResetPasswordNew() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="font-display text-5xl font-bold mb-2">
-            <span className="text-[#00e5ff]">Boy</span>
+            <span className="text-[#ff0000]">Boy</span>
             <span className="text-[#d4a959]">Fanz</span>
           </h1>
           <p className="text-zinc-400 text-sm">Create a new password</p>
@@ -136,7 +136,7 @@ export default function ResetPasswordNew() {
             boxShadow: "0 8px 32px 0 rgba(255, 0, 0, 0.1), inset 0 0 20px rgba(212, 169, 89, 0.05)",
           }}
         >
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#00e5ff]/5 via-transparent to-[#d4a959]/5 pointer-events-none" />
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#ff0000]/5 via-transparent to-[#d4a959]/5 pointer-events-none" />
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 relative z-10">
@@ -154,7 +154,7 @@ export default function ResetPasswordNew() {
                           type={showPassword ? "text" : "password"}
                           placeholder="Create a strong password"
                           data-testid="input-password"
-                          className="pl-10 pr-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#00e5ff]/50 focus:ring-[#00e5ff]/20"
+                          className="pl-10 pr-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#ff0000]/50 focus:ring-[#ff0000]/20"
                         />
                         <button
                           type="button"
@@ -185,7 +185,7 @@ export default function ResetPasswordNew() {
                           type={showConfirmPassword ? "text" : "password"}
                           placeholder="Re-enter your password"
                           data-testid="input-confirm-password"
-                          className="pl-10 pr-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#00e5ff]/50 focus:ring-[#00e5ff]/20"
+                          className="pl-10 pr-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#ff0000]/50 focus:ring-[#ff0000]/20"
                         />
                         <button
                           type="button"
@@ -206,7 +206,7 @@ export default function ResetPasswordNew() {
                 type="submit"
                 disabled={resetPasswordMutation.isPending}
                 data-testid="button-reset-password"
-                className="w-full h-12 bg-[#00e5ff] hover:bg-[#00bcd4] text-white font-bold text-base shadow-lg shadow-cyan-500/20 transition-all"
+                className="w-full h-12 bg-[#ff0000] hover:bg-[#cc0000] text-white font-bold text-base shadow-lg shadow-red-500/20 transition-all"
               >
                 {resetPasswordMutation.isPending ? (
                   <>

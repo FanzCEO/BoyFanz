@@ -129,39 +129,9 @@ export function useAuth() {
       });
     },
     onError: (error: Error) => {
-      // Extract user-friendly error message
-      let errorMessage = "Please check your username and password and try again.";
-
-      if (error.message) {
-        // Parse error message format "status: message"
-        const parts = error.message.split(':');
-        if (parts.length > 1) {
-          const statusCode = parts[0].trim();
-          const serverMessage = parts.slice(1).join(':').trim();
-
-          // Customize message based on status code
-          if (statusCode === '401') {
-            errorMessage = "Invalid username or password. Please try again.";
-          } else if (statusCode === '403') {
-            errorMessage = "Access forbidden. Your account may be suspended.";
-          } else if (statusCode === '429') {
-            errorMessage = "Too many login attempts. Please try again later.";
-          } else if (statusCode.startsWith('5')) {
-            errorMessage = "Server error. Please try again in a moment.";
-          } else if (serverMessage && serverMessage.length > 0 && serverMessage.length < 200) {
-            // Use server message if it's reasonable length and exists
-            errorMessage = serverMessage;
-          }
-        } else if (error.message.toLowerCase().includes('network')) {
-          errorMessage = "Network error. Please check your connection.";
-        } else if (error.message.toLowerCase().includes('fetch')) {
-          errorMessage = "Connection failed. Please check your internet connection.";
-        }
-      }
-
       toast({
-        title: "Login Failed",
-        description: errorMessage,
+        title: "Login failed",
+        description: error.message,
         variant: "destructive",
       });
     },

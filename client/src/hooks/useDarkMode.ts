@@ -1,85 +1,87 @@
 import { useState, useEffect, useCallback } from 'react';
 
-type Theme = 'dark' | 'light' | 'system';
+// BoyFanz Theme Modes
+// Dungeon = Default immersive dark neon experience
+// Night = Softer dark mode for extended use
+// Clean = Admin/testing only (light mode)
+export type ThemeMode = 'dungeon' | 'night' | 'clean';
 
-const STORAGE_KEY = 'boyfanz-theme-preference';
+const STORAGE_KEY = 'boyfanz-theme-mode';
 
 export function useDarkMode() {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    // Check localStorage first
+  const [theme, setThemeState] = useState<ThemeMode>(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-      if (stored && ['dark', 'light', 'system'].includes(stored)) {
+      const stored = localStorage.getItem(STORAGE_KEY) as ThemeMode | null;
+      if (stored && ['dungeon', 'night', 'clean'].includes(stored)) {
         return stored;
       }
     }
-    return 'dark'; // Default to dark for fight ring aesthetic
+    return 'dungeon'; // LOCKED DEFAULT: Dungeon mode
   });
 
   const [isDark, setIsDark] = useState(true);
 
-  // Get system preference
-  const getSystemTheme = useCallback((): boolean => {
-    if (typeof window !== 'undefined') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    return true;
-  }, []);
-
   // Apply theme to document
-  const applyTheme = useCallback((dark: boolean) => {
+  const applyTheme = useCallback((mode: ThemeMode) => {
     const root = document.documentElement;
-    if (dark) {
-      root.classList.remove('light');
-    } else {
-      root.classList.add('light');
+    const body = document.body;
+    
+    // Remove all theme classes first
+    root.classList.remove('dungeon', 'night', 'clean', 'light');
+    body.classList.remove('dungeon-section', 'night-section', 'clean-section');
+    
+    switch (mode) {
+      case 'dungeon':
+        root.classList.add('dungeon');
+        body.classList.add('dungeon-section');
+        body.style.backgroundColor = '#030406';
+        body.style.color = '#ffffff';
+        setIsDark(true);
+        break;
+      case 'night':
+        root.classList.add('night');
+        body.classList.add('night-section');
+        body.style.backgroundColor = '#0a0a0f';
+        body.style.color = '#e0e0e0';
+        setIsDark(true);
+        break;
+      case 'clean':
+        root.classList.add('clean', 'light');
+        body.classList.add('clean-section');
+        body.style.backgroundColor = '#ffffff';
+        body.style.color = '#1a1a1a';
+        setIsDark(false);
+        break;
     }
-    setIsDark(dark);
   }, []);
 
   // Set theme and persist
-  const setTheme = useCallback((newTheme: Theme) => {
+  const setTheme = useCallback((newTheme: ThemeMode) => {
     setThemeState(newTheme);
     localStorage.setItem(STORAGE_KEY, newTheme);
+    applyTheme(newTheme);
+  }, [applyTheme]);
 
-    if (newTheme === 'system') {
-      applyTheme(getSystemTheme());
-    } else {
-      applyTheme(newTheme === 'dark');
-    }
-  }, [applyTheme, getSystemTheme]);
-
-  // Toggle between dark and light
+  // Cycle through themes: dungeon -> night -> clean -> dungeon
   const toggleTheme = useCallback(() => {
-    const newTheme = isDark ? 'light' : 'dark';
-    setTheme(newTheme);
-  }, [isDark, setTheme]);
+    const order: ThemeMode[] = ['dungeon', 'night', 'clean'];
+    const currentIndex = order.indexOf(theme);
+    const nextIndex = (currentIndex + 1) % order.length;
+    setTheme(order[nextIndex]);
+  }, [theme, setTheme]);
 
-  // Initialize and listen for system preference changes
+  // Initialize theme on mount
   useEffect(() => {
-    // Apply initial theme
-    if (theme === 'system') {
-      applyTheme(getSystemTheme());
-    } else {
-      applyTheme(theme === 'dark');
-    }
-
-    // Listen for system preference changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e: MediaQueryListEvent) => {
-      if (theme === 'system') {
-        applyTheme(e.matches);
-      }
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme, applyTheme, getSystemTheme]);
+    applyTheme(theme);
+  }, [theme, applyTheme]);
 
   return {
     theme,
     isDark,
     setTheme,
     toggleTheme,
+    isDungeon: theme === 'dungeon',
+    isNight: theme === 'night',
+    isClean: theme === 'clean',
   };
 }

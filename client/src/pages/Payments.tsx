@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,22 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function Payments() {
   const [isAddCardOpen, setIsAddCardOpen] = useState(false);
+  const [savedCards, setSavedCards] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  // Fetch saved payment methods
-  const { data: savedCards = [], refetch: refetchCards } = useQuery({
-    queryKey: ['/api/payments/stripe/payment-methods'],
-    queryFn: async () => {
-      const response = await fetch('/api/payments/stripe/payment-methods', {
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to fetch payment methods');
-      const data = await response.json();
-      return data.paymentMethods || [];
-    },
-  });
 
   const [cardForm, setCardForm] = useState({
     cardNumber: "",
@@ -52,7 +38,7 @@ export default function Payments() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/payments/stripe/payment-methods", {
+      const response = await fetch("/api/payments/cards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -68,7 +54,7 @@ export default function Payments() {
 
       if (response.ok) {
         const data = await response.json();
-        queryClient.invalidateQueries({ queryKey: ['/api/payments/stripe/payment-methods'] });
+        setSavedCards([...savedCards, data.card]);
         setIsAddCardOpen(false);
         setCardForm({ cardNumber: "", expMonth: "", expYear: "", cvv: "", cardholderName: "", billingZip: "" });
         toast({ title: "Card added successfully", description: "Your payment method has been saved." });
@@ -85,13 +71,13 @@ export default function Payments() {
 
   const handleDeleteCard = async (cardId: string) => {
     try {
-      const response = await fetch(`/api/payments/stripe/payment-methods/${cardId}`, {
+      const response = await fetch(`/api/payments/cards/${cardId}`, {
         method: "DELETE",
         credentials: "include"
       });
 
       if (response.ok) {
-        queryClient.invalidateQueries({ queryKey: ['/api/payments/stripe/payment-methods'] });
+        setSavedCards(savedCards.filter(c => c.id !== cardId));
         toast({ title: "Card removed", description: "Payment method has been deleted." });
       }
     } catch (error) {

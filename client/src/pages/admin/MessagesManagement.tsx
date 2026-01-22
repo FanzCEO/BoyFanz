@@ -144,7 +144,7 @@ export default function MessagesManagement() {
   // Fetch messages with filtering
   const { data: messages = [], isLoading, error, refetch } = useQuery<Message[]>({
     queryKey: [
-      '/api/admin/messages',
+      '/api/admin/messages', 
       {
         searchQuery,
         senderId: senderIdFilter || undefined,
@@ -157,7 +157,7 @@ export default function MessagesManagement() {
         sortOrder
       }
     ],
-    enabled: activeTab === 'messages'
+    enabled: user?.role === 'admin' && activeTab === 'messages'
   });
 
   // Fetch message templates
@@ -171,13 +171,13 @@ export default function MessagesManagement() {
         offset: 0
       }
     ],
-    enabled: activeTab === 'templates' || activeTab === 'mass-messaging'
+    enabled: user?.role === 'admin' && (activeTab === 'templates' || activeTab === 'mass-messaging')
   });
 
   // Fetch message analytics
   const { data: analytics, isLoading: analyticsLoading } = useQuery<MessageAnalytics>({
     queryKey: ['/api/admin/messages/analytics', { dateFrom: analyticsDateFrom, dateTo: analyticsDateTo }],
-    enabled: showAnalyticsDialog
+    enabled: user?.role === 'admin' && showAnalyticsDialog
   });
 
   const totalMessages = messages.length;
@@ -355,6 +355,17 @@ export default function MessagesManagement() {
       deletedMessages: data.deletedMessages || 0
     };
   };
+
+  if (!user || user.role !== 'admin') {
+    return (
+      <Alert>
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          You don't have permission to access this page.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   if (error) {
     return (

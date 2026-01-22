@@ -88,25 +88,29 @@ export default function StoriesManagement() {
         sortBy,
         sortOrder
       }
-    ] || user?.role === 'moderator',
+    ],
+    enabled: user?.role === 'admin' || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 60000 : false // Refresh every minute for expiration updates
   });
 
   // Fetch real-time analytics
   const { data: storiesStats } = useQuery<any>({
-    queryKey: ['/api/admin/stories/stats'] || user?.role === 'moderator',
+    queryKey: ['/api/admin/stories/stats'],
+    enabled: user?.role === 'admin' || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 30000 : false
   });
 
   // Fetch trending stories analytics
   const { data: trendingStats } = useQuery<any>({
-    queryKey: ['/api/admin/stories/trending'] || user?.role === 'moderator',
+    queryKey: ['/api/admin/stories/trending'],
+    enabled: user?.role === 'admin' || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 60000 : false
   });
 
   // Fetch creators for filter
   const { data: creators } = useQuery<any[]>({
-    queryKey: ['/api/admin/creators'] || user?.role === 'moderator'
+    queryKey: ['/api/admin/creators'],
+    enabled: user?.role === 'admin' || user?.role === 'moderator'
   });
 
   const stories = storiesData?.stories || [];
@@ -338,6 +342,19 @@ export default function StoriesManagement() {
       return () => clearInterval(interval);
     }
   }, [autoRefresh, refetch]);
+
+  if (user?.role !== 'admin' && user?.role !== 'moderator') {
+    return (
+      <div className="space-y-6" data-testid="access-denied">
+        <Alert className="border-destructive/50 bg-destructive/10">
+          <AlertTriangle className="h-4 w-4 text-destructive" />
+          <AlertDescription className="text-destructive">
+            Access denied. Admin or moderator privileges required to manage stories.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   if (error) {
     return (

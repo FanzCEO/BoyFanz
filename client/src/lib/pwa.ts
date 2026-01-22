@@ -16,88 +16,57 @@ interface PushSubscriptionOptions {
 }
 
 class BoyFanzPWAManager {
-  private static instance: BoyFanzPWAManager | null = null;
-  private static isInitializing = false;
-  private static isInitialized = false;
-
   private deferredPrompt: BeforeInstallPromptEvent | null = null;
   private swRegistration: ServiceWorkerRegistration | null = null;
   private pushSubscription: PushSubscription | null = null;
-
+  
   // VAPID public key for push notifications
   private readonly vapidPublicKey = 'BP1_YOUR_VAPID_PUBLIC_KEY_HERE_REPLACE_WITH_ACTUAL';
-
-  private constructor() {
-    // Private constructor for singleton pattern
-  }
-
-  static getInstance(): BoyFanzPWAManager {
-    if (!BoyFanzPWAManager.instance) {
-      BoyFanzPWAManager.instance = new BoyFanzPWAManager();
-      BoyFanzPWAManager.instance.init();
-    }
-    return BoyFanzPWAManager.instance;
+  
+  constructor() {
+    this.init();
   }
 
   async init(): Promise<void> {
-    // Prevent multiple initializations
-    if (BoyFanzPWAManager.isInitializing || BoyFanzPWAManager.isInitialized) {
-      console.log('⚠️ PWA Manager already initialized or initializing, skipping...');
-      return;
-    }
-
-    BoyFanzPWAManager.isInitializing = true;
-
     try {
       // Register service worker
       await this.registerServiceWorker();
-
+      
       // Setup installation prompt handling
       this.setupInstallPrompt();
-
+      
       // Initialize push notifications
       await this.initializePushNotifications();
-
+      
       // Setup offline/online event handlers
       this.setupNetworkHandlers();
-
+      
       // Setup app badge support
       this.setupAppBadge();
-
-      BoyFanzPWAManager.isInitialized = true;
+      
       console.log('🚀 BoyFanz PWA Manager initialized successfully');
     } catch (error) {
       console.error('❌ PWA Manager initialization failed:', error);
-    } finally {
-      BoyFanzPWAManager.isInitializing = false;
     }
   }
 
   // Service Worker Registration
   async registerServiceWorker(): Promise<void> {
-    if (!('serviceWorker' in navigator)) {
-      throw new Error('Service Worker not supported');
+    // Skip service worker on staging (fanz.website) to prevent navigation hijacking
+    const isStaging = window.location.hostname.includes("fanz.website");
+    if (isStaging) {
+      console.log("⚠️ Service Worker disabled on staging environment");
+      // Unregister any existing service workers on staging
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const registration of registrations) {
+        await registration.unregister();
+        console.log("🗑️ Unregistered existing service worker");
+      }
+      return;
     }
 
-    // Check if service worker is already registered
-    const existingRegistration = await navigator.serviceWorker.getRegistration();
-    if (existingRegistration) {
-      console.log('✅ Service Worker already registered, reusing:', existingRegistration.scope);
-      this.swRegistration = existingRegistration;
-
-      // Still set up update listener
-      this.swRegistration.addEventListener('updatefound', () => {
-        const newWorker = this.swRegistration!.installing;
-        if (newWorker) {
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              this.notifyUserOfUpdate();
-            }
-          });
-        }
-      });
-
-      return;
+    if (!('serviceWorker' in navigator)) {
+      throw new Error('Service Worker not supported');
     }
 
     try {
@@ -411,7 +380,7 @@ class BoyFanzPWAManager {
         position: fixed;
         top: 20px;
         right: 20px;
-        background: linear-gradient(135deg, #00e5ff, #00bcd4);
+        background: linear-gradient(135deg, #ff0000, #cc0000);
         color: white;
         padding: 16px 20px;
         border-radius: 12px;
@@ -430,7 +399,7 @@ class BoyFanzPWAManager {
         <div style="display: flex; gap: 8px;">
           <button id="pwa-install-btn" style="
             background: white;
-            color: #00e5ff;
+            color: #ff0000;
             border: none;
             padding: 8px 16px;
             border-radius: 6px;
@@ -483,7 +452,7 @@ class BoyFanzPWAManager {
         color: white;
         padding: 16px 24px;
         border-radius: 8px;
-        border: 1px solid #00e5ff;
+        border: 1px solid #ff0000;
         box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         z-index: 10000;
       ">
@@ -491,7 +460,7 @@ class BoyFanzPWAManager {
           🔄 App Update Available
         </div>
         <button onclick="window.location.reload()" style="
-          background: #00e5ff;
+          background: #ff0000;
           color: white;
           border: none;
           padding: 8px 16px;
@@ -586,8 +555,8 @@ class BoyFanzPWAManager {
   }
 }
 
-// Global PWA Manager instance (singleton)
-export const pwaManager = BoyFanzPWAManager.getInstance();
+// Global PWA Manager instance
+export const pwaManager = new BoyFanzPWAManager();
 
 // Export types
 export type { BeforeInstallPromptEvent, PushSubscriptionOptions };

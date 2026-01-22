@@ -130,8 +130,8 @@ export default function BecomeCreator() {
           </h1>
 
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Turn your passion into profit. Share exclusive content with dedicated fans
-            and build your own community on your terms.
+            Turn your passion into profit. Join thousands of creators earning money
+            by sharing exclusive content with their dedicated fans.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
@@ -193,16 +193,16 @@ export default function BecomeCreator() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div className="p-6 rounded-xl bg-background/50 border border-red-900/30">
-              <p className="text-4xl font-bold text-red-500 mb-2">80%</p>
-              <p className="text-muted-foreground">Industry-leading creator payout</p>
+              <p className="text-4xl font-bold text-red-500 mb-2">$500+</p>
+              <p className="text-muted-foreground">Average monthly for beginners</p>
             </div>
             <div className="p-6 rounded-xl bg-background/50 border border-gold-500/30">
-              <p className="text-4xl font-bold text-gold-500 mb-2">24/7</p>
-              <p className="text-muted-foreground">Creator support available</p>
+              <p className="text-4xl font-bold text-gold-500 mb-2">$5,000+</p>
+              <p className="text-muted-foreground">Average for established creators</p>
             </div>
             <div className="p-6 rounded-xl bg-background/50 border border-red-900/30">
-              <p className="text-4xl font-bold text-red-500 mb-2">You</p>
-              <p className="text-muted-foreground">Set your own prices & schedule</p>
+              <p className="text-4xl font-bold text-red-500 mb-2">$50,000+</p>
+              <p className="text-muted-foreground">Top creators earn monthly</p>
             </div>
           </div>
 

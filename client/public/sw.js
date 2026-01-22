@@ -1,13 +1,11 @@
 // BoyFanz Progressive Web App Service Worker
 // Advanced caching strategies, offline support, and background sync
-// VERSION: 2.0.1 - Network-first with NO masking of auth failures
 
-const CACHE_VERSION = '2.0.1';
-const CACHE_NAME = `boyfanz-v${CACHE_VERSION}`;
-const OFFLINE_CACHE = `boyfanz-offline-v${CACHE_VERSION}`;
-const DYNAMIC_CACHE = `boyfanz-dynamic-v${CACHE_VERSION}`;
-const IMAGE_CACHE = `boyfanz-images-v${CACHE_VERSION}`;
-const API_CACHE = `boyfanz-api-v${CACHE_VERSION}`;
+const CACHE_NAME = 'boyfanz-v1.0.0';
+const OFFLINE_CACHE = 'boyfanz-offline-v1.0.0';
+const DYNAMIC_CACHE = 'boyfanz-dynamic-v1.0.0';
+const IMAGE_CACHE = 'boyfanz-images-v1.0.0';
+const API_CACHE = 'boyfanz-api-v1.0.0';
 
 // Static assets to precache (App Shell) - Production compatible paths only
 const STATIC_ASSETS = [
@@ -26,31 +24,14 @@ const DYNAMIC_ASSETS = [];
 // Environment detection
 const isDevelopment = location.hostname === 'localhost' || location.hostname.includes('replit');
 
-// CRITICAL: Endpoints that should NEVER be cached or masked
-// Auth failures from these MUST propagate to the UI
-const NEVER_CACHE_APIS = [
-  '/api/auth',
-  '/api/login',
-  '/api/logout',
-  '/api/infinity-feed',
-  '/api/auth/check-admin',
-  '/api/social-notifications',
-  '/api/streams/live',
-  '/api/trending',
-  '/api/creators/suggested',
-  '/api/stories',
-  '/api/messages/unread-count'
-];
-
-// API endpoints that CAN be cached for offline (non-auth-critical)
+// API endpoints that should be cached
 const CACHEABLE_APIS = [
+  '/api/auth/me',
+  '/api/users/profile',
   '/api/notifications',
   '/api/messages',
   '/api/content/feed'
 ];
-
-// Kill switch - if set, SW bypasses all caching
-let killSwitchActive = false;
 
 // Background sync tags
 const SYNC_TAGS = {
@@ -162,39 +143,32 @@ async function discoverAndCacheAssets() {
   }
 }
 
-// Activate event - clean up old caches + check kill switch
+// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('🔄 BoyFanz SW: Activating service worker v' + CACHE_VERSION);
-
+  console.log('🔄 BoyFanz SW: Activating service worker');
+  
   event.waitUntil(
     Promise.all([
-      // Check kill switch first
-      checkKillSwitch(),
-
-      // Clean up ALL old version caches (version-aware cleanup)
+      // Clean up old caches
       caches.keys().then((cacheNames) => {
-        const currentCaches = [CACHE_NAME, OFFLINE_CACHE, DYNAMIC_CACHE, IMAGE_CACHE, API_CACHE];
         return Promise.all(
           cacheNames.map((cacheName) => {
-            // Delete any cache that's not in our current version set
-            if (!currentCaches.includes(cacheName)) {
+            if (cacheName !== CACHE_NAME && 
+                cacheName !== OFFLINE_CACHE &&
+                cacheName !== DYNAMIC_CACHE &&
+                cacheName !== IMAGE_CACHE &&
+                cacheName !== API_CACHE) {
               console.log('🗑️ BoyFanz SW: Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
           })
         );
       }),
-
-      // Take control of all clients immediately
+      
+      // Take control of all clients
       self.clients.claim()
     ]).then(() => {
-      console.log('✅ BoyFanz SW: Activation complete v' + CACHE_VERSION);
-      // Notify all clients of new SW version
-      self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-          client.postMessage({ type: 'SW_ACTIVATED', version: CACHE_VERSION });
-        });
-      });
+      console.log('✅ BoyFanz SW: Activation complete');
     })
   );
 });
@@ -203,17 +177,12 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
-
-  // KILL SWITCH: If active, bypass SW entirely - let browser handle everything
-  if (killSwitchActive) {
-    return; // Pass through to network
-  }
-
+  
   // Skip non-GET requests and chrome-extension requests
   if (request.method !== 'GET' || url.protocol === 'chrome-extension:') {
     return;
   }
-
+  
   // Handle different types of requests with appropriate strategies
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(handleApiRequest(request));
@@ -226,98 +195,43 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
-// Check for kill switch on startup
-async function checkKillSwitch() {
-  try {
-    const response = await fetch('/sw-kill.json', { cache: 'no-store' });
-    if (response.ok) {
-      const data = await response.json();
-      if (data.kill === true) {
-        console.log('🚨 BoyFanz SW: Kill switch activated - unregistering');
-        killSwitchActive = true;
-        // Clear all caches
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map(name => caches.delete(name)));
-        // Unregister this service worker
-        await self.registration.unregister();
-        // Notify all clients to reload
-        const clients = await self.clients.matchAll();
-        clients.forEach(client => client.postMessage({ type: 'SW_KILLED' }));
-      }
-    }
-  } catch (e) {
-    // No kill switch file = normal operation
-  }
-}
-
-// API Request Handler - Network First, NO MASKING of auth failures
+// API Request Handler - Network First with fallback
 async function handleApiRequest(request) {
   const url = new URL(request.url);
-  const isNeverCache = NEVER_CACHE_APIS.some(api => url.pathname.startsWith(api));
-
+  
   try {
-    // ALWAYS try network first
+    // Try network first for fresh data
     const networkResponse = await fetch(request);
-
-    // CRITICAL: Never cache or mask 401/403 responses
-    // These MUST propagate to the UI so auth can be handled properly
-    if (networkResponse.status === 401 || networkResponse.status === 403) {
-      console.log('🔐 BoyFanz SW: Auth failure, passing through:', url.pathname, networkResponse.status);
-      return networkResponse; // Pass through directly - DO NOT cache
-    }
-
-    // CRITICAL: Never cache endpoints in the NEVER_CACHE list
-    if (isNeverCache) {
-      return networkResponse; // Pass through without caching
-    }
-
-    // Cache successful responses for cacheable endpoints only
-    if (networkResponse.ok && CACHEABLE_APIS.some(api => url.pathname.startsWith(api))) {
+    
+    // Cache successful responses
+    if (networkResponse.ok) {
       const cache = await caches.open(API_CACHE);
       cache.put(request, networkResponse.clone());
     }
-
+    
     return networkResponse;
   } catch (error) {
-    // Network completely unavailable (offline)
-    console.log('🌐 BoyFanz SW: Network unavailable for:', url.pathname);
-
-    // NEVER provide cached data for auth-critical endpoints
-    if (isNeverCache) {
+    console.log('🌐 BoyFanz SW: Network failed, trying cache for:', url.pathname);
+    
+    // Fall back to cache
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    // Return offline response for critical APIs
+    if (CACHEABLE_APIS.some(api => url.pathname.startsWith(api))) {
       return new Response(JSON.stringify({
-        error: 'NetworkError',
-        message: 'Unable to reach server. Please check your connection.',
-        offline: true,
-        _sw_error: true
+        error: 'Offline',
+        message: 'Content cached for offline viewing',
+        offline: true
       }), {
-        status: 503,
+        status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
     }
-
-    // For cacheable endpoints, try cache
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      // Clone and add header to indicate this is cached data
-      const headers = new Headers(cachedResponse.headers);
-      headers.set('X-SW-Cache', 'true');
-      return new Response(cachedResponse.body, {
-        status: cachedResponse.status,
-        statusText: cachedResponse.statusText,
-        headers
-      });
-    }
-
-    // No cache available
-    return new Response(JSON.stringify({
-      error: 'NetworkError',
-      message: 'Unable to reach server and no cached data available.',
-      offline: true,
-      _sw_error: true
-    }), {
-      status: 503,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    
+    throw error;
   }
 }
 
@@ -511,9 +425,9 @@ self.addEventListener('notificationclick', (event) => {
 // Message Handler for communication with main thread
 self.addEventListener('message', (event) => {
   console.log('💬 BoyFanz SW: Message received:', event.data);
-
+  
   const { type, payload } = event.data;
-
+  
   switch (type) {
     case 'SKIP_WAITING':
       self.skipWaiting();
@@ -526,34 +440,6 @@ self.addEventListener('message', (event) => {
       break;
     case 'UPDATE_BADGE':
       updateAppBadge(payload.count);
-      break;
-    // KILL SWITCH: Immediately unregister SW and clear all caches
-    case 'KILL_SW':
-      console.log('🚨 BoyFanz SW: Kill command received - unregistering');
-      killSwitchActive = true;
-      caches.keys().then(names => Promise.all(names.map(n => caches.delete(n))))
-        .then(() => self.registration.unregister())
-        .then(() => {
-          event.source?.postMessage({ type: 'SW_KILLED', success: true });
-        });
-      break;
-    // Clear all caches but keep SW registered
-    case 'CLEAR_ALL_CACHES':
-      console.log('🧹 BoyFanz SW: Clearing all caches');
-      caches.keys().then(names => Promise.all(names.map(n => caches.delete(n))))
-        .then(() => {
-          event.source?.postMessage({ type: 'CACHES_CLEARED', success: true });
-        });
-      break;
-    // Force check kill switch file
-    case 'CHECK_KILL_SWITCH':
-      checkKillSwitch().then(() => {
-        event.source?.postMessage({ type: 'KILL_SWITCH_CHECKED', active: killSwitchActive });
-      });
-      break;
-    // Get SW version
-    case 'GET_VERSION':
-      event.source?.postMessage({ type: 'SW_VERSION', version: CACHE_VERSION });
       break;
   }
 });

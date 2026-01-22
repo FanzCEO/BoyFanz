@@ -222,8 +222,7 @@ setupCSRFTokenEndpoint(app);
           app.locals.workflowEngine = workflowEngine;
           logger.info('Automated Workflow Engine initialized successfully');
           
-          // Initialize Service Discovery & Health Monitoring (if enabled)
-          if (process.env.HEALTH_MONITORING_ENABLED !== "false") {
+          // Initialize Service Discovery & Health Monitoring
           try {
             const ServiceDiscoveryHealth = (await import('./services/serviceDiscoveryHealth.js')).default;
             const serviceDiscovery = new ServiceDiscoveryHealth(orchestrationEngine, commandCenter, workflowEngine);
@@ -233,9 +232,6 @@ setupCSRFTokenEndpoint(app);
           } catch (serviceDiscoveryError) {
             logger.error({ err: serviceDiscoveryError }, 'Failed to initialize Service Discovery & Health Monitoring System');
             // Continue startup but with reduced service monitoring functionality
-          }
-          } else {
-            logger.info("Service Discovery & Health Monitoring disabled via env");
           }
 
           // Initialize FanzDash Central Command Connection
@@ -252,17 +248,7 @@ setupCSRFTokenEndpoint(app);
             logger.error({ err: fanzDashError }, 'Failed to connect to FanzDash Central Command');
             // Continue startup - platform can operate independently
           }
-
-          // Initialize FANZ Cybersecurity System - 500 Security Bots
-          try {
-            const { startCybersecuritySystem } = await import('./services/cybersecurityService.js');
-            await startCybersecuritySystem();
-            logger.info('FANZ Cybersecurity System initialized - 500 security bots active');
-          } catch (cybersecurityError) {
-            logger.error({ err: cybersecurityError }, 'Failed to initialize Cybersecurity System');
-            // Continue startup - security system can be started manually
-          }
-
+          
         } catch (workflowError) {
           logger.error({ err: workflowError }, 'Failed to initialize Automated Workflow Engine');
           // Continue startup but with reduced automation functionality
@@ -317,14 +303,20 @@ setupCSRFTokenEndpoint(app);
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  const serveStaticFiles = async () => {
+  if (app.get("env") === "development") {
+    // Dynamically import vite module only in development
+    const { setupVite } = await import("./vite");
+    await setupVite(app, server);
+  } else {
+    // Production: serve static files from dist/public
     const fs = await import("fs");
     const path = await import("path");
     const distPath = path.resolve(import.meta.dirname, "public");
 
     if (!fs.existsSync(distPath)) {
-      logger.warn(`Build directory not found: ${distPath}. Run 'npm run build:client' first.`);
-      return;
+      throw new Error(
+        `Could not find the build directory: ${distPath}, make sure to build the client first`,
+      );
     }
 
     app.use(express.static(distPath));
@@ -337,22 +329,6 @@ setupCSRFTokenEndpoint(app);
       }
       res.sendFile(path.resolve(distPath, "index.html"));
     });
-  };
-
-  if (app.get("env") === "development") {
-    // Dynamically import vite module only in development (when running with tsx)
-    try {
-      const { setupVite } = await import("./vite");
-      await setupVite(app, server);
-    } catch (err) {
-      // Running from dist bundle - vite module not available
-      // Fall back to serving static files
-      logger.info('Vite not available (running from dist), serving static files');
-      await serveStaticFiles();
-    }
-  } else {
-    // Production: serve static files from dist/public
-    await serveStaticFiles();
   }
 
   // 404 handler for unmatched API routes only (after static file serving)

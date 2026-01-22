@@ -225,7 +225,7 @@ export default function FanzMoneyCenter() {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00e5ff] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ff0000] mx-auto mb-4"></div>
           <p className="text-zinc-400">Loading FanzMoneyCenter...</p>
         </div>
       </div>
@@ -246,8 +246,8 @@ export default function FanzMoneyCenter() {
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-[#00e5ff]/20 to-[#d4a959]/20 border border-[#00e5ff]/30">
-            <Wallet className="w-8 h-8 text-[#00e5ff]" />
+          <div className="p-3 rounded-xl bg-gradient-to-br from-[#ff0000]/20 to-[#d4a959]/20 border border-[#ff0000]/30">
+            <Wallet className="w-8 h-8 text-[#ff0000]" />
           </div>
           <div>
             <h1 className="text-3xl md:text-4xl font-['Bebas_Neue'] text-white tracking-wide">
@@ -263,7 +263,7 @@ export default function FanzMoneyCenter() {
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Total Balance */}
-          <Card className="bg-gradient-to-br from-[#00e5ff]/10 to-transparent border-[#00e5ff]/30">
+          <Card className="bg-gradient-to-br from-[#ff0000]/10 to-transparent border-[#ff0000]/30">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-normal text-zinc-400">Total Balance</CardTitle>
             </CardHeader>
@@ -343,7 +343,7 @@ export default function FanzMoneyCenter() {
               <Card className="bg-zinc-900/50 border-zinc-800">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Wallet className="w-5 h-5 text-[#00e5ff]" />
+                    <Wallet className="w-5 h-5 text-[#ff0000]" />
                     Wallet Details
                   </CardTitle>
                   <CardDescription>Your FanzWallet balance breakdown</CardDescription>
@@ -368,9 +368,9 @@ export default function FanzMoneyCenter() {
                     </span>
                   </div>
                   <Separator className="bg-zinc-800" />
-                  <div className="flex justify-between items-center p-3 rounded-lg bg-gradient-to-r from-[#00e5ff]/20 to-[#d4a959]/20">
+                  <div className="flex justify-between items-center p-3 rounded-lg bg-gradient-to-r from-[#ff0000]/20 to-[#d4a959]/20">
                     <span className="text-sm font-semibold text-white">Total Balance</span>
-                    <span className="text-xl font-bold text-[#00e5ff]">
+                    <span className="text-xl font-bold text-[#ff0000]">
                       {formatCurrency(balance?.total || 0)}
                     </span>
                   </div>
@@ -394,7 +394,7 @@ export default function FanzMoneyCenter() {
                     >
                       <div className="flex items-center gap-2">
                         {token.type === 'fanzcoin' && <Coins className="w-4 h-4 text-[#d4a959]" />}
-                        {token.type === 'fanztoken' && <Zap className="w-4 h-4 text-[#00e5ff]" />}
+                        {token.type === 'fanztoken' && <Zap className="w-4 h-4 text-[#ff0000]" />}
                         {token.type === 'loyalty' && <Award className="w-4 h-4 text-purple-500" />}
                         {token.type === 'reward' && <Award className="w-4 h-4 text-blue-500" />}
                         {token.type === 'utility' && <Shield className="w-4 h-4 text-green-500" />}
@@ -427,7 +427,7 @@ export default function FanzMoneyCenter() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="border-[#00e5ff]/30 hover:bg-[#00e5ff]/10" data-testid="button-transfer" onClick={() => setTransferOpen(true)}>
+                  <Button variant="outline" className="border-[#ff0000]/30 hover:bg-[#ff0000]/10" data-testid="button-transfer" onClick={() => setTransferOpen(true)}>
                     <ArrowUpRight className="w-4 h-4 mr-2" />
                     Transfer
                   </Button>
@@ -453,7 +453,7 @@ export default function FanzMoneyCenter() {
             <Card className="bg-zinc-900/50 border-zinc-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <History className="w-5 h-5 text-[#00e5ff]" />
+                  <History className="w-5 h-5 text-[#ff0000]" />
                   Transaction History
                 </CardTitle>
                 <CardDescription>Your recent financial activity</CardDescription>
@@ -533,7 +533,7 @@ export default function FanzMoneyCenter() {
             <Card className="bg-zinc-900/50 border-zinc-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-[#00e5ff]" />
+                  <Shield className="w-5 h-5 text-[#ff0000]" />
                   FanzCredit
                 </CardTitle>
                 <CardDescription>Your credit lines and lending</CardDescription>
@@ -588,7 +588,7 @@ export default function FanzMoneyCenter() {
                       </div>
                     ))}
                     <Button
-                      className="w-full bg-[#00e5ff] hover:bg-[#00bcd4] text-white"
+                      className="w-full bg-[#ff0000] hover:bg-[#cc0000] text-white"
                       data-testid="button-apply-credit"
                       onClick={() => setApplyCreditOpen(true)}
                     >
@@ -601,7 +601,7 @@ export default function FanzMoneyCenter() {
                     <Shield className="w-12 h-12 mx-auto mb-4 text-zinc-600" />
                     <p className="text-zinc-500 mb-4">No credit lines yet</p>
                     <Button
-                      className="bg-[#00e5ff] hover:bg-[#00bcd4] text-white"
+                      className="bg-[#ff0000] hover:bg-[#cc0000] text-white"
                       data-testid="button-apply-credit-empty"
                       onClick={() => setApplyCreditOpen(true)}
                     >
@@ -628,7 +628,7 @@ export default function FanzMoneyCenter() {
                 {cards && cards.length > 0 ? (
                   <>
                     {cards.map((card: any) => (
-                      <div key={card.id} className="relative overflow-hidden p-6 rounded-2xl bg-gradient-to-br from-[#00e5ff]/20 via-zinc-900 to-[#d4a959]/20 border border-[#00e5ff]/30">
+                      <div key={card.id} className="relative overflow-hidden p-6 rounded-2xl bg-gradient-to-br from-[#ff0000]/20 via-zinc-900 to-[#d4a959]/20 border border-[#ff0000]/30">
                         <div className="relative z-10">
                           <div className="flex justify-between items-start mb-6">
                             <div>
@@ -665,7 +665,7 @@ export default function FanzMoneyCenter() {
                             </div>
                           </div>
                         </div>
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#00e5ff]/10 to-transparent rounded-full blur-3xl"></div>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#ff0000]/10 to-transparent rounded-full blur-3xl"></div>
                       </div>
                     ))}
                     <Button
@@ -702,7 +702,7 @@ export default function FanzMoneyCenter() {
         <DialogContent className="bg-zinc-900 border-zinc-800">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <ArrowUpRight className="w-5 h-5 text-[#00e5ff]" />
+              <ArrowUpRight className="w-5 h-5 text-[#ff0000]" />
               Transfer Funds
             </DialogTitle>
             <DialogDescription>Send funds to another user</DialogDescription>
@@ -743,7 +743,7 @@ export default function FanzMoneyCenter() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setTransferOpen(false)}>Cancel</Button>
             <Button
-              className="bg-[#00e5ff] hover:bg-[#00bcd4]"
+              className="bg-[#ff0000] hover:bg-[#cc0000]"
               onClick={handleTransfer}
               disabled={transferMutation.isPending}
             >
@@ -809,7 +809,7 @@ export default function FanzMoneyCenter() {
         <DialogContent className="bg-zinc-900 border-zinc-800">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <Shield className="w-5 h-5 text-[#00e5ff]" />
+              <Shield className="w-5 h-5 text-[#ff0000]" />
               Apply for Credit
             </DialogTitle>
             <DialogDescription>Request a FanzCredit line</DialogDescription>
@@ -833,7 +833,7 @@ export default function FanzMoneyCenter() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setApplyCreditOpen(false)}>Cancel</Button>
             <Button
-              className="bg-[#00e5ff] hover:bg-[#00bcd4]"
+              className="bg-[#ff0000] hover:bg-[#cc0000]"
               onClick={handleApplyCredit}
               disabled={applyCreditMutation.isPending}
             >

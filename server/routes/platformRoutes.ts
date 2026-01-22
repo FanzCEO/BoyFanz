@@ -5,27 +5,6 @@ import { isAuthenticated } from "../middleware/auth";
 const router = Router();
 
 /**
- * GET /api/platform/current
- * Returns current platform metadata - public endpoint
- */
-router.get("/current", (req, res) => {
-  res.json({
-    success: true,
-    platform: "boyfanz",
-    brand: "BoyFanz",
-    host: req.headers.host,
-    themeColor: "#dc2626",
-    description: "Premium adult content platform for guys",
-    features: {
-      streaming: true,
-      messaging: true,
-      tips: true,
-      subscriptions: true
-    }
-  });
-});
-
-/**
  * Get all platform definitions
  */
 router.get("/platforms/definitions", async (req: Request, res: Response) => {

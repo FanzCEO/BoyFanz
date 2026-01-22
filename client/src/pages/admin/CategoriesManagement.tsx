@@ -129,13 +129,15 @@ export default function CategoriesManagement() {
 
   // Fetch category analytics
   const { data: categoryStats } = useQuery<any>({
-    queryKey: [`/api/admin/categories/${activeTab}/stats`] || user?.role === 'moderator',
+    queryKey: [`/api/admin/categories/${activeTab}/stats`],
+    enabled: user?.role === 'admin' || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 300000 : false // 5 minutes
   });
 
   // Fetch category performance data
   const { data: performanceData } = useQuery<any>({
-    queryKey: [`/api/admin/categories/${activeTab}/performance`] || user?.role === 'moderator',
+    queryKey: [`/api/admin/categories/${activeTab}/performance`],
+    enabled: user?.role === 'admin' || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 300000 : false
   });
 
@@ -628,6 +630,19 @@ export default function CategoriesManagement() {
       return () => clearInterval(interval);
     }
   }, [autoRefresh, activeTab, refetchContent, refetchProducts]);
+
+  if (user?.role !== 'admin' && user?.role !== 'moderator') {
+    return (
+      <div className="space-y-6" data-testid="access-denied">
+        <Alert className="border-destructive/50 bg-destructive/10">
+          <AlertTriangle className="h-4 w-4 text-destructive" />
+          <AlertDescription className="text-destructive">
+            Access denied. Admin or moderator privileges required to manage categories.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   if (error) {
     return (

@@ -1,22 +1,9 @@
-import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { DollarSign, TrendingUp, Calendar, Percent, Users, Zap, Heart, PawPrint, Sparkles } from 'lucide-react';
+import { DollarSign, TrendingUp, Calendar, Percent, Users, Zap } from 'lucide-react';
 
 interface EarningsBreakdown {
   grossEarnings: number;
@@ -48,11 +35,6 @@ interface EarningsStats {
 }
 
 export default function EarningsPage() {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [donationPercent, setDonationPercent] = useState(0);
-  const [isDonationDialogOpen, setIsDonationDialogOpen] = useState(false);
-
   const { data: breakdown, isLoading: breakdownLoading } = useQuery<EarningsBreakdown>({
     queryKey: ['/api/earnings/breakdown'],
   });
@@ -60,46 +42,6 @@ export default function EarningsPage() {
   const { data: stats, isLoading: statsLoading } = useQuery<EarningsStats>({
     queryKey: ['/api/earnings/stats'],
   });
-
-  // Fetch current donation settings
-  const { data: donationSettings } = useQuery<{ donationPercent: number }>({
-    queryKey: ['/api/creator/donation-settings'],
-  });
-
-  // Update donation settings mutation
-  const updateDonationMutation = useMutation({
-    mutationFn: async (percent: number) => {
-      const response = await fetch('/api/creator/donation-settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ donationPercent: percent }),
-      });
-      if (!response.ok) throw new Error('Failed to save donation settings');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/creator/donation-settings'] });
-      toast({
-        title: "Donation preference saved",
-        description: `${donationPercent}% of your earnings will go to The Wittle Bear Foundation`,
-      });
-      setIsDonationDialogOpen(false);
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to save donation preference. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Sync state with fetched settings
-  useEffect(() => {
-    if (donationSettings?.donationPercent !== undefined) {
-      setDonationPercent(donationSettings.donationPercent);
-    }
-  }, [donationSettings?.donationPercent]);
 
   if (breakdownLoading || statsLoading) {
     return (
@@ -206,172 +148,14 @@ export default function EarningsPage() {
               <p className="text-sm text-muted-foreground">Your Take-Home</p>
             </div>
           </div>
-
+          
           <Separator className="bg-emerald-500/20" />
-
+          
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium">Transparency Promise:</span>
             <Badge variant="outline" className="border-emerald-500/50 text-emerald-400">
               Full Disclosure
             </Badge>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* The Wittle Bear Foundation - Creator Donation Settings */}
-      <Card className="border-pink-500/30 bg-gradient-to-br from-pink-500/5 to-amber-500/5" data-testid="card-foundation-donation">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-full bg-pink-500/20">
-                <PawPrint className="h-6 w-6 text-pink-400" />
-              </div>
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  The Wittle Bear Foundation
-                  <Heart className="h-4 w-4 text-pink-500 fill-pink-500" />
-                </CardTitle>
-                <CardDescription>
-                  In loving memory of Wittle Bear
-                </CardDescription>
-              </div>
-            </div>
-            <Dialog open={isDonationDialogOpen} onOpenChange={setIsDonationDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="border-pink-500/30 hover:bg-pink-500/10">
-                  <Heart className="h-4 w-4 mr-2 text-pink-500" />
-                  Donate Earnings
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <PawPrint className="h-5 w-5 text-pink-500" />
-                    Donate to The Wittle Bear Foundation
-                  </DialogTitle>
-                  <DialogDescription>
-                    Choose what percentage of your earnings to donate to support homeless LGBTQ+ youth and shelter animals.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-6 py-4">
-                  <div className="text-center">
-                    <div className="text-5xl font-bold text-pink-500 mb-2">
-                      {donationPercent}%
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      of your earnings
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      step="5"
-                      value={donationPercent}
-                      onChange={(e) => setDonationPercent(Number(e.target.value))}
-                      className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-pink-500"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>0%</span>
-                      <span>25%</span>
-                      <span>50%</span>
-                      <span>75%</span>
-                      <span>100%</span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-4 gap-2">
-                    {[0, 25, 50, 100].map((percent) => (
-                      <Button
-                        key={percent}
-                        variant={donationPercent === percent ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setDonationPercent(percent)}
-                        className={donationPercent === percent ? "bg-pink-500 hover:bg-pink-600" : ""}
-                      >
-                        {percent}%
-                      </Button>
-                    ))}
-                  </div>
-
-                  <div className="p-4 bg-muted/50 rounded-lg space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Example: If you earn $100:</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">You keep:</span>
-                      <span className="font-medium">${(100 * (1 - donationPercent / 100)).toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Your donation:</span>
-                      <span className="font-medium text-pink-500">${(100 * donationPercent / 100).toFixed(2)}</span>
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-center text-muted-foreground">
-                    The Wittle Bear Foundation supports homeless LGBTQ+ youth and
-                    animals in shelters - because everyone deserves love, safety, and a home.
-                  </p>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsDonationDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={() => updateDonationMutation.mutate(donationPercent)}
-                    disabled={updateDonationMutation.isPending}
-                    className="bg-pink-500 hover:bg-pink-600"
-                  >
-                    <Heart className="h-4 w-4 mr-2" />
-                    {updateDonationMutation.isPending ? "Saving..." : "Save Preference"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-pink-400">
-                <Heart className="h-5 w-5" />
-                <span className="font-semibold">Supporting LGBTQ+ Youth</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Providing shelter, resources, and hope to homeless LGBTQ+ youth who face rejection from their families.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-amber-400">
-                <PawPrint className="h-5 w-5" />
-                <span className="font-semibold">Rescuing Shelter Animals</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Helping animals in shelters find loving forever homes because every creature deserves love.
-              </p>
-            </div>
-          </div>
-
-          <Separator className="my-6 bg-pink-500/20" />
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-pink-400" />
-              <span className="text-sm font-medium">Your Current Donation:</span>
-            </div>
-            <Badge className="bg-pink-500/20 text-pink-400 border-pink-500/30">
-              {donationSettings?.donationPercent || 0}% of earnings
-            </Badge>
-          </div>
-
-          <div className="mt-4 p-4 bg-pink-500/5 border border-pink-500/20 rounded-lg">
-            <p className="text-sm text-center text-muted-foreground">
-              <Heart className="inline h-4 w-4 text-pink-500 mr-1" />
-              Plus, 30% of all ad revenue from your profile automatically goes to the foundation.
-              You keep 100% of your subscription, tip, and PPV earnings - we never take a cut.
-            </p>
           </div>
         </CardContent>
       </Card>

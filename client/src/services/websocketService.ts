@@ -58,16 +58,14 @@ class WebSocketService {
     this.connectionState = 'connecting';
 
     try {
-      // Determine WebSocket URL - ALWAYS use /ws path through 443 (no direct :3001)
+      // Determine WebSocket URL
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const host = window.location.host; // includes port if non-standard
-      // Production: wss://boyfanz.fanz.website/ws
-      // Development: ws://localhost:5000/ws (Vite proxy handles it)
-      const wsUrl = `${protocol}//${host}/ws`;
-
+      const host = window.location.hostname;
+      const wsUrl = `${protocol}//${host}:3001`;
+      
       console.log(`Connecting to WebSocket at ${wsUrl}`);
       this.ws = new WebSocket(wsUrl);
-
+      
       this.setupWebSocketHandlers();
     } catch (error) {
       console.error('Failed to create WebSocket connection:', error);

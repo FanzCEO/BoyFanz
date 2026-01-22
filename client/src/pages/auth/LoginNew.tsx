@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Loader2, Mail, Lock, Key } from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -65,7 +65,7 @@ export default function LoginNew() {
         {/* Logo/Header */}
         <div className="text-center mb-8">
           <h1 className="font-display text-5xl font-bold mb-2">
-            <span className="text-[#00e5ff]">Boy</span>
+            <span className="text-[#ff0000]">Boy</span>
             <span className="text-[#d4a959]">Fanz</span>
           </h1>
           <p className="text-zinc-400 text-sm">Welcome back</p>
@@ -79,7 +79,7 @@ export default function LoginNew() {
           }}
         >
           {/* Neon glow effect */}
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#00e5ff]/5 via-transparent to-[#d4a959]/5 pointer-events-none" />
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#ff0000]/5 via-transparent to-[#d4a959]/5 pointer-events-none" />
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 relative z-10">
@@ -97,7 +97,7 @@ export default function LoginNew() {
                           type="email"
                           placeholder="you@example.com"
                           data-testid="input-email"
-                          className="pl-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#00e5ff]/50 focus:ring-[#00e5ff]/20"
+                          className="pl-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#ff0000]/50 focus:ring-[#ff0000]/20"
                         />
                       </div>
                     </FormControl>
@@ -130,7 +130,7 @@ export default function LoginNew() {
                           type={showPassword ? "text" : "password"}
                           placeholder="Enter your password"
                           data-testid="input-password"
-                          className="pl-10 pr-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#00e5ff]/50 focus:ring-[#00e5ff]/20"
+                          className="pl-10 pr-10 bg-black/60 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#ff0000]/50 focus:ring-[#ff0000]/20"
                         />
                         <button
                           type="button"
@@ -151,7 +151,7 @@ export default function LoginNew() {
                 type="submit"
                 disabled={loginMutation.isPending}
                 data-testid="button-login"
-                className="w-full h-12 bg-[#00e5ff] hover:bg-[#00bcd4] text-white font-bold text-base shadow-lg shadow-cyan-500/20 transition-all"
+                className="w-full h-12 bg-[#ff0000] hover:bg-[#cc0000] text-white font-bold text-base shadow-lg shadow-red-500/20 transition-all"
               >
                 {loginMutation.isPending ? (
                   <>
@@ -161,27 +161,6 @@ export default function LoginNew() {
                 ) : (
                   "Log In"
                 )}
-              </Button>
-
-              {/* SSO Login */}
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-white/10" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-black/40 px-2 text-zinc-500">Or continue with</span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => window.location.href = '/auth/sso/login'}
-                data-testid="button-sso-login"
-                className="w-full h-11 bg-black/40 border-[#d4a959]/30 hover:bg-[#d4a959]/10 text-[#d4a959] hover:text-[#e5ba6a] transition-all"
-              >
-                <Key className="w-4 h-4 mr-2" />
-                Sign in with FanzSSO
               </Button>
 
               <div className="text-center text-sm">

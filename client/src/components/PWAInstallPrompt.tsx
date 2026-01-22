@@ -71,7 +71,7 @@ export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
       className="fixed top-4 right-4 left-4 md:left-auto md:w-80 z-50 animate-in slide-in-from-top-2 duration-300"
       data-testid="pwa-install-prompt"
     >
-      <div className="bg-gradient-to-r from-cyan-900/95 to-cyan-800/95 backdrop-blur-lg border border-cyan-500/30 rounded-lg p-4 shadow-2xl">
+      <div className="bg-gradient-to-r from-red-900/95 to-red-800/95 backdrop-blur-lg border border-red-500/30 rounded-lg p-4 shadow-2xl">
         {/* Close button */}
         <Button
           variant="ghost"
@@ -86,14 +86,14 @@ export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
         {/* Content */}
         <div className="pr-8">
           <div className="flex items-center gap-3 mb-3">
-            <div className="bg-cyan-500/20 rounded-lg p-2">
-              <Smartphone className="h-5 w-5 text-cyan-400" />
+            <div className="bg-red-500/20 rounded-lg p-2">
+              <Smartphone className="h-5 w-5 text-red-400" />
             </div>
             <div>
               <h3 className="font-bold text-white text-sm">
                 Install BoyFanz App
               </h3>
-              <p className="text-cyan-200 text-xs">
+              <p className="text-red-200 text-xs">
                 Every Man's Playground
               </p>
             </div>
@@ -105,20 +105,20 @@ export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
 
           {/* Features */}
           <div className="grid grid-cols-2 gap-2 mb-4 text-xs">
-            <div className="flex items-center gap-2 text-cyan-200">
-              <div className="w-1 h-1 bg-cyan-400 rounded-full"></div>
+            <div className="flex items-center gap-2 text-red-200">
+              <div className="w-1 h-1 bg-red-400 rounded-full"></div>
               <span>Offline messaging</span>
             </div>
-            <div className="flex items-center gap-2 text-cyan-200">
-              <div className="w-1 h-1 bg-cyan-400 rounded-full"></div>
+            <div className="flex items-center gap-2 text-red-200">
+              <div className="w-1 h-1 bg-red-400 rounded-full"></div>
               <span>Push notifications</span>
             </div>
-            <div className="flex items-center gap-2 text-cyan-200">
-              <div className="w-1 h-1 bg-cyan-400 rounded-full"></div>
+            <div className="flex items-center gap-2 text-red-200">
+              <div className="w-1 h-1 bg-red-400 rounded-full"></div>
               <span>Faster loading</span>
             </div>
-            <div className="flex items-center gap-2 text-cyan-200">
-              <div className="w-1 h-1 bg-cyan-400 rounded-full"></div>
+            <div className="flex items-center gap-2 text-red-200">
+              <div className="w-1 h-1 bg-red-400 rounded-full"></div>
               <span>App-like experience</span>
             </div>
           </div>
@@ -127,7 +127,7 @@ export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
           <Button
             onClick={handleInstall}
             disabled={isInstalling}
-            className="w-full bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white font-semibold border-0 shadow-lg"
+            className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold border-0 shadow-lg"
             data-testid="button-install-pwa"
           >
             {isInstalling ? (

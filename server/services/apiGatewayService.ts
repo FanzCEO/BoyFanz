@@ -806,10 +806,10 @@ export class APIGatewayService extends EventEmitter {
   registerService(service: ServiceRegistry) {
     this.services.set(service.id, service);
     
-    // Register routes (target stays as relative path, baseUrl added in buildTargetUrl)
+    // Register routes
     service.routes.forEach(route => {
       const routeKey = `${route.method}:${route.path}`;
-      this.routes.set(routeKey, { ...route, _serviceId: service.id } as any);
+      this.routes.set(routeKey, { ...route, target: `${service.baseUrl}${route.target}` });
     });
 
     // Register with load balancer
@@ -930,9 +930,11 @@ export class APIGatewayService extends EventEmitter {
   }
 
   private getServiceIdFromRoute(route: RouteDefinition): string {
-    // Extract service ID from route metadata (added during registration)
-    if ((route as any)._serviceId) {
-      return (route as any)._serviceId;
+    // Extract service ID from target URL or route
+    for (const [serviceId, service] of this.services.entries()) {
+      if (route.target.startsWith(service.baseUrl)) {
+        return serviceId;
+      }
     }
     return 'unknown';
   }
@@ -1160,11 +1162,10 @@ export const GatewayConfigSchema = z.object({
 export type GatewayConfigInput = z.infer<typeof GatewayConfigSchema>;
 
 // Create and export a default instance with default config
-// Health checks disabled for monolith deployment (all services are in-process)
 const defaultGatewayConfig = GatewayConfigSchema.parse({
   rateLimiting: {},
   authentication: {},
-  loadBalancing: { healthCheck: { enabled: false } },
+  loadBalancing: { healthCheck: {} },
   circuitBreaker: {},
   logging: {},
   caching: {},

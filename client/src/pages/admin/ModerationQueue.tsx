@@ -11,8 +11,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { CheckCircle, XCircle, Eye, Clock, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { apiRequest } from "@/lib/queryClient";
-import { motion } from "framer-motion";
-import { AdminLayout, AdminStatCard } from "@/components/bathhouse";
 
 export default function ModerationQueue() {
   const { user } = useAuth();
@@ -26,7 +24,8 @@ export default function ModerationQueue() {
   const { toast } = useToast();
 
   const { data: moderationQueue, isLoading } = useQuery({
-    queryKey: ['/api/moderation/queue'] || user?.role === 'moderator',
+    queryKey: ['/api/moderation/queue'],
+    enabled: user?.role === 'admin' || user?.role === 'moderator',
   });
 
   const approveMutation = useMutation({
@@ -96,13 +95,27 @@ export default function ModerationQueue() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  if (user?.role !== 'admin') {
+    return (
+      <div className="space-y-6" data-testid="access-denied">
+        <Alert className="border-destructive/50 bg-destructive/10">
+          <AlertTriangle className="h-4 w-4 text-destructive" />
+          <AlertDescription className="text-destructive">
+            Access denied. Admin privileges required to view moderation queue.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
-    <AdminLayout
-      title="Security Booth"
-      subtitle="Review and moderate guest-submitted content"
-      zone="security-booth"
-    >
-      <div className="space-y-6 pb-12" data-testid="moderation-queue-page">
+    <div className="space-y-6" data-testid="moderation-queue-page">
+      <div>
+        <h1 className="text-3xl font-bold font-display" data-testid="page-title">Moderation Queue</h1>
+        <p className="text-muted-foreground" data-testid="page-description">
+          Review and moderate user-submitted content
+        </p>
+      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -322,20 +335,19 @@ export default function ModerationQueue() {
             >
               Cancel
             </Button>
-            <Button
+            <Button 
               onClick={handleSubmitReview}
               disabled={approveMutation.isPending || rejectMutation.isPending || (reviewDialog.action === 'reject' && !notes.trim())}
               className={reviewDialog.action === 'approve' ? 'bg-accent hover:bg-accent/90' : ''}
               variant={reviewDialog.action === 'approve' ? 'default' : 'destructive'}
               data-testid="review-submit-button"
             >
-              {(approveMutation.isPending || rejectMutation.isPending) ? 'Processing...' :
+              {(approveMutation.isPending || rejectMutation.isPending) ? 'Processing...' : 
                reviewDialog.action === 'approve' ? 'Approve Content' : 'Reject Content'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      </div>
-    </AdminLayout>
+    </div>
   );
 }

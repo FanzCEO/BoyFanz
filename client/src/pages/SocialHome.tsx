@@ -12,6 +12,7 @@ import { useCSRF } from '@/hooks/useCSRF';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Link } from 'wouter';
 import { SidebarAdStack, FeedAd } from '@/components/ads/AdBanner';
+import { StarzTierStack } from '@/components/ads/StarzTierStack';
 import { CoStarPromptModal } from '@/components/costar/CoStarPromptModal';
 import { CoStarInviteForm } from '@/components/costar/CoStarInviteForm';
 import {
@@ -35,8 +36,10 @@ import {
   Shield,
   BarChart3,
   X,
-  Trash2
+  Trash2,
+  Trophy,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
 interface Post {
@@ -601,57 +604,117 @@ const Leaderboard = () => {
     queryKey: ['/api/creators/leaderboard'],
   });
 
+  // Show 10 spots (filled with creators or empty placeholders)
+  const leaderboardSpots = Array.from({ length: 10 }, (_, i) => {
+    const creator = topCreators[i];
+    return { position: i + 1, creator };
+  });
+
+  const getRankStyle = (position: number) => {
+    if (position === 1) return 'from-yellow-400 to-amber-500 text-yellow-600';
+    if (position === 2) return 'from-gray-300 to-gray-400 text-gray-500';
+    if (position === 3) return 'from-amber-600 to-orange-600 text-amber-700';
+    return 'from-gray-600 to-gray-700 text-gray-400';
+  };
+
   return (
     <Card className="bg-card border-border">
       <CardHeader className="pb-3">
-        <h3 className="font-semibold text-sm">Leaderboard</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-sm flex items-center gap-2">
+            <Trophy className="h-4 w-4 text-yellow-500" />
+            Top Creators
+          </h3>
+          <Badge variant="outline" className="text-xs">Weekly</Badge>
+        </div>
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="space-y-3">
+        <div className="space-y-2">
           {isLoading ? (
-            [...Array(3)].map((_, i) => (
-              <div key={i} className="flex items-center gap-3 animate-pulse">
-                <div className="h-8 w-8 bg-muted rounded-full" />
+            [...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center gap-3 animate-pulse p-2">
+                <div className="h-10 w-10 bg-muted rounded-full" />
                 <div className="flex-1">
                   <div className="h-3 bg-muted rounded mb-1" />
-                  <div className="h-2 bg-muted rounded" />
+                  <div className="h-2 bg-muted rounded w-2/3" />
                 </div>
               </div>
             ))
           ) : (
-            topCreators.slice(0, 3).map((creator, index) => (
-              <div key={creator.id} className="flex items-center gap-3" data-testid={`leaderboard-creator-${creator.id}`}>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-muted-foreground w-4">
-                    {index + 1}.
-                  </span>
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={creator.profileImageUrl} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                      {creator.username[0]?.toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
+            leaderboardSpots.map(({ position, creator }) => (
+              <div 
+                key={position}
+                className={cn(
+                  "relative overflow-hidden rounded-lg transition-all hover:scale-[1.02]",
+                  creator ? "cursor-pointer" : "opacity-50"
+                )}
+              >
+                {/* Banner Background */}
+                <div 
+                  className="absolute inset-0 bg-cover bg-center opacity-30"
+                  style={{ 
+                    backgroundImage: creator?.bannerUrl 
+                      ? `url(${creator.bannerUrl})` 
+                      : 'linear-gradient(to right, #1a1a2e, #16213e)'
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-background/60" />
                 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm font-medium truncate">{creator.username}</span>
-                    {creator.isVerified && <span className="text-xs">✓</span>}
+                {/* Content */}
+                <div className="relative flex items-center gap-3 p-2">
+                  {/* Rank Number */}
+                  <div className={cn(
+                    "h-8 w-8 rounded-full bg-gradient-to-br flex items-center justify-center font-bold text-sm",
+                    getRankStyle(position)
+                  )}>
+                    {position}
                   </div>
-                  <Progress 
-                    value={creator.score} 
-                    className="h-1 mt-1" 
-                    data-testid={`creator-progress-${creator.id}`}
-                  />
+                  
+                  {/* Avatar */}
+                  <Avatar className="h-10 w-10 ring-2 ring-white/20">
+                    {creator ? (
+                      <>
+                        <AvatarImage src={creator.profileImageUrl} />
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                          {creator.username[0]?.toUpperCase()}
+                        </AvatarFallback>
+                      </>
+                    ) : (
+                      <AvatarFallback className="bg-muted text-muted-foreground text-xs">?</AvatarFallback>
+                    )}
+                  </Avatar>
+                  
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    {creator ? (
+                      <>
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm font-semibold truncate">{creator.username}</span>
+                          {creator.isVerified && (
+                            <Badge variant="secondary" className="h-4 px-1 text-[10px]">✓</Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <Progress value={creator.score} className="h-1 flex-1" />
+                          <span className="text-xs font-bold text-primary">{creator.score}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <span className="text-xs text-muted-foreground italic">Spot available</span>
+                    )}
+                  </div>
                 </div>
-                
-                <span className="text-sm font-bold text-right">
-                  {creator.score}
-                </span>
               </div>
             ))
           )}
         </div>
+        
+        {/* View All Link */}
+        <Link href="/leaderboard">
+          <Button variant="ghost" size="sm" className="w-full mt-3 text-xs">
+            View Full Leaderboard
+          </Button>
+        </Link>
       </CardContent>
     </Card>
   );
@@ -701,7 +764,7 @@ const AdSpace = () => {
   return (
     <div className="space-y-4">
       {/* Premium Ad Slots */}
-      <SidebarAdStack count={2} />
+      <StarzTierStack />
 
       {/* Advertise With Us CTA */}
       <Card className="bg-card border-border">
@@ -790,23 +853,43 @@ export default function SocialHome() {
           {/* Main Content */}
           <div className="lg:col-span-8">
             {/* Story Section */}
-            <div className="mb-6">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Avatar className="h-16 w-16 ring-2 ring-primary/20">
-                    <AvatarImage src={user?.profileImageUrl} />
-                    <AvatarFallback className="bg-primary/10 text-primary">
-                      {user?.username?.[0]?.toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <Button 
-                    size="sm" 
-                    className="absolute -bottom-1 -right-1 h-6 w-16 text-xs bg-red-600 hover:bg-red-700 text-white rounded-full"
-                    data-testid="add-story-button"
-                  >
-                    Add story
-                  </Button>
+            <div className="mb-6 overflow-hidden">
+              <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                {/* Add Story Circle */}
+                <div className="relative flex-shrink-0 cursor-pointer group">
+                  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center ring-2 ring-gray-600 group-hover:ring-red-500 transition-all">
+                    {user?.profileImageUrl ? (
+                      <Avatar className="h-14 w-14">
+                        <AvatarImage src={user.profileImageUrl} />
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          {user?.username?.[0]?.toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    ) : (
+                      <span className="text-white text-lg font-bold">{user?.username?.[0]?.toUpperCase() || 'U'}</span>
+                    )}
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-red-600 flex items-center justify-center ring-2 ring-background" data-testid="add-story-button">
+                    <Plus className="h-4 w-4 text-white" />
+                  </div>
+                  <p className="text-[10px] text-center mt-1 text-muted-foreground">Your story</p>
                 </div>
+                
+                {/* Following Stories - placeholder circles */}
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="relative flex-shrink-0 cursor-pointer">
+                    <div className="h-16 w-16 rounded-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-[2px]">
+                      <div className="h-full w-full rounded-full bg-background flex items-center justify-center">
+                        <Avatar className="h-14 w-14">
+                          <AvatarFallback className="bg-muted text-muted-foreground text-xs">
+                            {String.fromCharCode(65 + i)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-center mt-1 text-muted-foreground truncate w-16">user_{i + 1}</p>
+                  </div>
+                ))}
               </div>
             </div>
 

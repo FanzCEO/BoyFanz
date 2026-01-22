@@ -1,48 +1,57 @@
-import { Moon, Sun, Monitor } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Flame, Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useDarkMode } from '@/hooks/useDarkMode';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/dropdown-menu";
+import { useDarkMode, ThemeMode } from "@/hooks/useDarkMode";
+import { cn } from "@/lib/utils";
 
-interface DarkModeToggleProps {
-  variant?: 'icon' | 'dropdown';
+interface ThemeSelectorProps {
+  variant?: "icon" | "dropdown";
   className?: string;
 }
 
-export function DarkModeToggle({ variant = 'icon', className }: DarkModeToggleProps) {
-  const { theme, isDark, setTheme, toggleTheme } = useDarkMode();
+const THEME_CONFIG: Record<ThemeMode, { icon: typeof Flame; label: string; color: string }> = {
+  dungeon: { 
+    icon: Flame, 
+    label: "Dungeon", 
+    color: "text-cyan-400 hover:text-cyan-300" 
+  },
+  night: { 
+    icon: Moon, 
+    label: "Night", 
+    color: "text-blue-400 hover:text-blue-300" 
+  },
+  clean: { 
+    icon: Sun, 
+    label: "Clean", 
+    color: "text-amber-400 hover:text-amber-300" 
+  },
+};
 
-  if (variant === 'icon') {
+export function DarkModeToggle({ variant = "dropdown", className }: ThemeSelectorProps) {
+  const { theme, setTheme, toggleTheme } = useDarkMode();
+  const config = THEME_CONFIG[theme];
+  const Icon = config.icon;
+
+  if (variant === "icon") {
     return (
       <Button
         variant="ghost"
         size="icon"
         onClick={toggleTheme}
         className={cn(
-          'relative h-9 w-9 rounded-lg transition-all duration-300',
-          'hover:bg-primary/10 hover:text-primary',
+          "relative h-9 w-9 rounded-lg transition-all duration-300",
+          config.color,
           className
         )}
-        aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-        data-testid="dark-mode-toggle"
+        aria-label={`Current theme: ${config.label}. Click to cycle.`}
+        data-testid="theme-toggle"
       >
-        <Sun
-          className={cn(
-            'h-5 w-5 rotate-0 scale-100 transition-all duration-300',
-            isDark && 'rotate-90 scale-0'
-          )}
-        />
-        <Moon
-          className={cn(
-            'absolute h-5 w-5 rotate-90 scale-0 transition-all duration-300',
-            isDark && 'rotate-0 scale-100'
-          )}
-        />
+        <Icon className="h-5 w-5" />
         <span className="sr-only">Toggle theme</span>
       </Button>
     );
@@ -55,58 +64,41 @@ export function DarkModeToggle({ variant = 'icon', className }: DarkModeTogglePr
           variant="ghost"
           size="icon"
           className={cn(
-            'relative h-9 w-9 rounded-lg transition-all duration-300',
-            'hover:bg-primary/10 hover:text-primary',
+            "relative h-9 w-9 rounded-lg transition-all duration-300",
+            config.color,
             className
           )}
-          data-testid="dark-mode-dropdown"
+          data-testid="theme-dropdown"
         >
-          <Sun
-            className={cn(
-              'h-5 w-5 rotate-0 scale-100 transition-all duration-300',
-              isDark && 'rotate-90 scale-0'
-            )}
-          />
-          <Moon
-            className={cn(
-              'absolute h-5 w-5 rotate-90 scale-0 transition-all duration-300',
-              isDark && 'rotate-0 scale-100'
-            )}
-          />
-          <span className="sr-only">Toggle theme</span>
+          <Icon className="h-5 w-5" />
+          <span className="sr-only">Select theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40">
-        <DropdownMenuItem
-          onClick={() => setTheme('dark')}
-          className={cn(
-            'cursor-pointer',
-            theme === 'dark' && 'bg-primary/10 text-primary'
-          )}
-        >
-          <Moon className="mr-2 h-4 w-4" />
-          <span>Dark</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => setTheme('light')}
-          className={cn(
-            'cursor-pointer',
-            theme === 'light' && 'bg-primary/10 text-primary'
-          )}
-        >
-          <Sun className="mr-2 h-4 w-4" />
-          <span>Light</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => setTheme('system')}
-          className={cn(
-            'cursor-pointer',
-            theme === 'system' && 'bg-primary/10 text-primary'
-          )}
-        >
-          <Monitor className="mr-2 h-4 w-4" />
-          <span>System</span>
-        </DropdownMenuItem>
+      <DropdownMenuContent 
+        align="end" 
+        className="w-44 bg-zinc-900/95 border-zinc-700 backdrop-blur-sm"
+      >
+        {(Object.entries(THEME_CONFIG) as [ThemeMode, typeof config][]).map(([mode, cfg]) => {
+          const ItemIcon = cfg.icon;
+          return (
+            <DropdownMenuItem
+              key={mode}
+              onClick={() => setTheme(mode)}
+              className={cn(
+                "cursor-pointer flex items-center gap-2",
+                theme === mode && "bg-cyan-500/20 text-cyan-400"
+              )}
+            >
+              <ItemIcon className={cn("h-4 w-4", cfg.color)} />
+              <span>{cfg.label}</span>
+              {mode === "dungeon" && (
+                <span className="ml-auto text-xs text-cyan-500 uppercase tracking-wider">
+                  Default
+                </span>
+              )}
+            </DropdownMenuItem>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );
