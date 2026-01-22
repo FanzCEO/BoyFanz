@@ -60,18 +60,7 @@ function Router() {
   useTheme();
   useWebSocketInit();
   
-  const [loadingTimeout, setLoadingTimeout] = useState(false);
-  
-  useEffect(() => {
-    if (isLoading) {
-      const timer = setTimeout(() => {
-        setLoadingTimeout(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading]);
-
-  // Protected routes
+  // Protected routes - redirect to login if not authenticated
   const protectedRoutes = ['/feed', '/messages', '/dashboard', '/settings', '/media'];
   const isProtectedRoute = protectedRoutes.some(route => location.startsWith(route));
 
@@ -81,9 +70,8 @@ function Router() {
     }
   }, [isLoading, isAuthenticated, isProtectedRoute, navigate]);
 
-  const effectivelyAuthenticated = isAuthenticated || (loadingTimeout && isLoading);
-
-  if (!effectivelyAuthenticated) {
+  // Auth routes are ALWAYS available - no timeout gating
+  if (!isAuthenticated) {
     return (
       <Switch>
         <Route path="/" component={Landing} />

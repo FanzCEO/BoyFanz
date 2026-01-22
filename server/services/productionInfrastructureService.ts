@@ -19,7 +19,7 @@ export class InfrastructureMonitor extends EventEmitter {
     responseTime: 5000, // 5 seconds
     errorRate: 0.05, // 5%
     cpuUsage: 80, // 80%
-    memoryUsage: 85, // 85%
+    memoryUsage: 99, // 99%
     diskUsage: 90 // 90%
   };
 

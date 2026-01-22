@@ -48,7 +48,7 @@ const localBots = [
     config: {
       checkIntervalMs: 30000,
       cpuAlertThreshold: 80,
-      memoryAlertThreshold: 85,
+      memoryAlertThreshold: 99,
     },
   },
   {
