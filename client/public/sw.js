@@ -2,7 +2,7 @@
 // Advanced caching strategies, offline support, and background sync
 // VERSION: 2.0.1 - Network-first with NO masking of auth failures
 
-const CACHE_VERSION = '2.0.1';
+const CACHE_VERSION = '2.0.2';
 const CACHE_NAME = `boyfanz-v${CACHE_VERSION}`;
 const OFFLINE_CACHE = `boyfanz-offline-v${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `boyfanz-dynamic-v${CACHE_VERSION}`;
