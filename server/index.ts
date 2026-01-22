@@ -28,8 +28,8 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      styleSrc: ["'self'", "'unsafe-inline'"], // Google Fonts
-      fontSrc: ["'self'", "data:"], // Google Fonts
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"], // Google Fonts
+      fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"], // Google Fonts
       imgSrc: ["'self'", "data:", "https:", "blob:"], // Support for media uploads
       connectSrc: ["'self'", "wss:", "ws:"], // Allow websockets
       mediaSrc: ["'self'", "blob:"], // Media playback
