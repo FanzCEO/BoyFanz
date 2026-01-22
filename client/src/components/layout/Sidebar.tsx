@@ -3,11 +3,34 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut } from "lucide-react";
-import { useState } from "react";
+import { Menu, X, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, createContext, useContext } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
-import { PlatformSwitcher } from "./PlatformSwitcher";
+import { BoostedPostsCarousel } from "@/components/sidebar/BoostedPostsCarousel";
+
+// Sidebar collapse context
+const SidebarCollapseContext = createContext<{
+  isCollapsed: boolean;
+  setIsCollapsed: (value: boolean) => void;
+} | null>(null);
+
+export function useSidebarCollapse() {
+  const context = useContext(SidebarCollapseContext);
+  if (!context) {
+    return { isCollapsed: false, setIsCollapsed: () => {} };
+  }
+  return context;
+}
+
+export function SidebarCollapseProvider({ children }: { children: React.ReactNode }) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  return (
+    <SidebarCollapseContext.Provider value={{ isCollapsed, setIsCollapsed }}>
+      {children}
+    </SidebarCollapseContext.Provider>
+  );
+}
 
 // Sidebar Promo Ad Component
 function SidebarPromoAd() {
@@ -59,6 +82,7 @@ export default function Sidebar({ user }: SidebarProps) {
   const [location, setLocation] = useLocation();
   const isMobile = useIsMobile();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const { logoutMutation } = useAuth();
   const {
     hasAdminAccess,
@@ -84,11 +108,11 @@ export default function Sidebar({ user }: SidebarProps) {
   
   const navItems = [
     { path: "/", icon: "fas fa-home", label: "Home" },
-    { path: "/infinity-feed", icon: "fas fa-infinity", label: "Infinity Feed" },
+    { path: "/infinity-feed", icon: "fas fa-infinity", label: "FanzSpa" },
     { path: "/fanz-money-center", icon: "fas fa-wallet", label: "FanzMoneyCenter" },
     { path: `/creator/${user?.id}`, icon: "fas fa-user", label: "My page" },
     { path: "/dashboard", icon: "fas fa-tachometer-alt", label: "Dashboard" },
-    { path: "/starz-studio", icon: "fas fa-magic", label: "Starz Studio" },
+    { path: "/starz-studio", icon: "fas fa-star", label: "Starz Studio" },
     { path: "/analytics", icon: "fas fa-chart-line", label: "Analytics" },
     { path: "/notifications", icon: "fas fa-bell", label: "Notifications", dot: true },
     { path: "/messages", icon: "fas fa-comments", label: "Messages", dot: true },
@@ -106,6 +130,53 @@ export default function Sidebar({ user }: SidebarProps) {
     { path: "/settings", icon: "fas fa-cog", label: "Settings" },
   ] as Array<{ path: string; icon: string; label: string; dot?: boolean; badge?: string }>;
 
+  // FanzTube section items
+  const tubeItems = [
+    { path: "/tube", icon: "fas fa-play-circle", label: "FanzTube" },
+    { path: "/tube/gay", icon: "fas fa-rainbow", label: "Gay Tube" },
+    { path: "/tube/hunks", icon: "fas fa-dumbbell", label: "Hunks" },
+    { path: "/tube/broz", icon: "fas fa-users", label: "Broz" },
+    { path: "/tube/categories", icon: "fas fa-th-large", label: "All Categories", badge: "NEW" },
+  ];
+
+  // FanzCock section items (TikTok-style reels)
+  const cockItems = [
+    { path: "/cock", icon: "fas fa-fire", label: "FanzCock", badge: "HOT" },
+    { path: "/cock/trending", icon: "fas fa-chart-line", label: "Trending" },
+    { path: "/cock/following", icon: "fas fa-heart", label: "Following" },
+    { path: "/cock/amateur", icon: "fas fa-video", label: "Amateur" },
+    { path: "/cock/verified", icon: "fas fa-check-circle", label: "Verified" },
+    { path: "/cock/categories", icon: "fas fa-th-large", label: "Categories" },
+  ];
+
+  // FANZ Ecosystem - Auxiliary Platforms
+  const ecosystemItems = [
+    { path: "/starz-studio", icon: "fas fa-star", label: "Starz Studio", badge: "CREATOR" },
+    { path: "/fanz-defend", icon: "fas fa-shield-alt", label: "FanzDefend" },
+    { path: "/fanz-cybersecure", icon: "fas fa-shield-virus", label: "FanzCybersecure", badge: "SECURITY" },
+    { path: "/fanz-forge", icon: "fas fa-hammer", label: "FanzForge" },
+    { path: "/fanz-filiate", icon: "fas fa-handshake", label: "FanzFiliate" },
+    { path: "/fanz-varsity", icon: "fas fa-graduation-cap", label: "FanzVarsity" },
+    { path: "/fanz-meet", icon: "fas fa-video", label: "FanzMeet" },
+    { path: "/fanz-swipe", icon: "fas fa-heart", label: "FanzSwipe", badge: "DATING" },
+    { path: "/fanz-world", icon: "fas fa-globe-americas", label: "FanzWorld" },
+    { path: "/starz-cardz", icon: "fas fa-id-card", label: "StarzCardz" },
+    { path: "/wicked-crm", icon: "fas fa-address-book", label: "WickedCRM", badge: "PRO" },
+  ];
+
+  // FANZ Security & Architecture
+  const securityItems = [
+    { path: "/fanz-cybersecure", icon: "fas fa-lock", label: "FanzCyberSecure" },
+    { path: "/fanz-nexus", icon: "fas fa-globe", label: "FANZ Nexus", badge: "MAP" },
+    { path: "/fanz-neuroverse", icon: "fas fa-brain", label: "FanzNeuroverse", badge: "AI" },
+  ];
+
+  // Mobile Apps
+  const mobileItems = [
+    { path: "/fanz-incognito", icon: "fas fa-user-secret", label: "FanzIncognito", badge: "APP" },
+    { path: "/fanz-cloud", icon: "fas fa-cloud", label: "FanzCloud", badge: "APP" },
+  ];
+
   // Add streaming and events items to main nav for easy access
   if (user?.role === 'creator' || user?.role === 'admin' || user?.role === 'moderator') {
     navItems.splice(2, 0, { path: "/streams", icon: "fas fa-broadcast-tower", label: "Live Streams" });
@@ -116,119 +187,311 @@ export default function Sidebar({ user }: SidebarProps) {
   }
 
   const adminItems = [
-    { path: "/admin/dashboard", icon: "fas fa-tachometer-alt", label: "Admin Dashboard" },
-    { path: "/admin/complaints", icon: "fas fa-exclamation-triangle", label: "Complaints Management" },
-    { path: "/admin/withdrawals", icon: "fas fa-money-bill-wave", label: "Withdrawals & Payouts" },
-    { path: "/admin/verification", icon: "fas fa-shield-alt", label: "Verification Requests" },
-    { path: "/admin/moderation", icon: "fas fa-tasks", label: "Moderation Queue", badge: "7" },
-    { path: "/admin/users", icon: "fas fa-users", label: "User Management" },
-    { path: "/admin/delegation", icon: "fas fa-key", label: "Delegation Manager" },
-    { path: "/admin/themes", icon: "fas fa-palette", label: "Theme Manager" },
-    { path: "/admin/reports", icon: "fas fa-chart-bar", label: "Reports & Analytics" },
+    { path: "/panel/admin/dashboard", icon: "fas fa-tachometer-alt", label: "Admin Dashboard" },
+    { path: "/panel/admin/complaints", icon: "fas fa-exclamation-triangle", label: "Complaints Management" },
+    { path: "/panel/admin/withdrawals", icon: "fas fa-money-bill-wave", label: "Withdrawals & Payouts" },
+    { path: "/panel/admin/verification", icon: "fas fa-shield-alt", label: "Verification Requests" },
+    { path: "/panel/admin/moderation", icon: "fas fa-tasks", label: "Moderation Queue", badge: "7" },
+    { path: "/panel/admin/users", icon: "fas fa-users", label: "User Management" },
+    { path: "/panel/admin/delegation", icon: "fas fa-key", label: "Delegation Manager" },
+    { path: "/panel/admin/themes", icon: "fas fa-palette", label: "Theme Manager" },
+    { path: "/panel/admin/reports", icon: "fas fa-chart-bar", label: "Reports & Analytics" },
   ];
 
   const contentManagementItems = [
-    { path: "/admin/posts", icon: "fas fa-file-alt", label: "Posts Management" },
-    { path: "/admin/streaming", icon: "fas fa-broadcast-tower", label: "Live Streaming" },
-    { path: "/admin/stories", icon: "fas fa-clock", label: "Stories Management" },
-    { path: "/admin/shop", icon: "fas fa-store", label: "Shop Management" },
-    { path: "/admin/categories", icon: "fas fa-folder-tree", label: "Categories Management" },
-    { path: "/admin/forums", icon: "fas fa-comments", label: "Forums Moderation" },
-    { path: "/admin/messages", icon: "fas fa-envelope-open-text", label: "Messages Moderation" },
+    { path: "/panel/admin/posts", icon: "fas fa-file-alt", label: "Posts Management" },
+    { path: "/panel/admin/streaming", icon: "fas fa-broadcast-tower", label: "Live Streaming" },
+    { path: "/panel/admin/stories", icon: "fas fa-clock", label: "Stories Management" },
+    { path: "/panel/admin/shop", icon: "fas fa-store", label: "Shop Management" },
+    { path: "/panel/admin/categories", icon: "fas fa-folder-tree", label: "Categories Management" },
+    { path: "/panel/admin/forums", icon: "fas fa-comments", label: "Forums Moderation" },
+    { path: "/panel/admin/messages", icon: "fas fa-envelope-open-text", label: "Messages Moderation" },
   ];
 
   const financialManagementItems = [
-    { path: "/admin/transactions", icon: "fas fa-exchange-alt", label: "Transactions" },
-    { path: "/admin/billing", icon: "fas fa-file-invoice", label: "Billing Management" },
-    { path: "/admin/tax-rates", icon: "fas fa-percentage", label: "Tax Rates" },
-    { path: "/admin/payment-settings", icon: "fas fa-cogs", label: "Payment Settings" },
-    { path: "/admin/deposits", icon: "fas fa-wallet", label: "Deposits" },
+    { path: "/panel/admin/transactions", icon: "fas fa-exchange-alt", label: "Transactions" },
+    { path: "/panel/admin/billing", icon: "fas fa-file-invoice", label: "Billing Management" },
+    { path: "/panel/admin/tax-rates", icon: "fas fa-percentage", label: "Tax Rates" },
+    { path: "/panel/admin/payment-settings", icon: "fas fa-cogs", label: "Payment Settings" },
+    { path: "/panel/admin/deposits", icon: "fas fa-wallet", label: "Deposits" },
   ];
 
   const systemManagementItems = [
-    { path: "/admin/platforms", icon: "fas fa-globe", label: "Platform Management" },
-    { path: "/admin/cloud-storage", icon: "fas fa-cloud", label: "Cloud Storage (CDN)" },
-    { path: "/admin/announcements", icon: "fas fa-bullhorn", label: "Announcements" },
-    { path: "/admin/push-notifications", icon: "fas fa-bell", label: "Push Notifications" },
-    { path: "/admin/email-marketing", icon: "fas fa-envelope", label: "Email Marketing" },
-    { path: "/admin/system-settings", icon: "fas fa-cog", label: "System Settings" },
-    { path: "/admin/branding", icon: "fas fa-paint-brush", label: "Branding Assets" },
-    { path: "/admin/bookings", icon: "fas fa-calendar-check", label: "Booking Management" },
-    { path: "/admin/appearance", icon: "fas fa-magic", label: "Site Appearance" },
-    { path: "/admin/gallery", icon: "fas fa-images", label: "Gallery Management" },
-    { path: "/admin/oauth-settings", icon: "fas fa-key", label: "Social Login" },
-    { path: "/admin/storage", icon: "fas fa-hdd", label: "Storage Management" },
+    { path: "/panel/admin/platforms", icon: "fas fa-globe", label: "Platform Management" },
+    { path: "/panel/admin/cloud-storage", icon: "fas fa-cloud", label: "Cloud Storage (CDN)" },
+    { path: "/panel/admin/announcements", icon: "fas fa-bullhorn", label: "Announcements" },
+    { path: "/panel/admin/push-notifications", icon: "fas fa-bell", label: "Push Notifications" },
+    { path: "/panel/admin/email-marketing", icon: "fas fa-envelope", label: "Email Marketing" },
+    { path: "/panel/admin/system-settings", icon: "fas fa-cog", label: "System Settings" },
+    { path: "/panel/admin/branding", icon: "fas fa-paint-brush", label: "Branding Assets" },
+    { path: "/panel/admin/bookings", icon: "fas fa-calendar-check", label: "Booking Management" },
+    { path: "/panel/admin/appearance", icon: "fas fa-magic", label: "Site Appearance" },
+    { path: "/panel/admin/gallery", icon: "fas fa-images", label: "Gallery Management" },
+    { path: "/panel/admin/oauth-settings", icon: "fas fa-key", label: "Social Login" },
+    { path: "/panel/admin/storage", icon: "fas fa-hdd", label: "Storage Management" },
   ];
 
   const sidebarContent = (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Logo - Clickable to go to home/feed */}
       <Link href="/social">
-        <div className="flex-shrink-0 flex h-16 md:h-20 items-center px-4 md:px-6 border-b border-border cursor-pointer hover:bg-accent/10 transition-colors">
-          <div className="flex items-center gap-2 md:gap-3">
+        <div className={cn(
+          "flex-shrink-0 flex h-16 md:h-20 items-center border-b border-border cursor-pointer hover:bg-accent/10 transition-all",
+          isCollapsed ? "px-2 justify-center" : "px-4 md:px-6"
+        )}>
+          <div className={cn("flex items-center", isCollapsed ? "flex-col gap-0" : "gap-2 md:gap-3")}>
             <img
               src="/boyfanz-logo.png"
               alt="BoyFanz Logo"
-              className="h-8 md:h-12 w-auto"
+              className={cn("w-auto transition-all", isCollapsed ? "h-6" : "h-8 md:h-12")}
             />
-            <div className="flex flex-col">
-              <span className="font-display font-bold text-lg md:text-xl neon-sign tracking-wider">BoyFanz</span>
-              <span className="text-xs neon-sign-golden font-heading font-semibold tracking-wide uppercase hidden sm:block">Every Man's Playground</span>
-            </div>
+            {!isCollapsed && (
+              <div className="flex flex-col">
+                <span className="font-display font-bold text-lg md:text-xl neon-sign tracking-wider">BoyFanz</span>
+                <span className="text-xs neon-sign-golden font-heading font-semibold tracking-wide uppercase hidden sm:block">Every Man's Playground</span>
+              </div>
+            )}
           </div>
         </div>
       </Link>
 
-      {/* Platform Switcher */}
-      {user && (
-        <div className="px-3 py-2 border-b border-border">
+      {/* Collapse/Expand Button - Desktop Only */}
+      {!isMobile && (
+        <div className="flex justify-end px-2 py-2 border-b border-border">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="h-8 w-8 hover:bg-primary/10"
+            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
         </div>
       )}
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent" data-testid="sidebar-nav">
+      <nav className={cn(
+        "flex-1 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent",
+        isCollapsed ? "px-1" : "px-3"
+      )} data-testid="sidebar-nav">
         <div className="space-y-1">
           {navItems.map((item) => (
-            <Link 
-              key={item.path} 
+            <Link
+              key={item.path}
               href={item.path}
               onClick={isMobile ? handleMobileLinkClick : undefined}
               className={cn(
-                "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                "sidebar-link flex items-center gap-3 rounded-md text-sm font-medium transition-all",
+                isCollapsed ? "px-2 py-2 justify-center" : "px-3 py-3 md:py-2 touch-target min-h-[44px] md:min-h-[36px]",
                 isActive(item.path)
                   ? "active bg-primary/10 text-primary border-r-2 border-primary"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
               data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+              title={isCollapsed ? item.label : undefined}
             >
-              <i className={`${item.icon} w-5 h-5 md:w-4 md:h-4`}></i>
-              {item.label}
-              {item.badge && (
-                <span className={cn(
-                  "ml-auto text-xs px-2 py-0.5 rounded-full font-bold",
-                  item.badge === "KYC"
-                    ? "bg-yellow-500 text-yellow-900"
-                    : item.badge === "HOT"
-                    ? "bg-gradient-to-r from-red-500 to-orange-500 text-white animate-pulse"
-                    : "bg-primary text-primary-foreground"
-                )}>
-                  {item.badge === "HOT" ? "🔥 HOT" : item.badge}
-                </span>
+              <i className={cn(item.icon, isCollapsed ? "w-5 h-5" : "w-5 h-5 md:w-4 md:h-4")}></i>
+              {!isCollapsed && (
+                <>
+                  {item.label}
+                  {item.badge && (
+                    <span className={cn(
+                      "ml-auto text-xs px-2 py-0.5 rounded-full font-bold",
+                      item.badge === "KYC"
+                        ? "bg-yellow-500 text-yellow-900"
+                        : item.badge === "HOT"
+                        ? "bg-gradient-to-r from-red-500 to-orange-500 text-white animate-pulse"
+                        : "bg-primary text-primary-foreground"
+                    )}>
+                      {item.badge === "HOT" ? "🔥 HOT" : item.badge}
+                    </span>
+                  )}
+                  {item.dot && (
+                    <span className="ml-auto w-2 h-2 bg-primary rounded-full notification-dot"></span>
+                  )}
+                </>
               )}
-              {item.dot && (
-                <span className="ml-auto w-2 h-2 bg-primary rounded-full notification-dot"></span>
+              {isCollapsed && (item.dot || item.badge) && (
+                <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span>
               )}
             </Link>
           ))}
         </div>
 
+        {/* FanzTube Section */}
+        {!isCollapsed && (
+          <div className="mt-6 md:mt-8">
+            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              FanzTube
+            </h3>
+            <div className="mt-2 space-y-1">
+              {tubeItems.map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  onClick={isMobile ? handleMobileLinkClick : undefined}
+                  className={cn(
+                    "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                    isActive(item.path)
+                      ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  <i className={`${item.icon} w-5 h-5 md:w-4 md:h-4`}></i>
+                  {item.label}
+                  {item.badge && (
+                    <span className="ml-auto text-xs px-2 py-0.5 bg-primary text-primary-foreground rounded-full">
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* FanzCock Section */}
+        {!isCollapsed && (
+          <div className="mt-6 md:mt-8">
+            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              FanzCock
+            </h3>
+            <div className="mt-2 space-y-1">
+              {cockItems.map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  onClick={isMobile ? handleMobileLinkClick : undefined}
+                  className={cn(
+                    "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                    isActive(item.path)
+                      ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  <i className={`${item.icon} w-5 h-5 md:w-4 md:h-4`}></i>
+                  {item.label}
+                  {item.badge && (
+                    <span className="ml-auto text-xs px-2 py-0.5 bg-primary text-primary-foreground rounded-full">
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* FANZ Ecosystem Section */}
+        {!isCollapsed && (
+          <div className="mt-6 md:mt-8">
+            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              FANZ Ecosystem
+            </h3>
+            <div className="mt-2 space-y-1">
+              {ecosystemItems.map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  onClick={isMobile ? handleMobileLinkClick : undefined}
+                  className={cn(
+                    "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                    isActive(item.path)
+                      ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  <i className={`${item.icon} w-5 h-5 md:w-4 md:h-4`}></i>
+                  {item.label}
+                  {item.badge && (
+                    <span className={cn(
+                      "ml-auto text-xs px-2 py-0.5 rounded-full font-medium",
+                      item.badge === "CREATOR" ? "bg-purple-500 text-white" :
+                      item.badge === "DATING" ? "bg-pink-500 text-white" :
+                      item.badge === "PRO" ? "bg-amber-500 text-black" :
+                      "bg-primary text-primary-foreground"
+                    )}>
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Apps Section */}
+        {!isCollapsed && (
+          <div className="mt-6 md:mt-8">
+            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Mobile Apps
+            </h3>
+            <div className="mt-2 space-y-1">
+              {mobileItems.map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  onClick={isMobile ? handleMobileLinkClick : undefined}
+                  className={cn(
+                    "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                    isActive(item.path)
+                      ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  <i className={`${item.icon} w-5 h-5 md:w-4 md:h-4`}></i>
+                  {item.label}
+                  {item.badge && (
+                    <span className="ml-auto text-xs px-2 py-0.5 bg-blue-500 text-white rounded-full">
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Security & Architecture Section */}
+        {!isCollapsed && (
+          <div className="mt-6 md:mt-8">
+            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Security & Architecture
+            </h3>
+            <div className="mt-2 space-y-1">
+              {securityItems.map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  onClick={isMobile ? handleMobileLinkClick : undefined}
+                  className={cn(
+                    "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                    isActive(item.path)
+                      ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  <i className={`${item.icon} w-5 h-5 md:w-4 md:h-4`}></i>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Become a Creator CTA for Fans */}
-        {user?.role === 'fan' && (
+        {user?.role === 'fan' && !isCollapsed && (
           <div className="mt-6 md:mt-8 px-3">
             <Link
               href="/become-creator"
               onClick={isMobile ? handleMobileLinkClick : undefined}
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-semibold transition-all shadow-lg hover:shadow-red-500/25 group"
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-semibold transition-all shadow-lg hover:shadow-cyan-500/25 group"
               data-testid="nav-become-creator"
             >
               <i className="fas fa-star w-5 h-5 group-hover:animate-pulse"></i>
@@ -241,17 +504,28 @@ export default function Sidebar({ user }: SidebarProps) {
         )}
 
         {/* Promotional Ad - Desktop Only */}
-        <div className="hidden md:block">
-          <SidebarPromoAd />
-        </div>
+        {!isCollapsed && (
+          <div className="hidden md:block">
+            <SidebarPromoAd />
+          </div>
+        )}
+
+        {/* Boosted Posts Carousel - Collapsed Sidebar Only */}
+        {isCollapsed && (
+          <div className="hidden md:block px-2">
+            <BoostedPostsCarousel />
+          </div>
+        )}
 
         {/* Creator Section */}
         {(user?.role === 'creator' || user?.role === 'admin' || user?.role === 'moderator') && (
           <div className="mt-6 md:mt-8">
-            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Creator
-            </h3>
-            <div className="mt-2 space-y-1">
+            {!isCollapsed && (
+              <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Creator
+              </h3>
+            )}
+            <div className={cn("space-y-1", !isCollapsed && "mt-2")}>
               <Link 
                 href="/streams/create"
                 onClick={isMobile ? handleMobileLinkClick : undefined}
@@ -295,6 +569,20 @@ export default function Sidebar({ user }: SidebarProps) {
                 Earnings
               </Link>
               <Link
+                href="/free-links"
+                onClick={isMobile ? handleMobileLinkClick : undefined}
+                className={cn(
+                  "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                  isActive("/free-links")
+                    ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+                data-testid="nav-free-links"
+              >
+                <i className="fas fa-link w-5 h-5 md:w-4 md:h-4"></i>
+                Free Links
+              </Link>
+              <Link
                 href="/creator-requests"
                 onClick={isMobile ? handleMobileLinkClick : undefined}
                 className={cn(
@@ -308,6 +596,24 @@ export default function Sidebar({ user }: SidebarProps) {
                 <i className="fas fa-gift w-5 h-5 md:w-4 md:h-4"></i>
                 Custom Requests
               </Link>
+
+              {/* Fuck Buddies List Settings */}
+              <div className="mt-4 pt-4 border-t border-border/50">
+                <Link
+                  href="/"
+                  onClick={isMobile ? handleMobileLinkClick : undefined}
+                  className={cn(
+                    "sidebar-link flex items-center gap-3 px-3 py-3 md:py-2 rounded-md text-sm font-medium transition-all touch-target min-h-[44px] md:min-h-[36px]",
+                    isActive("/")
+                      ? "active bg-primary/10 text-primary border-r-2 border-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  data-testid="nav-fuck-buddies-settings"
+                >
+                  <i className="fas fa-users-cog w-5 h-5 md:w-4 md:h-4"></i>
+                  {!isCollapsed && <span>Fuck Buddies List</span>}
+                </Link>
+              </div>
             </div>
           </div>
         )}
@@ -556,13 +862,13 @@ export default function Sidebar({ user }: SidebarProps) {
         </div>
 
         {/* Admin Section */}
-        {(hasAdminAccess || user?.role === 'admin' || user?.role === 'moderator') && canAccessSection('administration') && (
+        {(user?.role === 'admin' || user?.role === 'moderator' || user?.role === 'super_admin' || user?.role === 'ceo') && (
           <div className="mt-6 md:mt-8">
             <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Administration
             </h3>
             <div className="mt-2 space-y-1">
-              {adminItems.filter(item => canAccessRoute(item.path)).map((item) => (
+              {adminItems.map((item) => (
                 <Link
                   key={item.path}
                   href={item.path}
@@ -589,13 +895,13 @@ export default function Sidebar({ user }: SidebarProps) {
         )}
 
         {/* Content Management Section */}
-        {(hasAdminAccess || user?.role === 'admin' || user?.role === 'moderator') && canAccessSection('contentManagement') && (
+        {(user?.role === 'admin' || user?.role === 'moderator' || user?.role === 'super_admin' || user?.role === 'ceo') && (
           <div className="mt-6 md:mt-8">
             <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Content Management
             </h3>
             <div className="mt-2 space-y-1">
-              {contentManagementItems.filter(item => canAccessRoute(item.path)).map((item) => (
+              {contentManagementItems.map((item) => (
                 <Link
                   key={item.path}
                   href={item.path}
@@ -617,13 +923,13 @@ export default function Sidebar({ user }: SidebarProps) {
         )}
 
         {/* Financial Management Section */}
-        {(hasAdminAccess || user?.role === 'admin') && canAccessSection('financialManagement') && (
+        {(user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'ceo') && (
           <div className="mt-6 md:mt-8">
             <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Financial Management
             </h3>
             <div className="mt-2 space-y-1">
-              {financialManagementItems.filter(item => canAccessRoute(item.path)).map((item) => (
+              {financialManagementItems.map((item) => (
                 <Link
                   key={item.path}
                   href={item.path}
@@ -645,13 +951,13 @@ export default function Sidebar({ user }: SidebarProps) {
         )}
 
         {/* System Management Section */}
-        {(hasAdminAccess || user?.role === 'admin') && canAccessSection('systemManagement') && (
+        {(user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'ceo') && (
           <div className="mt-6 md:mt-8">
             <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               System Management
             </h3>
             <div className="mt-2 space-y-1">
-              {systemManagementItems.filter(item => canAccessRoute(item.path)).map((item) => (
+              {systemManagementItems.map((item) => (
                 <Link
                   key={item.path}
                   href={item.path}
@@ -745,7 +1051,7 @@ export default function Sidebar({ user }: SidebarProps) {
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetContent
             side="left"
-            className="w-80 p-0 bg-sidebar border-r border-sidebar-border dungeon-panel"
+            className="w-80 p-0 bg-card border-r retro-border smoky-bg"
             id="mobile-sidebar"
             aria-label="Main navigation"
           >
@@ -758,13 +1064,18 @@ export default function Sidebar({ user }: SidebarProps) {
 
   // Desktop sidebar
   return (
-    <aside
-      className="fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar border-r border-sidebar-border dungeon-panel"
-      data-testid="sidebar"
-      role="navigation"
-      aria-label="Main navigation"
-    >
-      {sidebarContent}
-    </aside>
+    <SidebarCollapseContext.Provider value={{ isCollapsed, setIsCollapsed }}>
+      <aside
+        className={cn(
+          "fixed left-0 top-0 z-40 h-screen bg-card border-r retro-border smoky-bg transition-all duration-300",
+          isCollapsed ? "w-16" : "w-64"
+        )}
+        data-testid="sidebar"
+        role="navigation"
+        aria-label="Main navigation"
+      >
+        {sidebarContent}
+      </aside>
+    </SidebarCollapseContext.Provider>
   );
 }

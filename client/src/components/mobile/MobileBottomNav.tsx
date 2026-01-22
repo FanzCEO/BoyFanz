@@ -60,7 +60,7 @@ export function MobileBottomNav() {
       label: "Explore",
     },
     {
-      path: "/starz-studio",
+      path: "/breeding-zone",
       icon: PlusSquare,
       label: "Create",
       requiresAuth: true,

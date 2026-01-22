@@ -7,13 +7,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   LineChart,
   Line,
@@ -23,14 +23,14 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { 
-  Users, 
-  DollarSign, 
-  FileText, 
-  Shield, 
-  AlertTriangle, 
-  CheckCircle, 
-  TrendingUp, 
+import {
+  Users,
+  DollarSign,
+  FileText,
+  Shield,
+  AlertTriangle,
+  CheckCircle,
+  TrendingUp,
   TrendingDown,
   Activity,
   Server,
@@ -49,6 +49,8 @@ import {
   RefreshCw
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { AdminLayout, ControlPanelCard, MonitorCard, AdminStatCard } from "@/components/bathhouse";
 
 // TypeScript interfaces for type safety
 interface DashboardOverview {
@@ -147,6 +149,17 @@ export default function AdminDashboard() {
     refetchInterval: 15000,
   });
 
+  // Security Data
+  const { data: securityStats } = useQuery({
+    queryKey: ['/api/security/stats', refreshTime],
+    refetchInterval: 30000,
+  });
+
+  const { data: captureAttempts } = useQuery({
+    queryKey: ['/api/security/capture-attempts', { limit: 20 }],
+    refetchInterval: 30000,
+  });
+
   // Default empty state when API hasn't been set up yet
   const defaultOverview: DashboardOverview = {
     totalUsers: 0,
@@ -225,118 +238,122 @@ export default function AdminDashboard() {
 
   if (overviewLoading || statsLoading) {
     return (
-      <div className="space-y-6" data-testid="dashboard-loading">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <div className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4 animate-spin" />
-            <span className="text-sm text-muted-foreground">Loading...</span>
+      <AdminLayout
+        title="Control Room"
+        subtitle="Loading system data..."
+        zone="control-room"
+      >
+        <div className="space-y-6" data-testid="dashboard-loading">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="monitor-card animate-pulse"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: i * 0.1 }}
+              >
+                <div className="h-4 bg-gray-700 rounded w-1/2 mb-3"></div>
+                <div className="h-8 bg-gray-700 rounded w-3/4"></div>
+              </motion.div>
+            ))}
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="space-y-0 pb-2">
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                <div className="h-8 bg-gray-200 rounded w-3/4 mt-2"></div>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="space-y-6" data-testid="admin-dashboard">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold" data-testid="dashboard-title">Admin Dashboard</h1>
-          <p className="text-muted-foreground" data-testid="dashboard-subtitle">
-            Welcome back, {user?.firstName}. Here's what's happening on your platform.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setRefreshTime(new Date())}
-            data-testid="button-refresh"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
-          <span className="text-sm text-muted-foreground" data-testid="text-last-updated">
-            Last updated: {refreshTime.toLocaleTimeString()}
-          </span>
-        </div>
-      </div>
+    <AdminLayout
+      title="Control Room"
+      subtitle={`Welcome back, ${user?.firstName}. Bathhouse systems operational.`}
+      zone="control-room"
+    >
+      <div className="space-y-6 pb-12" data-testid="admin-dashboard">
+        {/* Refresh Bar */}
+        <motion.div
+          className="flex items-center justify-between"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="status-light status-light-green" />
+            <span className="text-sm text-gray-400">All systems operational</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setRefreshTime(new Date())}
+              className="admin-action-btn"
+              data-testid="button-refresh"
+            >
+              <RefreshCw className="h-4 w-4" />
+              REFRESH
+            </Button>
+            <span className="text-xs text-gray-500 font-mono" data-testid="text-last-updated">
+              {refreshTime.toLocaleTimeString()}
+            </span>
+          </div>
+        </motion.div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card data-testid="card-total-users">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" data-testid="metric-total-users">
-              {currentData.totalUsers?.toLocaleString() || '0'}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              <TrendingUp className="h-3 w-3 inline mr-1" />
-              +{currentData.monthlyGrowth?.users || 0}% from last month
-            </p>
-          </CardContent>
-        </Card>
+      {/* Key Metrics - Monitor Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <AdminStatCard
+            value={currentData.totalUsers?.toLocaleString() || '0'}
+            label="Total Guests"
+            trend={`+${currentData.monthlyGrowth?.users || 0}%`}
+            trendUp={true}
+            color="cyan"
+          />
+        </motion.div>
 
-        <Card data-testid="card-total-revenue">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" data-testid="metric-total-revenue">
-              ${currentData.totalRevenue?.toLocaleString() || '0'}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              <TrendingUp className="h-3 w-3 inline mr-1" />
-              +{currentData.monthlyGrowth?.revenue || 0}% from last month
-            </p>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <AdminStatCard
+            value={`$${currentData.totalRevenue?.toLocaleString() || '0'}`}
+            label="Total Revenue"
+            trend={`+${currentData.monthlyGrowth?.revenue || 0}%`}
+            trendUp={true}
+            color="green"
+          />
+        </motion.div>
 
-        <Card data-testid="card-total-content">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Content</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" data-testid="metric-total-content">
-              {currentData.totalContent?.toLocaleString() || '0'}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              <TrendingUp className="h-3 w-3 inline mr-1" />
-              +{currentData.monthlyGrowth?.content || 0}% from last month
-            </p>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <AdminStatCard
+            value={currentData.totalContent?.toLocaleString() || '0'}
+            label="Content Items"
+            trend={`+${currentData.monthlyGrowth?.content || 0}%`}
+            trendUp={true}
+            color="purple"
+          />
+        </motion.div>
 
-        <Card data-testid="card-total-transactions">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Transactions</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" data-testid="metric-total-transactions">
-              {currentData.totalTransactions?.toLocaleString() || '0'}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              <TrendingUp className="h-3 w-3 inline mr-1" />
-              +{currentData.monthlyGrowth?.transactions || 0}% from last month
-            </p>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <AdminStatCard
+            value={currentData.totalTransactions?.toLocaleString() || '0'}
+            label="Transactions"
+            trend={`+${currentData.monthlyGrowth?.transactions || 0}%`}
+            trendUp={true}
+            color="yellow"
+          />
+        </motion.div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6" data-testid="dashboard-tabs">
@@ -344,6 +361,7 @@ export default function AdminDashboard() {
           <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
           <TabsTrigger value="analytics" data-testid="tab-analytics">Analytics</TabsTrigger>
           <TabsTrigger value="system" data-testid="tab-system">System Health</TabsTrigger>
+          <TabsTrigger value="security" data-testid="tab-security">Security</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -419,7 +437,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Link href="/admin/users">
+                <Link href="/panel/admin/users">
                   <Button
                     variant="outline"
                     className="h-20 w-full flex-col gap-2"
@@ -429,7 +447,7 @@ export default function AdminDashboard() {
                     User Management
                   </Button>
                 </Link>
-                <Link href="/admin/complaints">
+                <Link href="/panel/admin/complaints">
                   <Button
                     variant="outline"
                     className="h-20 w-full flex-col gap-2"
@@ -439,7 +457,7 @@ export default function AdminDashboard() {
                     Complaints
                   </Button>
                 </Link>
-                <Link href="/admin/withdrawals">
+                <Link href="/panel/admin/withdrawals">
                   <Button
                     variant="outline"
                     className="h-20 w-full flex-col gap-2"
@@ -449,7 +467,7 @@ export default function AdminDashboard() {
                     Withdrawals
                   </Button>
                 </Link>
-                <Link href="/admin/verification">
+                <Link href="/panel/admin/verification">
                   <Button
                     variant="outline"
                     className="h-20 w-full flex-col gap-2"
@@ -457,6 +475,16 @@ export default function AdminDashboard() {
                   >
                     <Shield className="h-6 w-6" />
                     Verification
+                  </Button>
+                </Link>
+                <Link href="/panel/admin/compliance">
+                  <Button
+                    variant="outline"
+                    className="h-20 w-full flex-col gap-2"
+                    data-testid="button-compliance"
+                  >
+                    <Shield className="h-6 w-6" />
+                    Compliance
                   </Button>
                 </Link>
               </div>
@@ -623,7 +651,199 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="security" className="space-y-6">
+          {/* Security Statistics */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card data-testid="card-total-attempts">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Attempts</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{securityStats?.captureAttempts?.total_attempts || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1">All time</p>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-unique-users">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Unique Users</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{securityStats?.captureAttempts?.unique_users || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1">Attempted capture</p>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-last-24h">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Last 24 Hours</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-orange-500">{securityStats?.captureAttempts?.last_24h || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1">Recent activity</p>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-last-7d">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Last 7 Days</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-yellow-500">{securityStats?.captureAttempts?.last_7d || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1">Weekly trend</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Capture Attempts Breakdown */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card data-testid="card-capture-types">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Capture Type Breakdown
+                </CardTitle>
+                <CardDescription>Distribution by screenshot vs screen recording</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Eye className="h-4 w-4 text-blue-500" />
+                      <span className="text-sm font-medium">Screenshots</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg font-bold">{securityStats?.captureAttempts?.screenshots || 0}</span>
+                    </div>
+                  </div>
+                  <Progress
+                    value={securityStats?.captureAttempts?.total_attempts > 0
+                      ? (securityStats?.captureAttempts?.screenshots / securityStats?.captureAttempts?.total_attempts) * 100
+                      : 0}
+                    className="h-2"
+                  />
+
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center gap-3">
+                      <Activity className="h-4 w-4 text-purple-500" />
+                      <span className="text-sm font-medium">Screen Recordings</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg font-bold">{securityStats?.captureAttempts?.recordings || 0}</span>
+                    </div>
+                  </div>
+                  <Progress
+                    value={securityStats?.captureAttempts?.total_attempts > 0
+                      ? (securityStats?.captureAttempts?.recordings / securityStats?.captureAttempts?.total_attempts) * 100
+                      : 0}
+                    className="h-2"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-security-status">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  Protection Status
+                </CardTitle>
+                <CardDescription>Content security features</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Screenshot Protection</span>
+                    <Badge className="bg-green-100 text-green-700">Active</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Screen Recording Detection</span>
+                    <Badge className="bg-green-100 text-green-700">Active</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Capture Logging</span>
+                    <Badge className="bg-green-100 text-green-700">Active</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Watermarking</span>
+                    <Badge className="bg-blue-100 text-blue-700">Enabled</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recent Capture Attempts Table */}
+          <Card data-testid="card-recent-captures">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-orange-500" />
+                Recent Capture Attempts
+              </CardTitle>
+              <CardDescription>Latest screenshot and screen recording attempts logged</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-3 px-4">Timestamp</th>
+                      <th className="text-left py-3 px-4">User</th>
+                      <th className="text-left py-3 px-4">Type</th>
+                      <th className="text-left py-3 px-4">Content</th>
+                      <th className="text-left py-3 px-4">IP Address</th>
+                      <th className="text-left py-3 px-4">Browser</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {!captureAttempts?.attempts || captureAttempts.attempts.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="text-center py-8 text-muted-foreground">
+                          No capture attempts logged yet
+                        </td>
+                      </tr>
+                    ) : (
+                      captureAttempts.attempts.map((attempt: any, index: number) => (
+                        <tr key={index} className="border-b hover:bg-muted/50" data-testid={`capture-row-${index}`}>
+                          <td className="py-3 px-4">
+                            {new Date(attempt.timestamp).toLocaleString()}
+                          </td>
+                          <td className="py-3 px-4">
+                            {attempt.user_email || `User ${attempt.user_id}`}
+                          </td>
+                          <td className="py-3 px-4">
+                            <Badge variant={attempt.capture_type === 'screenshot' ? 'default' : 'secondary'}>
+                              {attempt.capture_type}
+                            </Badge>
+                          </td>
+                          <td className="py-3 px-4 max-w-xs truncate">
+                            {attempt.content_id || 'N/A'}
+                          </td>
+                          <td className="py-3 px-4 font-mono text-xs">
+                            {attempt.ip_address || 'Unknown'}
+                          </td>
+                          <td className="py-3 px-4 max-w-xs truncate text-xs">
+                            {attempt.user_agent ? attempt.user_agent.substring(0, 50) + '...' : 'Unknown'}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              {captureAttempts?.total > 20 && (
+                <div className="mt-4 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Showing 20 of {captureAttempts.total} total attempts
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

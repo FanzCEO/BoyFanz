@@ -118,28 +118,24 @@ export default function ShopManagement() {
 
   // Fetch shop analytics
   const { data: shopStats } = useQuery<any>({
-    queryKey: ['/api/admin/shop/stats'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator',
+    queryKey: ['/api/admin/shop/stats'] || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 60000 : false
   });
 
   // Fetch revenue analytics
   const { data: revenueStats } = useQuery<any>({
-    queryKey: ['/api/admin/shop/revenue'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator',
+    queryKey: ['/api/admin/shop/revenue'] || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 300000 : false // 5 minutes
   });
 
   // Fetch creators for filter
   const { data: creators } = useQuery<any[]>({
-    queryKey: ['/api/admin/creators'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    queryKey: ['/api/admin/creators'] || user?.role === 'moderator'
   });
 
   // Fetch product categories
   const { data: categories } = useQuery<any[]>({
-    queryKey: ['/api/admin/product-categories'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    queryKey: ['/api/admin/product-categories'] || user?.role === 'moderator'
   });
 
   const products = productsData?.products || [];
@@ -359,19 +355,6 @@ export default function ShopManagement() {
       return () => clearInterval(interval);
     }
   }, [autoRefresh, activeTab, refetchProducts, refetchOrders]);
-
-  if (user?.role !== 'admin' && user?.role !== 'moderator') {
-    return (
-      <div className="space-y-6" data-testid="access-denied">
-        <Alert className="border-destructive/50 bg-destructive/10">
-          <AlertTriangle className="h-4 w-4 text-destructive" />
-          <AlertDescription className="text-destructive">
-            Access denied. Admin or moderator privileges required to manage shop.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
 
   if (error) {
     return (

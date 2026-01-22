@@ -222,7 +222,7 @@ export default function AgentSidebar({ className, collapsed = false, onToggle }:
 
       {/* Footer */}
       <div className="px-3 py-3 border-t border-border">
-        <Link href="/admin/agents">
+        <Link href="/panel/admin/agents">
           <Button variant="outline" size="sm" className="w-full justify-between text-xs">
             <span>View All Agents</span>
             <i className="fas fa-arrow-right text-[10px]"></i>

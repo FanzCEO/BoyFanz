@@ -94,7 +94,7 @@ const DEFAULT_THEME: ProfileTheme = {
   backgroundBlur: 0,
   backgroundOpacity: 100,
 
-  primaryColor: '#ff0000',
+  primaryColor: '#00e5ff',
   secondaryColor: '#d4a959',
   accentColor: '#ff6b6b',
   textColor: '#ffffff',
@@ -129,7 +129,7 @@ const PRESET_THEMES = [
     theme: {
       ...DEFAULT_THEME,
       backgroundGradient: 'linear-gradient(135deg, #0d0d0d 0%, #1a0a0a 50%, #2d0a0a 100%)',
-      primaryColor: '#ff0000',
+      primaryColor: '#00e5ff',
       neonBorders: true,
       glowEffect: true,
     },

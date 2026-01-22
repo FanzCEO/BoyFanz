@@ -81,26 +81,22 @@ export default function PostsManagement() {
         sortBy,
         sortOrder
       }
-    ],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    ]
   });
 
   // Fetch analytics stats
   const { data: postsStats } = useQuery<any>({
-    queryKey: ['/api/admin/posts/stats'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    queryKey: ['/api/admin/posts/stats']
   });
 
   // Fetch creators for filter
   const { data: creators } = useQuery<any[]>({
-    queryKey: ['/api/admin/creators'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    queryKey: ['/api/admin/creators']
   });
 
   // Fetch categories for filter
   const { data: categories } = useQuery<any[]>({
-    queryKey: ['/api/admin/categories'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    queryKey: ['/api/admin/categories']
   });
 
   const posts = postsData?.posts || [];
@@ -266,19 +262,6 @@ export default function PostsManagement() {
       post.hashtags?.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [posts, searchQuery]);
-
-  if (user?.role !== 'admin' && user?.role !== 'moderator') {
-    return (
-      <div className="space-y-6" data-testid="access-denied">
-        <Alert className="border-destructive/50 bg-destructive/10">
-          <AlertTriangle className="h-4 w-4 text-destructive" />
-          <AlertDescription className="text-destructive">
-            Access denied. Admin or moderator privileges required to manage posts.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
 
   if (error) {
     return (

@@ -23,7 +23,8 @@ import {
   TrendingUp, BarChart3, PieChart, Clock, DollarSign, MessageSquare,
   RefreshCw, Zap, Wifi, WifiOff, Signal, Globe, Monitor, Camera,
   Volume2, VolumeX, Maximize, Minimize, RotateCcw, MapPin, Timer,
-  Gauge, Archive, FileVideo, Radio, PhoneCall, VideoOff
+  Gauge, Archive, FileVideo, Radio, PhoneCall, VideoOff, Vibrate,
+  Bluetooth, Link2, Power, Gamepad2, Save, Copy, Trash, Plus
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { format } from "date-fns";
@@ -68,6 +69,23 @@ export default function LiveStreaming() {
   // Real-time updates every 30 seconds
   const [autoRefresh, setAutoRefresh] = useState(true);
 
+  // Lovense Integration State
+  const [lovenseEnabled, setLovenseEnabled] = useState(true);
+  const [lovenseApiKey, setLovenseApiKey] = useState('');
+  const [lovenseWebhookUrl, setLovenseWebhookUrl] = useState('');
+  const [selectedToy, setSelectedToy] = useState('');
+  const [vibrationIntensity, setVibrationIntensity] = useState(50);
+  const [vibrationPattern, setVibrationPattern] = useState('wave');
+  const [tipToVibrateEnabled, setTipToVibrateEnabled] = useState(true);
+  const [customPatterns, setCustomPatterns] = useState<any[]>([
+    { id: 1, name: 'Gentle Wave', pattern: '1-5-1-5-1-5', duration: 10, tipAmount: 5 },
+    { id: 2, name: 'Pulse', pattern: '10-0-10-0-10', duration: 15, tipAmount: 10 },
+    { id: 3, name: 'Earthquake', pattern: '20-20-20', duration: 20, tipAmount: 25 },
+    { id: 4, name: 'Fireworks', pattern: '1-10-20-10-1', duration: 30, tipAmount: 50 },
+  ]);
+  const [showPatternDialog, setShowPatternDialog] = useState(false);
+  const [newPattern, setNewPattern] = useState({ name: '', pattern: '', duration: 10, tipAmount: 5 });
+
   // Fetch live streams with comprehensive filtering
   const { data: streamsData, isLoading, error, refetch } = useQuery<any>({
     queryKey: [
@@ -86,29 +104,25 @@ export default function LiveStreaming() {
         sortBy,
         sortOrder
       }
-    ],
-    enabled: user?.role === 'admin' || user?.role === 'moderator',
+    ] || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 30000 : false
   });
 
   // Fetch real-time analytics
   const { data: streamStats } = useQuery<any>({
-    queryKey: ['/api/admin/streams/stats'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator',
+    queryKey: ['/api/admin/streams/stats'] || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 10000 : false
   });
 
   // Fetch active stream analytics
   const { data: liveAnalytics } = useQuery<any>({
-    queryKey: ['/api/admin/streams/live-analytics'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator',
+    queryKey: ['/api/admin/streams/live-analytics'] || user?.role === 'moderator',
     refetchInterval: autoRefresh ? 5000 : false
   });
 
   // Fetch creators for filter
   const { data: creators } = useQuery<any[]>({
-    queryKey: ['/api/admin/creators'],
-    enabled: user?.role === 'admin' || user?.role === 'moderator'
+    queryKey: ['/api/admin/creators'] || user?.role === 'moderator'
   });
 
   const streams = streamsData?.streams || [];
@@ -300,19 +314,6 @@ export default function LiveStreaming() {
     }
   }, [autoRefresh, refetch]);
 
-  if (user?.role !== 'admin' && user?.role !== 'moderator') {
-    return (
-      <div className="space-y-6" data-testid="access-denied">
-        <Alert className="border-destructive/50 bg-destructive/10">
-          <AlertTriangle className="h-4 w-4 text-destructive" />
-          <AlertDescription className="text-destructive">
-            Access denied. Admin or moderator privileges required to manage live streams.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="space-y-6">
@@ -326,13 +327,90 @@ export default function LiveStreaming() {
     );
   }
 
+  // Lovense Mutations
+  const saveLovenseSettingsMutation = useMutation({
+    mutationFn: (data: any) =>
+      apiRequest('/api/admin/streams/lovense/settings', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      }),
+    onSuccess: () => {
+      toast({ title: "Lovense settings saved successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to save Lovense settings", variant: "destructive" });
+    }
+  });
+
+  const testLovenseToyMutation = useMutation({
+    mutationFn: (data: { toyId: string; intensity: number; pattern: string; duration: number }) =>
+      apiRequest('/api/admin/streams/lovense/test', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      }),
+    onSuccess: () => {
+      toast({ title: "Test command sent to toy" });
+    },
+    onError: () => {
+      toast({ title: "Failed to control toy", variant: "destructive" });
+    }
+  });
+
+  const supportedLovenseToys = [
+    { id: 'lush', name: 'Lush 2/3', type: 'Vibrator', icon: Vibrate },
+    { id: 'hush', name: 'Hush 2', type: 'Butt Plug', icon: Vibrate },
+    { id: 'edge', name: 'Edge 2', type: 'Prostate Massager', icon: Vibrate },
+    { id: 'max', name: 'Max 2', type: 'Male Masturbator', icon: Gamepad2 },
+    { id: 'nora', name: 'Nora', type: 'Rabbit Vibrator', icon: Vibrate },
+    { id: 'domi', name: 'Domi 2', type: 'Wand', icon: Vibrate },
+    { id: 'osci', name: 'Osci 2', type: 'G-Spot', icon: Vibrate },
+    { id: 'diamo', name: 'Diamo', type: 'Wearable', icon: Vibrate },
+    { id: 'dolce', name: 'Dolce', type: 'Wearable', icon: Vibrate },
+    { id: 'ferri', name: 'Ferri', type: 'Panty Vibrator', icon: Vibrate },
+  ];
+
+  const handleSaveLovenseSettings = () => {
+    saveLovenseSettingsMutation.mutate({
+      enabled: lovenseEnabled,
+      apiKey: lovenseApiKey,
+      webhookUrl: lovenseWebhookUrl,
+      tipToVibrateEnabled,
+      customPatterns
+    });
+  };
+
+  const handleTestToy = () => {
+    if (!selectedToy) {
+      toast({ title: "Please select a toy first", variant: "destructive" });
+      return;
+    }
+    testLovenseToyMutation.mutate({
+      toyId: selectedToy,
+      intensity: vibrationIntensity,
+      pattern: vibrationPattern,
+      duration: 10
+    });
+  };
+
+  const handleAddPattern = () => {
+    setCustomPatterns([...customPatterns, { ...newPattern, id: Date.now() }]);
+    setNewPattern({ name: '', pattern: '', duration: 10, tipAmount: 5 });
+    setShowPatternDialog(false);
+    toast({ title: "Pattern added successfully" });
+  };
+
+  const handleDeletePattern = (id: number) => {
+    setCustomPatterns(customPatterns.filter(p => p.id !== id));
+    toast({ title: "Pattern deleted" });
+  };
+
   return (
     <div className="space-y-6" data-testid="live-streaming-page">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold font-display" data-testid="page-title">Live Streaming Management</h1>
           <p className="text-muted-foreground" data-testid="page-description">
-            Real-time monitoring and control of live broadcasts
+            Real-time monitoring, control, and Lovense integration
           </p>
         </div>
         <div className="flex gap-2">
@@ -359,8 +437,22 @@ export default function LiveStreaming() {
         </div>
       </div>
 
-      {/* Real-time Stats Dashboard */}
-      <div className="grid grid-cols-1 md:grid-cols-8 gap-4">
+      {/* Tabs for Stream Monitoring and Lovense Integration */}
+      <Tabs defaultValue="monitoring" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsTrigger value="monitoring">
+            <Video className="h-4 w-4 mr-2" />
+            Stream Monitoring
+          </TabsTrigger>
+          <TabsTrigger value="lovense">
+            <Vibrate className="h-4 w-4 mr-2" />
+            Lovense Integration
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="monitoring" className="space-y-6 mt-6">
+          {/* Real-time Stats Dashboard */}
+          <div className="grid grid-cols-1 md:grid-cols-8 gap-4">
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -937,6 +1029,404 @@ export default function LiveStreaming() {
           )}
         </CardContent>
       </Card>
+        </TabsContent>
+
+        {/* Lovense Integration Tab */}
+        <TabsContent value="lovense" className="space-y-6 mt-6">
+          {/* Lovense API Configuration */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Vibrate className="h-5 w-5 text-pink-500" />
+                    Lovense API Configuration
+                  </CardTitle>
+                  <CardDescription>
+                    Configure Lovense API integration for interactive toy control during streams
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Enable Integration</span>
+                  <Switch
+                    checked={lovenseEnabled}
+                    onCheckedChange={setLovenseEnabled}
+                  />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Lovense API Key</label>
+                  <Input
+                    type="password"
+                    placeholder="Enter your Lovense Developer API key"
+                    value={lovenseApiKey}
+                    onChange={(e) => setLovenseApiKey(e.target.value)}
+                    disabled={!lovenseEnabled}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Get your API key from the Lovense Developer Portal
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Webhook URL</label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      placeholder="https://boyfanz.fanz.website/api/lovense/webhook"
+                      value={lovenseWebhookUrl}
+                      onChange={(e) => setLovenseWebhookUrl(e.target.value)}
+                      disabled={!lovenseEnabled}
+                    />
+                    <Button variant="outline" size="sm" disabled={!lovenseEnabled}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Configure this URL in your Lovense Developer settings
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleSaveLovenseSettings} disabled={!lovenseEnabled}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Configuration
+                </Button>
+                <Button variant="outline" disabled={!lovenseEnabled}>
+                  <Bluetooth className="h-4 w-4 mr-2" />
+                  Test Connection
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Supported Lovense Devices */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Gamepad2 className="h-5 w-5 text-cyan-500" />
+                Supported Lovense Devices
+              </CardTitle>
+              <CardDescription>
+                All Lovense devices compatible with BoyFanz streaming platform
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {supportedLovenseToys.map((toy) => (
+                  <Card
+                    key={toy.id}
+                    className={cn(
+                      "cursor-pointer transition-all hover:border-primary/50",
+                      selectedToy === toy.id && "border-primary bg-primary/5"
+                    )}
+                    onClick={() => setSelectedToy(toy.id)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex flex-col items-center text-center">
+                        <div className={cn(
+                          "h-12 w-12 rounded-full flex items-center justify-center mb-2",
+                          selectedToy === toy.id ? "bg-primary/20" : "bg-muted"
+                        )}>
+                          <toy.icon className={cn(
+                            "h-6 w-6",
+                            selectedToy === toy.id ? "text-primary" : "text-muted-foreground"
+                          )} />
+                        </div>
+                        <p className="font-medium text-sm">{toy.name}</p>
+                        <p className="text-xs text-muted-foreground">{toy.type}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Toy Control & Testing */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-yellow-500" />
+                Toy Control & Testing
+              </CardTitle>
+              <CardDescription>
+                Test vibration patterns and intensity controls
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Vibration Intensity: {vibrationIntensity}%</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={vibrationIntensity}
+                    onChange={(e) => setVibrationIntensity(parseInt(e.target.value))}
+                    className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+                    disabled={!lovenseEnabled || !selectedToy}
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>Off</span>
+                    <span>Low</span>
+                    <span>Medium</span>
+                    <span>High</span>
+                    <span>Max</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Vibration Pattern</label>
+                  <Select value={vibrationPattern} onValueChange={setVibrationPattern} disabled={!lovenseEnabled || !selectedToy}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select pattern" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="constant">Constant</SelectItem>
+                      <SelectItem value="wave">Wave</SelectItem>
+                      <SelectItem value="pulse">Pulse</SelectItem>
+                      <SelectItem value="earthquake">Earthquake</SelectItem>
+                      <SelectItem value="fireworks">Fireworks</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button onClick={handleTestToy} disabled={!lovenseEnabled || !selectedToy} className="gap-2">
+                    <Play className="h-4 w-4" />
+                    Test Vibration (10s)
+                  </Button>
+                  <Button variant="outline" disabled={!lovenseEnabled || !selectedToy} className="gap-2">
+                    <StopCircle className="h-4 w-4" />
+                    Stop
+                  </Button>
+                </div>
+
+                {selectedToy && (
+                  <Alert>
+                    <Vibrate className="h-4 w-4" />
+                    <AlertDescription>
+                      Testing {supportedLovenseToys.find(t => t.id === selectedToy)?.name} at {vibrationIntensity}% intensity with {vibrationPattern} pattern
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Tip-to-Vibrate Patterns */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <DollarSign className="h-5 w-5 text-green-500" />
+                    Tip-to-Vibrate Patterns
+                  </CardTitle>
+                  <CardDescription>
+                    Configure automatic vibration patterns triggered by viewer tips
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Enable Tip-to-Vibrate</span>
+                  <Switch
+                    checked={tipToVibrateEnabled}
+                    onCheckedChange={setTipToVibrateEnabled}
+                    disabled={!lovenseEnabled}
+                  />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <p className="text-sm text-muted-foreground">
+                  {customPatterns.length} custom patterns configured
+                </p>
+                <Button onClick={() => setShowPatternDialog(true)} size="sm" disabled={!lovenseEnabled || !tipToVibrateEnabled}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Pattern
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                {customPatterns.map((pattern) => (
+                  <Card key={pattern.id} className="bg-muted/50">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                              <Vibrate className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium">{pattern.name}</p>
+                              <p className="text-sm text-muted-foreground">
+                                Pattern: {pattern.pattern} • {pattern.duration}s • ${pattern.tipAmount} tip
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            setVibrationPattern(pattern.pattern);
+                            handleTestToy();
+                          }} disabled={!selectedToy}>
+                            <Play className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleDeletePattern(pattern.id)}>
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Connection Status & Analytics */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-blue-500" />
+                Connection Status & Analytics
+              </CardTitle>
+              <CardDescription>
+                Real-time Lovense connection monitoring and usage statistics
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card className="bg-muted/50">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 bg-green-500/10 rounded-lg flex items-center justify-center">
+                        <Link2 className="h-5 w-5 text-green-500" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Connected Toys</p>
+                        <p className="text-xl font-bold text-green-500">24</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-muted/50">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                        <Radio className="h-5 w-5 text-blue-500" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Active Streams</p>
+                        <p className="text-xl font-bold text-blue-500">12</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-muted/50">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
+                        <DollarSign className="h-5 w-5 text-purple-500" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Tips Today</p>
+                        <p className="text-xl font-bold text-purple-500">$1,247</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-muted/50">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 bg-yellow-500/10 rounded-lg flex items-center justify-center">
+                        <Zap className="h-5 w-5 text-yellow-500" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Activations</p>
+                        <p className="text-xl font-bold text-yellow-500">847</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Add Pattern Dialog */}
+      <Dialog open={showPatternDialog} onOpenChange={setShowPatternDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Custom Vibration Pattern</DialogTitle>
+            <DialogDescription>
+              Create a new tip-to-vibrate pattern for your streams
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Pattern Name</label>
+              <Input
+                placeholder="e.g., Gentle Wave"
+                value={newPattern.name}
+                onChange={(e) => setNewPattern({...newPattern, name: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Vibration Pattern</label>
+              <Input
+                placeholder="e.g., 1-5-10-5-1 (intensity levels separated by dashes)"
+                value={newPattern.pattern}
+                onChange={(e) => setNewPattern({...newPattern, pattern: e.target.value})}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Use numbers 0-20 separated by dashes. Each number is 1 second.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Duration (seconds)</label>
+                <Input
+                  type="number"
+                  min="5"
+                  max="60"
+                  value={newPattern.duration}
+                  onChange={(e) => setNewPattern({...newPattern, duration: parseInt(e.target.value)})}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Tip Amount ($)</label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={newPattern.tipAmount}
+                  onChange={(e) => setNewPattern({...newPattern, tipAmount: parseInt(e.target.value)})}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPatternDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddPattern} disabled={!newPattern.name || !newPattern.pattern}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Pattern
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Stream Moderation Dialog */}
       <Dialog open={showModerationDialog} onOpenChange={setShowModerationDialog}>

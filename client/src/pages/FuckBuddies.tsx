@@ -1,638 +1,295 @@
-// @ts-nocheck
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useAuth } from '@/hooks/useAuth';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Users, UserPlus, UserMinus, Heart, MessageCircle, Shield, Ban,
-  Check, X, Search, Filter, Send, Star, Crown, Eye, EyeOff,
-  Bell, BellOff, MoreHorizontal, Settings, Trash2, ThumbsUp
-} from 'lucide-react';
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Dialog, DialogContent, DialogDescription, DialogFooter,
-  DialogHeader, DialogTitle, DialogTrigger,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+import { Users, Heart, Clock, UserPlus, Flame } from 'lucide-react';
+import { Link } from 'wouter';
+
+interface User {
+  id: string;
+  username: string;
+  displayName: string;
+  profileImageUrl?: string;
+  isVerified: boolean;
+  isCreator: boolean;
+  onlineStatus?: string;
+}
 
 interface FuckBuddy {
   id: string;
-  username: string;
-  displayName: string;
-  avatar?: string;
-  isCreator: boolean;
-  isVerified: boolean;
-  status: 'accepted' | 'pending' | 'blocked';
-  mutualFriends: number;
-  addedAt: string;
-  lastActive?: string;
+  userId: string;
+  buddyId: string;
+  relationshipType: string;
+  nickname?: string;
+  isTopEight: boolean;
+  topEightPosition?: number;
+  connectionScore: number;
+  createdAt: string;
+  user?: User;
 }
 
-interface Follower {
+interface BuddyRequest {
   id: string;
-  username: string;
-  displayName: string;
-  avatar?: string;
-  isCreator: boolean;
-  followedAt: string;
-  notificationsEnabled: boolean;
+  senderId: string;
+  receiverId: string;
+  relationshipType: string;
+  message?: string;
+  status: string;
+  createdAt: string;
+  sender?: User;
 }
 
+const RELATIONSHIP_LABELS: Record<string, { emoji: string; label: string }> = {
+  fuckbuddy: { emoji: '🔥', label: 'Fuck Buddy' },
+  fwb: { emoji: '💕', label: 'Friends with Benefits' },
+  crush: { emoji: '💜', label: 'Crush' },
+  lover: { emoji: '❤️', label: 'Lover' },
+  playmate: { emoji: '🎮', label: 'Playmate' },
+  admirer: { emoji: '👀', label: 'Admirer' },
+};
 
-// Content moderation for messages
 export default function FuckBuddies() {
-  const { user } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('buddies');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [thankYouMessage, setThankYouMessage] = useState('');
-  const [selectedUser, setSelectedUser] = useState<FuckBuddy | Follower | null>(null);
-  const [showThankYouDialog, setShowThankYouDialog] = useState(false);
+
+  // Fetch current user
+  const { data: user } = useQuery({
+    queryKey: ['/api/user'],
+    queryFn: async () => {
+      const response = await fetch('/api/user', { credentials: 'include' });
+      if (!response.ok) throw new Error('Failed to fetch user');
+      return response.json();
+    },
+  });
 
   // Fetch fuck buddies
-  const { data: buddies = [], isLoading: buddiesLoading } = useQuery({
+  const { data: buddies, refetch: refetchBuddies } = useQuery({
     queryKey: ['/api/fuck-buddies', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      const res = await fetch(`/api/fuck-buddies/${user.id}`);
-      if (!res.ok) return [];
-      return res.json();
-    }
+      const response = await fetch(`/api/fuck-buddies/${user.id}`, { credentials: 'include' });
+      if (!response.ok) throw new Error('Failed to fetch buddies');
+      const data = await response.json();
+      return data.buddies || [];
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch top 8
+  const { data: topEight } = useQuery({
+    queryKey: ['/api/fuck-buddies', user?.id, 'top-eight'],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const response = await fetch(`/api/fuck-buddies/${user.id}/top-eight`, { credentials: 'include' });
+      if (!response.ok) throw new Error('Failed to fetch top eight');
+      const data = await response.json();
+      return data.topEight || [];
+    },
+    enabled: !!user?.id,
   });
 
   // Fetch pending requests
-  const { data: requests = [], isLoading: requestsLoading } = useQuery({
-    queryKey: ['/api/fuck-buddies/requests'],
+  const { data: requests, refetch: refetchRequests } = useQuery({
+    queryKey: ['/api/fuck-buddies/requests/pending'],
     queryFn: async () => {
-      const res = await fetch('/api/fuck-buddies/requests/pending');
-      if (!res.ok) return [];
-      return res.json();
-    }
-  });
-
-  // Fetch blocked users
-  const { data: blocked = [], isLoading: blockedLoading } = useQuery({
-    queryKey: ['/api/blocked-users'],
-    queryFn: async () => {
-      const res = await fetch('/api/users/blocked');
-      if (!res.ok) return [];
-      return res.json();
-    }
-  });
-
-  // Fetch followers
-  const { data: followers = [], isLoading: followersLoading } = useQuery({
-    queryKey: ['/api/followers'],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      const res = await fetch(`/api/users/${user.id}/followers`);
-      if (!res.ok) return [];
-      return res.json();
-    }
-  });
-
-  // Fetch fanz (subscribers)
-  const { data: fanz = [], isLoading: fanzLoading } = useQuery({
-    queryKey: ['/api/subscribers'],
-    queryFn: async () => {
-      const res = await fetch('/api/subscribers');
-      if (!res.ok) return [];
-      return res.json();
-    }
-  });
-
-  // Mutations
-  const acceptRequest = useMutation({
-    mutationFn: async (userId: string) => {
-      const res = await fetch(`/api/fuck-buddies/accept/${userId}`, { method: 'POST' });
-      if (!res.ok) throw new Error('Failed to accept');
-      return res.json();
+      const response = await fetch('/api/fuck-buddies/requests/pending', { credentials: 'include' });
+      if (!response.ok) throw new Error('Failed to fetch requests');
+      const data = await response.json();
+      return data.requests || [];
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/fuck-buddies'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/fuck-buddies/requests'] });
-      toast({ title: 'Request accepted!', description: 'You have a new fuck buddy 🔥' });
-    }
   });
 
-  const rejectRequest = useMutation({
-    mutationFn: async (userId: string) => {
-      const res = await fetch(`/api/fuck-buddies/reject/${userId}`, { method: 'POST' });
-      if (!res.ok) throw new Error('Failed to reject');
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/fuck-buddies/requests'] });
-      toast({ title: 'Request rejected' });
-    }
-  });
-
-  const blockUser = useMutation({
-    mutationFn: async (userId: string) => {
-      const res = await fetch(`/api/users/${userId}/block`, { method: 'POST' });
-      if (!res.ok) throw new Error('Failed to block');
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/blocked-users'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/fuck-buddies'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/followers'] });
-      toast({ title: 'User blocked', description: 'They can no longer see your content' });
-    }
-  });
-
-  const unblockUser = useMutation({
-    mutationFn: async (userId: string) => {
-      const res = await fetch(`/api/users/${userId}/unblock`, { method: 'POST' });
-      if (!res.ok) throw new Error('Failed to unblock');
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/blocked-users'] });
-      toast({ title: 'User unblocked' });
-    }
-  });
-
-  const removeBuddy = useMutation({
-    mutationFn: async (userId: string) => {
-      const res = await fetch(`/api/fuck-buddies/${userId}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to remove');
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/fuck-buddies'] });
-      toast({ title: 'Buddy removed' });
-    }
-  });
-
-  const toggleFollowerNotifications = useMutation({
-    mutationFn: async ({ userId, enabled }: { userId: string; enabled: boolean }) => {
-      const res = await fetch(`/api/followers/${userId}/notifications`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled })
-      });
-      if (!res.ok) throw new Error('Failed to update');
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/followers'] });
-    }
-  });
-
-  const sendThankYou = useMutation({
-    mutationFn: async ({ userId, message }: { userId: string; message: string }) => {
-      const res = await fetch('/api/messages', {
+  const handleRespondRequest = async (requestId: string, action: 'accept' | 'decline') => {
+    try {
+      const response = await fetch(`/api/fuck-buddies/request/${requestId}/respond`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipientId: userId, content: message, isThankYou: true })
+        credentials: 'include',
+        body: JSON.stringify({ action }),
       });
-      if (!res.ok) throw new Error('Failed to send');
-      return res.json();
-    },
-    onSuccess: () => {
-      setShowThankYouDialog(false);
-      setThankYouMessage('');
-      setSelectedUser(null);
-      toast({ title: 'Thank you sent! 💜', description: 'Your appreciation has been delivered' });
+
+      if (!response.ok) throw new Error(`Failed to ${action} request`);
+
+      toast({
+        title: action === 'accept' ? 'Request accepted' : 'Request declined',
+        description: action === 'accept' ? 'You are now fuck buddies!' : 'Request has been declined',
+      });
+
+      refetchRequests();
+      refetchBuddies();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to respond to request',
+        variant: 'destructive',
+      });
     }
-  });
+  };
 
-  const filteredBuddies = (Array.isArray(buddies) ? buddies : []).filter((b: FuckBuddy) => 
-    b.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    b.displayName?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const renderBuddyCard = (buddy: FuckBuddy) => {
+    const relationship = RELATIONSHIP_LABELS[buddy.relationshipType] || RELATIONSHIP_LABELS.fuckbuddy;
 
-  const filteredFollowers = (Array.isArray(followers) ? followers : []).filter((f: Follower) =>
-    f.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    f.displayName?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    return (
+      <Card key={buddy.id}>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <Link href={`/creator/${buddy.user?.username || buddy.buddyId}`}>
+              <Avatar className="h-12 w-12 cursor-pointer">
+                <AvatarImage src={buddy.user?.profileImageUrl} />
+                <AvatarFallback>{buddy.user?.displayName?.[0] || '?'}</AvatarFallback>
+              </Avatar>
+            </Link>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <Link href={`/creator/${buddy.user?.username || buddy.buddyId}`}>
+                  <h3 className="font-semibold hover:underline cursor-pointer">
+                    {buddy.nickname || buddy.user?.displayName || 'Unknown'}
+                  </h3>
+                </Link>
+                {buddy.user?.isVerified && (
+                  <Badge variant="secondary" className="text-xs">✓</Badge>
+                )}
+                {buddy.isTopEight && (
+                  <Badge variant="default" className="text-xs">Top {buddy.topEightPosition || 8}</Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>{relationship.emoji} {relationship.label}</span>
+                {buddy.user?.onlineStatus === 'online' && (
+                  <Badge variant="outline" className="text-xs">Online</Badge>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderRequestCard = (request: BuddyRequest) => {
+    const relationship = RELATIONSHIP_LABELS[request.relationshipType] || RELATIONSHIP_LABELS.fuckbuddy;
+
+    return (
+      <Card key={request.id}>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <Link href={`/creator/${request.sender?.username || request.senderId}`}>
+              <Avatar className="h-12 w-12 cursor-pointer">
+                <AvatarImage src={request.sender?.profileImageUrl} />
+                <AvatarFallback>{request.sender?.displayName?.[0] || '?'}</AvatarFallback>
+              </Avatar>
+            </Link>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <Link href={`/creator/${request.sender?.username || request.senderId}`}>
+                  <h3 className="font-semibold hover:underline cursor-pointer">
+                    {request.sender?.displayName || 'Unknown'}
+                  </h3>
+                </Link>
+                {request.sender?.isVerified && (
+                  <Badge variant="secondary" className="text-xs">✓</Badge>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {relationship.emoji} Wants to be your {relationship.label}
+              </p>
+              {request.message && (
+                <p className="text-sm mt-1 italic">&quot;{request.message}&quot;</p>
+              )}
+              <div className="flex gap-2 mt-2">
+                <Button size="sm" onClick={() => handleRespondRequest(request.id, 'accept')}>
+                  Accept
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => handleRespondRequest(request.id, 'decline')}>
+                  Decline
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
-    <div className="container max-w-6xl mx-auto p-4 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Heart className="h-8 w-8 text-pink-500" />
-            Fuck Buddies
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your connections, followers, and fanz
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Badge variant="secondary" className="text-lg px-4 py-2">
+    <div className="container max-w-4xl mx-auto py-8 px-4">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <Flame className="h-8 w-8 text-orange-500" />
+          Fuck Buddies
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          Manage your connections and relationships
+        </p>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="buddies">
             <Users className="h-4 w-4 mr-2" />
-            {(Array.isArray(buddies) ? buddies : []).length} Buddies
-          </Badge>
-          <Badge variant="outline" className="text-lg px-4 py-2">
-            <Star className="h-4 w-4 mr-2" />
-            {(Array.isArray(fanz) ? fanz : []).length} Fanz
-          </Badge>
-        </div>
-      </div>
-
-      <div className="flex gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search connections..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="buddies" className="flex items-center gap-2">
-            <Heart className="h-4 w-4" />
-            Buddies ({buddies.length})
+            My Buddies ({buddies?.length || 0})
           </TabsTrigger>
-          <TabsTrigger value="requests" className="flex items-center gap-2">
-            <UserPlus className="h-4 w-4" />
-            Requests ({(Array.isArray(requests) ? requests : []).length})
+          <TabsTrigger value="top-eight">
+            <Heart className="h-4 w-4 mr-2" />
+            Top 8 ({topEight?.length || 0})
           </TabsTrigger>
-          <TabsTrigger value="followers" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Followers ({(Array.isArray(followers) ? followers : []).length})
-          </TabsTrigger>
-          <TabsTrigger value="fanz" className="flex items-center gap-2">
-            <Crown className="h-4 w-4" />
-            Fanz ({fanz.length})
-          </TabsTrigger>
-          <TabsTrigger value="blocked" className="flex items-center gap-2">
-            <Ban className="h-4 w-4" />
-            Blocked ({(Array.isArray(blocked) ? blocked : []).length})
+          <TabsTrigger value="requests">
+            <Clock className="h-4 w-4 mr-2" />
+            Requests ({requests?.length || 0})
           </TabsTrigger>
         </TabsList>
 
-        {/* Fuck Buddies Tab */}
-        <TabsContent value="buddies" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Fuck Buddies</CardTitle>
-              <CardDescription>People you've connected with intimately</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {buddiesLoading ? (
-                <div className="text-center py-8">Loading...</div>
-              ) : filteredBuddies.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Heart className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No fuck buddies yet</p>
-                  <p className="text-sm">Start connecting to build your network</p>
-                </div>
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {filteredBuddies.map((buddy: FuckBuddy) => (
-                    <Card key={buddy.id} className="relative">
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage src={buddy.avatar} />
-                            <AvatarFallback>{buddy.username?.[0]?.toUpperCase()}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold truncate">{buddy.displayName || buddy.username}</span>
-                              {buddy.isVerified && <Badge variant="secondary" className="text-xs">✓</Badge>}
-                              {buddy.isCreator && <Crown className="h-4 w-4 text-yellow-500" />}
-                            </div>
-                            <p className="text-sm text-muted-foreground">@{buddy.username}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {buddy.mutualFriends} mutual friends
-                            </p>
-                          </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => window.location.href = `/messages?user=${buddy.id}`}>
-                                <MessageCircle className="h-4 w-4 mr-2" />
-                                Message
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => { setSelectedUser(buddy); setShowThankYouDialog(true); }}>
-                                <ThumbsUp className="h-4 w-4 mr-2" />
-                                Send Thank You
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                className="text-destructive"
-                                onClick={() => removeBuddy.mutate(buddy.id)}
-                              >
-                                <UserMinus className="h-4 w-4 mr-2" />
-                                Remove Buddy
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                className="text-destructive"
-                                onClick={() => blockUser.mutate(buddy.id)}
-                              >
-                                <Ban className="h-4 w-4 mr-2" />
-                                Block
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        <TabsContent value="buddies" className="mt-6 space-y-4">
+          {!buddies || buddies.length === 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-center">No Buddies Yet</CardTitle>
+                <CardDescription className="text-center">
+                  Start connecting with other members to build your network
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          ) : (
+            buddies.map(renderBuddyCard)
+          )}
         </TabsContent>
 
-        {/* Friend Requests Tab */}
-        <TabsContent value="requests" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Pending Requests</CardTitle>
-              <CardDescription>People who want to be your fuck buddy</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {requestsLoading ? (
-                <div className="text-center py-8">Loading...</div>
-              ) : requests.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <UserPlus className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No pending requests</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {(Array.isArray(requests) ? requests : []).map((request: FuckBuddy) => (
-                    <div key={request.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage src={request.avatar} />
-                          <AvatarFallback>{request.username?.[0]?.toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold">{request.displayName || request.username}</span>
-                            {request.isCreator && <Crown className="h-4 w-4 text-yellow-500" />}
-                          </div>
-                          <p className="text-sm text-muted-foreground">@{request.username}</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          onClick={() => acceptRequest.mutate(request.id)}
-                          disabled={acceptRequest.isPending}
-                        >
-                          <Check className="h-4 w-4 mr-1" />
-                          Accept
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => rejectRequest.mutate(request.id)}
-                          disabled={rejectRequest.isPending}
-                        >
-                          <X className="h-4 w-4 mr-1" />
-                          Decline
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="destructive"
-                          onClick={() => blockUser.mutate(request.id)}
-                        >
-                          <Ban className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        <TabsContent value="top-eight" className="mt-6 space-y-4">
+          {!topEight || topEight.length === 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-center">No Top 8 Selected</CardTitle>
+                <CardDescription className="text-center">
+                  Add your favorite buddies to your Top 8
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {topEight.map(renderBuddyCard)}
+            </div>
+          )}
         </TabsContent>
 
-        {/* Followers Tab */}
-        <TabsContent value="followers" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Followers</CardTitle>
-              <CardDescription>Toggle notifications and manage who follows you</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {followersLoading ? (
-                <div className="text-center py-8">Loading...</div>
-              ) : filteredFollowers.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No followers yet</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {filteredFollowers.map((follower: Follower) => (
-                    <div key={follower.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={follower.avatar} />
-                          <AvatarFallback>{follower.username?.[0]?.toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <span className="font-semibold">{follower.displayName || follower.username}</span>
-                          <p className="text-sm text-muted-foreground">@{follower.username}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          <Label htmlFor={`notify-${follower.id}`} className="text-sm">
-                            {follower.notificationsEnabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
-                          </Label>
-                          <Switch
-                            id={`notify-${follower.id}`}
-                            checked={follower.notificationsEnabled}
-                            onCheckedChange={(checked) => 
-                              toggleFollowerNotifications.mutate({ userId: follower.id, enabled: checked })
-                            }
-                          />
-                        </div>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => { setSelectedUser(follower); setShowThankYouDialog(true); }}
-                        >
-                          <Send className="h-4 w-4 mr-1" />
-                          Thank
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="destructive"
-                          onClick={() => blockUser.mutate(follower.id)}
-                        >
-                          <Ban className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Fanz Tab */}
-        <TabsContent value="fanz" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Fanz</CardTitle>
-              <CardDescription>Paying subscribers who support your content</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {fanzLoading ? (
-                <div className="text-center py-8">Loading...</div>
-              ) : fanz.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Crown className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No fanz subscribers yet</p>
-                  <p className="text-sm">Share your profile to gain supporters</p>
-                </div>
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {(Array.isArray(fanz) ? fanz : []).map((fan: any) => (
-                    <Card key={fan.id}>
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage src={fan.avatar} />
-                            <AvatarFallback>{fan.username?.[0]?.toUpperCase()}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold">{fan.displayName || fan.username}</span>
-                              <Crown className="h-4 w-4 text-yellow-500" />
-                            </div>
-                            <p className="text-sm text-muted-foreground">@{fan.username}</p>
-                            <p className="text-xs text-green-600 mt-1">
-                              ${fan.totalSpent?.toFixed(2) || '0.00'} lifetime
-                            </p>
-                          </div>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => { setSelectedUser(fan); setShowThankYouDialog(true); }}
-                          >
-                            <ThumbsUp className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Blocked Tab */}
-        <TabsContent value="blocked" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Blocked Users</CardTitle>
-              <CardDescription>Users who cannot see or interact with your content</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {blockedLoading ? (
-                <div className="text-center py-8">Loading...</div>
-              ) : blocked.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No blocked users</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {(Array.isArray(blocked) ? blocked : []).map((user: any) => (
-                    <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10 opacity-50">
-                          <AvatarImage src={user.avatar} />
-                          <AvatarFallback>{user.username?.[0]?.toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <span className="font-semibold">{user.displayName || user.username}</span>
-                          <p className="text-sm text-muted-foreground">@{user.username}</p>
-                        </div>
-                      </div>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => unblockUser.mutate(user.id)}
-                        disabled={unblockUser.isPending}
-                      >
-                        Unblock
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        <TabsContent value="requests" className="mt-6 space-y-4">
+          {!requests || requests.length === 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-center">No Pending Requests</CardTitle>
+                <CardDescription className="text-center">
+                  You don&apos;t have any pending buddy requests
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          ) : (
+            requests.map(renderRequestCard)
+          )}
         </TabsContent>
       </Tabs>
-
-      {/* Thank You Dialog */}
-      <Dialog open={showThankYouDialog} onOpenChange={setShowThankYouDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Send a Thank You 💜</DialogTitle>
-            <DialogDescription>
-              Show your appreciation to {selectedUser?.displayName || selectedUser?.username}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <Textarea
-              placeholder="Write a personal thank you message..."
-              value={thankYouMessage}
-              onChange={(e) => setThankYouMessage(e.target.value)}
-              rows={4}
-            />
-            <div className="flex gap-2 flex-wrap">
-              {['Thanks for the support! 💕', 'You are amazing! 🔥', 'Love having you here! 😘', 'You make my day! ✨'].map((msg) => (
-                <Button
-                  key={msg}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setThankYouMessage(msg)}
-                >
-                  {msg}
-                </Button>
-              ))}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowThankYouDialog(false)}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={() => selectedUser && sendThankYou.mutate({ userId: selectedUser.id, message: thankYouMessage })}
-              disabled={!thankYouMessage || sendThankYou.isPending}
-            >
-              <Send className="h-4 w-4 mr-2" />
-              Send Thank You
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

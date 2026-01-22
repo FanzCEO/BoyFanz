@@ -52,11 +52,16 @@ companionship during difficult times, reminding us that every creature deserves 
 
   funding: {
     profitSharing: {
-      description: "A significant portion of all profits from Fanz ecosystem platforms is donated to The Wittle Bear Foundation. We believe in giving back substantially - not just ad revenue, but a meaningful share of everything we earn."
+      description: "30% of all ad revenue from creator profiles goes directly to The Wittle Bear Foundation. Creators keep 100% of their subscription, tip, and PPV earnings - we never take a cut from creators."
     },
     creatorDonations: {
-      description: "Creators can optionally donate a portion of their earnings to further support the foundation.",
+      description: "Creators can optionally donate all or part of their earnings to the foundation through their dashboard settings.",
       default: 0
+    },
+    adRevenueSplit: {
+      creatorShare: 70,
+      foundationShare: 30,
+      description: "Creators earn 70% of ad revenue displayed on their profiles. The remaining 30% supports homeless LGBTQ+ youth and shelter animals."
     },
     directDonations: {
       enabled: true,
@@ -65,12 +70,7 @@ companionship during difficult times, reminding us that every creature deserves 
   },
 
   impact: {
-    stats: [
-      { label: "Youth Housed", value: "500+", description: "LGBTQ+ youth provided emergency housing" },
-      { label: "Animals Adopted", value: "2,000+", description: "Shelter animals found forever homes" },
-      { label: "Meals Provided", value: "50,000+", description: "Meals served to youth in need" },
-      { label: "Counseling Sessions", value: "10,000+", description: "Mental health support sessions" }
-    ]
+    description: "We publish quarterly impact reports showing exactly where funds go. Every dollar makes a difference for LGBTQ+ youth and shelter animals in need."
   },
 
   contact: {
@@ -89,7 +89,7 @@ companionship during difficult times, reminding us that every creature deserves 
     },
     {
       question: "How is the foundation funded?",
-      answer: "A large portion of all profits from Fanz ecosystem platforms is donated to the foundation - not just ad revenue, but a meaningful share of everything we earn. Creators can also donate a portion of their earnings, and we accept direct donations."
+      answer: "30% of all ad revenue from creator profiles goes directly to the foundation. Creators keep 100% of their subscriptions, tips, and PPV - we never take a cut. Creators can also choose to donate part of their earnings, and we accept direct donations."
     },
     {
       question: "Why focus on LGBTQ+ youth?",
@@ -138,8 +138,8 @@ Founded in loving memory of Wittle Bear, a beloved yorkie, this foundation was c
 - Foster family programs
 
 ## How We're Funded
-- A large portion of all Fanz ecosystem profits
-- Creator voluntary donations
+- 30% of all ad revenue from creator profiles
+- Creator voluntary donations (they keep 100% of subs/tips/PPV)
 - Direct public donations
 - Corporate partnerships
 
@@ -151,11 +151,13 @@ Every day, we help LGBTQ+ youth find safe housing and support, while also ensuri
       slug: "fanz-foundation-support",
       content: `# How Fanz Platforms Support The Wittle Bear Foundation
 
-## Profit Sharing
-Every Fanz ecosystem platform (BoyFanz, GirlFanz, TransFanz, PupFanz, and more) donates a large portion of all profits to The Wittle Bear Foundation. This isn't just advertising revenue - it's a meaningful share of everything we earn as a company.
+## Revenue Model
+- **Creators keep 100%** of all subscription, tip, and PPV earnings - we never take a cut
+- **Ad revenue split**: Creators get 70%, Foundation gets 30% of ad revenue on their profiles
+- **Creator choice**: Creators can optionally donate all or part of their earnings through dashboard settings
 
 ## Creator Donations
-Creators can choose to donate a portion of their earnings to the foundation. This is completely optional and set by each creator.
+Creators can choose to donate a portion of their earnings to the foundation. This is completely optional and set by each creator in their earnings settings.
 
 ## Platform Integration
 The foundation is integrated throughout all Fanz platforms:
@@ -166,10 +168,10 @@ The foundation is integrated throughout all Fanz platforms:
 
 ## Transparency
 We publish quarterly reports showing:
-- Total profits generated
+- Total ad revenue generated
+- Creator donation totals
 - Amount donated to foundation
-- Programs funded
-- Impact metrics
+- Programs funded and impact metrics
 
 ## Get Involved
 Even if you're not a creator, you can support the foundation by:

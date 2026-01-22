@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { User, Shield, Bell, Key, Webhook, Save, Copy, Plus, Trash2, Upload, Camera } from "lucide-react";
+import { User, Shield, Bell, Key, Webhook, Save, Copy, Plus, Trash2, Upload, Camera, Instagram, Twitter, Youtube, Facebook, ShoppingBag, Link2, Mail } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function Settings() {
@@ -21,7 +21,16 @@ export default function Settings() {
   const [profileForm, setProfileForm] = useState({
     displayName: '',
     bio: '',
-    avatarUrl: ''
+    avatarUrl: '',
+    socialLinks: {
+      instagram: '',
+      twitter: '',
+      facebook: '',
+      youtube: '',
+      amazon: '',
+      fanzlink: ''
+    },
+    showEmailOnProfile: false
   });
   const [notificationSettings, setNotificationSettings] = useState({
     email: true,
@@ -311,7 +320,146 @@ export default function Settings() {
                     data-testid="bio-input"
                   />
                 </div>
-                
+
+                <Separator />
+
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-medium mb-1">Social Media Links</h3>
+                    <p className="text-sm text-muted-foreground">Add your social media profiles and links</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="instagram" className="flex items-center gap-2">
+                        <Instagram className="h-4 w-4 text-pink-500" />
+                        Instagram
+                      </Label>
+                      <Input
+                        id="instagram"
+                        value={profileForm.socialLinks.instagram}
+                        onChange={(e) => setProfileForm(prev => ({
+                          ...prev,
+                          socialLinks: { ...prev.socialLinks, instagram: e.target.value }
+                        }))}
+                        placeholder="username"
+                        data-testid="instagram-input"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="twitter" className="flex items-center gap-2">
+                        <Twitter className="h-4 w-4 text-sky-500" />
+                        Twitter/X
+                      </Label>
+                      <Input
+                        id="twitter"
+                        value={profileForm.socialLinks.twitter}
+                        onChange={(e) => setProfileForm(prev => ({
+                          ...prev,
+                          socialLinks: { ...prev.socialLinks, twitter: e.target.value }
+                        }))}
+                        placeholder="username"
+                        data-testid="twitter-input"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="facebook" className="flex items-center gap-2">
+                        <Facebook className="h-4 w-4 text-blue-500" />
+                        Facebook
+                      </Label>
+                      <Input
+                        id="facebook"
+                        value={profileForm.socialLinks.facebook}
+                        onChange={(e) => setProfileForm(prev => ({
+                          ...prev,
+                          socialLinks: { ...prev.socialLinks, facebook: e.target.value }
+                        }))}
+                        placeholder="username"
+                        data-testid="facebook-input"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="youtube" className="flex items-center gap-2">
+                        <Youtube className="h-4 w-4 text-red-500" />
+                        YouTube
+                      </Label>
+                      <Input
+                        id="youtube"
+                        value={profileForm.socialLinks.youtube}
+                        onChange={(e) => setProfileForm(prev => ({
+                          ...prev,
+                          socialLinks: { ...prev.socialLinks, youtube: e.target.value }
+                        }))}
+                        placeholder="channel name"
+                        data-testid="youtube-input"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="amazon" className="flex items-center gap-2">
+                        <ShoppingBag className="h-4 w-4 text-amber-500" />
+                        Amazon Gift Registry
+                      </Label>
+                      <Input
+                        id="amazon"
+                        value={profileForm.socialLinks.amazon}
+                        onChange={(e) => setProfileForm(prev => ({
+                          ...prev,
+                          socialLinks: { ...prev.socialLinks, amazon: e.target.value }
+                        }))}
+                        placeholder="https://www.amazon.com/..."
+                        data-testid="amazon-input"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="fanzlink" className="flex items-center gap-2">
+                        <Link2 className="h-4 w-4 text-cyan-500" />
+                        FanzLink Bio
+                      </Label>
+                      <Input
+                        id="fanzlink"
+                        value={profileForm.socialLinks.fanzlink}
+                        onChange={(e) => setProfileForm(prev => ({
+                          ...prev,
+                          socialLinks: { ...prev.socialLinks, fanzlink: e.target.value }
+                        }))}
+                        placeholder="https://fanzlink.com/..."
+                        data-testid="fanzlink-input"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-medium mb-1">Privacy & Visibility</h3>
+                    <p className="text-sm text-muted-foreground">Control what information is visible on your public profile</p>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 border border-border rounded-lg bg-card/50">
+                    <div className="flex items-start gap-3 flex-1">
+                      <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
+                      <div>
+                        <h4 className="font-medium">Show Email on Profile</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Allow visitors to see your email address on your public creator profile. When enabled, a contact button will appear on your profile.
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={profileForm.showEmailOnProfile}
+                      onCheckedChange={(checked) => setProfileForm(prev => ({ ...prev, showEmailOnProfile: checked }))}
+                      data-testid="show-email-switch"
+                    />
+                  </div>
+                </div>
+
                 <Button type="submit" disabled={updateProfileMutation.isPending} data-testid="save-profile-button">
                   <Save className="mr-2 h-4 w-4" />
                   {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}

@@ -195,36 +195,42 @@ export function setupLocalAuth(app: Express) {
   // Get current authenticated user endpoint
   app.get("/api/auth/user", (req, res) => {
     try {
-      // Check if user is authenticated
+      // Check if user is authenticated - return 200 always
       if (!req.isAuthenticated || !req.isAuthenticated()) {
-        return res.status(401).json({ 
-          error: 'Not authenticated',
-          message: 'User is not logged in'
+        return res.json({
+          authenticated: false,
+          user: null
         });
       }
 
       // User is authenticated, return user data
       const user = req.user;
       if (!user) {
-        return res.status(403).json({ 
-          error: 'User not found',
-          message: 'Authenticated but user data not available'
+        return res.json({
+          authenticated: false,
+          user: null
         });
       }
 
-      // Make sure we don't return password (extra safety)
-      const { password, ...userWithoutPassword } = user as any;
-      
-      res.status(200).json(userWithoutPassword);
+      res.json({
+        authenticated: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          isCreator: user.isCreator,
+          displayName: user.displayName,
+          bio: user.bio,
+          avatarUrl: user.avatarUrl,
+          headerUrl: user.headerUrl
+        }
+      });
     } catch (error) {
-      logger.error({
-        err: error,
-        userId: req.user?.id
-      }, 'Error getting authenticated user');
-      
-      res.status(500).json({ 
-        error: 'Internal server error',
-        message: 'Failed to retrieve user information'
+      console.error("Error getting user:", error);
+      res.json({
+        authenticated: false,
+        user: null
       });
     }
   });

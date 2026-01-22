@@ -95,14 +95,12 @@ export default function WithdrawalsManagement() {
       sortOrder,
       limit,
       offset: page * limit
-    }],
-    enabled: user?.role === 'admin'
+    }]
   });
 
   // Fetch payout statistics
   const { data: statsData } = useQuery({
-    queryKey: ['/api/admin/payouts/stats'],
-    enabled: user?.role === 'admin'
+    queryKey: ['/api/admin/payouts/stats']
   });
 
   // Fetch audit trail for selected payout
@@ -196,19 +194,6 @@ export default function WithdrawalsManagement() {
       currency: currency
     }).format(amount);
   };
-
-  if (user?.role !== 'admin') {
-    return (
-      <div className="space-y-6" data-testid="access-denied">
-        <Alert className="border-destructive/50 bg-destructive/10">
-          <AlertTriangle className="h-4 w-4 text-destructive" />
-          <AlertDescription className="text-destructive">
-            Access denied. Admin privileges required to manage withdrawals.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
 
   const stats = statsData as PayoutStats | undefined;
 

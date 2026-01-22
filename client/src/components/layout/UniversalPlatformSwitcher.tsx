@@ -80,7 +80,7 @@ interface PlatformSwitcherProps {
 const FAN_PLATFORMS: FanzPlatform[] = [
   {
     id: 'boyfanz', name: 'BoyFanz', slug: 'boyfanz', domain: 'boy.fanz.website', port: 3003,
-    logoUrl: '/platforms/boyfanz-logo.png', primaryColor: '#ff0000', secondaryColor: '#d4af37',
+    logoUrl: '/platforms/boyfanz-logo.png', primaryColor: '#00e5ff', secondaryColor: '#d4af37',
     accentColor: '#ffffff', backgroundColor: '#0a0a0a', description: 'Premium male content creators',
     tagline: "Every Man's Playground", category: 'fan_platform', status: 'active',
     isUserFacing: true, requiresAuth: false, ssoEnabled: true, platformId: 'boyfanz', dbName: 'boyfanz_db',
@@ -94,7 +94,7 @@ const FAN_PLATFORMS: FanzPlatform[] = [
   },
   {
     id: 'gayfanz', name: 'GayFanz', slug: 'gayfanz', domain: 'gay.fanz.website', port: 3014,
-    logoUrl: '/platforms/gayfanz-logo.png', primaryColor: '#ff0000', secondaryColor: '#d4af37',
+    logoUrl: '/platforms/gayfanz-logo.png', primaryColor: '#00e5ff', secondaryColor: '#d4af37',
     accentColor: '#d4af37', backgroundColor: '#000000', description: 'LGBTQ+ male creators',
     category: 'fan_platform', status: 'active', isUserFacing: true, requiresAuth: false,
     ssoEnabled: true, platformId: 'gayfanz', dbName: 'gayfanz_db',
@@ -108,7 +108,7 @@ const FAN_PLATFORMS: FanzPlatform[] = [
   },
   {
     id: 'milffanz', name: 'MilfFanz', slug: 'milffanz', domain: 'milf.fanz.website', port: 3017,
-    logoUrl: '/platforms/milffanz-logo.png', primaryColor: '#ff0000', secondaryColor: '#d4af37',
+    logoUrl: '/platforms/milffanz-logo.png', primaryColor: '#00e5ff', secondaryColor: '#d4af37',
     accentColor: '#d4af37', backgroundColor: '#000000', description: 'Mature women creators',
     category: 'fan_platform', status: 'active', isUserFacing: true, requiresAuth: false,
     ssoEnabled: true, platformId: 'milffanz', dbName: 'milffanz_db',
@@ -122,7 +122,7 @@ const FAN_PLATFORMS: FanzPlatform[] = [
   },
   {
     id: 'bearfanz', name: 'BearFanz', slug: 'bearfanz', domain: 'bear.fanz.website', port: 3005,
-    logoUrl: '/platforms/bearfanz-logo.png', primaryColor: '#ff0000', secondaryColor: '#d4af37',
+    logoUrl: '/platforms/bearfanz-logo.png', primaryColor: '#00e5ff', secondaryColor: '#d4af37',
     accentColor: '#d4af37', backgroundColor: '#050505', description: 'Bear community creators',
     category: 'fan_platform', status: 'active', isUserFacing: true, requiresAuth: false,
     ssoEnabled: true, platformId: 'bearfanz', dbName: 'bearfanz_db',
@@ -150,14 +150,14 @@ const FAN_PLATFORMS: FanzPlatform[] = [
   },
   {
     id: 'fanzuncut', name: 'FanzUncut', slug: 'fanzuncut', domain: 'uncut.fanz.website', port: 3020,
-    logoUrl: '/platforms/fanzuncut-logo.png', primaryColor: '#ff0000', secondaryColor: '#d4af37',
+    logoUrl: '/platforms/fanzuncut-logo.png', primaryColor: '#00e5ff', secondaryColor: '#d4af37',
     accentColor: '#d4af37', backgroundColor: '#050505', description: 'Uncensored content',
     category: 'fan_platform', status: 'active', isUserFacing: true, requiresAuth: false,
     ssoEnabled: true, platformId: 'fanzuncut', dbName: 'fanzuncut_db',
   },
   {
     id: 'femmefanz', name: 'FemmeFanz', slug: 'femmefanz', domain: 'femme.fanz.website', port: 3013,
-    logoUrl: '/platforms/femmefanz-logo.png', primaryColor: '#ff0000', secondaryColor: '#d4af37',
+    logoUrl: '/platforms/femmefanz-logo.png', primaryColor: '#00e5ff', secondaryColor: '#d4af37',
     accentColor: '#d4af37', backgroundColor: '#000000', description: 'Feminine creators showcase',
     category: 'fan_platform', status: 'active', isUserFacing: true, requiresAuth: false,
     ssoEnabled: true, platformId: 'femmefanz', dbName: 'femmefanz_db',
@@ -185,7 +185,7 @@ const FAN_PLATFORMS: FanzPlatform[] = [
   },
   {
     id: 'guyz', name: 'Guyz', slug: 'guyz', domain: 'guyz.fanz.website', port: 3016,
-    logoUrl: '/platforms/guyz-logo.png', primaryColor: '#ff0000', secondaryColor: '#d4af37',
+    logoUrl: '/platforms/guyz-logo.png', primaryColor: '#00e5ff', secondaryColor: '#d4af37',
     accentColor: '#d4af37', backgroundColor: '#000000', description: 'General male creators',
     category: 'fan_platform', status: 'active', isUserFacing: true, requiresAuth: false,
     ssoEnabled: true, platformId: 'guyz', dbName: 'guyz_db',

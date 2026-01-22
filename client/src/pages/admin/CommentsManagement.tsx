@@ -116,7 +116,7 @@ export default function CommentsManagement() {
   // Fetch comments with filtering
   const { data: commentsData, isLoading, error, refetch } = useQuery<Comment[]>({
     queryKey: [
-      '/api/admin/comments', 
+      '/api/admin/comments',
       {
         searchQuery,
         postId: postIdFilter || undefined,
@@ -128,14 +128,13 @@ export default function CommentsManagement() {
         sortBy,
         sortOrder
       }
-    ],
-    enabled: user?.role === 'admin'
+    ]
   });
 
   // Fetch comment analytics
   const { data: analytics, isLoading: analyticsLoading } = useQuery<CommentAnalytics>({
     queryKey: ['/api/admin/comments/analytics', { dateFrom: analyticsDateFrom, dateTo: analyticsDateTo }],
-    enabled: user?.role === 'admin' && showAnalyticsDialog
+    enabled: showAnalyticsDialog
   });
 
   const comments: Comment[] = commentsData || [];
@@ -273,17 +272,6 @@ export default function CommentsManagement() {
       spamRate: (data.spamRate * 100).toFixed(1) || '0'
     };
   };
-
-  if (!user || user.role !== 'admin') {
-    return (
-      <Alert>
-        <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>
-          You don't have permission to access this page.
-        </AlertDescription>
-      </Alert>
-    );
-  }
 
   if (error) {
     return (

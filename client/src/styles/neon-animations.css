@@ -204,20 +204,20 @@
 
 .bg-underground-gradient {
   background: linear-gradient(180deg,
-    rgba(139,0,0,0.1) 0%,
+    rgba(0,229,255,0.1) 0%,
     rgba(0,0,0,0.95) 20%,
     rgba(0,0,0,1) 80%,
-    rgba(139,0,0,0.1) 100%
+    rgba(0,229,255,0.1) 100%
   );
 }
 
 /* Text effects */
 .text-glow-red {
-  text-shadow: 
-    0 0 5px #ef4444,
-    0 0 10px #ef4444,
-    0 0 15px #ef4444,
-    0 0 20px #ef4444;
+  text-shadow:
+    0 0 5px #00e5ff,
+    0 0 10px #00e5ff,
+    0 0 15px #00e5ff,
+    0 0 20px #00e5ff;
 }
 
 .text-glow-cyan {

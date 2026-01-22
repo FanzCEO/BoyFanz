@@ -21,12 +21,13 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { 
+import {
   Bell, Search, Filter, MoreHorizontal, Send, Settings, Users, Target,
-  BarChart3, PieChart, TrendingUp, Edit, Trash2, Copy, Play, Pause, 
+  BarChart3, PieChart, TrendingUp, Edit, Trash2, Copy, Play, Pause,
   Plus, Smartphone, Monitor, User, Globe, Calendar, Clock, Activity,
   AlertTriangle, CheckCircle, XCircle, Eye, MessageSquare, Download,
-  TestTube2, Star, Zap, Flag, Mail, List, Settings2, Sliders
+  TestTube2, Star, Zap, Flag, Mail, List, Settings2, Sliders,
+  Heart, DollarSign, Gift, Megaphone, ShieldCheck, Sparkles
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { format } from "date-fns";
@@ -103,6 +104,220 @@ const campaignFormSchema = z.object({
 
 type CampaignFormData = z.infer<typeof campaignFormSchema>;
 
+// Pre-configured notification templates for quick campaign creation
+const NOTIFICATION_TEMPLATES = [
+  {
+    id: "welcome-subscriber",
+    name: "New Subscriber Welcome",
+    description: "Welcome message for new subscribers with engagement prompt",
+    category: "onboarding",
+    icon: Heart,
+    color: "pink",
+    title: "Welcome to {{creator_name}}'s exclusive content! 💖",
+    body: "Thanks for subscribing! Check out your first exclusive post and say hello in the comments.",
+    targetAudience: "subscribers" as const,
+    targetPlatforms: ["web", "ios", "android"] as const,
+    clickAction: "/profile/{{creator_username}}",
+    maxSendsPerUser: 1,
+    cooldownHours: 0,
+  },
+  {
+    id: "welcome-creator",
+    name: "New Creator Welcome",
+    description: "Onboarding message for new creators with setup guidance",
+    category: "onboarding",
+    icon: Star,
+    color: "cyan",
+    title: "Welcome to BoyFanz, {{creator_name}}! ✨",
+    body: "Your creator profile is live! Complete your bio and upload your first post to start earning.",
+    targetAudience: "creators" as const,
+    targetPlatforms: ["web", "ios", "android", "desktop"] as const,
+    clickAction: "/creator/dashboard",
+    maxSendsPerUser: 1,
+    cooldownHours: 0,
+  },
+  {
+    id: "content-upload",
+    name: "New Content Notification",
+    description: "Notify subscribers when creator uploads new content",
+    category: "engagement",
+    icon: Bell,
+    color: "blue",
+    title: "{{creator_name}} just posted new content 🔥",
+    body: "Don't miss out! Check out the latest exclusive content from {{creator_name}}.",
+    targetAudience: "subscribers" as const,
+    targetPlatforms: ["web", "ios", "android"] as const,
+    clickAction: "/post/{{post_id}}",
+    maxSendsPerUser: 3,
+    cooldownHours: 2,
+  },
+  {
+    id: "livestream-starting",
+    name: "Livestream Starting Soon",
+    description: "Alert subscribers when creator goes live",
+    category: "engagement",
+    icon: Activity,
+    color: "red",
+    title: "🔴 {{creator_name}} is LIVE now!",
+    body: "Join the livestream and interact with {{creator_name}} in real-time. Don't miss out!",
+    targetAudience: "subscribers" as const,
+    targetPlatforms: ["web", "ios", "android"] as const,
+    clickAction: "/livestream/{{stream_id}}",
+    maxSendsPerUser: 5,
+    cooldownHours: 1,
+  },
+  {
+    id: "payment-received",
+    name: "Payment Confirmation",
+    description: "Confirm successful payment or tip to user",
+    category: "transaction",
+    icon: DollarSign,
+    color: "green",
+    title: "Payment successful! 💵",
+    body: "Your {{amount}} payment to {{creator_name}} was processed successfully. Thank you for your support!",
+    targetAudience: "fans" as const,
+    targetPlatforms: ["web", "ios", "android"] as const,
+    clickAction: "/transactions/{{transaction_id}}",
+    maxSendsPerUser: 100,
+    cooldownHours: 0,
+  },
+  {
+    id: "withdrawal-processed",
+    name: "Withdrawal Processed",
+    description: "Notify creators when withdrawal is completed",
+    category: "transaction",
+    icon: DollarSign,
+    color: "green",
+    title: "Withdrawal processed! 🎉",
+    body: "Your withdrawal of {{amount}} has been processed and will arrive in 1-3 business days.",
+    targetAudience: "creators" as const,
+    targetPlatforms: ["web", "ios", "android", "desktop"] as const,
+    clickAction: "/creator/earnings",
+    maxSendsPerUser: 100,
+    cooldownHours: 0,
+  },
+  {
+    id: "inactive-reminder",
+    name: "Inactive User Re-engagement",
+    description: "Bring back inactive users with personalized message",
+    category: "retention",
+    icon: Heart,
+    color: "purple",
+    title: "We miss you! 💙 Come back to BoyFanz",
+    body: "{{creator_count}} creators you follow have posted new content. Check out what you've been missing!",
+    targetAudience: "all" as const,
+    targetPlatforms: ["web", "ios", "android"] as const,
+    clickAction: "/feed",
+    maxSendsPerUser: 1,
+    cooldownHours: 168, // 1 week
+  },
+  {
+    id: "subscription-expiring",
+    name: "Subscription Expiring Soon",
+    description: "Remind users before subscription expires",
+    category: "retention",
+    icon: AlertTriangle,
+    color: "orange",
+    title: "⏰ Your subscription to {{creator_name}} expires in {{days}} days",
+    body: "Don't lose access to exclusive content! Renew your subscription to keep enjoying {{creator_name}}'s posts.",
+    targetAudience: "subscribers" as const,
+    targetPlatforms: ["web", "ios", "android"] as const,
+    clickAction: "/subscribe/{{creator_id}}",
+    maxSendsPerUser: 2,
+    cooldownHours: 72,
+  },
+  {
+    id: "discount-promotion",
+    name: "Special Discount Offer",
+    description: "Promote limited-time subscription discounts",
+    category: "promotion",
+    icon: Gift,
+    color: "pink",
+    title: "🎁 {{discount}}% OFF subscription to {{creator_name}}!",
+    body: "Limited time offer! Subscribe now and save {{discount}}% on your first month. Offer ends {{expiry_date}}.",
+    targetAudience: "fans" as const,
+    targetPlatforms: ["web", "ios", "android"] as const,
+    clickAction: "/subscribe/{{creator_id}}?promo={{promo_code}}",
+    maxSendsPerUser: 1,
+    cooldownHours: 48,
+  },
+  {
+    id: "exclusive-drop",
+    name: "Exclusive Content Drop",
+    description: "Announce special limited content releases",
+    category: "promotion",
+    icon: Sparkles,
+    color: "yellow",
+    title: "✨ Exclusive content drop from {{creator_name}}!",
+    body: "Limited access! {{creator_name}} just released exclusive content for subscribers only. Get it now!",
+    targetAudience: "subscribers" as const,
+    targetPlatforms: ["web", "ios", "android"] as const,
+    clickAction: "/exclusive/{{content_id}}",
+    maxSendsPerUser: 1,
+    cooldownHours: 12,
+  },
+  {
+    id: "maintenance-notice",
+    name: "Scheduled Maintenance",
+    description: "Inform users about scheduled platform maintenance",
+    category: "announcement",
+    icon: Settings,
+    color: "gray",
+    title: "⚙️ Scheduled maintenance: {{maintenance_date}}",
+    body: "BoyFanz will be undergoing maintenance on {{maintenance_date}} from {{start_time}} to {{end_time}}. We'll be back shortly!",
+    targetAudience: "all" as const,
+    targetPlatforms: ["web", "ios", "android", "desktop"] as const,
+    clickAction: "/status",
+    maxSendsPerUser: 1,
+    cooldownHours: 0,
+  },
+  {
+    id: "new-feature",
+    name: "New Feature Announcement",
+    description: "Announce exciting new platform features",
+    category: "announcement",
+    icon: Megaphone,
+    color: "cyan",
+    title: "🚀 New feature: {{feature_name}}!",
+    body: "We've just launched {{feature_name}}! {{feature_description}} Try it out now.",
+    targetAudience: "all" as const,
+    targetPlatforms: ["web", "ios", "android", "desktop"] as const,
+    clickAction: "/features/{{feature_slug}}",
+    maxSendsPerUser: 1,
+    cooldownHours: 0,
+  },
+  {
+    id: "content-approved",
+    name: "Content Approved",
+    description: "Notify creators when content passes moderation",
+    category: "moderation",
+    icon: CheckCircle,
+    color: "green",
+    title: "✅ Your content has been approved!",
+    body: "Great news! Your post \"{{content_title}}\" has been approved and is now live on BoyFanz.",
+    targetAudience: "creators" as const,
+    targetPlatforms: ["web", "ios", "android", "desktop"] as const,
+    clickAction: "/post/{{post_id}}",
+    maxSendsPerUser: 100,
+    cooldownHours: 0,
+  },
+  {
+    id: "content-flagged",
+    name: "Content Flagged for Review",
+    description: "Alert creators when content is flagged for moderation",
+    category: "moderation",
+    icon: ShieldCheck,
+    color: "orange",
+    title: "⚠️ Content flagged for review",
+    body: "Your post \"{{content_title}}\" has been flagged and is under review. We'll notify you of the outcome soon.",
+    targetAudience: "creators" as const,
+    targetPlatforms: ["web", "ios", "android", "desktop"] as const,
+    clickAction: "/creator/moderation",
+    maxSendsPerUser: 100,
+    cooldownHours: 0,
+  },
+];
+
 export default function PushNotificationsManagement() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -134,6 +349,7 @@ export default function PushNotificationsManagement() {
   const [showTestSendDialog, setShowTestSendDialog] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<PushNotificationCampaign | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<NotificationTemplate | null>(null);
+  const [selectedQuickTemplate, setSelectedQuickTemplate] = useState<string | null>(null);
   
   // Form
   const form = useForm<CampaignFormData>({
@@ -181,26 +397,22 @@ export default function PushNotificationsManagement() {
         sortBy,
         sortOrder
       }
-    ],
-    enabled: user?.role === 'admin'
+    ]
   });
 
   // Fetch notification templates
   const { data: templates = [], isLoading: templatesLoading } = useQuery<NotificationTemplate[]>({
-    queryKey: ['/api/admin/notification-templates'],
-    enabled: user?.role === 'admin' && activeTab === 'templates'
+    queryKey: ['/api/admin/notification-templates'] && activeTab === 'templates'
   });
 
   // Fetch campaign analytics
   const { data: analytics, isLoading: analyticsLoading } = useQuery<CampaignAnalytics>({
-    queryKey: ['/api/admin/push-campaigns/analytics', { dateFrom: analyticsDateFrom, dateTo: analyticsDateTo }],
-    enabled: user?.role === 'admin' && showAnalyticsDialog
+    queryKey: ['/api/admin/push-campaigns/analytics', { dateFrom: analyticsDateFrom, dateTo: analyticsDateTo }] && showAnalyticsDialog
   });
 
   // Fetch user notification preferences
   const { data: userPreferences = [], isLoading: preferencesLoading } = useQuery<any[]>({
-    queryKey: ['/api/admin/user-notification-preferences'],
-    enabled: user?.role === 'admin' && activeTab === 'preferences'
+    queryKey: ['/api/admin/user-notification-preferences'] && activeTab === 'preferences'
   });
 
   // Mutations
@@ -339,7 +551,7 @@ export default function PushNotificationsManagement() {
   });
 
   const bulkOperationMutation = useMutation({
-    mutationFn: ({ action, ids }: { action: string; ids: string[] }) => 
+    mutationFn: ({ action, ids }: { action: string; ids: string[] }) =>
       apiRequest('/api/admin/push-notification-campaigns/bulk', {
         method: 'POST',
         body: { action, ids }
@@ -360,6 +572,49 @@ export default function PushNotificationsManagement() {
       });
     }
   });
+
+  const applyTemplateMutation = useMutation({
+    mutationFn: (templateId: string) => {
+      const template = NOTIFICATION_TEMPLATES.find(t => t.id === templateId);
+      if (!template) throw new Error("Template not found");
+
+      // Populate the form with template values
+      form.setValue("name", `Campaign: ${template.name}`);
+      form.setValue("title", template.title);
+      form.setValue("body", template.body);
+      form.setValue("targetAudience", template.targetAudience);
+      form.setValue("targetPlatforms", template.targetPlatforms as any);
+      form.setValue("clickAction", template.clickAction);
+      form.setValue("maxSendsPerUser", template.maxSendsPerUser);
+      form.setValue("cooldownHours", template.cooldownHours);
+
+      // Return success promise
+      return Promise.resolve({ success: true });
+    },
+    onSuccess: (_, templateId) => {
+      const template = NOTIFICATION_TEMPLATES.find(t => t.id === templateId);
+      toast({
+        title: "Template Applied",
+        description: `"${template?.name}" template has been loaded. Customize and save to create the campaign.`
+      });
+      setShowTemplateDialog(false);
+      setShowCampaignDialog(true);
+      setSelectedQuickTemplate(null);
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to apply template"
+      });
+    }
+  });
+
+  // Handler for applying quick template
+  const handleApplyTemplate = (templateId: string) => {
+    setSelectedQuickTemplate(templateId);
+    applyTemplateMutation.mutate(templateId);
+  };
 
   // Helper functions
   const getStatusBadge = (status: string) => {
@@ -452,15 +707,26 @@ export default function PushNotificationsManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground" data-testid="page-title">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent" data-testid="page-title">
             Push Notifications Management
           </h1>
           <p className="text-muted-foreground mt-1" data-testid="page-description">
             Create, schedule, and manage push notification campaigns with advanced targeting and analytics
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowTemplateDialog(true)}
+            className="border-cyan-500/30 hover:bg-cyan-500/10"
+            data-testid="button-templates"
+          >
+            <Zap className="h-4 w-4 mr-2 text-cyan-400" />
+            Templates
+          </Button>
+
           <Button
             variant="outline"
             size="sm"
@@ -470,7 +736,7 @@ export default function PushNotificationsManagement() {
             <BarChart3 className="h-4 w-4 mr-2" />
             Analytics
           </Button>
-          
+
           <Dialog open={showCampaignDialog} onOpenChange={setShowCampaignDialog}>
             <DialogTrigger asChild>
               <Button 
@@ -1300,8 +1566,8 @@ export default function PushNotificationsManagement() {
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium">Test Users (Email or User ID)</label>
-              <Textarea 
-                placeholder="Enter emails or user IDs, one per line" 
+              <Textarea
+                placeholder="Enter emails or user IDs, one per line"
                 className="min-h-[100px]"
                 data-testid="textarea-test-users"
               />
@@ -1314,17 +1580,118 @@ export default function PushNotificationsManagement() {
             </Alert>
           </div>
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setShowTestSendDialog(false)}
               data-testid="button-test-cancel"
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               data-testid="button-test-send"
             >
               Send Test
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Quick Templates Dialog */}
+      <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent">
+              ⚡ Notification Templates
+            </DialogTitle>
+            <DialogDescription>
+              Pre-configured notification templates for common scenarios. Select a template to quickly create campaigns.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            {NOTIFICATION_TEMPLATES.map((template) => {
+              const IconComponent = template.icon;
+              const colorClasses = {
+                pink: "border-pink-500/30 hover:bg-pink-500/10",
+                cyan: "border-cyan-500/30 hover:bg-cyan-500/10",
+                blue: "border-blue-500/30 hover:bg-blue-500/10",
+                red: "border-red-500/30 hover:bg-red-500/10",
+                green: "border-green-500/30 hover:bg-green-500/10",
+                purple: "border-purple-500/30 hover:bg-purple-500/10",
+                orange: "border-orange-500/30 hover:bg-orange-500/10",
+                yellow: "border-yellow-500/30 hover:bg-yellow-500/10",
+                gray: "border-gray-500/30 hover:bg-gray-500/10",
+              };
+
+              const badgeColors = {
+                onboarding: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
+                engagement: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+                transaction: "bg-green-500/10 text-green-400 border-green-500/30",
+                retention: "bg-purple-500/10 text-purple-400 border-purple-500/30",
+                promotion: "bg-pink-500/10 text-pink-400 border-pink-500/30",
+                announcement: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
+                moderation: "bg-orange-500/10 text-orange-400 border-orange-500/30",
+              };
+
+              const isSelected = selectedQuickTemplate === template.id;
+
+              return (
+                <Card
+                  key={template.id}
+                  className={`cursor-pointer transition-all hover:shadow-lg ${colorClasses[template.color as keyof typeof colorClasses]} ${isSelected ? 'ring-2 ring-cyan-500' : ''}`}
+                  onClick={() => handleApplyTemplate(template.id)}
+                  data-testid={`template-card-${template.id}`}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg bg-${template.color}-500/10`}>
+                          <IconComponent className={`h-5 w-5 text-${template.color}-400`} />
+                        </div>
+                        <div>
+                          <CardTitle className="text-base font-semibold">{template.name}</CardTitle>
+                          <Badge className={`mt-1 ${badgeColors[template.category as keyof typeof badgeColors]}`}>
+                            {template.category}
+                          </Badge>
+                        </div>
+                      </div>
+                      {isSelected && <CheckCircle className="h-5 w-5 text-cyan-400" />}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <p className="text-sm text-muted-foreground">{template.description}</p>
+                    <div className="space-y-1 pt-2 border-t border-border/50">
+                      <p className="text-xs font-medium text-foreground">
+                        <strong>Title:</strong> {template.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Body:</strong> {template.body.substring(0, 80)}...
+                      </p>
+                      <div className="flex items-center gap-2 pt-1">
+                        <Badge variant="outline" className="text-xs">
+                          {template.targetAudience}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {template.targetPlatforms.length} platforms
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {template.cooldownHours}h cooldown
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowTemplateDialog(false)}
+              data-testid="button-close-templates"
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

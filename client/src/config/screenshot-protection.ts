@@ -1,8 +1,8 @@
 const screenshotProtectionConfig = {
-  enabled: false,
-  blurOnCapture: false,
-  showWarning: false,
-  warningMessage: 'Screenshots are not allowed on this page.'
+  enabled: true,
+  blurOnCapture: true,
+  showWarning: true,
+  warningMessage: '⚠️ Screenshots are prohibited. All capture attempts are logged and monitored.'
 };
 
 export default screenshotProtectionConfig;

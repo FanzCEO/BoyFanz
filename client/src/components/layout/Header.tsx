@@ -29,7 +29,6 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { DarkModeToggle } from "@/components/ui/DarkModeToggle";
-import { AdSpacePlaceholder } from "@/components/ads/AdSpacePlaceholder";
 
 interface HeaderProps {
   user: any;
@@ -58,7 +57,7 @@ export default function Header({ user }: HeaderProps) {
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
   const isMobile = useIsMobile();
   const { logoutMutation } = useAuth();
-  const { hasAdminAccess } = usePermissions();
+  const { hasAdminAccess, isAdmin, isModerator } = usePermissions();
   const [, setLocation] = useLocation();
 
   // Fetch notifications
@@ -130,7 +129,7 @@ export default function Header({ user }: HeaderProps) {
 
   return (
     <header
-      className="sticky top-0 z-30 border-b border-sidebar-border bg-sidebar/95 backdrop-blur dungeon-panel"
+      className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
       data-testid="header"
       role="banner"
       aria-label="Site header"
@@ -456,10 +455,10 @@ export default function Header({ user }: HeaderProps) {
 
               <DropdownMenuSeparator />
 
-              {/* Admin Link */}
-              {(user?.role === 'admin' || user?.role === 'moderator' || hasAdminAccess) && (
+              {/* Admin Link - Shows for admins, moderators, or users with delegated access */}
+              {(isAdmin || isModerator || hasAdminAccess) && (
                 <>
-                  <Link href="/admin/dashboard">
+                  <Link href="/panel/admin/dashboard">
                     <DropdownMenuItem className="cursor-pointer text-primary">
                       <Shield className="mr-2 h-4 w-4" />
                       <span>Admin Panel</span>
@@ -483,12 +482,6 @@ export default function Header({ user }: HeaderProps) {
       </div>
 
       {/* Platform Navigation Bar - shows when user has multiple platforms */}
-      {/* Ad Banner Space */}
-      {user && (
-        <div className="w-full py-2 px-4 flex justify-center border-b border-white/5">
-          <AdSpacePlaceholder size="banner" className="max-w-3xl" />
-        </div>
-      )}
     </header>
   );
 }

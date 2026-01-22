@@ -295,7 +295,7 @@ export default function StarzStudio() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-white">Starz Studio</h1>
-                <p className="text-muted-foreground">Advanced Creator Tools</p>
+                <p className="text-gray-300">Advanced Creator Tools</p>
               </div>
             </div>
             <div className="flex gap-3">
@@ -314,7 +314,7 @@ export default function StarzStudio() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="bg-card dungeon-panel p-1">
+          <TabsList className="bg-gray-800/50 p-1">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="calendar">Calendar</TabsTrigger>
             <TabsTrigger value="batch">Batch Upload</TabsTrigger>
@@ -362,7 +362,7 @@ export default function StarzStudio() {
 
             {/* Upcoming Posts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <Card className="bg-card dungeon-panel border-sidebar-border">
+              <Card className="bg-gray-800/50 border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <Clock className="h-5 w-5 text-blue-400" />
@@ -375,7 +375,7 @@ export default function StarzStudio() {
                       {upcomingPosts.map(post => (
                         <div
                           key={post.id}
-                          className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                          className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg"
                         >
                           <div className="flex items-center gap-3">
                             <div className="p-2 bg-blue-500/20 rounded-lg">
@@ -386,8 +386,8 @@ export default function StarzStudio() {
                               )}
                             </div>
                             <div>
-                              <p className="text-sm text-muted-foreground line-clamp-1">{post.content}</p>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-sm text-gray-300 line-clamp-1">{post.content}</p>
+                              <p className="text-xs text-gray-500">
                                 {new Date(post.scheduledFor).toLocaleString()}
                               </p>
                             </div>
@@ -417,7 +417,7 @@ export default function StarzStudio() {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8 text-muted-foreground">
+                    <div className="text-center py-8 text-gray-500">
                       <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
                       <p>No scheduled posts</p>
                       <Button
@@ -434,7 +434,7 @@ export default function StarzStudio() {
               </Card>
 
               {/* Quick Stats */}
-              <Card className="bg-card dungeon-panel border-sidebar-border">
+              <Card className="bg-gray-800/50 border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <BarChart3 className="h-5 w-5 text-green-400" />
@@ -443,21 +443,21 @@ export default function StarzStudio() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-muted rounded-lg text-center">
+                    <div className="p-4 bg-gray-700/50 rounded-lg text-center">
                       <p className="text-2xl font-bold text-white">{scheduledPosts.length}</p>
-                      <p className="text-xs text-muted-foreground">Scheduled Posts</p>
+                      <p className="text-xs text-gray-400">Scheduled Posts</p>
                     </div>
-                    <div className="p-4 bg-muted rounded-lg text-center">
+                    <div className="p-4 bg-gray-700/50 rounded-lg text-center">
                       <p className="text-2xl font-bold text-white">{templates.length}</p>
-                      <p className="text-xs text-muted-foreground">Saved Templates</p>
+                      <p className="text-xs text-gray-400">Saved Templates</p>
                     </div>
-                    <div className="p-4 bg-muted rounded-lg text-center">
+                    <div className="p-4 bg-gray-700/50 rounded-lg text-center">
                       <p className="text-2xl font-bold text-white">{watermarks.length}</p>
-                      <p className="text-xs text-muted-foreground">Watermark Presets</p>
+                      <p className="text-xs text-gray-400">Watermark Presets</p>
                     </div>
-                    <div className="p-4 bg-muted rounded-lg text-center">
+                    <div className="p-4 bg-gray-700/50 rounded-lg text-center">
                       <p className="text-2xl font-bold text-white">0</p>
-                      <p className="text-xs text-muted-foreground">Batch Uploads Today</p>
+                      <p className="text-xs text-gray-400">Batch Uploads Today</p>
                     </div>
                   </div>
                 </CardContent>
@@ -465,7 +465,7 @@ export default function StarzStudio() {
             </div>
 
             {/* Recent Templates */}
-            <Card className="bg-card dungeon-panel border-sidebar-border">
+            <Card className="bg-gray-800/50 border-gray-700">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-white flex items-center gap-2">
                   <Layers className="h-5 w-5 text-pink-400" />
@@ -479,10 +479,10 @@ export default function StarzStudio() {
                 {templates.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {templates.slice(0, 3).map(template => (
-                      <Card key={template.id} className="bg-muted border-sidebar-border">
+                      <Card key={template.id} className="bg-gray-700/50 border-gray-600">
                         <CardContent className="p-4">
                           <h4 className="font-medium text-white mb-2">{template.name}</h4>
-                          <p className="text-sm text-muted-foreground line-clamp-2">{template.content}</p>
+                          <p className="text-sm text-gray-400 line-clamp-2">{template.content}</p>
                           <div className="flex items-center gap-2 mt-3">
                             <Button variant="ghost" size="sm">
                               <Copy className="h-3 w-3 mr-1" />
@@ -498,7 +498,7 @@ export default function StarzStudio() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">
+                  <div className="text-center py-8 text-gray-500">
                     <Layers className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>No templates yet</p>
                     <Button
@@ -517,7 +517,7 @@ export default function StarzStudio() {
 
           {/* Calendar Tab */}
           <TabsContent value="calendar" className="space-y-6">
-            <Card className="bg-card dungeon-panel border-sidebar-border">
+            <Card className="bg-gray-800/50 border-gray-700">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-white flex items-center gap-2">
@@ -555,7 +555,7 @@ export default function StarzStudio() {
               <CardContent>
                 <div className="grid grid-cols-7 gap-2">
                   {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                    <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">
+                    <div key={day} className="text-center text-sm font-medium text-gray-400 py-2">
                       {day}
                     </div>
                   ))}
@@ -579,7 +579,7 @@ export default function StarzStudio() {
 
           {/* Batch Upload Tab */}
           <TabsContent value="batch" className="space-y-6">
-            <Card className="bg-card dungeon-panel border-sidebar-border">
+            <Card className="bg-gray-800/50 border-gray-700">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <Upload className="h-5 w-5 text-green-400" />
@@ -588,20 +588,20 @@ export default function StarzStudio() {
                 <CardDescription>Upload multiple files at once and schedule them</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="border-2 border-dashed border-sidebar-border rounded-xl p-12 text-center hover:border-primary/50 transition-colors cursor-pointer">
-                  <Upload className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                <div className="border-2 border-dashed border-gray-600 rounded-xl p-12 text-center hover:border-primary/50 transition-colors cursor-pointer">
+                  <Upload className="h-16 w-16 mx-auto mb-4 text-gray-500" />
                   <h3 className="text-lg font-medium text-white mb-2">
                     Drop files here or click to upload
                   </h3>
-                  <p className="text-muted-foreground mb-4">
+                  <p className="text-gray-400 mb-4">
                     Support for images and videos up to 500MB each
                   </p>
                   <div className="flex justify-center gap-4">
-                    <Badge variant="outline" className="text-muted-foreground">
+                    <Badge variant="outline" className="text-gray-400">
                       <Image className="h-3 w-3 mr-1" />
                       JPG, PNG, GIF, WEBP
                     </Badge>
-                    <Badge variant="outline" className="text-muted-foreground">
+                    <Badge variant="outline" className="text-gray-400">
                       <Video className="h-3 w-3 mr-1" />
                       MP4, MOV, WEBM
                     </Badge>
@@ -615,35 +615,35 @@ export default function StarzStudio() {
                 <div className="mt-8">
                   <h4 className="font-medium text-white mb-4">Upload Options</h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card className="bg-muted border-sidebar-border">
+                    <Card className="bg-gray-700/50 border-gray-600">
                       <CardContent className="p-4">
                         <div className="flex items-center gap-3">
                           <Clock className="h-5 w-5 text-blue-400" />
                           <div>
                             <p className="font-medium text-white">Auto-Schedule</p>
-                            <p className="text-xs text-muted-foreground">Space posts evenly</p>
+                            <p className="text-xs text-gray-400">Space posts evenly</p>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
-                    <Card className="bg-muted border-sidebar-border">
+                    <Card className="bg-gray-700/50 border-gray-600">
                       <CardContent className="p-4">
                         <div className="flex items-center gap-3">
                           <Droplets className="h-5 w-5 text-purple-400" />
                           <div>
                             <p className="font-medium text-white">Apply Watermark</p>
-                            <p className="text-xs text-muted-foreground">Protect your content</p>
+                            <p className="text-xs text-gray-400">Protect your content</p>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
-                    <Card className="bg-muted border-sidebar-border">
+                    <Card className="bg-gray-700/50 border-gray-600">
                       <CardContent className="p-4">
                         <div className="flex items-center gap-3">
                           <Wand2 className="h-5 w-5 text-pink-400" />
                           <div>
                             <p className="font-medium text-white">AI Captions</p>
-                            <p className="text-xs text-muted-foreground">Generate for each</p>
+                            <p className="text-xs text-gray-400">Generate for each</p>
                           </div>
                         </div>
                       </CardContent>
@@ -667,7 +667,7 @@ export default function StarzStudio() {
             {templates.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {templates.map(template => (
-                  <Card key={template.id} className="bg-card dungeon-panel border-sidebar-border">
+                  <Card key={template.id} className="bg-gray-800/50 border-gray-700">
                     <CardHeader>
                       <CardTitle className="text-white text-lg">{template.name}</CardTitle>
                       <div className="flex gap-2">
@@ -678,7 +678,7 @@ export default function StarzStudio() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-muted-foreground text-sm mb-4 line-clamp-3">{template.content}</p>
+                      <p className="text-gray-400 text-sm mb-4 line-clamp-3">{template.content}</p>
                       {template.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-4">
                           {template.tags.map((tag, i) => (
@@ -705,11 +705,11 @@ export default function StarzStudio() {
                 ))}
               </div>
             ) : (
-              <Card className="bg-card dungeon-panel border-sidebar-border">
+              <Card className="bg-gray-800/50 border-gray-700">
                 <CardContent className="p-12 text-center">
-                  <Layers className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                  <Layers className="h-16 w-16 mx-auto mb-4 text-gray-500" />
                   <h3 className="text-lg font-medium text-white mb-2">No Templates Yet</h3>
-                  <p className="text-muted-foreground mb-6">
+                  <p className="text-gray-400 mb-6">
                     Save your favorite post formats as templates for quick reuse
                   </p>
                   <Button onClick={() => setShowTemplateDialog(true)}>
@@ -725,7 +725,7 @@ export default function StarzStudio() {
           <TabsContent value="ai" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Caption Generator */}
-              <Card className="bg-card dungeon-panel border-sidebar-border">
+              <Card className="bg-gray-800/50 border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <Wand2 className="h-5 w-5 text-purple-400" />
@@ -737,12 +737,12 @@ export default function StarzStudio() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    <label className="text-sm font-medium text-gray-300 mb-2 block">
                       Describe your content
                     </label>
                     <Textarea
                       placeholder="E.g., A seductive beach photoshoot at sunset, showing off my new swimwear..."
-                      className="min-h-[100px] bg-muted border-sidebar-border"
+                      className="min-h-[100px] bg-gray-700/50 border-gray-600"
                     />
                   </div>
                   <div className="flex gap-2">
@@ -765,7 +765,7 @@ export default function StarzStudio() {
                     </Button>
                   </div>
                   {aiCaption && (
-                    <div className="p-4 bg-muted rounded-lg">
+                    <div className="p-4 bg-gray-700/50 rounded-lg">
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-xs text-purple-400 font-medium">Generated Caption</span>
                         <Button variant="ghost" size="sm">
@@ -773,14 +773,14 @@ export default function StarzStudio() {
                           Copy
                         </Button>
                       </div>
-                      <p className="text-muted-foreground">{aiCaption}</p>
+                      <p className="text-gray-300">{aiCaption}</p>
                     </div>
                   )}
                 </CardContent>
               </Card>
 
               {/* Hashtag Generator */}
-              <Card className="bg-card dungeon-panel border-sidebar-border">
+              <Card className="bg-gray-800/50 border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <Hash className="h-5 w-5 text-blue-400" />
@@ -792,12 +792,12 @@ export default function StarzStudio() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    <label className="text-sm font-medium text-gray-300 mb-2 block">
                       Content category
                     </label>
                     <Input
                       placeholder="E.g., fitness, lifestyle, cosplay..."
-                      className="bg-muted border-sidebar-border"
+                      className="bg-gray-700/50 border-gray-600"
                     />
                   </div>
                   <Button className="w-full bg-blue-600 hover:bg-blue-700">
@@ -819,7 +819,7 @@ export default function StarzStudio() {
               </Card>
 
               {/* Content Ideas */}
-              <Card className="bg-card dungeon-panel border-sidebar-border lg:col-span-2">
+              <Card className="bg-gray-800/50 border-gray-700 lg:col-span-2">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <Zap className="h-5 w-5 text-yellow-400" />
@@ -839,10 +839,10 @@ export default function StarzStudio() {
                       { title: 'Throwback', desc: 'Share past content' },
                       { title: 'Collab Idea', desc: 'Partner with another creator' }
                     ].map((idea, i) => (
-                      <Card key={i} className="bg-muted border-sidebar-border cursor-pointer hover:border-yellow-500/50 transition-colors">
+                      <Card key={i} className="bg-gray-700/50 border-gray-600 cursor-pointer hover:border-yellow-500/50 transition-colors">
                         <CardContent className="p-4">
                           <h4 className="font-medium text-white mb-1">{idea.title}</h4>
-                          <p className="text-sm text-muted-foreground">{idea.desc}</p>
+                          <p className="text-sm text-gray-400">{idea.desc}</p>
                         </CardContent>
                       </Card>
                     ))}
@@ -862,13 +862,13 @@ export default function StarzStudio() {
               </Button>
             </div>
 
-            <Card className="bg-card dungeon-panel border-sidebar-border">
+            <Card className="bg-gray-800/50 border-gray-700">
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Watermark Preview */}
-                  <div className="aspect-video bg-muted rounded-xl relative overflow-hidden">
+                  <div className="aspect-video bg-gray-700/50 rounded-xl relative overflow-hidden">
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <Image className="h-20 w-20 text-muted-foreground" />
+                      <Image className="h-20 w-20 text-gray-500" />
                     </div>
                     <div className="absolute bottom-4 right-4 text-white/50 text-sm font-bold">
                       @YourUsername
@@ -878,7 +878,7 @@ export default function StarzStudio() {
                   {/* Watermark Settings */}
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                      <label className="text-sm font-medium text-gray-300 mb-2 block">
                         Watermark Type
                       </label>
                       <div className="flex gap-2">
@@ -894,17 +894,17 @@ export default function StarzStudio() {
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                      <label className="text-sm font-medium text-gray-300 mb-2 block">
                         Watermark Text
                       </label>
                       <Input
                         placeholder="@YourUsername"
-                        className="bg-muted border-sidebar-border"
+                        className="bg-gray-700/50 border-gray-600"
                       />
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                      <label className="text-sm font-medium text-gray-300 mb-2 block">
                         Position
                       </label>
                       <div className="grid grid-cols-3 gap-2">
@@ -917,7 +917,7 @@ export default function StarzStudio() {
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                      <label className="text-sm font-medium text-gray-300 mb-2 block">
                         Opacity: 50%
                       </label>
                       <input
@@ -942,15 +942,15 @@ export default function StarzStudio() {
             {watermarks.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {watermarks.map(preset => (
-                  <Card key={preset.id} className="bg-card dungeon-panel border-sidebar-border">
+                  <Card key={preset.id} className="bg-gray-800/50 border-gray-700">
                     <CardContent className="p-4">
-                      <div className="aspect-video bg-muted rounded-lg mb-3 relative">
+                      <div className="aspect-video bg-gray-700/50 rounded-lg mb-3 relative">
                         <div className="absolute bottom-2 right-2 text-white/50 text-xs">
                           {preset.text || 'Image'}
                         </div>
                       </div>
                       <h4 className="font-medium text-white mb-1">{preset.name}</h4>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-gray-400">
                         {preset.position} • {preset.opacity}% opacity
                       </p>
                     </CardContent>
@@ -964,7 +964,7 @@ export default function StarzStudio() {
 
       {/* Schedule Post Dialog */}
       <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
-        <DialogContent className="bg-card border-sidebar-border max-w-2xl">
+        <DialogContent className="bg-gray-800 border-gray-700 max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-white">Schedule a Post</DialogTitle>
             <DialogDescription>
@@ -973,31 +973,31 @@ export default function StarzStudio() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">Content</label>
+              <label className="text-sm font-medium text-gray-300 mb-2 block">Content</label>
               <Textarea
                 placeholder="What's on your mind?"
-                className="min-h-[100px] bg-muted border-sidebar-border"
+                className="min-h-[100px] bg-gray-700/50 border-gray-600"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">Date</label>
+                <label className="text-sm font-medium text-gray-300 mb-2 block">Date</label>
                 <Input
                   type="date"
                   defaultValue={selectedDate?.toISOString().split('T')[0]}
-                  className="bg-muted border-sidebar-border"
+                  className="bg-gray-700/50 border-gray-600"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">Time</label>
+                <label className="text-sm font-medium text-gray-300 mb-2 block">Time</label>
                 <Input
                   type="time"
-                  className="bg-muted border-sidebar-border"
+                  className="bg-gray-700/50 border-gray-600"
                 />
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">Visibility</label>
+              <label className="text-sm font-medium text-gray-300 mb-2 block">Visibility</label>
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1">Public</Button>
                 <Button variant="outline" className="flex-1">Subscribers</Button>
@@ -1019,7 +1019,7 @@ export default function StarzStudio() {
 
       {/* Create Template Dialog */}
       <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
-        <DialogContent className="bg-card border-sidebar-border">
+        <DialogContent className="bg-gray-800 border-gray-700">
           <DialogHeader>
             <DialogTitle className="text-white">Create Template</DialogTitle>
             <DialogDescription>
@@ -1028,24 +1028,24 @@ export default function StarzStudio() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">Template Name</label>
+              <label className="text-sm font-medium text-gray-300 mb-2 block">Template Name</label>
               <Input
                 placeholder="E.g., Weekly Update"
-                className="bg-muted border-sidebar-border"
+                className="bg-gray-700/50 border-gray-600"
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">Content</label>
+              <label className="text-sm font-medium text-gray-300 mb-2 block">Content</label>
               <Textarea
                 placeholder="Your template content..."
-                className="min-h-[100px] bg-muted border-sidebar-border"
+                className="min-h-[100px] bg-gray-700/50 border-gray-600"
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">Tags (comma separated)</label>
+              <label className="text-sm font-medium text-gray-300 mb-2 block">Tags (comma separated)</label>
               <Input
                 placeholder="fitness, lifestyle, tips"
-                className="bg-muted border-sidebar-border"
+                className="bg-gray-700/50 border-gray-600"
               />
             </div>
           </div>

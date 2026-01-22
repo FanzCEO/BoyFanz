@@ -35,7 +35,7 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import { 
+import {
   Globe,
   Calculator,
   FileText,
@@ -62,7 +62,14 @@ import {
   Scale,
   Receipt,
   BookOpen,
-  AlertCircle
+  AlertCircle,
+  Clock,
+  Copy,
+  Zap,
+  FileSpreadsheet,
+  History,
+  Trash,
+  Save
 } from "lucide-react";
 
 // TypeScript interfaces
@@ -172,6 +179,111 @@ const COUNTRIES = [
   { code: "SE", name: "Sweden" }
 ];
 
+// Pre-configured tax rate templates
+const TAX_TEMPLATES = [
+  {
+    id: "us-ca-sales",
+    name: "California Sales Tax",
+    country: "US",
+    state: "CA",
+    taxType: "sales_tax" as const,
+    taxName: "California State Sales Tax",
+    rate: 7.25,
+    description: "Standard California state sales tax rate"
+  },
+  {
+    id: "us-ny-sales",
+    name: "New York Sales Tax",
+    country: "US",
+    state: "NY",
+    taxType: "sales_tax" as const,
+    taxName: "New York State Sales Tax",
+    rate: 4.0,
+    description: "Standard New York state sales tax rate"
+  },
+  {
+    id: "gb-vat",
+    name: "UK VAT Standard",
+    country: "GB",
+    taxType: "vat" as const,
+    taxName: "UK Value Added Tax",
+    rate: 20.0,
+    description: "Standard UK VAT rate"
+  },
+  {
+    id: "de-vat",
+    name: "Germany VAT",
+    country: "DE",
+    taxType: "vat" as const,
+    taxName: "German Value Added Tax (MwSt)",
+    rate: 19.0,
+    description: "Standard German VAT rate"
+  },
+  {
+    id: "fr-vat",
+    name: "France VAT",
+    country: "FR",
+    taxType: "vat" as const,
+    taxName: "French Value Added Tax (TVA)",
+    rate: 20.0,
+    description: "Standard French VAT rate"
+  },
+  {
+    id: "ca-gst",
+    name: "Canada GST",
+    country: "CA",
+    taxType: "sales_tax" as const,
+    taxName: "Goods and Services Tax (GST)",
+    rate: 5.0,
+    description: "Canadian federal GST"
+  },
+  {
+    id: "au-gst",
+    name: "Australia GST",
+    country: "AU",
+    taxType: "sales_tax" as const,
+    taxName: "Goods and Services Tax (GST)",
+    rate: 10.0,
+    description: "Australian GST"
+  },
+  {
+    id: "in-gst",
+    name: "India GST Standard",
+    country: "IN",
+    taxType: "vat" as const,
+    taxName: "Goods and Services Tax",
+    rate: 18.0,
+    description: "Standard Indian GST rate"
+  },
+  {
+    id: "sg-gst",
+    name: "Singapore GST",
+    country: "SG",
+    taxType: "vat" as const,
+    taxName: "Goods and Services Tax",
+    rate: 8.0,
+    description: "Singapore GST (2023 rate)"
+  },
+  {
+    id: "nl-vat",
+    name: "Netherlands VAT",
+    country: "NL",
+    taxType: "vat" as const,
+    taxName: "Dutch VAT (BTW)",
+    rate: 21.0,
+    description: "Standard Netherlands VAT rate"
+  },
+  {
+    id: "se-vat",
+    name: "Sweden VAT",
+    country: "SE",
+    taxType: "vat" as const,
+    taxName: "Swedish VAT (Moms)",
+    rate: 25.0,
+    description: "Standard Swedish VAT rate"
+  }
+];
+
 export default function TaxRatesManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -181,12 +293,17 @@ export default function TaxRatesManagement() {
   const [selectedTaxRate, setSelectedTaxRate] = useState<TaxRate | null>(null);
   const [showCreateRate, setShowCreateRate] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [showBulkImport, setShowBulkImport] = useState(false);
+  const [showAuditHistory, setShowAuditHistory] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+  const [bulkImportFile, setBulkImportFile] = useState<File | null>(null);
   const [taxFilters, setTaxFilters] = useState({
     page: 1,
     limit: 50,
-    jurisdiction: "",
-    taxType: "",
-    isActive: ""
+    jurisdiction: "all",
+    taxType: "all",
+    isActive: "all"
   });
   const [calculationResult, setCalculationResult] = useState<TaxCalculation | null>(null);
 
@@ -214,7 +331,7 @@ export default function TaxRatesManagement() {
     queryKey: ['/api/admin/financial/tax-rates', taxFilters],
     queryFn: () => apiRequest(`/api/admin/financial/tax-rates?${new URLSearchParams(
       Object.entries(taxFilters).reduce((acc, [key, value]) => {
-        if (value !== undefined && value !== '') {
+        if (value !== undefined && value !== '' && value !== 'all') {
           acc[key] = String(value);
         }
         return acc;
@@ -230,6 +347,12 @@ export default function TaxRatesManagement() {
   const { data: compliance, isLoading: complianceLoading } = useQuery<any>({
     queryKey: ['/api/admin/financial/tax-compliance'],
     queryFn: () => apiRequest('/api/admin/financial/tax-compliance')
+  });
+
+  const { data: auditHistory, isLoading: auditLoading } = useQuery<any>({
+    queryKey: ['/api/admin/financial/tax-rates/audit'],
+    queryFn: () => apiRequest('/api/admin/financial/tax-rates/audit'),
+    enabled: showAuditHistory
   });
 
   // Mutations
@@ -280,6 +403,91 @@ export default function TaxRatesManagement() {
     }
   });
 
+  const applyTemplateMutation = useMutation({
+    mutationFn: (templateId: string) => {
+      const template = TAX_TEMPLATES.find(t => t.id === templateId);
+      if (!template) throw new Error("Template not found");
+
+      return apiRequest('/api/admin/financial/tax-rates', {
+        method: 'POST',
+        body: JSON.stringify({
+          ...template,
+          jurisdiction: `${template.country}${template.state ? `-${template.state}` : ''}`,
+          effectiveDate: new Date().toISOString().split('T')[0],
+          isActive: true,
+          applicableCategories: [],
+          exemptions: []
+        })
+      });
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Tax template applied successfully" });
+      refetchTaxRates();
+      setShowTemplates(false);
+      setSelectedTemplate("");
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message || "Failed to apply template", variant: "destructive" });
+    }
+  });
+
+  const bulkImportMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/admin/financial/tax-rates/bulk-import', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Bulk import failed');
+      }
+
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Success",
+        description: `Imported ${data.imported} tax rates successfully. ${data.failed || 0} failed.`
+      });
+      refetchTaxRates();
+      setShowBulkImport(false);
+      setBulkImportFile(null);
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message || "Bulk import failed", variant: "destructive" });
+    }
+  });
+
+  const exportTaxRatesMutation = useMutation({
+    mutationFn: (format: 'csv' | 'excel') =>
+      apiRequest(`/api/admin/financial/tax-rates/export?format=${format}`, {
+        method: 'GET'
+      }),
+    onSuccess: (data, format) => {
+      // Create download link
+      const blob = new Blob([data], {
+        type: format === 'csv' ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tax-rates-${new Date().toISOString().split('T')[0]}.${format === 'csv' ? 'csv' : 'xlsx'}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({ title: "Success", description: "Tax rates exported successfully" });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message || "Export failed", variant: "destructive" });
+    }
+  });
+
   // Event handlers
   const onSubmitTaxRate = (data: z.infer<typeof taxRateSchema>) => {
     createTaxRateMutation.mutate(data);
@@ -294,6 +502,26 @@ export default function TaxRatesManagement() {
       id: taxRate.id,
       data: { isActive: !taxRate.isActive }
     });
+  };
+
+  const handleApplyTemplate = () => {
+    if (!selectedTemplate) {
+      toast({ title: "Error", description: "Please select a template", variant: "destructive" });
+      return;
+    }
+    applyTemplateMutation.mutate(selectedTemplate);
+  };
+
+  const handleBulkImport = () => {
+    if (!bulkImportFile) {
+      toast({ title: "Error", description: "Please select a file to import", variant: "destructive" });
+      return;
+    }
+    bulkImportMutation.mutate(bulkImportFile);
+  };
+
+  const handleExport = (format: 'csv' | 'excel') => {
+    exportTaxRatesMutation.mutate(format);
   };
 
   const formatCurrency = (amount: number, currency: string = 'USD') => {
@@ -337,12 +565,50 @@ export default function TaxRatesManagement() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold" data-testid="page-title">Tax Rates Management</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent" data-testid="page-title">
+            Tax Rates Management
+          </h1>
           <p className="text-muted-foreground">Configure tax rates by jurisdiction and manage compliance</p>
         </div>
         <div className="flex space-x-2">
           <Button
+            onClick={() => setShowTemplates(true)}
+            variant="outline"
+            className="border-cyan-500/30 hover:bg-cyan-500/10"
+            data-testid="button-templates"
+          >
+            <Zap className="h-4 w-4 mr-2 text-cyan-400" />
+            Templates
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="border-pink-500/30 hover:bg-pink-500/10"
+                data-testid="button-bulk-actions"
+              >
+                <FileSpreadsheet className="h-4 w-4 mr-2 text-pink-400" />
+                Bulk Actions
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setShowBulkImport(true)}>
+                <Upload className="h-4 w-4 mr-2" />
+                Import CSV/Excel
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('csv')}>
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('excel')}>
+                <Download className="h-4 w-4 mr-2" />
+                Export Excel
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button
             onClick={() => setShowCreateRate(true)}
+            className="bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-cyan-600 hover:to-pink-600"
             data-testid="button-create-rate"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -354,7 +620,15 @@ export default function TaxRatesManagement() {
             data-testid="button-calculator"
           >
             <Calculator className="h-4 w-4 mr-2" />
-            Tax Calculator
+            Calculator
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setShowAuditHistory(true)}
+            data-testid="button-audit"
+          >
+            <History className="h-4 w-4 mr-2" />
+            Audit
           </Button>
           <Button
             variant="outline"
@@ -362,7 +636,6 @@ export default function TaxRatesManagement() {
             data-testid="button-refresh"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
           </Button>
         </div>
       </div>
@@ -452,7 +725,7 @@ export default function TaxRatesManagement() {
                       <SelectValue placeholder="All Jurisdictions" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="_all">All Jurisdictions</SelectItem>
+                      <SelectItem value="all">All Jurisdictions</SelectItem>
                       {COUNTRIES.map(country => (
                         <SelectItem key={country.code} value={country.code}>
                           {country.name}
@@ -472,7 +745,7 @@ export default function TaxRatesManagement() {
                       <SelectValue placeholder="All Types" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="_all">All Types</SelectItem>
+                      <SelectItem value="all">All Types</SelectItem>
                       <SelectItem value="vat">VAT</SelectItem>
                       <SelectItem value="sales_tax">Sales Tax</SelectItem>
                       <SelectItem value="income_tax">Income Tax</SelectItem>
@@ -492,7 +765,7 @@ export default function TaxRatesManagement() {
                       <SelectValue placeholder="All" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="_all">All</SelectItem>
+                      <SelectItem value="all">All</SelectItem>
                       <SelectItem value="true">Active</SelectItem>
                       <SelectItem value="false">Inactive</SelectItem>
                     </SelectContent>
@@ -789,7 +1062,7 @@ export default function TaxRatesManagement() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="_none">None</SelectItem>
+                          <SelectItem value="none">None</SelectItem>
                           {getStatesForCountry(taxRateForm.watch("country")).map(state => (
                             <SelectItem key={state} value={state}>
                               {state}
@@ -1044,7 +1317,7 @@ export default function TaxRatesManagement() {
               {selectedTaxRate?.taxName} - {getCountryName(selectedTaxRate?.country || "")}
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedTaxRate && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -1106,6 +1379,231 @@ export default function TaxRatesManagement() {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Tax Templates Dialog */}
+      <Dialog open={showTemplates} onOpenChange={setShowTemplates}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" data-testid="dialog-templates">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Zap className="h-5 w-5 mr-2 text-cyan-400" />
+              Tax Rate Templates
+            </DialogTitle>
+            <DialogDescription>
+              Quick-apply pre-configured tax rates for common jurisdictions
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            {TAX_TEMPLATES.map((template) => (
+              <Card
+                key={template.id}
+                className={`cursor-pointer transition-all hover:border-cyan-500/50 ${
+                  selectedTemplate === template.id
+                    ? 'border-cyan-500 bg-cyan-500/5'
+                    : 'border-border'
+                }`}
+                onClick={() => setSelectedTemplate(template.id)}
+                data-testid={`template-${template.id}`}
+              >
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-2 flex-1">
+                      <div className="flex items-center space-x-2">
+                        <h4 className="font-semibold">{template.name}</h4>
+                        <Badge className={`${TAX_TYPE_COLORS[template.taxType]} text-white text-xs`}>
+                          {template.taxType.replace('_', ' ').toUpperCase()}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{template.description}</p>
+                      <div className="flex items-center space-x-4 text-sm">
+                        <div className="flex items-center">
+                          <Flag className="h-3 w-3 mr-1 text-cyan-400" />
+                          <span>{getCountryName(template.country)}</span>
+                          {template.state && <span className="ml-1 text-muted-foreground">({template.state})</span>}
+                        </div>
+                        <div className="flex items-center font-semibold text-cyan-400">
+                          <Percent className="h-3 w-3 mr-1" />
+                          <span>{template.rate}%</span>
+                        </div>
+                      </div>
+                    </div>
+                    {selectedTemplate === template.id && (
+                      <CheckCircle className="h-5 w-5 text-cyan-400 ml-2" />
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowTemplates(false);
+                setSelectedTemplate("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleApplyTemplate}
+              disabled={!selectedTemplate || applyTemplateMutation.isPending}
+              className="bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-cyan-600 hover:to-pink-600"
+            >
+              {applyTemplateMutation.isPending ? 'Applying...' : 'Apply Template'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Import Dialog */}
+      <Dialog open={showBulkImport} onOpenChange={setShowBulkImport}>
+        <DialogContent className="max-w-xl" data-testid="dialog-bulk-import">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Upload className="h-5 w-5 mr-2 text-pink-400" />
+              Bulk Import Tax Rates
+            </DialogTitle>
+            <DialogDescription>
+              Import multiple tax rates from CSV or Excel file
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Required columns:</strong> jurisdiction, country, taxType, taxName, rate, effectiveDate
+                <br />
+                <strong>Optional columns:</strong> state, isActive, expiryDate, minAmount, maxAmount
+              </AlertDescription>
+            </Alert>
+
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center">
+              <Input
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) setBulkImportFile(file);
+                }}
+                className="hidden"
+                id="bulk-import-file"
+              />
+              <label htmlFor="bulk-import-file" className="cursor-pointer">
+                <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-sm font-medium">Click to select file or drag and drop</p>
+                <p className="text-xs text-muted-foreground mt-1">CSV or Excel files up to 10MB</p>
+              </label>
+              {bulkImportFile && (
+                <div className="mt-4 p-3 bg-cyan-500/10 border border-cyan-500/30 rounded">
+                  <p className="text-sm font-medium text-cyan-400">{bulkImportFile.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {(bulkImportFile.size / 1024).toFixed(2)} KB
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-between items-center">
+              <Button variant="outline" size="sm" onClick={() => handleExport('csv')}>
+                <Download className="h-4 w-4 mr-2" />
+                Download CSV Template
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowBulkImport(false);
+                setBulkImportFile(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleBulkImport}
+              disabled={!bulkImportFile || bulkImportMutation.isPending}
+              className="bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-cyan-600 hover:to-pink-600"
+            >
+              {bulkImportMutation.isPending ? 'Importing...' : 'Import Tax Rates'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Audit History Dialog */}
+      <Dialog open={showAuditHistory} onOpenChange={setShowAuditHistory}>
+        <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto" data-testid="dialog-audit-history">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <History className="h-5 w-5 mr-2 text-purple-400" />
+              Tax Rate Audit History
+            </DialogTitle>
+            <DialogDescription>
+              Track all changes made to tax rates across jurisdictions
+            </DialogDescription>
+          </DialogHeader>
+
+          {auditLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : auditHistory?.data?.length > 0 ? (
+            <div className="space-y-3">
+              {auditHistory.data.map((entry: any, index: number) => (
+                <Card key={index} className="border-l-4 border-l-purple-500">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-3">
+                          <Badge variant={entry.action === 'create' ? 'default' : entry.action === 'update' ? 'secondary' : 'destructive'}>
+                            {entry.action.toUpperCase()}
+                          </Badge>
+                          <span className="font-medium">{entry.taxRateName}</span>
+                          <span className="text-sm text-muted-foreground">
+                            {getCountryName(entry.country)}
+                            {entry.state && ` - ${entry.state}`}
+                          </span>
+                        </div>
+
+                        {entry.changes && Object.keys(entry.changes).length > 0 && (
+                          <div className="text-sm space-y-1">
+                            {Object.entries(entry.changes).map(([field, change]: [string, any]) => (
+                              <div key={field} className="flex items-center space-x-2">
+                                <span className="text-muted-foreground capitalize">{field}:</span>
+                                <span className="line-through text-red-500">{String(change.old)}</span>
+                                <span>→</span>
+                                <span className="text-green-500">{String(change.new)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                          <div className="flex items-center">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {formatDate(entry.timestamp)}
+                          </div>
+                          <div>by {entry.adminEmail || 'System'}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>No audit history available</p>
             </div>
           )}
         </DialogContent>

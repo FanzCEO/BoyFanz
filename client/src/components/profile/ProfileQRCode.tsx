@@ -26,7 +26,7 @@ interface ProfileQRCodeProps {
 export function ProfileQRCode({ username, userId, profileImageUrl, className }: ProfileQRCodeProps) {
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [size, setSize] = useState<number>(256);
-  const [color, setColor] = useState<string>('#ff0000');
+  const [color, setColor] = useState<string>('#00e5ff');
   const [bgColor, setBgColor] = useState<string>('#ffffff');
   const [copied, setCopied] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -180,7 +180,7 @@ export function ProfileQRCode({ username, userId, profileImageUrl, className }: 
                   value={color}
                   onChange={(e) => setColor(e.target.value)}
                   className="flex-1"
-                  placeholder="#ff0000"
+                  placeholder="#00e5ff"
                 />
               </div>
             </div>

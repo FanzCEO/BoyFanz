@@ -1,494 +1,423 @@
+/**
+ * Starz Program Information & Signup Page
+ *
+ * Explains the performance-based Starz membership system before creators sign up
+ */
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Link, useLocation } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
-import { Crown, Star, Zap, Camera, DollarSign, Users, ArrowRight, Check, Sparkles, Shield, Upload } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
+import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "wouter";
+import { Star, Users, Camera, Zap, TrendingUp, Award, Crown, CheckCircle2, ArrowRight, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 
-type OnboardingStep = 'welcome' | 'account' | 'profile' | 'verification' | 'complete';
+const tierData = [
+  {
+    tier: "bronze_star",
+    name: "Bronze Star",
+    color: "from-amber-600 to-amber-700",
+    textColor: "text-amber-400",
+    borderColor: "border-amber-600/30",
+    requirements: {
+      fans: 50,
+      referrals: 3,
+      quality: 40,
+      posts: 20,
+    },
+    benefits: [
+      "Basic AI tools for content creation",
+      "FanzCloud Mobile basic access",
+      "Creator analytics dashboard",
+      "Community forum access"
+    ],
+    icon: Star
+  },
+  {
+    tier: "silver_star",
+    name: "Silver Star",
+    color: "from-gray-400 to-gray-500",
+    textColor: "text-gray-300",
+    borderColor: "border-gray-400/30",
+    requirements: {
+      fans: 250,
+      referrals: 10,
+      quality: 55,
+      posts: 75,
+    },
+    benefits: [
+      "Enhanced AI features",
+      "Fan insights & analytics",
+      "DM templates library",
+      "Priority support response",
+      "All Bronze benefits"
+    ],
+    icon: Star
+  },
+  {
+    tier: "gold_star",
+    name: "Gold Star",
+    color: "from-yellow-500 to-yellow-600",
+    textColor: "text-yellow-400",
+    borderColor: "border-yellow-500/30",
+    requirements: {
+      fans: 1000,
+      referrals: 25,
+      quality: 70,
+      posts: 200,
+    },
+    benefits: [
+      "Full AI suite access",
+      "Video editor with effects",
+      "AI pricing optimizer",
+      "Collaboration finder",
+      "All Silver benefits"
+    ],
+    icon: Award
+  },
+  {
+    tier: "platinum_star",
+    name: "Platinum Star",
+    color: "from-gray-300 to-gray-400",
+    textColor: "text-gray-200",
+    borderColor: "border-gray-300/30",
+    requirements: {
+      fans: 5000,
+      referrals: 50,
+      quality: 80,
+      posts: 500,
+    },
+    benefits: [
+      "Priority AI processing",
+      "Custom AI models",
+      "API access for integrations",
+      "Dedicated account manager",
+      "All Gold benefits"
+    ],
+    icon: Crown
+  },
+  {
+    tier: "diamond_star",
+    name: "Diamond Star",
+    color: "from-cyan-400 to-cyan-500",
+    textColor: "text-cyan-300",
+    borderColor: "border-cyan-400/30",
+    requirements: {
+      fans: 25000,
+      referrals: 100,
+      quality: 90,
+      posts: 1000,
+    },
+    benefits: [
+      "All platform features unlocked",
+      "Beta access to new tools",
+      "24/7 dedicated support",
+      "Custom integrations",
+      "VIP treatment & recognition",
+      "All Platinum benefits"
+    ],
+    icon: Crown
+  }
+];
 
 export default function StarzSignup() {
-  const [, setLocation] = useLocation();
-  const { registerMutation, user } = useAuth();
-  const { toast } = useToast();
-  const [currentStep, setCurrentStep] = useState<OnboardingStep>('welcome');
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    displayName: "",
-    stageName: "",
-    pronouns: "",
-    bio: "",
-    niches: [] as string[],
-    agreeToTerms: false,
-    over18: false,
-    payoutMethod: "",
-    payoutDetails: ""
-  });
-
-  // Redirect if already logged in
-  if (user) {
-    setLocation("/");
-    return null;
-  }
-
-  const steps: OnboardingStep[] = ['welcome', 'account', 'profile', 'verification', 'complete'];
-  const currentStepIndex = steps.indexOf(currentStep);
-  const progress = ((currentStepIndex + 1) / steps.length) * 100;
-
-  const nicheOptions = [
-    "Fitness & Wellness", "Gaming", "Music", "Art", "Fashion", 
-    "Lifestyle", "Adult Content", "Education", "Tech", "Food & Cooking"
-  ];
-
-  const handleNext = () => {
-    const nextIndex = currentStepIndex + 1;
-    if (nextIndex < steps.length) {
-      setCurrentStep(steps[nextIndex]);
-    }
-  };
-
-  const handleBack = () => {
-    const prevIndex = currentStepIndex - 1;
-    if (prevIndex >= 0) {
-      setCurrentStep(steps[prevIndex]);
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!formData.agreeToTerms || !formData.over18) {
-      toast({
-        title: "Agreement Required",
-        description: "You must agree to the terms and confirm you are 18+",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Password Mismatch",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    registerMutation.mutate({
-      username: formData.username,
-      email: formData.email,
-      password: formData.password,
-      role: "creator",
-      firstName: formData.displayName.split(" ")[0] || formData.displayName,
-      lastName: formData.displayName.split(" ").slice(1).join(" ") || "",
-    });
-  };
-
-  const handleChange = (field: string, value: string | boolean | string[]) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const toggleNiche = (niche: string) => {
-    setFormData(prev => ({
-      ...prev,
-      niches: prev.niches.includes(niche)
-        ? prev.niches.filter(n => n !== niche)
-        : [...prev.niches, niche]
-    }));
-  };
+  const [expandedTier, setExpandedTier] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4 relative">
-      {/* Loading Overlay */}
-      {registerMutation.isPending && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 border-4 border-[#ff0000] border-t-transparent rounded-full animate-spin mx-auto" />
-            <div className="space-y-2">
-              <h3 className="text-2xl font-['Bebas_Neue'] text-white">Creating Your Creator Account</h3>
-              <p className="text-zinc-400">Setting up your monetization profile...</p>
+    <div className="min-h-screen bg-gradient-to-b from-[#050505] via-[#0a0a0a] to-[#050505] text-white">
+
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-purple-500/5 to-transparent pointer-events-none" />
+        <div className="container mx-auto px-4 py-16 md:py-24">
+          <div className="text-center max-w-4xl mx-auto relative">
+            <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 rounded-full px-6 py-2 mb-6">
+              <Zap className="w-4 h-4 text-cyan-400" />
+              <span className="text-sm text-cyan-300 font-medium">Performance-Based Membership</span>
+            </div>
+
+            <h1 className="text-5xl md:text-7xl font-['Bebas_Neue'] mb-6 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent tracking-wide">
+              Earn Your Star Status
+            </h1>
+
+            <p className="text-xl md:text-2xl text-zinc-400 mb-8 leading-relaxed">
+              Starz Studio is <strong className="text-white">not a paid membership</strong> — it's earned through performance.
+              Build your fanbase, create quality content, and unlock powerful AI tools as you grow.
+            </p>
+
+            <div className="flex flex-wrap justify-center gap-4 mb-12">
+              <div className="flex items-center gap-2 bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-2">
+                <Users className="w-5 h-5 text-cyan-400" />
+                <span className="text-sm text-zinc-300">Fan Count</span>
+              </div>
+              <div className="flex items-center gap-2 bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-2">
+                <TrendingUp className="w-5 h-5 text-purple-400" />
+                <span className="text-sm text-zinc-300">Referrals</span>
+              </div>
+              <div className="flex items-center gap-2 bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-2">
+                <Camera className="w-5 h-5 text-pink-400" />
+                <span className="text-sm text-zinc-300">Media Quality</span>
+              </div>
+              <div className="flex items-center gap-2 bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-2">
+                <Zap className="w-5 h-5 text-yellow-400" />
+                <span className="text-sm text-zinc-300">Post Volume</span>
+              </div>
+            </div>
+
+            <Button
+              asChild
+              className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 text-white px-8 py-6 text-lg rounded-full shadow-lg shadow-cyan-500/30"
+            >
+              <Link href="/auth/signup">
+                Start Your Creator Journey
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* How It Works Section */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-4xl font-['Bebas_Neue'] text-center mb-4">How Starz Works</h2>
+          <p className="text-center text-zinc-400 mb-12 max-w-2xl mx-auto">
+            Your tier is evaluated every 30 days based on your performance metrics.
+            Titles change dynamically to keep momentum and reward consistent growth.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <Card className="bg-zinc-900/50 border-cyan-500/30 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-cyan-500/10 rounded-lg">
+                    <TrendingUp className="w-6 h-6 text-cyan-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-2">30-Day Rolling Period</h3>
+                    <p className="text-zinc-400 text-sm">
+                      Your tier is re-evaluated monthly. Stay active and engaged to maintain or upgrade your status.
+                      Inactive creators may see tier adjustments.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-zinc-900/50 border-purple-500/30 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-purple-500/10 rounded-lg">
+                    <Zap className="w-6 h-6 text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-2">Dynamic Titles</h3>
+                    <p className="text-zinc-400 text-sm">
+                      Your title reflects your current performance tier. As you grow and improve,
+                      your title updates to match — keeping the momentum fresh and competitive.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-zinc-900/50 border-pink-500/30 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-pink-500/10 rounded-lg">
+                    <Camera className="w-6 h-6 text-pink-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-2">AI Quality Scoring</h3>
+                    <p className="text-zinc-400 text-sm">
+                      Your media uploads are scored by FanzMediaHub AI for quality, composition,
+                      and engagement potential. Higher quality = higher tier progress.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-zinc-900/50 border-yellow-500/30 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-yellow-500/10 rounded-lg">
+                    <Users className="w-6 h-6 text-yellow-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-2">Fan & Referral Growth</h3>
+                    <p className="text-zinc-400 text-sm">
+                      Build your fanbase through engaging content and successful referrals.
+                      Both metrics contribute to your tier evaluation and unlock new benefits.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Important Info */}
+          <div className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/30 rounded-xl p-6 mb-12">
+            <div className="flex items-start gap-4">
+              <Info className="w-6 h-6 text-cyan-400 flex-shrink-0 mt-1" />
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-2">Starz Program Rules</h3>
+                <ul className="space-y-2 text-sm text-zinc-300">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                    <span>Membership cannot be purchased — only earned through platform performance</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                    <span>Tiers are evaluated every 30 days based on rolling metrics</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                    <span>All metrics must meet minimum requirements to maintain or upgrade tier</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                    <span>Violating platform policies may result in tier demotion or removal</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                    <span>Higher tiers unlock exclusive AI tools, priority support, and VIP treatment</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
-      )}
-      
-      <div className="w-full max-w-4xl">
-        
-        {/* Progress Bar */}
-        {currentStep !== 'welcome' && currentStep !== 'complete' && (
-          <div className="mb-8">
-            <div className="flex justify-between mb-2 text-sm">
-              <span className="text-zinc-400">Step {currentStepIndex + 1} of {steps.length}</span>
-              <span className="text-[#ff0000]">{Math.round(progress)}% Complete</span>
-            </div>
-            <Progress value={progress} className="h-2 bg-zinc-800" />
-          </div>
-        )}
-
-        <Card className="bg-zinc-900/50 border-[#ff0000]/30 backdrop-blur-sm">
-          
-          {/* STEP 1: Welcome Screen */}
-          {currentStep === 'welcome' && (
-            <div className="p-8 md:p-12 text-center">
-              <div className="mx-auto mb-6 w-20 h-20 bg-gradient-to-br from-[#ff0000]/20 to-[#d4a959]/20 rounded-full flex items-center justify-center border border-[#ff0000]/30">
-                <Crown className="h-10 w-10 text-[#ff0000]" />
-              </div>
-              <h1 className="text-4xl md:text-5xl font-['Bebas_Neue'] text-white mb-4 tracking-wide">
-                Claim Your Star Power
-              </h1>
-              <p className="text-xl text-zinc-400 mb-8 max-w-2xl mx-auto">
-                Join the creator economy that puts you first. Build your empire with 100% earnings, full content ownership, and powerful community tools.
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 max-w-3xl mx-auto">
-                <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700">
-                  <DollarSign className="w-8 h-8 text-[#d4a959] mx-auto mb-2" />
-                  <h3 className="text-white font-semibold mb-1">100% Earnings</h3>
-                  <p className="text-sm text-zinc-400">Keep everything you make</p>
-                </div>
-                <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700">
-                  <Shield className="w-8 h-8 text-[#ff0000] mx-auto mb-2" />
-                  <h3 className="text-white font-semibold mb-1">Full Ownership</h3>
-                  <p className="text-sm text-zinc-400">Your content, your rules</p>
-                </div>
-                <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700">
-                  <Users className="w-8 h-8 text-[#d4a959] mx-auto mb-2" />
-                  <h3 className="text-white font-semibold mb-1">Community Tools</h3>
-                  <p className="text-sm text-zinc-400">Engage like never before</p>
-                </div>
-              </div>
-
-              <Button
-                onClick={handleNext}
-                className="bg-[#ff0000] hover:bg-[#cc0000] text-white px-8 py-6 text-lg"
-                data-testid="button-start-creator-signup"
-              >
-                Start Your Journey
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-
-              <p className="mt-6 text-sm text-zinc-500">
-                Already have an account?{" "}
-                <Link href="/auth/login" className="text-[#ff0000] hover:underline">
-                  Sign In
-                </Link>
-              </p>
-            </div>
-          )}
-
-          {/* STEP 2: Account Creation */}
-          {currentStep === 'account' && (
-            <div className="p-8">
-              <CardHeader>
-                <CardTitle className="text-2xl font-['Bebas_Neue'] text-white">Create Your Account</CardTitle>
-                <CardDescription className="text-zinc-400">Choose your preferred sign-up method</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <SocialLoginButtons role="creator" data-testid="social-login-creator" />
-                
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-zinc-700" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-zinc-900 px-2 text-zinc-500">Or continue with email</span>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="email" className="text-zinc-300">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="creator@example.com"
-                      value={formData.email}
-                      onChange={(e) => handleChange("email", e.target.value)}
-                      className="bg-zinc-800 border-zinc-700 text-white mt-1"
-                      data-testid="input-creator-email"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="username" className="text-zinc-300">Creator Username</Label>
-                    <Input
-                      id="username"
-                      type="text"
-                      placeholder="@yourcreatorname"
-                      value={formData.username}
-                      onChange={(e) => handleChange("username", e.target.value)}
-                      className="bg-zinc-800 border-zinc-700 text-white mt-1"
-                      data-testid="input-creator-username"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="password" className="text-zinc-300">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Create a strong password"
-                      value={formData.password}
-                      onChange={(e) => handleChange("password", e.target.value)}
-                      className="bg-zinc-800 border-zinc-700 text-white mt-1"
-                      data-testid="input-creator-password"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="confirmPassword" className="text-zinc-300">Confirm Password</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="Re-enter your password"
-                      value={formData.confirmPassword}
-                      onChange={(e) => handleChange("confirmPassword", e.target.value)}
-                      className="bg-zinc-800 border-zinc-700 text-white mt-1"
-                      data-testid="input-creator-confirm-password"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-between pt-4">
-                  <Button onClick={handleBack} variant="outline" className="border-zinc-700" data-testid="button-back-account">
-                    Back
-                  </Button>
-                  <Button 
-                    onClick={handleNext} 
-                    className="bg-[#ff0000] hover:bg-[#cc0000]"
-                    data-testid="button-next-account"
-                    disabled={!formData.email || !formData.username || !formData.password || !formData.confirmPassword}
-                  >
-                    Continue
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </div>
-          )}
-
-          {/* STEP 3: Profile Setup */}
-          {currentStep === 'profile' && (
-            <div className="p-8">
-              <CardHeader>
-                <CardTitle className="text-2xl font-['Bebas_Neue'] text-white">Build Your Creator Profile</CardTitle>
-                <CardDescription className="text-zinc-400">Tell your fans who you are</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="displayName" className="text-zinc-300">Display Name</Label>
-                    <Input
-                      id="displayName"
-                      placeholder="Your real or public name"
-                      value={formData.displayName}
-                      onChange={(e) => handleChange("displayName", e.target.value)}
-                      className="bg-zinc-800 border-zinc-700 text-white mt-1"
-                      data-testid="input-display-name"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="stageName" className="text-zinc-300">Stage Name</Label>
-                    <Input
-                      id="stageName"
-                      placeholder="Your creative alias"
-                      value={formData.stageName}
-                      onChange={(e) => handleChange("stageName", e.target.value)}
-                      className="bg-zinc-800 border-zinc-700 text-white mt-1"
-                      data-testid="input-stage-name"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="pronouns" className="text-zinc-300">Pronouns (Optional)</Label>
-                  <Input
-                    id="pronouns"
-                    placeholder="e.g., they/them, she/her, he/him"
-                    value={formData.pronouns}
-                    onChange={(e) => handleChange("pronouns", e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white mt-1"
-                    data-testid="input-pronouns"
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-zinc-300 mb-3 block">Select Your Niches</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {nicheOptions.map((niche) => (
-                      <Badge
-                        key={niche}
-                        onClick={() => toggleNiche(niche)}
-                        className={`cursor-pointer transition-all ${
-                          formData.niches.includes(niche)
-                            ? 'bg-[#ff0000] text-white border-[#ff0000]'
-                            : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:border-[#ff0000]/50'
-                        }`}
-                        data-testid={`badge-niche-${niche.toLowerCase().replace(/\s+/g, '-')}`}
-                      >
-                        {formData.niches.includes(niche) && <Check className="w-3 h-3 mr-1" />}
-                        {niche}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex justify-between pt-4">
-                  <Button onClick={handleBack} variant="outline" className="border-zinc-700" data-testid="button-back-profile">
-                    Back
-                  </Button>
-                  <Button 
-                    onClick={handleNext} 
-                    className="bg-[#ff0000] hover:bg-[#cc0000]"
-                    data-testid="button-next-profile"
-                  >
-                    Continue
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </div>
-          )}
-
-          {/* STEP 4: Verification & Compliance */}
-          {currentStep === 'verification' && (
-            <div className="p-8">
-              <CardHeader>
-                <CardTitle className="text-2xl font-['Bebas_Neue'] text-white">Verification & Compliance</CardTitle>
-                <CardDescription className="text-zinc-400">Quick and secure identity verification</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="p-6 rounded-lg border border-[#d4a959]/30 bg-[#d4a959]/5">
-                  <div className="flex items-start gap-4">
-                    <Shield className="w-8 h-8 text-[#d4a959] flex-shrink-0 mt-1" />
-                    <div>
-                      <h3 className="text-white font-semibold mb-2">Why We Verify</h3>
-                      <p className="text-sm text-zinc-400">
-                        We verify all creators to ensure platform safety, comply with regulations, and protect both you and your fans. Your data is encrypted and secure.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="over18"
-                      checked={formData.over18}
-                      onCheckedChange={(checked) => handleChange("over18", checked as boolean)}
-                      data-testid="checkbox-over-18"
-                    />
-                    <label htmlFor="over18" className="text-sm text-zinc-300 cursor-pointer">
-                      I confirm that I am 18 years of age or older
-                    </label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="agreeToTerms"
-                      checked={formData.agreeToTerms}
-                      onCheckedChange={(checked) => handleChange("agreeToTerms", checked as boolean)}
-                      data-testid="checkbox-agree-terms"
-                    />
-                    <label htmlFor="agreeToTerms" className="text-sm text-zinc-300 cursor-pointer">
-                      I agree to the{" "}
-                      <Link href="/terms" className="text-[#ff0000] hover:underline">
-                        Terms of Service
-                      </Link>{" "}
-                      and{" "}
-                      <Link href="/privacy" className="text-[#ff0000] hover:underline">
-                        Privacy Policy
-                      </Link>
-                    </label>
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Camera className="w-5 h-5 text-[#ff0000]" />
-                    <span className="text-white font-medium">ID Verification (Coming Soon)</span>
-                  </div>
-                  <p className="text-sm text-zinc-400">
-                    You'll be prompted to complete ID verification via a secure photo + selfie match after account creation. This ensures platform compliance and unlocks monetization features.
-                  </p>
-                </div>
-
-                <div className="flex justify-between pt-4">
-                  <Button onClick={handleBack} variant="outline" className="border-zinc-700" data-testid="button-back-verification">
-                    Back
-                  </Button>
-                  <Button 
-                    onClick={handleNext} 
-                    className="bg-[#ff0000] hover:bg-[#cc0000]"
-                    data-testid="button-next-verification"
-                    disabled={!formData.over18 || !formData.agreeToTerms}
-                  >
-                    Continue
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </div>
-          )}
-
-          {/* STEP 5: Complete - Dashboard Intro */}
-          {currentStep === 'complete' && (
-            <div className="p-8 md:p-12 text-center">
-              <div className="mx-auto mb-6 w-20 h-20 bg-gradient-to-br from-[#ff0000]/20 to-[#d4a959]/20 rounded-full flex items-center justify-center border border-[#ff0000]/30 animate-pulse">
-                <Star className="h-10 w-10 text-[#d4a959]" />
-              </div>
-              <h1 className="text-4xl md:text-5xl font-['Bebas_Neue'] text-white mb-4 tracking-wide">
-                Welcome to Your Empire!
-              </h1>
-              <p className="text-xl text-zinc-400 mb-8 max-w-2xl mx-auto">
-                Your creator account is almost ready. Complete your registration to unlock your dashboard and start building your community.
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 max-w-3xl mx-auto">
-                <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700">
-                  <Upload className="w-8 h-8 text-[#ff0000] mx-auto mb-2" />
-                  <h3 className="text-white font-semibold mb-1">Upload Content</h3>
-                  <p className="text-sm text-zinc-400">Share photos, videos & more</p>
-                </div>
-                <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700">
-                  <Users className="w-8 h-8 text-[#d4a959] mx-auto mb-2" />
-                  <h3 className="text-white font-semibold mb-1">Go Live</h3>
-                  <p className="text-sm text-zinc-400">Stream to your fans in real-time</p>
-                </div>
-                <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700">
-                  <Zap className="w-8 h-8 text-[#ff0000] mx-auto mb-2" />
-                  <h3 className="text-white font-semibold mb-1">Earn Instantly</h3>
-                  <p className="text-sm text-zinc-400">Get paid for every interaction</p>
-                </div>
-              </div>
-
-              <Button
-                onClick={handleSubmit}
-                disabled={registerMutation.isPending}
-                className="bg-[#ff0000] hover:bg-[#cc0000] text-white px-8 py-6 text-lg"
-                data-testid="button-complete-signup"
-              >
-                {registerMutation.isPending ? "Creating Your Account..." : "Enter Your Dashboard"}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </div>
-          )}
-
-        </Card>
       </div>
+
+      {/* Tier Breakdown Section */}
+      <div className="container mx-auto px-4 py-16 bg-gradient-to-b from-transparent via-zinc-900/30 to-transparent">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl font-['Bebas_Neue'] text-center mb-4">Starz Tiers & Benefits</h2>
+          <p className="text-center text-zinc-400 mb-12 max-w-2xl mx-auto">
+            Five performance-based tiers, each unlocking powerful tools and benefits to grow your creator business.
+          </p>
+
+          <div className="space-y-4">
+            {tierData.map((tier) => {
+              const Icon = tier.icon;
+              const isExpanded = expandedTier === tier.tier;
+
+              return (
+                <Card
+                  key={tier.tier}
+                  className={`bg-zinc-900/50 border ${tier.borderColor} backdrop-blur-sm transition-all cursor-pointer hover:border-opacity-60`}
+                  onClick={() => setExpandedTier(isExpanded ? null : tier.tier)}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className={`p-3 bg-gradient-to-br ${tier.color} rounded-lg`}>
+                          <Icon className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className={`text-2xl font-['Bebas_Neue'] ${tier.textColor}`}>{tier.name}</h3>
+                          <p className="text-sm text-zinc-500">Click to view requirements & benefits</p>
+                        </div>
+                      </div>
+                      <ArrowRight className={`w-5 h-5 text-zinc-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                    </div>
+
+                    {isExpanded && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 pt-6 border-t border-zinc-800">
+                        {/* Requirements */}
+                        <div>
+                          <h4 className="text-lg font-semibold text-white mb-4">Requirements</h4>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
+                              <span className="text-sm text-zinc-400">Minimum Fans</span>
+                              <Badge variant="outline" className={`${tier.textColor} border-current`}>
+                                {tier.requirements.fans.toLocaleString()}+
+                              </Badge>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
+                              <span className="text-sm text-zinc-400">Successful Referrals</span>
+                              <Badge variant="outline" className={`${tier.textColor} border-current`}>
+                                {tier.requirements.referrals}+
+                              </Badge>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
+                              <span className="text-sm text-zinc-400">Media Quality Score</span>
+                              <Badge variant="outline" className={`${tier.textColor} border-current`}>
+                                {tier.requirements.quality}/100
+                              </Badge>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
+                              <span className="text-sm text-zinc-400">Total Posts</span>
+                              <Badge variant="outline" className={`${tier.textColor} border-current`}>
+                                {tier.requirements.posts}+
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Benefits */}
+                        <div>
+                          <h4 className="text-lg font-semibold text-white mb-4">Benefits Unlocked</h4>
+                          <ul className="space-y-2">
+                            {tier.benefits.map((benefit, index) => (
+                              <li key={index} className="flex items-start gap-2 text-sm text-zinc-300">
+                                <CheckCircle2 className={`w-4 h-4 flex-shrink-0 mt-0.5 ${tier.textColor}`} />
+                                <span>{benefit}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="bg-gradient-to-br from-cyan-500/20 via-purple-500/20 to-pink-500/20 border border-cyan-500/30 rounded-2xl p-8 md:p-12">
+            <Crown className="w-16 h-16 text-cyan-400 mx-auto mb-6" />
+            <h2 className="text-4xl font-['Bebas_Neue'] mb-4">Ready to Earn Your Stars?</h2>
+            <p className="text-zinc-400 mb-8 text-lg">
+              Create your creator account and start building your fanbase.
+              Your Starz tier will be automatically evaluated as you grow.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                asChild
+                className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 text-white px-8 py-6 text-lg rounded-full shadow-lg shadow-cyan-500/30"
+              >
+                <Link href="/auth/signup">
+                  Start as Creator
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="border-zinc-700 hover:bg-zinc-800 px-8 py-6 text-lg rounded-full"
+              >
+                <Link href="/auth/login">
+                  Already Have Account?
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Note */}
+      <div className="container mx-auto px-4 pb-16">
+        <p className="text-center text-sm text-zinc-600">
+          Questions about Starz membership? <Link href="/contact" className="text-cyan-400 hover:underline">Contact Support</Link>
+        </p>
+      </div>
+
     </div>
   );
 }

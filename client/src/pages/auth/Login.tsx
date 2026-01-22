@@ -20,8 +20,9 @@ export default function Login() {
     password: "",
   });
 
-  // Redirect if already logged in
-  if (user) {
+  // Simple redirect check - don't over-complicate
+  // React Query will handle authentication state properly
+  if (user && user.id) {
     setLocation("/");
     return null;
   }
@@ -120,33 +121,7 @@ export default function Login() {
               </Button>
             </form>
 
-            {/* FanzSSO Login */}
-            <div className="mt-6">
-              <div className="relative mb-4">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-muted/20" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card/50 px-2 text-muted-foreground">Or continue with</span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full border-primary/30 hover:bg-primary/10 text-primary hover:text-primary glow-effect"
-                onClick={() => window.location.href = '/api/auth/sso'}
-                data-testid="button-sso-login"
-              >
-                <Key className="w-4 h-4 mr-2" />
-                Sign in with FanzSSO
-              </Button>
-            </div>
-
-            {/* Social Login Options */}
-            <div className="mt-4">
-              <SocialLoginButtons mode="login" variant="outline" className="w-full" />
-            </div>
+            {/* SSO and Social Login Removed - Email/Password Only */}
 
             <div className="mt-8 text-center space-y-4">
               <p className="text-sm neon-white-body">
@@ -159,14 +134,14 @@ export default function Login() {
               <div className="border-t border-muted/20 pt-4">
                 <p className="text-sm neon-white-body mb-4">Don't have an account yet?</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Link href="/auth/starz-signup" className="block">
-                    <Button 
-                      variant="outline" 
+                  <Link href="/auth/breeding-zone-signup" className="block">
+                    <Button
+                      variant="outline"
                       className="w-full border-primary/30 hover:bg-primary/10 text-primary hover:text-primary"
-                      data-testid="button-join-starz"
+                      data-testid="button-join-breeding-zone"
                     >
                       <Crown className="w-4 h-4 mr-2" />
-                      Join as Starz
+                      Join Breeding Zone
                     </Button>
                   </Link>
                   <Link href="/auth/fanz-signup" className="block">

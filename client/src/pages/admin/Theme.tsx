@@ -1,13 +1,13 @@
 import React from 'react';
 import ThemeManagementDashboard from '@/components/admin/ThemeManagementDashboard';
 import { useAuth } from '@/hooks/useAuth';
-import { Navigate } from 'react-router-dom';
+import { Redirect } from 'wouter';
 
 export default function ThemePage() {
   const { user, isAdmin } = useAuth();
-  
+
   if (!user || !isAdmin) {
-    return <Navigate to="/" replace />;
+    return <Redirect to="/" />;
   }
   
   const handleSave = async (theme: any) => {

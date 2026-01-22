@@ -55,7 +55,7 @@ const PAGE_CONTEXT: Record<string, { title: string; tips: string[]; quickActions
     ]
   },
   '/infinity-feed': {
-    title: 'Infinity Feed',
+    title: 'Fanz Spa',
     tips: [
       'Endless scrolling of curated content based on your preferences',
       'AI-powered recommendations learn from your interactions',
@@ -382,6 +382,7 @@ export function TutorialBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [hasSeenWelcome, setHasSeenWelcome] = useLocalStorage('tutorialBot_seenWelcome', false);
+  const [neverShowAgain, setNeverShowAgain] = useLocalStorage('tutorialBot_neverShow', false);
   const [completedSteps, setCompletedSteps] = useLocalStorage<string[]>('tutorialBot_completedSteps', []);
   const [currentTrack, setCurrentTrack] = useState<TutorialTrack | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -537,13 +538,14 @@ export function TutorialBot() {
     }
   };
 
-  if (!user) return null;
+  // Don't render if user opted to never show again
+  if (!user || neverShowAgain) return null;
 
   return (
     <>
       {/* Floating Bot Button */}
       <motion.div
-        className="fixed bottom-6 right-6 z-50"
+        className="fixed top-1/2 -translate-y-1/2 right-6 z-50"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 1, type: 'spring' }}
@@ -592,7 +594,7 @@ export function TutorialBot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
             transition={{ type: 'spring', damping: 25 }}
-            className="fixed bottom-6 right-6 z-50 w-[380px] max-h-[600px]"
+            className="fixed top-1/2 -translate-y-1/2 right-6 z-50 w-[380px] max-h-[600px]"
           >
             <Card className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-primary/30 shadow-2xl shadow-primary/20 overflow-hidden">
               {/* Header */}
@@ -833,6 +835,24 @@ export function TutorialBot() {
                         <Play className="h-3 w-3 mr-1" />
                         All Tutorials
                       </Button>
+                    </div>
+
+                    {/* Don't show again option */}
+                    <div className="mt-4 pt-3 border-t border-white/5">
+                      <label className="flex items-center gap-2 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          checked={false}
+                          onChange={() => {
+                            setNeverShowAgain(true);
+                            setIsOpen(false);
+                          }}
+                          className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-primary focus:ring-primary focus:ring-offset-0"
+                        />
+                        <span className="text-xs text-gray-500 group-hover:text-gray-400 transition-colors">
+                          Don't show this guide again
+                        </span>
+                      </label>
                     </div>
                   </div>
                 )}

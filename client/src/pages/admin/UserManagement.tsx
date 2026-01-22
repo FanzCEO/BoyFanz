@@ -15,14 +15,16 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { 
-  Users, UserCheck, UserX, Search, Filter, MoreHorizontal, Shield, AlertTriangle, 
+import {
+  Users, UserCheck, UserX, Search, Filter, MoreHorizontal, Shield, AlertTriangle,
   Download, Upload, MessageSquare, Ban, CheckCircle, XCircle, Eye, EyeOff,
   Calendar, Activity, Star, Trash2, Edit, Mail, Phone
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { Clock } from "lucide-react";
+import { motion } from "framer-motion";
+import { AdminLayout, AdminStatCard } from "@/components/bathhouse";
 
 export default function UserManagement() {
   const { user } = useAuth();
@@ -73,14 +75,12 @@ export default function UserManagement() {
         sortBy,
         sortOrder
       }
-    ],
-    enabled: user?.role === 'admin'
+    ]
   });
 
   // Fetch user stats
   const { data: userStats } = useQuery<any>({
-    queryKey: ['/api/admin/users/stats'],
-    enabled: user?.role === 'admin'
+    queryKey: ['/api/admin/users/stats']
   });
 
   const users = usersData?.users || [];
@@ -216,53 +216,49 @@ export default function UserManagement() {
     );
   }, [users, searchQuery]);
 
-
-  if (user?.role !== 'admin') {
-    return (
-      <div className="space-y-6" data-testid="access-denied">
-        <Alert className="border-destructive/50 bg-destructive/10">
-          <AlertTriangle className="h-4 w-4 text-destructive" />
-          <AlertDescription className="text-destructive">
-            Access denied. Admin privileges required to manage users.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
   if (error) {
     return (
-      <div className="space-y-6">
-        <Alert className="border-destructive/50 bg-destructive/10">
-          <AlertTriangle className="h-4 w-4 text-destructive" />
-          <AlertDescription className="text-destructive">
-            Failed to load users. Please try again.
-          </AlertDescription>
-        </Alert>
-      </div>
+      <AdminLayout title="Guest Registry" subtitle="System error" zone="registry">
+        <div className="space-y-6">
+          <Alert className="border-red-500/50 bg-red-900/20">
+            <AlertTriangle className="h-4 w-4 text-red-400" />
+            <AlertDescription className="text-red-400">
+              Failed to load guest registry. Please try again.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="space-y-6" data-testid="user-management-page">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold font-display" data-testid="page-title">User Management</h1>
-          <p className="text-muted-foreground" data-testid="page-description">
-            Comprehensive user management with advanced filtering and bulk operations
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Export Users
-          </Button>
-          <Button variant="outline" className="gap-2">
-            <Upload className="h-4 w-4" />
-            Import Users
-          </Button>
-        </div>
-      </div>
+    <AdminLayout
+      title="Guest Registry"
+      subtitle="Comprehensive guest management with advanced filtering and bulk operations"
+      zone="registry"
+    >
+      <div className="space-y-6 pb-12" data-testid="user-management-page">
+        {/* Action Bar */}
+        <motion.div
+          className="flex items-center justify-between"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="status-light status-light-green" />
+            <span className="text-sm text-gray-400">Registry Online</span>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" className="admin-action-btn">
+              <Download className="h-4 w-4" />
+              EXPORT
+            </Button>
+            <Button variant="outline" className="admin-action-btn">
+              <Upload className="h-4 w-4" />
+              IMPORT
+            </Button>
+          </div>
+        </motion.div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
@@ -867,6 +863,7 @@ export default function UserManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

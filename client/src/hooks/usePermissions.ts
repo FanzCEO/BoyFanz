@@ -84,11 +84,29 @@ export const ROUTE_PERMISSIONS: Record<string, string[]> = {
   "/admin/messages": ["moderation_actions"],
 };
 
+// Response from /api/auth/check-admin endpoint
+interface CheckAdminResponse {
+  isAdmin: boolean;
+  isSuperAdmin: boolean;
+  isModerator: boolean;
+  bypassCharges: boolean;
+  roles?: string[];
+}
+
 export function usePermissions() {
-  const { data, isLoading, error } = useQuery<UserPermissions>({
-    queryKey: ["/api/user/permissions"],
+  // Use the working /api/auth/check-admin endpoint
+  const { data: checkAdminData, isLoading, error } = useQuery<CheckAdminResponse>({
+    queryKey: ["/api/auth/check-admin"],
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
+
+  // Transform check-admin response to UserPermissions format
+  const data: UserPermissions | undefined = checkAdminData ? {
+    isAdmin: checkAdminData.isAdmin || checkAdminData.isSuperAdmin,
+    isModerator: checkAdminData.isModerator,
+    permissions: checkAdminData.isAdmin || checkAdminData.isSuperAdmin ? ["*"] : [],
+    hasAdminAccess: checkAdminData.isAdmin || checkAdminData.isSuperAdmin || checkAdminData.isModerator
+  } : undefined;
 
   const hasPermission = (permission: string): boolean => {
     if (!data) return false;

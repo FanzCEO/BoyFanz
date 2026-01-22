@@ -197,7 +197,7 @@ router.get("/api/logout", (req: Request, res: Response) => {
  */
 router.get("/api/auth/user", optionalFanzSSO, (req: Request, res: Response) => {
   if (!req.ssoUser && !req.session.ssoUser) {
-    return res.status(401).json({
+    return res.status(200).json({
       authenticated: false,
       user: null,
     });
@@ -257,7 +257,7 @@ router.get("/api/auth/check-admin", optionalFanzSSO, (req: Request, res: Respons
   const user = req.ssoUser || req.session.ssoUser;
 
   if (!user) {
-    return res.json({ isAdmin: false, isSuperAdmin: false, bypassCharges: false });
+    return res.status(200).json({ isAdmin: false, isSuperAdmin: false, bypassCharges: false });
   }
 
   const enhanced = enhanceUserWithSuperAdmin(user);
@@ -326,6 +326,42 @@ async function syncUserToLocalDatabase(ssoUser: SSOUser): Promise<void> {
     // Don't throw - user can still use the platform even if local sync fails
   }
 }
+
+// Platform metadata endpoint
+
+// Entitlements API - returns user tier, features, zone access
+router.get("/api/entitlements", (req: Request, res: Response) => {
+  const isAuth = req.isAuthenticated?.() && req.user;
+  res.json({
+    success: true,
+    entitlements: {
+      tier: isAuth ? "basic" : "free",
+      isActive: !isAuth ? false : true,
+      expiresAt: null,
+      features: { basic_viewing: true, public_content: true },
+      zoneAccess: { fanztube: "full" },
+      stepUpVerified: false,
+      stepUpExpiresAt: null
+    }
+  });
+});
+
+router.get("/api/platform/current", (req: Request, res: Response) => {
+  res.status(200).json({
+    success: true,
+    platform: "boyfanz",
+    brand: "BoyFanz",
+    host: req.headers.host,
+    themeColor: "#ff0000",
+    description: "The premier underground platform for creators and fans",
+    features: {
+      streaming: true,
+      messaging: true,
+      tips: true,
+      subscriptions: true,
+    },
+  });
+});
 
 export default router;
 export { isSuperAdmin, enhanceUserWithSuperAdmin, SUPER_ADMIN_EMAILS };

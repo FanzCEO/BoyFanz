@@ -101,14 +101,12 @@ export default function ComplaintsManagement() {
       sortOrder,
       limit,
       offset: page * limit
-    }],
-    enabled: user?.role === 'admin'
+    }]
   });
 
   // Fetch complaint statistics
   const { data: statsData } = useQuery({
-    queryKey: ['/api/admin/complaints/stats'],
-    enabled: user?.role === 'admin'
+    queryKey: ['/api/admin/complaints/stats']
   });
 
   // Fetch comments for selected complaint
@@ -204,19 +202,6 @@ export default function ComplaintsManagement() {
       default: return 'bg-gray-500 text-white';
     }
   };
-
-  if (user?.role !== 'admin') {
-    return (
-      <div className="space-y-6" data-testid="access-denied">
-        <Alert className="border-destructive/50 bg-destructive/10">
-          <AlertTriangle className="h-4 w-4 text-destructive" />
-          <AlertDescription className="text-destructive">
-            Access denied. Admin privileges required to manage complaints.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
 
   const stats = statsData as ComplaintStats | undefined;
 

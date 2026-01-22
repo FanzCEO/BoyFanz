@@ -10,6 +10,7 @@ import authRoutes from './routes/authRoutes';
 import ssoRoutes from './routes/ssoRoutes';
 import dataRetentionRoutes from './routes/dataRetentionRoutes';
 import agentRoutes from './routes/agentRoutes';
+import aiAgentRoutes from './routes/aiAgentRoutes';
 import fuckBuddyRoutes from './routes/fuckBuddyRoutes';
 import naughtyProfileRoutes from './routes/naughtyProfileRoutes';
 import tipGamesRoutes from './routes/tipGamesRoutes';
@@ -41,6 +42,7 @@ import revenueIntelligenceRoutes from './routes/admin/revenueIntelligenceRoutes'
 import complianceRoutes from './routes/admin/complianceRoutes';
 import { csrfProtection, setupCSRFTokenEndpoint } from './middleware/csrf';
 import { isAuthenticated, requireAdmin, requireCreator, isSuperAdmin, shouldBypassCharges } from './middleware/auth';
+import cybersecurityRoutes from './routes/cybersecurityRoutes';
 import { ObjectStorageService } from './objectStorage';
 
 const objectStorageService = new ObjectStorageService();
@@ -250,6 +252,10 @@ export function registerRoutes(app: Express) {
   // ===== LOCAL AGENT ROUTES =====
   app.use("/api/local-bots", agentRoutes);
 
+  // ===== AI CONTROL PLANE ROUTES =====
+  // Agent Registry, RBAC, Policy, Audit for FANZ OS autonomy agents
+  app.use("/api/ai-control", aiAgentRoutes);
+
   // NOTE: Local bots are started in server/index.ts after app.listen()
   // to prevent multiple startups during hot reload or clustering
 
@@ -293,6 +299,11 @@ export function registerRoutes(app: Express) {
   // ===== SAFETY CENTER =====
   // Panic button, screenshot protection, reports, and content safety
   app.use("/api/safety", safetyRoutes);
+
+  // ===== FANZ CYBERSECURITY SYSTEM =====
+  // 500 Security Bots - Defense, Detection, Prevention, Compliance
+  app.use("/api/cybersecurity", cybersecurityRoutes);
+  console.log('🛡️ FANZ Cybersecurity System routes registered');
 
   // ===== UNIFIED AI GATEWAY =====
   // Together AI, OpenAI, Anthropic - with auto-failover
@@ -5724,6 +5735,7 @@ import {
 } from './routes/advancedFeatures';
 import infrastructureDashboardRoutes from './routes/infrastructureDashboard.js';
 import securityDashboardRoutes from './routes/securityDashboard.js';
+import cybersecurityRoutes from './routes/cybersecurityRoutes.js';
 import mobileApiRoutes from './routes/mobileApi.js';
 import monitoringDashboardRoutes from './routes/monitoringDashboard.js';
 import apiGatewayRoutes from './routes/apiGatewayRoutes.js';
@@ -5842,7 +5854,10 @@ export async function setupAdvancedRoutes(app: Express) {
   
   // Advanced Security & Compliance Dashboard
   app.use('/api/security', securityDashboardRoutes);
-  
+
+  // FANZ Cybersecurity System - 500 Security Bots
+  app.use('/api/cybersecurity', cybersecurityRoutes);
+
   // Mobile App Backend (ClubCentral)
   app.use('/api/mobile', mobileApiRoutes);
   
@@ -5881,6 +5896,7 @@ export async function setupAdvancedRoutes(app: Express) {
   console.log('🏢 Enterprise Command Center registered: Real-Time Dashboard, Alert Management, Performance Tracking, Service Discovery, Business Intelligence');
   console.log('🤖 Automated Workflow Engine registered: Rule-Based Automation, Cross-Service Actions, Intelligent Triggers, Revenue Optimization, Content Strategy Automation');
   console.log('🔍 Service Discovery & Health Monitoring registered: Service Registry, Auto-Discovery, Health Checks, Circuit Breakers, Dependency Mapping, Automated Failover');
+  console.log('🛡️ FANZ Cybersecurity System registered: 500 Security Bots, BOT LAW Compliance, Threat Detection, Attack Prevention, IP Blocking, Rate Limiting');
   console.log('💎 FanzTrust™ Financial Ledger System registered: FanzWallet, FanzLedger, FanzCredit, FanzToken, FanzCard, FanzRevenue');
   console.log('💳 FanzPay Payment Processing System registered: Deposits, Withdrawals, Instant Transfers, 12+ Providers');
   console.log('💰 FanzCredit System registered: Credit Lines, Trust Scoring, Automated Approvals, Collateral Management');

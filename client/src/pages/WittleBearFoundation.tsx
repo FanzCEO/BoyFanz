@@ -267,25 +267,15 @@ export default function WittleBearFoundation() {
                 </ul>
               </div>
 
-              <div>
-                <h4 className="font-semibold mb-3 text-secondary">By The Numbers</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-muted/50 rounded-lg p-4 text-center">
-                    <p className="text-2xl font-bold text-pink-400">100+</p>
-                    <p className="text-xs text-muted-foreground">Youth Housed</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-lg p-4 text-center">
-                    <p className="text-2xl font-bold text-amber-400">250+</p>
-                    <p className="text-xs text-muted-foreground">Pets Adopted</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-lg p-4 text-center">
-                    <p className="text-2xl font-bold text-primary">50+</p>
-                    <p className="text-xs text-muted-foreground">Shelter Partners</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-lg p-4 text-center">
-                    <p className="text-2xl font-bold text-accent">$500K+</p>
-                    <p className="text-xs text-muted-foreground">Donated</p>
-                  </div>
+              <div className="bg-gradient-to-br from-pink-500/10 to-amber-500/10 rounded-xl p-6">
+                <h4 className="font-semibold mb-3 text-secondary">Our Promise</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Every dollar counts. We're committed to transparency and ensuring
+                  your support directly impacts the lives of LGBTQ+ youth and shelter animals.
+                </p>
+                <div className="flex items-center gap-2 text-pink-300">
+                  <Shield className="h-4 w-4" />
+                  <span className="text-sm">Impact reports published quarterly</span>
                 </div>
               </div>
             </div>

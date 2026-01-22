@@ -214,7 +214,7 @@ export function AgentSidebar() {
 
       {/* Footer */}
       <div className="p-3 border-t border-gray-800">
-        <Link href="/admin/agents">
+        <Link href="/panel/admin/agents">
           <a className="flex items-center justify-center gap-2 w-full p-2 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 text-sm font-medium transition-colors">
             <Activity className="w-4 h-4" />
             <span>Manage Agents</span>

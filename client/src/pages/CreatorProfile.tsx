@@ -20,7 +20,7 @@ import {
   Gift, Flame, Sparkles, UserPlus, MoreHorizontal, Edit3, Settings, Image,
   Play, Bookmark, TrendingUp, Zap, CheckCircle2, Ban, Flag, Bell, BellOff,
   Send, Music, Instagram, Twitter, Youtube, X, ChevronDown, ChevronRight,
-  Plus, ThumbsUp, Award, Verified
+  Plus, ThumbsUp, Award, Verified, Facebook, ShoppingBag, Link2
 } from 'lucide-react';
 import {
   Dialog,
@@ -72,18 +72,23 @@ interface CreatorProfile {
   isSubscribed?: boolean;
   isFollowing?: boolean;
   mutualFriends?: number;
+  showEmailOnProfile?: boolean;
   socialLinks?: {
     instagram?: string;
     twitter?: string;
+    facebook?: string;
     youtube?: string;
     tiktok?: string;
     onlyfans?: string;
+    amazon?: string; // Amazon Gift Registry
+    fanzlink?: string; // FanzLink bio platform
   };
   user?: {
     username: string;
     firstName?: string;
     lastName?: string;
     profileImageUrl?: string;
+    email?: string;
   };
   featuredContent?: Post[];
 }
@@ -455,7 +460,7 @@ export default function CreatorProfile() {
                         Edit Profile
                       </Button>
                     </Link>
-                    <Link href="/starz-studio">
+                    <Link href="/breeding-zone">
                       <Button variant="outline" className="border-red-500/30 text-white hover:bg-red-950/30">
                         <Crown className="h-4 w-4 mr-2" />
                         Starz Studio
@@ -647,6 +652,34 @@ export default function CreatorProfile() {
                         <a href={creator.socialLinks.youtube} target="_blank" rel="noopener noreferrer">
                           <Button variant="outline" size="icon" className="border-red-500/30 text-red-400 hover:bg-red-950/30">
                             <Youtube className="h-5 w-5" />
+                          </Button>
+                        </a>
+                      )}
+                      {creator.socialLinks.facebook && (
+                        <a href={`https://facebook.com/${creator.socialLinks.facebook}`} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="icon" className="border-blue-600/30 text-blue-500 hover:bg-blue-950/30">
+                            <Facebook className="h-5 w-5" />
+                          </Button>
+                        </a>
+                      )}
+                      {creator.socialLinks.amazon && (
+                        <a href={creator.socialLinks.amazon} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="icon" className="border-amber-500/30 text-amber-400 hover:bg-amber-950/30" title="Amazon Gift Registry">
+                            <ShoppingBag className="h-5 w-5" />
+                          </Button>
+                        </a>
+                      )}
+                      {creator.socialLinks.fanzlink && (
+                        <a href={creator.socialLinks.fanzlink} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="icon" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-950/30" title="FanzLink Bio">
+                            <Link2 className="h-5 w-5" />
+                          </Button>
+                        </a>
+                      )}
+                      {creator.showEmailOnProfile && creator.user?.email && (
+                        <a href={`mailto:${creator.user.email}`}>
+                          <Button variant="outline" size="icon" className="border-purple-500/30 text-purple-400 hover:bg-purple-950/30" title={`Contact via Email: ${creator.user.email}`}>
+                            <Mail className="h-5 w-5" />
                           </Button>
                         </a>
                       )}
@@ -857,7 +890,7 @@ export default function CreatorProfile() {
                         {currentUser?.username?.[0]?.toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <Link href="/starz-studio" className="flex-1">
+                    <Link href="/breeding-zone" className="flex-1">
                       <div className="bg-red-950/30 rounded-full px-6 py-3 text-gray-400 hover:bg-red-950/50 transition-colors cursor-pointer">
                         What's on your mind, {currentUser?.firstName || 'Star'}?
                       </div>
@@ -865,19 +898,19 @@ export default function CreatorProfile() {
                   </div>
                   <Separator className="my-4 bg-red-900/30" />
                   <div className="flex items-center justify-around">
-                    <Link href="/starz-studio">
+                    <Link href="/breeding-zone">
                       <Button variant="ghost" className="text-red-400 hover:bg-red-950/30">
                         <Video className="h-5 w-5 mr-2" />
                         Live Video
                       </Button>
                     </Link>
-                    <Link href="/starz-studio">
+                    <Link href="/breeding-zone">
                       <Button variant="ghost" className="text-green-400 hover:bg-green-950/30">
                         <Image className="h-5 w-5 mr-2" />
                         Photo/Video
                       </Button>
                     </Link>
-                    <Link href="/starz-studio">
+                    <Link href="/breeding-zone">
                       <Button variant="ghost" className="text-purple-400 hover:bg-purple-950/30">
                         <Lock className="h-5 w-5 mr-2" />
                         Premium Post
@@ -918,7 +951,7 @@ export default function CreatorProfile() {
                         : "This creator hasn't posted anything yet."}
                     </p>
                     {isOwnProfile && (
-                      <Link href="/starz-studio">
+                      <Link href="/breeding-zone">
                         <Button className="mt-4 bg-red-600 hover:bg-red-700">
                           Create Your First Post
                         </Button>
