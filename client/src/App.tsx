@@ -51,6 +51,9 @@ import AdminDashboard from "@/pages/admin/Dashboard";
 import UserManagement from "@/pages/admin/UserManagement";
 import ModerationQueue from "@/pages/admin/ModerationQueue";
 
+// Live Streaming pages
+import { GoLivePage, WatchStreamPage, LiveStreamsPage, VideoCallPage } from "@/pages/live";
+
 console.log('[BOYFANZ] Stable App loading...');
 
 function Router() {
@@ -118,6 +121,11 @@ function Router() {
       <Route path="/panel/admin/dashboard" component={AdminDashboard} />
       <Route path="/panel/admin/users" component={UserManagement} />
       <Route path="/panel/admin/moderation" component={ModerationQueue} />
+      <Route path="/live" component={LiveStreamsPage} />
+      <Route path="/live/go-live" component={GoLivePage} />
+      <Route path="/live/watch/:roomName" component={WatchStreamPage} />
+      <Route path="/video-call/:roomName" component={VideoCallPage} />
+      <Route path="/video-call/start/:userId" component={VideoCallPage} />
       <Route component={NotFound} />
     </Switch>
   );

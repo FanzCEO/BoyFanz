@@ -24,6 +24,7 @@ import watchPartyRoutes from './routes/watchPartyRoutes';
 import safetyRoutes from './routes/safetyRoutes';
 import aiRoutes from './routes/aiRoutes';
 import aiGatewayRoutes from './routes/aiGatewayRoutes';
+import livekitRoutes from './routes/livekitRoutes';
 // Admin Management Routes
 import brandingRoutes from './routes/admin/branding';
 import bookingsRoutes from './routes/admin/bookings';
@@ -255,6 +256,10 @@ export function registerRoutes(app: Express) {
   // ===== AI CONTROL PLANE ROUTES =====
   // Agent Registry, RBAC, Policy, Audit for FANZ OS autonomy agents
   app.use("/api/ai-control", aiAgentRoutes);
+
+  // ===== LIVEKIT REAL-TIME STREAMING ROUTES =====
+  // Livestreams, video calls, WebRTC via Fanz LiveKit microservice
+  app.use("/api/livekit", livekitRoutes);
 
   // NOTE: Local bots are started in server/index.ts after app.listen()
   // to prevent multiple startups during hot reload or clustering
