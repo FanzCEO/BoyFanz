@@ -101,9 +101,16 @@ function Router() {
     );
   }
 
+  // Authenticated users should go to dashboard, not landing
   return (
     <Switch>
-      <Route path="/" component={Landing} />
+      <Route path="/">
+        {() => {
+          // Redirect authenticated users to dashboard
+          navigate('/dashboard');
+          return null;
+        }}
+      </Route>
       <Route path="/auth/login" component={LoginNew} />
       <Route path="/auth/register" component={Register} />
       <Route path="/auth/callback" component={AuthCallback} />
