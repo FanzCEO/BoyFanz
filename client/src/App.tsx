@@ -104,6 +104,9 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Landing} />
+      <Route path="/auth/login" component={LoginNew} />
+      <Route path="/auth/register" component={Register} />
+      <Route path="/auth/callback" component={AuthCallback} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/feed" component={PostsFeed} />
       <Route path="/social" component={SocialHome} />

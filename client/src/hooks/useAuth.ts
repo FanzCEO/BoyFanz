@@ -73,6 +73,10 @@ export function useAuth() {
         try {
           const data = await res.json();
           // Return the user object from the response
+          // IMPORTANT: Return null if user is not authenticated, not the wrapper object
+          if (data.authenticated === false || !data.user) {
+            return null;
+          }
           return data.user || data;
         } catch (jsonError) {
           // Log JSON parsing error with response details
