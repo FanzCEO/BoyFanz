@@ -1,5 +1,5 @@
 // @ts-nocheck
-// Stable App.tsx - working version with essential features
+// Full Platform App.tsx with Sidebar and Header layout
 import { ScreenshotProtectionProvider } from '@/components/security/ScreenshotProtection';
 import { PlatformProvider } from '@/contexts/PlatformContext';
 import screenshotProtectionConfig from './config/screenshot-protection';
@@ -14,6 +14,10 @@ import { useTheme } from "@/hooks/useTheme";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useWebSocketInit } from "@/hooks/useWebSocketInit";
 import { useEffect, useState } from "react";
+
+// Layout components - FULL PLATFORM UI
+import Sidebar from "@/components/layout/Sidebar";
+import Header from "@/components/layout/Header";
 
 // Core pages
 import Landing from "@/pages/Landing";
@@ -54,7 +58,7 @@ import ModerationQueue from "@/pages/admin/ModerationQueue";
 // Live Streaming pages
 import { GoLivePage, WatchStreamPage, LiveStreamsPage, VideoCallPage } from "@/pages/live";
 
-console.log('[BOYFANZ] Stable App loading...');
+console.log('[BOYFANZ] Full Platform App loading with Sidebar and Header...');
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -101,43 +105,57 @@ function Router() {
     );
   }
 
-  // Authenticated users should go to dashboard, not landing
+  // Authenticated users get FULL PLATFORM LAYOUT with Sidebar and Header
   return (
-    <Switch>
-      <Route path="/">
-        {() => {
-          // Redirect authenticated users to dashboard
-          navigate('/dashboard');
-          return null;
-        }}
-      </Route>
-      <Route path="/auth/login" component={LoginNew} />
-      <Route path="/auth/register" component={Register} />
-      <Route path="/auth/callback" component={AuthCallback} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/feed" component={PostsFeed} />
-      <Route path="/social" component={SocialHome} />
-      <Route path="/messages" component={Messages} />
-      <Route path="/media" component={Media} />
-      <Route path="/settings" component={Settings} />
-      <Route path="/creator/:userId" component={CreatorProfile} />
-      <Route path="/search" component={SearchCreators} />
-      <Route path="/blog" component={Blog} />
-      <Route path="/contact" component={Contact} />
-      <Route path="/safety" component={SafetyCenter} />
-      <Route path="/terms" component={TermsOfService} />
-      <Route path="/privacy" component={PrivacyPolicy} />
-      <Route path="/help" component={HelpCenter} />
-      <Route path="/panel/admin/dashboard" component={AdminDashboard} />
-      <Route path="/panel/admin/users" component={UserManagement} />
-      <Route path="/panel/admin/moderation" component={ModerationQueue} />
-      <Route path="/live" component={LiveStreamsPage} />
-      <Route path="/live/go-live" component={GoLivePage} />
-      <Route path="/live/watch/:roomName" component={WatchStreamPage} />
-      <Route path="/video-call/:roomName" component={VideoCallPage} />
-      <Route path="/video-call/start/:userId" component={VideoCallPage} />
-      <Route component={NotFound} />
-    </Switch>
+    <div className="flex min-h-screen bg-background">
+      {/* Sidebar - Full navigation panel */}
+      <Sidebar user={user} />
+
+      {/* Main content area */}
+      <div className={`flex-1 flex flex-col ${isMobile ? 'ml-0' : 'ml-64'}`}>
+        {/* Header - Top navigation bar */}
+        <Header user={user} />
+
+        {/* Page content */}
+        <main className="flex-1 overflow-auto">
+          <Switch>
+            <Route path="/">
+              {() => {
+                // Redirect authenticated users to dashboard
+                navigate('/dashboard');
+                return null;
+              }}
+            </Route>
+            <Route path="/auth/login" component={LoginNew} />
+            <Route path="/auth/register" component={Register} />
+            <Route path="/auth/callback" component={AuthCallback} />
+            <Route path="/dashboard" component={Dashboard} />
+            <Route path="/feed" component={PostsFeed} />
+            <Route path="/social" component={SocialHome} />
+            <Route path="/messages" component={Messages} />
+            <Route path="/media" component={Media} />
+            <Route path="/settings" component={Settings} />
+            <Route path="/creator/:userId" component={CreatorProfile} />
+            <Route path="/search" component={SearchCreators} />
+            <Route path="/blog" component={Blog} />
+            <Route path="/contact" component={Contact} />
+            <Route path="/safety" component={SafetyCenter} />
+            <Route path="/terms" component={TermsOfService} />
+            <Route path="/privacy" component={PrivacyPolicy} />
+            <Route path="/help" component={HelpCenter} />
+            <Route path="/panel/admin/dashboard" component={AdminDashboard} />
+            <Route path="/panel/admin/users" component={UserManagement} />
+            <Route path="/panel/admin/moderation" component={ModerationQueue} />
+            <Route path="/live" component={LiveStreamsPage} />
+            <Route path="/live/go-live" component={GoLivePage} />
+            <Route path="/live/watch/:roomName" component={WatchStreamPage} />
+            <Route path="/video-call/:roomName" component={VideoCallPage} />
+            <Route path="/video-call/start/:userId" component={VideoCallPage} />
+            <Route component={NotFound} />
+          </Switch>
+        </main>
+      </div>
+    </div>
   );
 }
 
