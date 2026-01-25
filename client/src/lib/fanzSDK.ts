@@ -146,99 +146,107 @@ class FanzSDK {
   }
 
   /**
-   * Redirect to SSO login with PKCE
+   * Login via BoyFanz backend (which proxies to SSO)
+   * Browser → BoyFanz backend → SSO (never direct to SSO)
    */
-  async login(): Promise<void> {
+  async loginWithCredentials(email: string, password: string): Promise<{ success: boolean; user?: FanzUser; error?: string }> {
     try {
-      // Generate PKCE parameters
-      const { verifier, challenge } = await this.generatePKCE();
-      const state = this.generateState();
-
-      // Store verifier and state in sessionStorage for callback
-      sessionStorage.setItem(`${PLATFORM_ID}_pkce_verifier`, verifier);
-      sessionStorage.setItem(`${PLATFORM_ID}_pkce_state`, state);
-
-      // Build authorization URL with PKCE
-      const params = new URLSearchParams({
-        client_id: PLATFORM_ID,
-        response_type: 'code',
-        redirect_uri: `${window.location.origin}/auth/sso/callback`,
-        scope: 'openid profile email',
-        state: state,
-        code_challenge: challenge,
-        code_challenge_method: 'S256',
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
       });
 
-      // Redirect to SSO authorization endpoint
-      window.location.href = `https://sso.fanz.website/authorize?${params.toString()}`;
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { success: false, error: data.error || data.message || 'Login failed' };
+      }
+
+      // Store user if returned
+      if (data.user) {
+        this.setUser(data.user);
+      }
+
+      // Store tokens if returned (may be server-side session only)
+      if (data.accessToken) {
+        this.setTokens(data.accessToken, data.refreshToken);
+      }
+
+      console.log('[FanzSDK] Login successful');
+      return { success: true, user: data.user };
     } catch (error) {
       console.error('[FanzSDK] Login failed:', error);
-      throw error;
+      return { success: false, error: 'Network error' };
     }
   }
 
   /**
-   * Handle SSO callback and exchange code for tokens
+   * @deprecated Use loginWithCredentials() instead. SSO does not have /authorize endpoint.
+   * Keeping for backwards compatibility - redirects to login page.
+   */
+  async login(): Promise<void> {
+    // SSO v3.0.0 does NOT have /authorize - redirect to login page
+    console.warn('[FanzSDK] login() is deprecated. Use loginWithCredentials() instead.');
+    window.location.href = '/login';
+  }
+
+  /**
+   * @deprecated SSO does not have OAuth callback flow. Use loginWithCredentials() instead.
    */
   async handleCallback(code: string, state: string): Promise<void> {
+    // SSO v3.0.0 does NOT have OAuth callback flow
+    console.error('[FanzSDK] handleCallback() is deprecated - SSO does not support OAuth flow');
+    throw new Error('SSO callback flow not supported. Use loginWithCredentials() instead.');
+  }
+
+  /**
+   * Start age verification flow via BoyFanz backend
+   */
+  async startAgeVerification(): Promise<{ url?: string; error?: string }> {
     try {
-      // Verify state parameter
-      const storedState = sessionStorage.getItem(`${PLATFORM_ID}_pkce_state`);
-      if (!storedState || storedState !== state) {
-        throw new Error('Invalid state parameter - possible CSRF attack');
-      }
-
-      // Retrieve PKCE verifier
-      const verifier = sessionStorage.getItem(`${PLATFORM_ID}_pkce_verifier`);
-      if (!verifier) {
-        throw new Error('PKCE verifier not found in session');
-      }
-
-      // Exchange authorization code for tokens
-      const response = await fetch('https://sso.fanz.website/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          grant_type: 'authorization_code',
-          code: code,
-          redirect_uri: `${window.location.origin}/auth/sso/callback`,
-          client_id: PLATFORM_ID,
-          code_verifier: verifier,
-        }).toString(),
+      const response = await fetch('/api/auth/verify-age', {
+        method: 'GET',
+        credentials: 'include',
       });
 
       if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`Token exchange failed: ${error}`);
+        const data = await response.json();
+        return { error: data.error || 'Failed to start age verification' };
       }
 
       const data = await response.json();
+      // Backend returns verification URL from SSO
+      if (data.url) {
+        return { url: data.url };
+      }
+      return { error: 'No verification URL returned' };
+    } catch (error) {
+      console.error('[FanzSDK] Age verification failed:', error);
+      return { error: 'Network error' };
+    }
+  }
 
-      // Store tokens
-      this.setTokens(data.access_token, data.refresh_token);
+  /**
+   * Check age verification status
+   */
+  async checkAgeVerificationStatus(): Promise<{ verified: boolean; status?: string; error?: string }> {
+    try {
+      const response = await fetch('/api/auth/verification-status', {
+        method: 'GET',
+        credentials: 'include',
+      });
 
-      // Fetch and store user info if available
-      if (data.id_token || data.access_token) {
-        // Decode user info from id_token or fetch from userinfo endpoint
-        // For now, store basic user data
-        if (data.user) {
-          this.setUser(data.user);
-        }
+      if (!response.ok) {
+        return { verified: false, error: 'Failed to check verification status' };
       }
 
-      // Clean up PKCE parameters
-      sessionStorage.removeItem(`${PLATFORM_ID}_pkce_verifier`);
-      sessionStorage.removeItem(`${PLATFORM_ID}_pkce_state`);
-
-      console.log('[FanzSDK] Authentication successful');
+      const data = await response.json();
+      return { verified: data.verified || data.ageVerified || false, status: data.status };
     } catch (error) {
-      console.error('[FanzSDK] Callback handling failed:', error);
-      // Clean up on error
-      sessionStorage.removeItem(`${PLATFORM_ID}_pkce_verifier`);
-      sessionStorage.removeItem(`${PLATFORM_ID}_pkce_state`);
-      throw error;
+      console.error('[FanzSDK] Verification status check failed:', error);
+      return { verified: false, error: 'Network error' };
     }
   }
 
