@@ -114,10 +114,10 @@ export function useAuth() {
       }
     },
     retry: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: true,  // Re-check auth when user returns to tab
+    refetchOnMount: true,        // Re-check auth on component mount
+    staleTime: 30 * 1000,        // 30 seconds - auth state can change frequently
+    gcTime: 5 * 60 * 1000,       // 5 minutes garbage collection
   });
 
   const loginMutation = useMutation({
@@ -125,12 +125,15 @@ export function useAuth() {
       const res = await apiRequest("POST", "/api/auth/login", credentials);
       return await res.json();
     },
-    onSuccess: (user: any) => {
-      queryClient.setQueryData(["/api/auth/user"], user);
+    onSuccess: (data: any) => {
+      queryClient.setQueryData(["/api/auth/user"], data.user || data);
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
       });
+      // Hard redirect to force auth context refresh
+      const returnTo = new URLSearchParams(window.location.search).get('returnTo') || '/';
+      window.location.href = returnTo;
     },
     onError: (error: Error) => {
       // Extract user-friendly error message
