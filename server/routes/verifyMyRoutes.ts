@@ -143,10 +143,10 @@ function generateBasicAuth(): string {
 }
 
 /**
- * POST /api/verification/age-initiate
+ * POST /api/verification/age/initiate
  * Initiates age verification flow with VerifyMy
  */
-router.post('/age-initiate', verificationRateLimiter, async (req: Request, res: Response) => {
+router.post('/age/initiate', verificationRateLimiter, async (req: Request, res: Response) => {
   try {
     // SECURITY: Validate API credentials exist
     if (!config.apiKey || !config.apiSecret) {
@@ -169,7 +169,7 @@ router.post('/age-initiate', verificationRateLimiter, async (req: Request, res: 
       console.error('Invalid APP_URL configuration');
       return res.status(500).json({ error: 'Configuration error' });
     }
-    const redirectUrl = `${baseUrl}/api/verification/age-callback`;
+    const redirectUrl = `${baseUrl}/api/verification/age/callback`;
 
     // Request body for VerifyMy
     const requestBody = JSON.stringify({
@@ -232,10 +232,10 @@ router.post('/age-initiate', verificationRateLimiter, async (req: Request, res: 
 });
 
 /**
- * GET /api/verification/age-callback
+ * GET /api/verification/age/callback
  * Handles the callback from VerifyMy after verification
  */
-router.get('/age-callback', async (req: Request, res: Response) => {
+router.get('/age/callback', async (req: Request, res: Response) => {
   try {
     const { code, error, error_description } = req.query;
 
@@ -341,10 +341,10 @@ router.get('/age-callback', async (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/verification/age-check
+ * GET /api/verification/age/check
  * Checks if the current user is age verified
  */
-router.get('/age-check', checkRateLimiter, async (req: Request, res: Response) => {
+router.get('/age/check', checkRateLimiter, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
 
@@ -397,10 +397,10 @@ router.get('/age-check', checkRateLimiter, async (req: Request, res: Response) =
 });
 
 /**
- * POST /api/verification/age-confirm
+ * POST /api/verification/age/confirm
  * Confirms self-declaration age verification (fallback method)
  */
-router.post('/age-confirm', verificationRateLimiter, async (req: Request, res: Response) => {
+router.post('/age/confirm', verificationRateLimiter, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
     const { method } = req.body;
@@ -472,10 +472,10 @@ router.post('/age-confirm', verificationRateLimiter, async (req: Request, res: R
 });
 
 /**
- * POST /api/verification/creator-verify
+ * POST /api/verification/creator/verify
  * Initiates creator verification (2257 compliance + age verification)
  */
-router.post('/creator-verify', verificationRateLimiter, async (req: Request, res: Response) => {
+router.post('/creator/verify', verificationRateLimiter, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
 
@@ -492,7 +492,7 @@ router.post('/creator-verify', verificationRateLimiter, async (req: Request, res
     if (!baseUrl.includes('fanz.website') && !baseUrl.includes('localhost')) {
       return res.status(500).json({ error: 'Configuration error' });
     }
-    const redirectUrl = `${baseUrl}/api/verification/age-callback?type=creator`;
+    const redirectUrl = `${baseUrl}/api/verification/age/callback?type=creator`;
 
     const requestBody = JSON.stringify({
       redirect_url: redirectUrl,

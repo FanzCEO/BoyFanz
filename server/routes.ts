@@ -1,5 +1,5 @@
 import { Express } from 'express';
-import { db } from "./db";
+import { db, pool } from "./db";
 import { eq, and, desc, sql, gte, lte } from "drizzle-orm";
 import { creatorPromotions, creatorCoupons, couponRedemptions, promotionRedemptions } from "@shared/schema";
 import express from 'express';
@@ -41,6 +41,7 @@ import creatorAnalyticsRoutes from './routes/admin/creatorAnalyticsRoutes';
 import moderationWorkflowRoutes from './routes/admin/moderationWorkflowRoutes';
 import revenueIntelligenceRoutes from './routes/admin/revenueIntelligenceRoutes';
 import complianceRoutes from './routes/admin/complianceRoutes';
+import { initComplianceRoutes } from './routes/complianceRoutes.js';
 import { csrfProtection, setupCSRFTokenEndpoint } from './middleware/csrf';
 import { isAuthenticated, requireAdmin, requireCreator, isSuperAdmin, shouldBypassCharges } from './middleware/auth';
 import cybersecurityRoutes from './routes/cybersecurityRoutes';
@@ -335,6 +336,7 @@ export function registerRoutes(app: Express) {
   app.use("/api/admin/moderation", moderationWorkflowRoutes);
   app.use("/api/admin/revenue", revenueIntelligenceRoutes);
   app.use("/api/admin/compliance", complianceRoutes);
+  app.use("/api/compliance", initComplianceRoutes(pool));
 
   // Get current user delegated permissions
   app.get("/api/admin/delegated-permissions/my", isAuthenticated, async (req, res) => {
@@ -5760,6 +5762,7 @@ import analyticsIntelligenceRoutes from './routes/analyticsIntelligence.js';
 // import unifiedDataRoutes from './routes/unifiedDataRoutes.js';
 import pipelineIntegrationRoutes from './routes/pipelineIntegrationRoutes.js';
 import enterpriseCommandCenterRoutes from './routes/enterpriseCommandCenterRoutes.js';
+import verifyMyRoutes from "./routes/verifyMyRoutes";
 
 export async function setupAdvancedRoutes(app: Express) {
   // Dynamic imports for CommonJS routes
@@ -5851,6 +5854,9 @@ export async function setupAdvancedRoutes(app: Express) {
   // Progressive Web App (PWA) Routes
   app.use('/api/pwa', pwaRoutes);
   
+
+  // VerifyMy Age Verification Routes
+  app.use("/api/verification", verifyMyRoutes);
   // API Gateway & Service Mesh Dashboard (must be first for routing control)
   app.use('/api/gateway', apiGatewayRoutes);
   
