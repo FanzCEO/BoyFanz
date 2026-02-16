@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useWebSocketInit } from "@/hooks/useWebSocketInit";
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 
 // Layout components - FULL PLATFORM UI
 import Sidebar from "@/components/layout/Sidebar";
@@ -46,7 +46,8 @@ import Outlawz from "@/pages/Outlawz";
 import FanzCock from "@/pages/FanzCock";
 import StarzStudio from "@/pages/StarzStudio";
 import FanzCyberSecure from "@/pages/FanzCyberSecure";
-import FanzNexus from "@/pages/FanzNexus";
+// Lazy load 3D components to prevent React Three Fiber from crashing app init
+const FanzNexus = lazy(() => import("@/pages/FanzNexus"));
 import StarzCardzPage from "@/pages/StarzCardzPage";
 import FanzSpa from "@/pages/FanzSpa";
 import Payments from "@/pages/Payments";
@@ -198,8 +199,8 @@ function Router() {
         <Route path="/auth/verify-email" component={VerifyEmail} />
         <Route path="/auth/callback" component={AuthCallback} />
         <Route path="/auth/sso/callback" component={AuthCallback} />
-        <Route path="/login" component={Login} />
-        <Route path="/signin" component={Login} />
+        <Route path="/login" component={LoginNew} />
+        <Route path="/signin" component={LoginNew} />
         <Route path="/creator/:userId" component={CreatorProfile} />
         <Route path="/search" component={SearchCreators} />
         <Route path="/blog" component={Blog} />
@@ -306,8 +307,12 @@ function Router() {
             <Route path="/wicked-crm" component={FanzEmpire} />
             <Route path="/fanz-empire" component={FanzEmpire} />
 
-            {/* Security & Architecture */}
-            <Route path="/fanz-nexus" component={FanzNexus} />
+            {/* Security & Architecture - Lazy loaded 3D components */}
+            <Route path="/fanz-nexus">
+              <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading 3D...</div>}>
+                <FanzNexus />
+              </Suspense>
+            </Route>
             <Route path="/fanz-neuroverse" component={FanzEmpire} />
 
             {/* Mobile Apps */}

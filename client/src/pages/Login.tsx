@@ -22,13 +22,10 @@ export default function Login() {
   }, [setLocation, searchParams]);
 
   const handleLogin = async () => {
-    try {
-      console.log('[BOYFANZ SSO] Initiating login flow');
-      // This will redirect to the SSO service
-      await fanzSDK.login();
-    } catch (error) {
-      console.error('[BOYFANZ SSO] Login initiation failed:', error);
-    }
+    // Redirect to the proper login page with email/password form
+    // SSO v3.0.0 uses direct credential login, not OAuth redirect
+    console.log('[BOYFANZ SSO] Redirecting to login form');
+    setLocation('/auth/login');
   };
 
   return (

@@ -12,6 +12,7 @@ import {
   type SSOUser,
 } from "../auth/fanzSSO";
 import { storage } from "../storage";
+import { FAN_PLATFORMS } from "../../shared/fanzEcosystemRegistry";
 
 const router = Router();
 
@@ -53,21 +54,12 @@ function enhanceUserWithSuperAdmin(user: SSOUser): SSOUser {
 
 /**
  * GET /login or /auth/sso/login
- * Redirect to FanzSSO for authentication
+ * SSO v3.0.0 uses POST /api/auth/login, not OAuth redirects.
+ * Let the client-side React router handle the login page rendering.
+ * This route should NOT intercept - removed to allow client routing.
  */
-router.get(["/login", "/auth/sso/login"], (req: Request, res: Response) => {
-  // Generate CSRF state token
-  const state = FanzSSOClient.generateState();
-  req.session.oauthState = state;
-
-  // Store return URL if provided
-  const returnTo = req.query.returnTo as string || req.session.returnTo || "/";
-  req.session.returnTo = returnTo;
-
-  // Redirect to FanzSSO
-  const authUrl = FanzSSOClient.getAuthorizationUrl(state, returnTo);
-  res.redirect(authUrl);
-});
+// NOTE: Removed OAuth redirect - SSO v3.0.0 uses direct POST login
+// The React app at /auth/login handles the login UI
 
 /**
  * GET /auth/sso/callback
@@ -346,20 +338,23 @@ router.get("/api/entitlements", (req: Request, res: Response) => {
   });
 });
 
+/**
+ * GET /api/platform/current
+ * Returns current platform metadata for PlatformContext.tsx
+ * Must return FanzPlatform object, not just platform ID string
+ */
 router.get("/api/platform/current", (req: Request, res: Response) => {
-  res.status(200).json({
-    success: true,
-    platform: "boyfanz",
-    brand: "BoyFanz",
-    host: req.headers.host,
-    themeColor: "#ff0000",
-    description: "The premier underground platform for creators and fans",
-    features: {
-      streaming: true,
-      messaging: true,
-      tips: true,
-      subscriptions: true,
-    },
+  const boyfanzPlatform = FAN_PLATFORMS.find(p => p.id === 'boyfanz');
+
+  if (!boyfanzPlatform) {
+    return res.status(500).json({ error: "Platform configuration error" });
+  }
+
+  // Return shape that PlatformContext expects
+  res.json({
+    platform: boyfanzPlatform,
+    isAdminOverride: false,
+    availablePlatforms: FAN_PLATFORMS.filter(p => p.status === 'active'),
   });
 });
 
