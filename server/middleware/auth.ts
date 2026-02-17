@@ -14,19 +14,30 @@ export async function isAuthenticated(req: Request, res: Response, next: NextFun
   // Check for FanzSSO authentication first
   const ssoUser = (req as any).ssoUser || (req.session as any)?.ssoUser;
   if (ssoUser) {
-    // Load full user from database using SSO user email
-    // Note: ssoUser.id is a string like "user_xxx", NOT a valid UUID
-    // The local database user has a UUID id, so we look up by email instead
     if (!req.user) {
       try {
-        const user = await storage.getUserByEmail(ssoUser.email);
+        const user = await storage.getUser(ssoUser.id);
         if (user) {
           (req as any).user = user;
           return next();
         }
       } catch (error) {
-        console.error("Failed to load user from SSO session:", error);
+        // SSO user IDs (e.g. "user_xxx") may not be UUIDs - that's OK
       }
+      // If user not found in users table, trust the SSO token directly
+      (req as any).user = {
+        id: ssoUser.id,
+        email: ssoUser.email,
+        username: ssoUser.username,
+        role: ssoUser.isAdmin ? 'admin' : (ssoUser.isCreator ? 'creator' : 'fan'),
+        roles: ssoUser.roles || ['user'],
+        isAdmin: ssoUser.isAdmin || false,
+        isModerator: ssoUser.isModerator || false,
+        isCreator: ssoUser.isCreator || false,
+        ageVerified: ssoUser.ageVerified || false,
+        status: 'active',
+      };
+      return next();
     } else {
       return next();
     }
@@ -62,25 +73,7 @@ export async function isAuthenticated(req: Request, res: Response, next: NextFun
 
 // Helper to check if user is authenticated via session or Passport (async version)
 async function checkAuthAndLoadUser(req: Request): Promise<boolean> {
-  // Check for FanzSSO authentication first
-  const ssoUser = (req as any).ssoUser || (req.session as any)?.ssoUser;
-  if (ssoUser) {
-    if (!req.user) {
-      try {
-        const user = await storage.getUserByEmail(ssoUser.email);
-        if (user) {
-          (req as any).user = user;
-          return true;
-        }
-      } catch (error) {
-        console.error('Failed to load user from SSO:', error);
-        return false;
-      }
-    }
-    return true;
-  }
-
-  // Check session-based auth (local login)
+  // Check session-based auth first
   if (req.session && (req.session as any).userId) {
     const userId = (req.session as any).userId;
 

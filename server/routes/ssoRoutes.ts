@@ -110,7 +110,7 @@ router.get("/auth/sso/callback", async (req: Request, res: Response) => {
     req.session.ssoUser = user;
 
     // Get return URL before clearing it
-    const returnTo = req.session.returnTo || "/";
+    const returnTo = req.session.returnTo || "/dashboard";
     delete req.session.returnTo;
 
     // Find or create local user record
