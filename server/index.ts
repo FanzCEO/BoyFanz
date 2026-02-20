@@ -137,10 +137,6 @@ setupCSRFTokenEndpoint(app);
   // Email/Password authentication is handled via API routes (server/routes/authRoutes.ts)
   // Session management is configured in server/routes.ts
   
-  // Apply FanzSSO token verification globally for all API routes
-  const { optionalFanzSSO } = await import('./auth/fanzSSO');
-  app.use("/api", optionalFanzSSO);
-
   await registerRoutes(app);
   
   // Initialize advanced features

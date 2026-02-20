@@ -19,118 +19,6 @@ const SSO_SHARED_SECRET = process.env.SSO_SHARED_SECRET || process.env.JWT_SECRE
 // Platform identification
 const PLATFORM_ID = process.env.PLATFORM_ID || "boyfanz";
 
-/**
- * SSO Login Response - SSO might return token under various keys
- */
-type LoginResponse = {
-  token?: string;
-  accessToken?: string;
-  jwt?: string;
-  sessionToken?: string;
-  user?: any;
-  [k: string]: any;
-};
-
-/**
- * Pick the auth token from SSO response (handles various field names)
- */
-function pickAuthToken(payload: LoginResponse): string {
-  const t =
-    payload.token ||
-    payload.accessToken ||
-    payload.jwt ||
-    payload.sessionToken;
-
-  if (!t) throw new Error("SSO /login returned no usable token");
-  return t;
-}
-
-/**
- * Step 1: Authenticate with SSO via POST /login
- * This is the REAL SSO endpoint (not OAuth /authorize or /token)
- */
-export async function ssoLogin(email: string, password: string, platformId: string = PLATFORM_ID) {
-  const resp = await fetch(`${SSO_BASE_URL}/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, platformId }),
-  });
-
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(`SSO /login failed (${resp.status}): ${text}`);
-  }
-
-  const data = (await resp.json()) as LoginResponse;
-  const bearer = pickAuthToken(data);
-  return { raw: data, bearer, user: data.user };
-}
-
-/**
- * Step 2: Mint platform JWT via POST /api/auth/platform-token
- * SSO requires Authorization header with bearer token from login
- */
-export async function ssoPlatformToken(bearer: string, platformId: string = PLATFORM_ID) {
-  const resp = await fetch(`${SSO_BASE_URL}/api/auth/platform-token`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${bearer}`,
-    },
-    body: JSON.stringify({ platformId }),
-  });
-
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(`SSO platform-token failed (${resp.status}): ${text}`);
-  }
-
-  return await resp.json();
-}
-
-/**
- * Get age verification URL from SSO
- */
-export async function ssoGetAgeVerificationUrl(bearer: string, redirectUri?: string) {
-  const url = new URL(`${SSO_BASE_URL}/verify-age`);
-  if (redirectUri) {
-    url.searchParams.set("redirect_uri", redirectUri);
-  }
-
-  const resp = await fetch(url.toString(), {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${bearer}`,
-    },
-  });
-
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(`SSO verify-age failed (${resp.status}): ${text}`);
-  }
-
-  return await resp.json();
-}
-
-/**
- * Check age verification status from SSO
- */
-export async function ssoCheckVerificationStatus(bearer: string) {
-  const resp = await fetch(`${SSO_BASE_URL}/api/verification/status`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${bearer}`,
-    },
-  });
-
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(`SSO verification status failed (${resp.status}): ${text}`);
-  }
-
-  return await resp.json();
-}
-
 export interface SSOUser {
   id: string;
   email: string;
@@ -193,14 +81,22 @@ declare module 'express-session' {
  */
 export class FanzSSOClient {
   /**
-   * @deprecated SSO does not have /authorize endpoint. Use ssoLogin() instead.
-   * This method now throws an error to prevent silent failures.
+   * Generate the authorization URL to redirect users to FanzSSO
    */
   static getAuthorizationUrl(state: string, returnTo?: string): string {
-    // SSO v3.0.0 does NOT have /authorize - use direct login flow via ssoLogin()
-    throw new Error(
-      "DEPRECATED: SSO does not support /authorize. Use ssoLogin() for authentication."
-    );
+    const params = new URLSearchParams({
+      client_id: SSO_CLIENT_ID,
+      redirect_uri: SSO_CALLBACK_URL,
+      response_type: "code",
+      scope: "openid profile email age_verified",
+      state: state,
+    });
+
+    if (returnTo) {
+      params.append("return_to", returnTo);
+    }
+
+    return `${SSO_BASE_URL}/authorize?${params.toString()}`;
   }
 
   /**
@@ -211,8 +107,7 @@ export class FanzSSOClient {
   }
 
   /**
-   * @deprecated SSO does not have /token endpoint. Use ssoPlatformToken() instead.
-   * This method now throws an error to prevent silent failures.
+   * Exchange authorization code for tokens
    */
   static async exchangeCodeForTokens(code: string): Promise<{
     accessToken: string;
@@ -220,25 +115,65 @@ export class FanzSSOClient {
     idToken: string;
     expiresIn: number;
   }> {
-    // SSO v3.0.0 does NOT have /token - use ssoLogin() + ssoPlatformToken() instead
-    throw new Error(
-      "DEPRECATED: SSO does not support /token. Use ssoLogin() then ssoPlatformToken()."
-    );
+    const response = await fetch(`${SSO_BASE_URL}/token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        grant_type: "authorization_code",
+        code,
+        client_id: SSO_CLIENT_ID,
+        client_secret: SSO_CLIENT_SECRET,
+        redirect_uri: SSO_CALLBACK_URL,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Token exchange failed: ${error}`);
+    }
+
+    const data = await response.json();
+    return {
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token,
+      idToken: data.id_token,
+      expiresIn: data.expires_in,
+    };
   }
 
   /**
-   * @deprecated SSO does not have /token endpoint for refresh. Re-authenticate via ssoLogin().
-   * This method now throws an error to prevent silent failures.
+   * Refresh an access token using a refresh token
    */
   static async refreshAccessToken(refreshToken: string): Promise<{
     accessToken: string;
     refreshToken: string;
     expiresIn: number;
   }> {
-    // SSO v3.0.0 does NOT have token refresh - re-authenticate via ssoLogin()
-    throw new Error(
-      "DEPRECATED: SSO does not support token refresh. Re-authenticate via ssoLogin()."
-    );
+    const response = await fetch(`${SSO_BASE_URL}/token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+        client_id: SSO_CLIENT_ID,
+        client_secret: SSO_CLIENT_SECRET,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Token refresh failed");
+    }
+
+    const data = await response.json();
+    return {
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token || refreshToken,
+      expiresIn: data.expires_in,
+    };
   }
 
   /**
@@ -354,12 +289,23 @@ export const requireFanzSSO = async (
     // Verify the token
     const decoded = FanzSSOClient.verifyToken(token);
     if (!decoded) {
-      // Token invalid or expired - SSO doesn't support refresh, need to re-authenticate
-      // Clear invalid session tokens
-      if (req.session) {
-        delete req.session.accessToken;
-        delete req.session.refreshToken;
-        delete req.session.ssoUser;
+      // Token invalid or expired - try to refresh if we have a refresh token
+      if (req.session?.refreshToken) {
+        try {
+          const newTokens = await FanzSSOClient.refreshAccessToken(req.session.refreshToken);
+          req.session.accessToken = newTokens.accessToken;
+          req.session.refreshToken = newTokens.refreshToken;
+
+          const newDecoded = FanzSSOClient.verifyToken(newTokens.accessToken);
+          if (newDecoded) {
+            req.ssoToken = newDecoded;
+            req.ssoUser = FanzSSOClient.mapTokenToUser(newDecoded);
+            next();
+            return;
+          }
+        } catch {
+          // Refresh failed, need to re-authenticate
+        }
       }
 
       if (req.path.startsWith("/api/")) {

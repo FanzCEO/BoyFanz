@@ -5,10 +5,9 @@ module.exports = {
     cwd: "/var/www/boyfanz",
     instances: 1,
     exec_mode: "fork",
-    node_args: "--max-old-space-size=2048",
     env: {
       NODE_ENV: "production",
-      PORT: "3000",
+      PORT: "3202",
       SSO_SHARED_SECRET: "fb7b900a70893b288cc46741c9715efc07f7dacc9cf873e97755643c156cc436",
       HEALTH_MONITORING_ENABLED: "false",
       SERVICE_DISCOVERY_ENABLED: "false",

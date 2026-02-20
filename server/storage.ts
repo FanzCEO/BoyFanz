@@ -1808,34 +1808,60 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getInfinityFeedPosts(userId: string, limit: number, offset: number): Promise<any[]> {
-    // Use raw SQL since the actual database columns differ from the Drizzle schema
-    const result = await db.execute(sql`
-      SELECT
-        p.id,
-        p.author_id as "creatorId",
-        u.username as "creatorHandle",
-        COALESCE(u.first_name, u.username) as "creatorName",
-        u.profile_image_url as "creatorAvatar",
-        p.type,
-        p.visibility,
-        p.title,
-        p.body as "content",
-        p.media_ids as "mediaUrls",
-        p.price as "priceCents",
-        CASE WHEN p.visibility = 'free' THEN true ELSE false END as "isFreeToView",
-        COALESCE(p.like_count, 0) as "likesCount",
-        COALESCE(p.comment_count, 0) as "commentsCount",
-        COALESCE(p.view_count, 0) as "viewsCount",
-        p.created_at as "createdAt"
-      FROM posts p
-      INNER JOIN users u ON p.author_id = u.id
-      WHERE p.deleted_at IS NULL
-      ORDER BY p.created_at DESC
-      LIMIT ${limit}
-      OFFSET ${offset}
-    `);
+    const currentTime = new Date();
+    
+    // Infinity Feed fetches posts from:
+    // 1. Creators the user subscribes to (all their posts)
+    // 2. Creators the user follows (only free posts)
+    // 3. Age-verified creators with free-to-view posts
+    
+    const results = await db
+      .select({
+        id: posts.id,
+        creatorId: posts.creatorId,
+        creatorHandle: users.username,
+        creatorName: users.displayName,
+        creatorAvatar: users.avatarUrl,
+        type: posts.type,
+        visibility: posts.visibility,
+        title: posts.title,
+        content: posts.content,
+        mediaUrls: posts.mediaUrls,
+        thumbnailUrl: posts.thumbnailUrl,
+        priceCents: posts.priceCents,
+        isSubscribed: sql<boolean>`CASE WHEN ${subscriptions.id} IS NOT NULL THEN true ELSE false END`,
+        isFreeToView: sql<boolean>`CASE WHEN ${posts.visibility} = 'free' THEN true ELSE false END`,
+        isAgeVerified: users.isAgeVerified,
+        likesCount: posts.likesCount,
+        commentsCount: posts.commentsCount,
+        viewsCount: posts.viewsCount,
+        repostsCount: posts.repostsCount,
+        quotesCount: posts.quotesCount,
+        pollId: posts.pollId,
+        createdAt: posts.createdAt,
+      })
+      .from(posts)
+      .innerJoin(users, eq(posts.creatorId, users.id))
+      .leftJoin(subscriptions, and(
+        eq(subscriptions.creatorId, posts.creatorId),
+        eq(subscriptions.fanId, userId),
+        eq(subscriptions.status, 'active'),
+        sql`${subscriptions.currentPeriodStart} <= ${currentTime}`,
+        sql`(${subscriptions.currentPeriodEnd} IS NULL OR ${subscriptions.currentPeriodEnd} > ${currentTime})`
+      ))
+      .where(and(
+        // Post is ready (not scheduled or scheduled for now/past)
+        sql`(${posts.scheduledFor} IS NULL OR ${posts.scheduledFor} <= ${currentTime})`,
+        // Post is not processing
+        sql`${posts.isProcessing} = false`,
+        // Post hasn't expired
+        sql`(${posts.expiresAt} IS NULL OR ${posts.expiresAt} > ${currentTime})`
+      ))
+      .orderBy(desc(posts.createdAt))
+      .limit(limit)
+      .offset(offset);
 
-    return result.rows || [];
+    return results;
   }
 
   async getSubscribedFeedPosts(userId: string, limit: number, offset: number): Promise<any[]> {

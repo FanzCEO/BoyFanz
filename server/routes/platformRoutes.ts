@@ -1,29 +1,27 @@
 import { Router, Request, Response } from "express";
 import { platformAccessService } from "../services/platformAccessService";
 import { isAuthenticated } from "../middleware/auth";
-import { FAN_PLATFORMS } from "../../shared/fanzEcosystemRegistry";
 
 const router = Router();
 
 /**
  * GET /api/platform/current
  * Returns current platform metadata - public endpoint
- * Must return shape expected by PlatformContext.tsx
  */
 router.get("/current", (req, res) => {
-  // Find the full boyfanz platform object from the registry
-  const boyfanzPlatform = FAN_PLATFORMS.find(p => p.id === 'boyfanz');
-
-  if (!boyfanzPlatform) {
-    // Fallback if not found (shouldn't happen)
-    return res.status(500).json({ error: "Platform configuration error" });
-  }
-
-  // Return shape that PlatformContext expects
   res.json({
-    platform: boyfanzPlatform,
-    isAdminOverride: false,
-    availablePlatforms: FAN_PLATFORMS.filter(p => p.status === 'active'),
+    success: true,
+    platform: "boyfanz",
+    brand: "BoyFanz",
+    host: req.headers.host,
+    themeColor: "#dc2626",
+    description: "Premium adult content platform for guys",
+    features: {
+      streaming: true,
+      messaging: true,
+      tips: true,
+      subscriptions: true
+    }
   });
 });
 

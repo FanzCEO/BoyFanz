@@ -5,8 +5,6 @@ import { authRateLimit } from "../middleware/rateLimitingAdvanced";
 import { db } from "../db";
 import { sql } from "drizzle-orm";
 import bcrypt from "bcrypt";
-import { ssoLogin, ssoPlatformToken, ssoGetAgeVerificationUrl, ssoCheckVerificationStatus } from "../auth/fanzSSO";
-import { storage } from "../storage";
 
 const router = Router();
 
@@ -131,84 +129,55 @@ router.post("/login", authRateLimit, async (req, res) => {
       });
     }
 
-    // Use the new SSO functions: ssoLogin() -> ssoPlatformToken()
-    let ssoResult;
-    try {
-      ssoResult = await ssoLogin(data.email, data.password, PLATFORM_ID);
-    } catch (ssoError: any) {
+    // Forward login to SSO server
+    const response = await fetch(`${SSO_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: data.email,
+        password: data.password,
+        platformId: PLATFORM_ID,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
       trackLoginAttempt(ipAddress, false);
       trackLoginAttempt(`email:${data.email.toLowerCase()}`, false);
 
-      // Check if SSO is returning a specific error
-      const errorMessage = ssoError.message || "Login failed";
-      const statusCode = errorMessage.includes("401") ? 401 :
-                        errorMessage.includes("429") ? 429 : 400;
-
-      return res.status(statusCode).json({
+      return res.status(response.status).json({
         success: false,
-        error: errorMessage.replace(/SSO \/login failed \(\d+\): ?/, ""),
+        error: result.error || result.message || "Login failed",
       });
     }
 
-    // Track successful SSO login
+    // Track successful login
     trackLoginAttempt(ipAddress, true);
     trackLoginAttempt(`email:${data.email.toLowerCase()}`, true);
 
-    // Get platform token for this specific platform
-    let platformToken;
-    try {
-      platformToken = await ssoPlatformToken(ssoResult.bearer, PLATFORM_ID);
-    } catch (tokenError: any) {
-      console.warn("[Auth] Platform token failed, using SSO bearer:", tokenError.message);
-      // Continue with SSO bearer if platform token fails
-      platformToken = null;
+    // Set SSO token cookie
+    if (result.token) {
+      res.cookie("fanz_sso_token", result.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        domain: process.env.NODE_ENV === "production" ? ".fanz.website" : undefined,
+      });
     }
 
-    // Determine the token to use
-    const authToken = platformToken?.token || platformToken?.accessToken || ssoResult.bearer;
-
-    // Set SSO token cookie
-    res.cookie("fanz_sso_token", authToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      domain: process.env.NODE_ENV === "production" ? ".fanz.website" : undefined,
-    });
-
-    // Store bearer in session for verification flows
-    (req.session as any).ssoBearer = ssoResult.bearer;
-
     // Also set session for backwards compatibility
-    const user = ssoResult.user || ssoResult.raw?.user;
-    if (user?.id) {
-      req.session.userId = user.id;
-      req.session.emailVerified = user.emailVerified || user.email_verified;
-      (req.session as any).ageVerified = user.ageVerified || user.age_verified;
-      (req.session as any).ssoUser = user;
-
-      // CRITICAL: Sync ageVerified to DB if SSO returns it
-      // This ensures the gate middleware in auth.ts can check userProfile.ageVerified
-      const isAgeVerified = user.ageVerified || user.age_verified;
-      if (isAgeVerified) {
-        try {
-          await storage.updateUserProfile(user.id, {
-            ageVerified: true,
-            ageVerifiedAt: user.ageVerifiedAt || user.age_verified_at || new Date().toISOString()
-          });
-          console.log(`[Auth] Age verification synced to DB on login for user ${user.id}`);
-        } catch (dbError) {
-          console.error("[Auth] Failed to sync age verification on login:", dbError);
-          // Continue anyway - login shouldn't fail for this
-        }
-      }
+    if (result.user?.id) {
+      req.session.userId = result.user.id;
+      req.session.emailVerified = result.user.emailVerified;
     }
 
     res.json({
       success: true,
       message: "Login successful",
-      user: user,
-      accessToken: authToken,
+      user: result.user,
+      token: result.token,
     });
   } catch (error: any) {
     const ipAddress = (req.headers["x-forwarded-for"] as string)?.split(",")[0] ||
@@ -471,105 +440,5 @@ router.get("/user", async (req, res) => {
     });
   }
 });
-
-// ============================================================
-// AGE VERIFICATION ROUTES
-// ============================================================
-
-/**
- * GET /api/auth/verify-age
- * Start age verification flow via SSO
- */
-router.get("/verify-age", async (req, res) => {
-  try {
-    // Check if user is logged in
-    const bearer = req.cookies?.fanz_sso_token || (req.session as any)?.ssoBearer;
-
-    if (!bearer) {
-      return res.status(401).json({
-        success: false,
-        error: "Authentication required",
-        code: "AUTH_REQUIRED",
-      });
-    }
-
-    // Get verification URL from SSO
-    const redirectUri = `${req.protocol}://${req.get('host')}/verification-callback`;
-    const result = await ssoGetAgeVerificationUrl(bearer, redirectUri);
-
-    res.json({
-      success: true,
-      url: result.url || result.redirectUrl || result.verificationUrl || `${process.env.SSO_BASE_URL || 'https://sso.fanz.website'}/verify-age`,
-    });
-  } catch (error: any) {
-    console.error("[Auth] Age verification start error:", error);
-    res.status(500).json({
-      success: false,
-      error: error.message || "Failed to start age verification",
-    });
-  }
-});
-
-/**
- * GET /api/auth/verification-status
- * Check age verification status via SSO and SYNC to DB if verified
- * This is the critical sync point that makes the gate actually work
- */
-router.get("/verification-status", async (req, res) => {
-  try {
-    // Check if user is logged in
-    const bearer = req.cookies?.fanz_sso_token || (req.session as any)?.ssoBearer;
-    const userId = req.session?.userId || (req.session as any)?.ssoUser?.id;
-
-    if (!bearer) {
-      return res.status(401).json({
-        success: false,
-        error: "Authentication required",
-        code: "AUTH_REQUIRED",
-        verified: false,
-      });
-    }
-
-    // Check status with SSO
-    const result = await ssoCheckVerificationStatus(bearer);
-    const isVerified = result.verified || result.ageVerified || result.status === 'verified';
-
-    // CRITICAL: Sync verification status to DB so the gate middleware works
-    // The gate in middleware/auth.ts checks userProfile.ageVerified from DB
-    if (isVerified && userId) {
-      try {
-        await storage.updateUserProfile(userId, {
-          ageVerified: true,
-          ageVerifiedAt: result.verifiedAt || result.age_verified_at || new Date().toISOString()
-        });
-        console.log(`[Auth] Age verification synced to DB for user ${userId}`);
-
-        // Also update session for immediate use
-        (req.session as any).ageVerified = true;
-      } catch (dbError) {
-        console.error("[Auth] Failed to sync age verification to DB:", dbError);
-        // Continue anyway - SSO is source of truth
-      }
-    }
-
-    res.json({
-      success: true,
-      verified: isVerified,
-      status: result.status,
-      verifiedAt: result.verifiedAt || result.age_verified_at,
-    });
-  } catch (error: any) {
-    console.error("[Auth] Verification status error:", error);
-    res.status(500).json({
-      success: false,
-      error: error.message || "Failed to check verification status",
-      verified: false,
-    });
-  }
-});
-
-// NOTE: Age verification middleware is in server/middleware/auth.ts::requireAgeVerification
-// It checks userProfile.ageVerified from the DATABASE, not session fields.
-// Use that middleware on protected routes, not a session-based check.
 
 export default router;

@@ -14,6 +14,7 @@ export async function isAuthenticated(req: Request, res: Response, next: NextFun
   // Check for FanzSSO authentication first
   const ssoUser = (req as any).ssoUser || (req.session as any)?.ssoUser;
   if (ssoUser) {
+    // Load full user from database using SSO user ID
     if (!req.user) {
       try {
         const user = await storage.getUser(ssoUser.id);
@@ -22,22 +23,8 @@ export async function isAuthenticated(req: Request, res: Response, next: NextFun
           return next();
         }
       } catch (error) {
-        // SSO user IDs (e.g. "user_xxx") may not be UUIDs - that's OK
+        console.error("Failed to load user from SSO session:", error);
       }
-      // If user not found in users table, trust the SSO token directly
-      (req as any).user = {
-        id: ssoUser.id,
-        email: ssoUser.email,
-        username: ssoUser.username,
-        role: ssoUser.isAdmin ? 'admin' : (ssoUser.isCreator ? 'creator' : 'fan'),
-        roles: ssoUser.roles || ['user'],
-        isAdmin: ssoUser.isAdmin || false,
-        isModerator: ssoUser.isModerator || false,
-        isCreator: ssoUser.isCreator || false,
-        ageVerified: ssoUser.ageVerified || false,
-        status: 'active',
-      };
-      return next();
     } else {
       return next();
     }

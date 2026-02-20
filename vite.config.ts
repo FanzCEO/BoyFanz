@@ -24,33 +24,19 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // Code splitting for better caching
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            // Core React
-            if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('scheduler')) {
-              return 'react-vendor';
-            }
-            // UI components
-            if (id.includes('@radix-ui/')) {
-              return 'ui-vendor';
-            }
-            // Form handling
-            if (id.includes('react-hook-form') || id.includes('@hookform/') || id.includes('/zod/')) {
-              return 'form-vendor';
-            }
-            // Data fetching
-            if (id.includes('@tanstack/react-query')) {
-              return 'query-vendor';
-            }
-            // Charts
-            if (id.includes('recharts') || id.includes('d3-')) {
-              return 'chart-vendor';
-            }
-            // Date handling
-            if (id.includes('date-fns')) {
-              return 'date-vendor';
-            }
-          }
+        manualChunks: {
+          // Core React
+          'react-vendor': ['react', 'react-dom'],
+          // UI components
+          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs', '@radix-ui/react-toast', '@radix-ui/react-tooltip'],
+          // Form handling
+          'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          // Data fetching
+          'query-vendor': ['@tanstack/react-query'],
+          // Charts & visualization
+          'chart-vendor': ['recharts'],
+          // Date handling
+          'date-vendor': ['date-fns'],
         },
         // Smaller chunk names
         chunkFileNames: 'assets/[name]-[hash:8].js',
@@ -63,8 +49,8 @@ export default defineConfig({
   },
   esbuild: {
     target: 'es2020', // Safari 14+ compatible
-    // Keep console for debugging - restore drop after fixing
-    // drop: ['console', 'debugger'],
+    // Remove console.log in production
+    drop: ['console', 'debugger'],
   },
   server: {
     fs: {

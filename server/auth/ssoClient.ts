@@ -180,7 +180,7 @@ class SSOClient {
    */
   async generateToken(userId: string, email: string, scopes: string[] = ['read']): Promise<string | null> {
     try {
-      const response = await fetch(`${SSO_URL}/api/auth/platform-token`, {
+      const response = await fetch(`${SSO_URL}/api/auth/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
