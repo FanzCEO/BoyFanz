@@ -208,7 +208,7 @@ export default function LoginNew() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => window.location.href = '/auth/sso/login'}
+                onClick={() => window.location.href = '/api/auth/sso'}
                 data-testid="button-sso-login"
                 className="w-full h-11 bg-black/40 border-[#d4a959]/30 hover:bg-[#d4a959]/10 text-[#d4a959] hover:text-[#e5ba6a] transition-all"
               >
