@@ -181,7 +181,11 @@
       "parse-duration": "^2.1.3",
       "esbuild": ">=0.25.0",
       "passport": ">=0.7.0",
-      "cookie": ">=0.7.0"
+      "cookie": ">=0.7.0",
+      "bn.js": ">=5.2.3",
+      "minimatch": ">=10.2.1",
+      "fast-xml-parser": ">=5.3.6",
+      "qs": ">=6.14.2"
     }
   },
   "overrides": {
@@ -197,6 +201,10 @@
     "cookie": "^0.7.0",
     "on-headers": "^1.0.3",
     "brace-expansion": "^2.0.1",
-    "rimraf": "^5.0.10"
+    "rimraf": "^5.0.10",
+    "bn.js": ">=5.2.3",
+    "minimatch": ">=10.2.1",
+    "fast-xml-parser": ">=5.3.6",
+    "qs": ">=6.14.2"
   }
 }
