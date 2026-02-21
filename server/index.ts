@@ -27,14 +27,14 @@ app.use(helmet({
   contentSecurityPolicy: isDevelopment ? false : {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://js.stripe.com"],
-      styleSrc: ["'self'", "'unsafe-inline'"], // Google Fonts
-      fontSrc: ["'self'", "data:"], // Google Fonts
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:", "blob:"], // Support for media uploads
-      connectSrc: ["'self'", "wss:", "ws:", "https://api.stripe.com"], // Allow websockets
+      connectSrc: ["'self'", "wss:", "ws:"], // Allow websockets
       mediaSrc: ["'self'", "blob:"], // Media playback
       objectSrc: ["'none'"], // Prevent object/embed attacks
-      frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"], // Allow Stripe payment iframes
+      frameSrc: ["'self'"],
       baseUri: ["'self'"], // Restrict base tag
       formAction: ["'self'"], // Restrict form submissions
       frameAncestors: ["'none'"], // Additional clickjacking protection
@@ -291,9 +291,15 @@ setupCSRFTokenEndpoint(app);
   const { createServer } = await import('http');
   const server = createServer(app);
   
-  // Initialize WebSocket server
-  // const { wsManager } = await import('./websocket');
-  // logger.info('WebSocket server initialized on port 3001');
+  // Initialize WebSocket server attached to HTTP server on /ws path
+  try {
+    const { WebSocketManager } = await import('./websocket');
+    const wsManager = new WebSocketManager(0, server);
+    app.locals.wsManager = wsManager;
+    logger.info('WebSocket server initialized on /ws path');
+  } catch (wsError: any) {
+    logger.warn({ err: wsError }, 'WebSocket initialization failed - real-time features disabled');
+  }
 
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

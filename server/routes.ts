@@ -24,6 +24,7 @@ import watchPartyRoutes from './routes/watchPartyRoutes';
 import safetyRoutes from './routes/safetyRoutes';
 import aiRoutes from './routes/aiRoutes';
 import aiGatewayRoutes from './routes/aiGatewayRoutes';
+import notificationRoutes from './routes/notificationRoutes';
 // Admin Management Routes
 import brandingRoutes from './routes/admin/branding';
 import bookingsRoutes from './routes/admin/bookings';
@@ -40,6 +41,7 @@ import creatorAnalyticsRoutes from './routes/admin/creatorAnalyticsRoutes';
 import moderationWorkflowRoutes from './routes/admin/moderationWorkflowRoutes';
 import revenueIntelligenceRoutes from './routes/admin/revenueIntelligenceRoutes';
 import complianceRoutes from './routes/admin/complianceRoutes';
+// initComplianceRoutes removed - duplicate of admin/complianceRoutes
 import { csrfProtection, setupCSRFTokenEndpoint } from './middleware/csrf';
 import { isAuthenticated, requireAdmin, requireCreator, isSuperAdmin, shouldBypassCharges } from './middleware/auth';
 import cybersecurityRoutes from './routes/cybersecurityRoutes';
@@ -330,6 +332,56 @@ export function registerRoutes(app: Express) {
   app.use("/api/admin/moderation", moderationWorkflowRoutes);
   app.use("/api/admin/revenue", revenueIntelligenceRoutes);
   app.use("/api/admin/compliance", complianceRoutes);
+  // Notification routes (used by Header, Dashboard, MobileBottomNav)
+  app.use("/api/notifications", notificationRoutes);
+  app.use("/api/social-notifications", notificationRoutes);
+
+  // Dashboard stats (non-admin version for creator dashboard)
+  app.get('/api/dashboard/stats', isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req as any).user?.id || (req as any).ssoUser?.id;
+      if (!userId) return res.status(401).json({ message: "Authentication required" });
+      const { posts, media: mediaTable, subscriptions, tips, users: usersTable } = await import('@shared/schema');
+      const { eq, sql, and, gte } = await import('drizzle-orm');
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+      const [fanCount] = await db.select({ count: sql<number>`count(*)` }).from(subscriptions).where(eq(subscriptions.creatorId, userId));
+      const [viewCount] = await db.select({ count: sql<number>`coalesce(sum(${posts.viewCount}), 0)` }).from(posts).where(eq(posts.userId, userId));
+      const [revenueResult] = await db.select({ total: sql<number>`coalesce(sum(${tips.amount}), 0)` }).from(tips).where(eq(tips.recipientId, userId));
+      const [pendingCount] = await db.select({ count: sql<number>`count(*)` }).from(posts).where(and(eq(posts.userId, userId), eq(posts.status, 'pending')));
+
+      res.json({
+        totalRevenue: (revenueResult?.total || 0) / 100,
+        activeFans: fanCount?.count || 0,
+        contentViews: viewCount?.count || 0,
+        pendingReviews: pendingCount?.count || 0,
+      });
+    } catch (error: any) {
+      logger.error({ err: error }, 'Dashboard stats error');
+      res.json({ totalRevenue: 0, activeFans: 0, contentViews: 0, pendingReviews: 0 });
+    }
+  });
+
+  // Media list for dashboard (user's own media)
+  app.get('/api/media', isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req as any).user?.id || (req as any).ssoUser?.id;
+      if (!userId) return res.status(401).json({ message: "Authentication required" });
+      const { posts } = await import('@shared/schema');
+      const { eq, desc } = await import('drizzle-orm');
+
+      const userMedia = await db.select()
+        .from(posts)
+        .where(eq(posts.userId, userId))
+        .orderBy(desc(posts.createdAt))
+        .limit(20);
+
+      res.json(userMedia);
+    } catch (error: any) {
+      logger.error({ err: error }, 'Media list error');
+      res.json([]);
+    }
+  });
 
   // Get current user delegated permissions
   app.get("/api/admin/delegated-permissions/my", isAuthenticated, async (req, res) => {

@@ -12,7 +12,7 @@
 import { Router, type Request, type Response } from "express";
 import { z } from "zod";
 import { db } from "../db";
-import { socialNotifications as notifications, notificationPreferences, users } from "@shared/schema";
+import { socialNotifications as notifications, users } from "@shared/schema";
 import { eq, and, desc, sql, count, lt, isNull, or } from "drizzle-orm";
 import { isAuthenticated } from "../middleware/auth";
 import { logger } from "../logger";
@@ -225,7 +225,7 @@ router.delete("/clear-all", isAuthenticated, async (req: Request, res: Response)
 });
 
 // ============================================================
-// PREFERENCES ROUTES
+// PREFERENCES ROUTES (stubbed - notificationPreferences table not yet created)
 // ============================================================
 
 /**
@@ -233,28 +233,22 @@ router.delete("/clear-all", isAuthenticated, async (req: Request, res: Response)
  * GET /api/notifications/preferences
  */
 router.get("/preferences", isAuthenticated, async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user?.id;
-
-    let [prefs] = await db
-      .select()
-      .from(notificationPreferences)
-      .where(eq(notificationPreferences.userId, userId))
-      .limit(1);
-
-    // Create default preferences if none exist
-    if (!prefs) {
-      [prefs] = await db
-        .insert(notificationPreferences)
-        .values({ userId })
-        .returning();
-    }
-
-    res.json(prefs);
-  } catch (error: any) {
-    logger.error("Failed to get notification preferences:", error);
-    res.status(500).json({ error: "Failed to get preferences" });
-  }
+  // Return defaults until notificationPreferences table exists
+  res.json({
+    pushEnabled: true,
+    pushWallPosts: true,
+    pushReactions: true,
+    pushComments: true,
+    pushBuddyRequests: true,
+    pushMessages: true,
+    pushLiveStreams: true,
+    emailEnabled: true,
+    emailDigestFrequency: "daily",
+    emailWallActivity: true,
+    emailBuddyRequests: true,
+    emailPromotions: false,
+    quietHoursEnabled: false,
+  });
 });
 
 /**
@@ -262,41 +256,8 @@ router.get("/preferences", isAuthenticated, async (req: Request, res: Response) 
  * PATCH /api/notifications/preferences
  */
 router.patch("/preferences", isAuthenticated, async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user?.id;
-
-    const parsed = updatePreferencesSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return res.status(400).json({ error: parsed.error.message });
-    }
-
-    const updates = parsed.data;
-
-    // Upsert preferences
-    let [prefs] = await db
-      .select()
-      .from(notificationPreferences)
-      .where(eq(notificationPreferences.userId, userId))
-      .limit(1);
-
-    if (prefs) {
-      [prefs] = await db
-        .update(notificationPreferences)
-        .set({ ...updates, updatedAt: new Date() })
-        .where(eq(notificationPreferences.userId, userId))
-        .returning();
-    } else {
-      [prefs] = await db
-        .insert(notificationPreferences)
-        .values({ userId, ...updates })
-        .returning();
-    }
-
-    res.json(prefs);
-  } catch (error: any) {
-    logger.error("Failed to update notification preferences:", error);
-    res.status(500).json({ error: "Failed to update preferences" });
-  }
+  // Stub - accept and acknowledge until table exists
+  res.json({ success: true, message: "Preferences noted" });
 });
 
 // ============================================================
@@ -320,46 +281,8 @@ export async function createNotification(data: {
   metadata?: Record<string, any>;
 }) {
   try {
-    // Check user preferences first
-    const [prefs] = await db
-      .select()
-      .from(notificationPreferences)
-      .where(eq(notificationPreferences.userId, data.userId))
-      .limit(1);
-
-    // Default to enabled if no preferences
-    const shouldNotify = prefs ? prefs.pushEnabled : true;
-
-    if (!shouldNotify) {
-      return null;
-    }
-
-    // Check quiet hours
-    if (prefs?.quietHoursEnabled) {
-      const now = new Date();
-      const [startHour, startMin] = (prefs.quietHoursStart || "22:00").split(":").map(Number);
-      const [endHour, endMin] = (prefs.quietHoursEnd || "08:00").split(":").map(Number);
-      const currentHour = now.getHours();
-      const currentMin = now.getMinutes();
-
-      const currentMinutes = currentHour * 60 + currentMin;
-      const startMinutes = startHour * 60 + startMin;
-      const endMinutes = endHour * 60 + endMin;
-
-      // Handle overnight quiet hours (e.g., 22:00 to 08:00)
-      const isQuietHours = startMinutes > endMinutes
-        ? currentMinutes >= startMinutes || currentMinutes < endMinutes
-        : currentMinutes >= startMinutes && currentMinutes < endMinutes;
-
-      if (isQuietHours) {
-        // Still create notification but don't send push
-        const [notification] = await db
-          .insert(notifications)
-          .values({ ...data, type: data.type as any })
-          .returning();
-        return notification;
-      }
-    }
+    // Preferences check stubbed out until notificationPreferences table is created
+    // All notifications enabled by default
 
     const [notification] = await db
       .insert(notifications)
