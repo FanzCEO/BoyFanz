@@ -14,6 +14,7 @@ import creatorEconomyDashboardRoutes from './creatorEconomyDashboard.js';
 import fanEngagementToolsRoutes from './fanEngagementTools.js';
 import revenueOptimizationRoutes from './revenueOptimizationRoutes.js';
 import orchestrationRoutes from './orchestration.js';
+import complianceRoutes from './complianceRoutes.js';
 
 const router = express.Router();
 
@@ -40,6 +41,7 @@ router.use('/dashboard', creatorEconomyDashboardRoutes);
 router.use('/fan-engagement', fanEngagementToolsRoutes);
 router.use('/revenue-ai', revenueOptimizationRoutes);
 router.use('/orchestration', orchestrationRoutes);
+router.use('/compliance', complianceRoutes);
 
 // 404 handler for unknown routes
 router.use('*', (req, res) => {

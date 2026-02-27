@@ -282,8 +282,15 @@ router.get("/api/auth/check-admin", optionalFanzSSO, (req: Request, res: Respons
  */
 async function syncUserToLocalDatabase(ssoUser: SSOUser): Promise<void> {
   try {
-    // Check if user exists locally
-    const existingUser = await storage.getUserByEmail(ssoUser.email);
+    // Check if user exists locally by email, username, or SSO ID
+    // SSO may pass a username (not email) in the email field
+    let existingUser = await storage.getUserByEmail(ssoUser.email);
+    if (!existingUser && ssoUser.username) {
+      existingUser = await storage.getUserByUsername(ssoUser.username);
+    }
+    if (!existingUser && ssoUser.email && !ssoUser.email.includes("@")) {
+      existingUser = await storage.getUserByUsername(ssoUser.email);
+    }
 
     const superAdmin = isSuperAdmin(ssoUser.email);
 
