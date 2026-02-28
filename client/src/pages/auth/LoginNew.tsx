@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { Eye, EyeOff, Loader2, Mail, Lock, Key } from "lucide-react";
 
 const loginSchema = z.object({
@@ -21,6 +22,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginNew() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { refreshAuth } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginFormValues>({
@@ -33,23 +35,53 @@ export default function LoginNew() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormValues) => {
-      return await apiRequest<{ success: boolean; message: string; accountId: string }>(
+      return await apiRequest<{ success: boolean; message: string; user: any; token?: string }>(
         "/api/auth/login",
         { method: "POST", body: data }
       );
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+    onSuccess: async (responseData) => {
+      // Set user directly in the auth query cache from the login response
+      if (responseData?.user) {
+        queryClient.setQueryData(["/api/auth/user"], responseData.user);
+      }
+      // Refresh the AuthContext so the router shows authenticated routes
+      await refreshAuth();
       toast({
         title: "Welcome back!",
         description: "You've successfully logged in.",
       });
-      setLocation("/");
+      const returnTo = new URLSearchParams(window.location.search).get('returnTo') || '/dashboard';
+      setLocation(returnTo);
     },
     onError: (error: Error) => {
+      let errorMessage = "Please check your email and password and try again.";
+
+      if (error.message) {
+        const parts = error.message.split(':');
+        if (parts.length > 1) {
+          const statusCode = parts[0].trim();
+          const serverMessage = parts.slice(1).join(':').trim();
+
+          if (statusCode === '401') {
+            errorMessage = "Invalid email or password. Please try again.";
+          } else if (statusCode === '403') {
+            errorMessage = "Access forbidden. Your account may be suspended.";
+          } else if (statusCode === '429') {
+            errorMessage = "Too many login attempts. Please try again later.";
+          } else if (statusCode.startsWith('5')) {
+            errorMessage = "Server error. Please try again in a moment.";
+          } else if (serverMessage && serverMessage.length > 0 && serverMessage.length < 200) {
+            errorMessage = serverMessage;
+          }
+        } else if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
+          errorMessage = "Network error. Please check your connection.";
+        }
+      }
+
       toast({
         title: "Login Failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -176,7 +208,7 @@ export default function LoginNew() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => window.location.href = '/auth/sso/login'}
+                onClick={() => window.location.href = '/api/auth/sso'}
                 data-testid="button-sso-login"
                 className="w-full h-11 bg-black/40 border-[#d4a959]/30 hover:bg-[#d4a959]/10 text-[#d4a959] hover:text-[#e5ba6a] transition-all"
               >

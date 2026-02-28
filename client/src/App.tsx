@@ -1,5 +1,5 @@
 // @ts-nocheck
-// Full Platform App.tsx with Sidebar and Header layout
+// Stable App.tsx - working version with essential features
 import { ScreenshotProtectionProvider } from '@/components/security/ScreenshotProtection';
 import { PlatformProvider } from '@/contexts/PlatformContext';
 import screenshotProtectionConfig from './config/screenshot-protection';
@@ -14,10 +14,6 @@ import { useTheme } from "@/hooks/useTheme";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useWebSocketInit } from "@/hooks/useWebSocketInit";
 import { useEffect, useState } from "react";
-
-// Layout components - FULL PLATFORM UI
-import Sidebar from "@/components/layout/Sidebar";
-import Header from "@/components/layout/Header";
 
 // Core pages
 import Landing from "@/pages/Landing";
@@ -41,6 +37,7 @@ import LoginNew from "@/pages/auth/LoginNew";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPasswordNew from "@/pages/auth/ResetPasswordNew";
 import VerifyEmail from "@/pages/auth/VerifyEmail";
+import CreatorSignup from "@/pages/CreatorSignup";
 
 // Public pages
 import Blog from "@/pages/Blog";
@@ -55,10 +52,73 @@ import AdminDashboard from "@/pages/admin/Dashboard";
 import UserManagement from "@/pages/admin/UserManagement";
 import ModerationQueue from "@/pages/admin/ModerationQueue";
 
-// Live Streaming pages
-import { GoLivePage, WatchStreamPage, LiveStreamsPage, VideoCallPage } from "@/pages/live";
+// Main sidebar pages
+import InfinityFeed from "@/pages/InfinityFeed";
+import FanzMoneyCenter from "@/pages/FanzMoneyCenter";
+import StarzStudio from "@/pages/StarzStudio";
+import AnalyticsDashboard from "@/pages/AnalyticsDashboard";
+import Notifications from "@/pages/Notifications";
+import Subscriptions from "@/pages/Subscriptions";
+import Purchased from "@/pages/Purchased";
+import CustomRequests from "@/pages/CustomRequests";
+import Wallet from "@/pages/Wallet";
+import Referrals from "@/pages/Referrals";
+import Stories from "@/pages/Stories";
+import ReleaseForms from "@/pages/ReleaseForms";
+import Nearby from "@/pages/Nearby";
+import Outlawz from "@/pages/Outlawz";
+import FanzSpa from "@/pages/FanzSpa";
 
-console.log('[BOYFANZ] Full Platform App loading with Sidebar and Header...');
+// Creator pages
+import BecomeCreator from "@/pages/BecomeCreator";
+import CreatorRequests from "@/pages/CreatorRequests";
+import Collaborations from "@/pages/Collaborations";
+import MassMessaging from "@/pages/MassMessaging";
+import FreeLinkRedeem from "@/pages/FreeLinkRedeem";
+
+// Financial pages
+import Payments from "@/pages/Payments";
+import PaymentsReceived from "@/pages/PaymentsReceived";
+import Payouts from "@/pages/Payouts";
+import Withdrawals from "@/pages/Withdrawals";
+
+// Ecosystem pages
+import FanzCock from "@/pages/FanzCock";
+import FanzCyberSecure from "@/pages/FanzCyberSecure";
+import FanzNexus from "@/pages/FanzNexus";
+import StarzCardzPage from "@/pages/StarzCardzPage";
+import Bathhouse from "@/pages/Bathhouse";
+import NaughtyProfile from "@/pages/NaughtyProfile";
+
+// Live/Events pages
+import EventsHome from "@/pages/EventsHome";
+import EventDetails from "@/pages/EventDetails";
+import EventHost from "@/pages/EventHost";
+import EventLive from "@/pages/EventLive";
+import StreamsHome from "@/pages/StreamsHome";
+import StreamCreation from "@/pages/StreamCreation";
+import StreamAnalytics from "@/pages/StreamAnalytics";
+
+// Content pages
+import SavedPosts from "@/pages/SavedPosts";
+import PostView from "@/pages/PostView";
+
+// Forums
+import ForumsHome from "@/pages/forums/ForumsHome";
+
+// Settings sub-pages
+import SettingsPrivacy from "@/pages/settings/Privacy";
+import SettingsPassword from "@/pages/settings/Password";
+import SettingsCountries from "@/pages/settings/Countries";
+import SettingsRestricted from "@/pages/settings/Restricted";
+
+// Help sub-pages
+import { WikiPage } from "@/pages/help/WikiPage";
+import { TutorialsPage } from "@/pages/help/TutorialsPage";
+import { TicketsPage } from "@/pages/help/TicketsPage";
+import { ChatPage } from "@/pages/help/ChatPage";
+
+console.log('[BOYFANZ] Stable App loading...');
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -66,9 +126,9 @@ function Router() {
   const isMobile = useIsMobile();
   useTheme();
   useWebSocketInit();
-  
-  // Protected routes - redirect to login if not authenticated
-  const protectedRoutes = ['/feed', '/messages', '/dashboard', '/settings', '/media'];
+
+  // Redirect from protected routes if not authenticated
+  const protectedRoutes = ['/feed', '/messages', '/dashboard', '/settings', '/media', '/panel/admin', '/infinity-feed', '/fanz-money-center', '/starz-studio', '/analytics', '/notifications', '/subscriptions', '/purchased', '/wallet', '/custom-requests', '/referrals', '/stories', '/nearby', '/payments', '/payouts', '/withdrawals'];
   const isProtectedRoute = protectedRoutes.some(route => location.startsWith(route));
 
   useEffect(() => {
@@ -77,85 +137,112 @@ function Router() {
     }
   }, [isLoading, isAuthenticated, isProtectedRoute, navigate]);
 
-  // Auth routes are ALWAYS available - no timeout gating
-  if (!isAuthenticated) {
-    return (
-      <Switch>
-        <Route path="/" component={Landing} />
-        <Route path="/auth-complete" component={AuthComplete} />
-        <Route path="/auth-error" component={AuthError} />
-        <Route path="/auth/register" component={Register} />
-        <Route path="/auth/login" component={LoginNew} />
-        <Route path="/auth/forgot-password" component={ForgotPassword} />
-        <Route path="/auth/reset-password" component={ResetPasswordNew} />
-        <Route path="/auth/verify-email" component={VerifyEmail} />
-        <Route path="/auth/callback" component={AuthCallback} />
-        <Route path="/login" component={Login} />
-        <Route path="/signin" component={Login} />
-        <Route path="/creator/:userId" component={CreatorProfile} />
-        <Route path="/search" component={SearchCreators} />
-        <Route path="/blog" component={Blog} />
-        <Route path="/contact" component={Contact} />
-        <Route path="/safety" component={SafetyCenter} />
-        <Route path="/terms" component={TermsOfService} />
-        <Route path="/privacy" component={PrivacyPolicy} />
-        <Route path="/help" component={HelpCenter} />
-        <Route component={NotFound} />
-      </Switch>
-    );
-  }
-
-  // Authenticated users get FULL PLATFORM LAYOUT with Sidebar and Header
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Sidebar - Full navigation panel */}
-      <Sidebar user={user} />
+    <Switch>
+      {/* Auth routes */}
+      <Route path="/auth/login" component={LoginNew} />
+      <Route path="/auth/register" component={Register} />
+      <Route path="/auth/forgot-password" component={ForgotPassword} />
+      <Route path="/auth/reset-password" component={ResetPasswordNew} />
+      <Route path="/auth/verify-email" component={VerifyEmail} />
+      <Route path="/auth/callback" component={AuthCallback} />
+      <Route path="/auth-complete" component={AuthComplete} />
+      <Route path="/auth-error" component={AuthError} />
+      <Route path="/login" component={Login} />
+      <Route path="/signin" component={Login} />
+      <Route path="/creator-signup" component={CreatorSignup} />
 
-      {/* Main content area */}
-      <div className={`flex-1 flex flex-col ${isMobile ? 'ml-0' : 'ml-64'}`}>
-        {/* Header - Top navigation bar */}
-        <Header user={user} />
+      {/* Main navigation */}
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/infinity-feed" component={InfinityFeed} />
+      <Route path="/fanzspa" component={FanzSpa} />
+      <Route path="/fanz-money-center" component={FanzMoneyCenter} />
+      <Route path="/fanzmoneycenteer" component={FanzMoneyCenter} />
+      <Route path="/starz-studio" component={StarzStudio} />
+      <Route path="/analytics" component={AnalyticsDashboard} />
+      <Route path="/notifications" component={Notifications} />
+      <Route path="/feed" component={PostsFeed} />
+      <Route path="/social" component={SocialHome} />
+      <Route path="/messages" component={Messages} />
+      <Route path="/media" component={Media} />
+      <Route path="/search" component={SearchCreators} />
+      <Route path="/subscriptions" component={Subscriptions} />
+      <Route path="/purchased" component={Purchased} />
+      <Route path="/custom-requests" component={CustomRequests} />
+      <Route path="/wallet" component={Wallet} />
+      <Route path="/referrals" component={Referrals} />
+      <Route path="/stories" component={Stories} />
+      <Route path="/release-forms" component={ReleaseForms} />
+      <Route path="/nearby" component={Nearby} />
+      <Route path="/outlawz" component={Outlawz} />
+      <Route path="/saved" component={SavedPosts} />
+      <Route path="/post/:postId" component={PostView} />
 
-        {/* Page content */}
-        <main className="flex-1 overflow-auto">
-          <Switch>
-            <Route path="/">
-              {() => {
-                // Redirect authenticated users to dashboard
-                navigate('/dashboard');
-                return null;
-              }}
-            </Route>
-            <Route path="/auth/login" component={LoginNew} />
-            <Route path="/auth/register" component={Register} />
-            <Route path="/auth/callback" component={AuthCallback} />
-            <Route path="/dashboard" component={Dashboard} />
-            <Route path="/feed" component={PostsFeed} />
-            <Route path="/social" component={SocialHome} />
-            <Route path="/messages" component={Messages} />
-            <Route path="/media" component={Media} />
-            <Route path="/settings" component={Settings} />
-            <Route path="/creator/:userId" component={CreatorProfile} />
-            <Route path="/search" component={SearchCreators} />
-            <Route path="/blog" component={Blog} />
-            <Route path="/contact" component={Contact} />
-            <Route path="/safety" component={SafetyCenter} />
-            <Route path="/terms" component={TermsOfService} />
-            <Route path="/privacy" component={PrivacyPolicy} />
-            <Route path="/help" component={HelpCenter} />
-            <Route path="/panel/admin/dashboard" component={AdminDashboard} />
-            <Route path="/panel/admin/users" component={UserManagement} />
-            <Route path="/panel/admin/moderation" component={ModerationQueue} />
-            <Route path="/live" component={LiveStreamsPage} />
-            <Route path="/live/go-live" component={GoLivePage} />
-            <Route path="/live/watch/:roomName" component={WatchStreamPage} />
-            <Route path="/video-call/:roomName" component={VideoCallPage} />
-            <Route path="/video-call/start/:userId" component={VideoCallPage} />
-            <Route component={NotFound} />
-          </Switch>
-        </main>
-      </div>
-    </div>
+      {/* Creator routes */}
+      <Route path="/creator/:userId" component={CreatorProfile} />
+      <Route path="/become-creator" component={BecomeCreator} />
+      <Route path="/creator-requests" component={CreatorRequests} />
+      <Route path="/collaborations" component={Collaborations} />
+      <Route path="/mass-messaging" component={MassMessaging} />
+      <Route path="/free-links" component={FreeLinkRedeem} />
+      <Route path="/naughty-profile" component={NaughtyProfile} />
+
+      {/* Financial routes */}
+      <Route path="/payments" component={Payments} />
+      <Route path="/payments/received" component={PaymentsReceived} />
+      <Route path="/payouts" component={Payouts} />
+      <Route path="/withdrawals" component={Withdrawals} />
+      <Route path="/earnings" component={AnalyticsDashboard} />
+
+      {/* Live / Events / Streams */}
+      <Route path="/events" component={EventsHome} />
+      <Route path="/events/:eventId" component={EventDetails} />
+      <Route path="/events/host" component={EventHost} />
+      <Route path="/events/live/:eventId" component={EventLive} />
+      <Route path="/live-events" component={EventsHome} />
+      <Route path="/streams" component={StreamsHome} />
+      <Route path="/streams/create" component={StreamCreation} />
+      <Route path="/streams/analytics" component={StreamAnalytics} />
+
+      {/* Ecosystem */}
+      <Route path="/cock" component={FanzCock} />
+      <Route path="/cock/:section" component={FanzCock} />
+      <Route path="/fanz-cybersecure" component={FanzCyberSecure} />
+      <Route path="/fanz-nexus" component={FanzNexus} />
+      <Route path="/starz-cardz" component={StarzCardzPage} />
+      <Route path="/bathhouse" component={Bathhouse} />
+      <Route path="/forums" component={ForumsHome} />
+
+      {/* Settings sub-pages */}
+      <Route path="/settings/privacy" component={SettingsPrivacy} />
+      <Route path="/settings/password" component={SettingsPassword} />
+      <Route path="/settings/countries" component={SettingsCountries} />
+      <Route path="/settings/restricted" component={SettingsRestricted} />
+      <Route path="/settings" component={Settings} />
+
+      {/* Help sub-pages */}
+      <Route path="/help/wiki" component={WikiPage} />
+      <Route path="/help/tutorials" component={TutorialsPage} />
+      <Route path="/help/tickets" component={TicketsPage} />
+      <Route path="/help/chat" component={ChatPage} />
+      <Route path="/help" component={HelpCenter} />
+
+      {/* Public pages */}
+      <Route path="/blog" component={Blog} />
+      <Route path="/contact" component={Contact} />
+      <Route path="/safety" component={SafetyCenter} />
+      <Route path="/terms" component={TermsOfService} />
+      <Route path="/privacy" component={PrivacyPolicy} />
+
+      {/* Admin */}
+      <Route path="/panel/admin/dashboard" component={AdminDashboard} />
+      <Route path="/panel/admin/users" component={UserManagement} />
+      <Route path="/panel/admin/moderation" component={ModerationQueue} />
+
+      {/* Landing + catch-all */}
+      <Route path="/" component={Landing} />
+      <Route component={NotFound} />
+    </Switch>
   );
 }
 

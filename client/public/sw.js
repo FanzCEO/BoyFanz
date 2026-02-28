@@ -1,8 +1,8 @@
 // BoyFanz Progressive Web App Service Worker
 // Advanced caching strategies, offline support, and background sync
-// VERSION: 2.1.0 - Full platform layout with sidebar and header
+// VERSION: 2.3.0 - Added loading state to prevent blank screen
 
-const CACHE_VERSION = '2.1.0';
+const CACHE_VERSION = '2.4.0';
 const CACHE_NAME = `boyfanz-v${CACHE_VERSION}`;
 const OFFLINE_CACHE = `boyfanz-offline-v${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `boyfanz-dynamic-v${CACHE_VERSION}`;
@@ -34,6 +34,7 @@ const NEVER_CACHE_APIS = [
   '/api/logout',
   '/api/infinity-feed',
   '/api/auth/check-admin',
+  '/api/platform/current',
   '/api/social-notifications',
   '/api/streams/live',
   '/api/trending',
