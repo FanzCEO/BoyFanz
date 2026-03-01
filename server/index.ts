@@ -27,14 +27,14 @@ app.use(helmet({
   contentSecurityPolicy: isDevelopment ? false : {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://js.stripe.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"], // Google Fonts
+      fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"], // Google Fonts
       imgSrc: ["'self'", "data:", "https:", "blob:"], // Support for media uploads
-      connectSrc: ["'self'", "wss:", "ws:"], // Allow websockets
+      connectSrc: ["'self'", "wss:", "ws:", "https://api.stripe.com"], // Allow websockets
       mediaSrc: ["'self'", "blob:"], // Media playback
       objectSrc: ["'none'"], // Prevent object/embed attacks
-      frameSrc: ["'self'"],
+      frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"], // Allow Stripe payment iframes
       baseUri: ["'self'"], // Restrict base tag
       formAction: ["'self'"], // Restrict form submissions
       frameAncestors: ["'none'"], // Additional clickjacking protection

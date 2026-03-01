@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useLocation, useLocation } from 'wouter';
+import { useLocation } from 'wouter';
 import { AlertCircle } from 'lucide-react';
 
 export default function AuthError() {

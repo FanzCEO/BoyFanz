@@ -37,6 +37,7 @@ import LoginNew from "@/pages/auth/LoginNew";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPasswordNew from "@/pages/auth/ResetPasswordNew";
 import VerifyEmail from "@/pages/auth/VerifyEmail";
+import CreatorSignup from "@/pages/CreatorSignup";
 
 // Public pages
 import Blog from "@/pages/Blog";
@@ -149,6 +150,7 @@ function Router() {
       <Route path="/auth-error" component={AuthError} />
       <Route path="/login" component={Login} />
       <Route path="/signin" component={Login} />
+      <Route path="/creator-signup" component={CreatorSignup} />
 
       {/* Main navigation */}
       <Route path="/dashboard" component={Dashboard} />

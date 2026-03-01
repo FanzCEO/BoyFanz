@@ -64,8 +64,14 @@ router.get(["/login", "/auth/sso/login"], (req: Request, res: Response) => {
   const returnTo = req.query.returnTo as string || req.session.returnTo || "/";
   req.session.returnTo = returnTo;
 
+  // Build dynamic callback URL based on the actual host the user is on
+  const protocol = req.protocol;
+  const host = req.get("host");
+  const dynamicCallbackUrl = `${protocol}://${host}/auth/sso/callback`;
+  req.session.dynamicCallbackUrl = dynamicCallbackUrl;
+
   // Redirect to FanzSSO
-  const authUrl = FanzSSOClient.getAuthorizationUrl(state, returnTo);
+  const authUrl = FanzSSOClient.getAuthorizationUrl(state, returnTo, dynamicCallbackUrl);
   res.redirect(authUrl);
 });
 
@@ -98,7 +104,8 @@ router.get("/auth/sso/callback", async (req: Request, res: Response) => {
     }
 
     // Exchange code for tokens
-    const tokens = await FanzSSOClient.exchangeCodeForTokens(code as string);
+    const dynamicCb = req.session.dynamicCallbackUrl;
+    const tokens = await FanzSSOClient.exchangeCodeForTokens(code as string, dynamicCb);
 
     // Decode the ID token to get user info
     const decoded = FanzSSOClient.decodeToken(tokens.idToken);
@@ -282,8 +289,15 @@ router.get("/api/auth/check-admin", optionalFanzSSO, (req: Request, res: Respons
  */
 async function syncUserToLocalDatabase(ssoUser: SSOUser): Promise<void> {
   try {
-    // Check if user exists locally
-    const existingUser = await storage.getUserByEmail(ssoUser.email);
+    // Check if user exists locally by email, username, or SSO ID
+    // SSO may pass a username (not email) in the email field
+    let existingUser = await storage.getUserByEmail(ssoUser.email);
+    if (!existingUser && ssoUser.username) {
+      existingUser = await storage.getUserByUsername(ssoUser.username);
+    }
+    if (!existingUser && ssoUser.email && !ssoUser.email.includes("@")) {
+      existingUser = await storage.getUserByUsername(ssoUser.email);
+    }
 
     const superAdmin = isSuperAdmin(ssoUser.email);
 

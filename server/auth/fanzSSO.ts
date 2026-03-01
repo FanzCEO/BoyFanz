@@ -83,10 +83,10 @@ export class FanzSSOClient {
   /**
    * Generate the authorization URL to redirect users to FanzSSO
    */
-  static getAuthorizationUrl(state: string, returnTo?: string): string {
+  static getAuthorizationUrl(state: string, returnTo?: string, dynamicCallbackUrl?: string): string {
     const params = new URLSearchParams({
       client_id: SSO_CLIENT_ID,
-      redirect_uri: SSO_CALLBACK_URL,
+      redirect_uri: dynamicCallbackUrl || SSO_CALLBACK_URL,
       response_type: "code",
       scope: "openid profile email age_verified",
       state: state,
@@ -109,7 +109,7 @@ export class FanzSSOClient {
   /**
    * Exchange authorization code for tokens
    */
-  static async exchangeCodeForTokens(code: string): Promise<{
+  static async exchangeCodeForTokens(code: string, dynamicCallbackUrl?: string): Promise<{
     accessToken: string;
     refreshToken: string;
     idToken: string;
@@ -125,7 +125,7 @@ export class FanzSSOClient {
         code,
         client_id: SSO_CLIENT_ID,
         client_secret: SSO_CLIENT_SECRET,
-        redirect_uri: SSO_CALLBACK_URL,
+        redirect_uri: dynamicCallbackUrl || SSO_CALLBACK_URL,
       }),
     });
 

@@ -15,6 +15,7 @@ import {
   bigserial,
   bigint,
   inet,
+  date,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -177,8 +178,22 @@ export const profiles = pgTable(
       .notNull()
       .references(() => accounts.id, { onDelete: "cascade" }),
     handle: varchar("handle").unique().notNull(), // global handle across all tenants
-    displayName: varchar("display_name"),
+    displayName: varchar("display_name").unique().notNull(), // this is the username
     bio: text("bio"),
+
+    legal_first_name: varchar("legal_first_name").notNull(),
+    legal_last_name: varchar("legal_last_name").notNull(),
+    dob: date("dob").notNull(),
+    country: varchar("country").notNull(),
+    phone_number: varchar("phone_number"),
+    state: varchar("state"),
+    id_type: varchar("id_type").notNull(),
+    id_number: varchar("id_number").notNull(),
+    expiry_date: date("expiry_date").notNull(),
+    id_front_url: varchar("id_front_url").notNull(),
+    id_back_url: varchar("id_back_url"),
+    selfie_with_id_url: varchar("selfie_with_id_url").notNull(),
+
     styleAttitude: jsonb("style_attitude").$type<string[]>().default([]),
     type: profileTypeEnum("type").default("fan").notNull(),
     avatarUrl: varchar("avatar_url"),
