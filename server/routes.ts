@@ -5808,6 +5808,7 @@ import analyticsIntelligenceRoutes from './routes/analyticsIntelligence.js';
 // import unifiedDataRoutes from './routes/unifiedDataRoutes.js';
 import pipelineIntegrationRoutes from './routes/pipelineIntegrationRoutes.js';
 import enterpriseCommandCenterRoutes from './routes/enterpriseCommandCenterRoutes.js';
+import adsRoutes from "./routes/adsRoutes";
 
 export async function setupAdvancedRoutes(app: Express) {
   // Register missing API routes (dashboard, media, notifications)
@@ -5944,6 +5945,9 @@ export async function setupAdvancedRoutes(app: Express) {
 
   // Public API for external integrations (no auth required)
   app.use('/api/public', publicApiRoutes);
+
+  // Ad insertion system
+  app.use("/api/ads", adsRoutes);
   console.log('🌐 Public API registered: External creator profiles, widget data, public stats');
 
   console.log('🚀 Advanced features registered: PWA (Progressive Web App), NFT, AI Feeds, Analytics, Age Verification, AI Help & Support System, API Gateway & Service Mesh, Infrastructure Management, Security & Compliance, Mobile Backend (ClubCentral), Real-Time Monitoring, Revolutionary Analytics & Intelligence Engine');
