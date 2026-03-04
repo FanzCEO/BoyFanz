@@ -117,6 +117,7 @@ import { WikiPage } from "@/pages/help/WikiPage";
 import { TutorialsPage } from "@/pages/help/TutorialsPage";
 import { TicketsPage } from "@/pages/help/TicketsPage";
 import { ChatPage } from "@/pages/help/ChatPage";
+import { AdInsertionProvider } from '@/components/ads/AdInsertionProvider';
 
 console.log('[BOYFANZ] Stable App loading...');
 
@@ -253,7 +254,9 @@ function App() {
         <ScreenshotProtectionProvider config={screenshotProtectionConfig}>
           <PlatformProvider>
             <TooltipProvider>
+              <AdInsertionProvider>
               <Router />
+            </AdInsertionProvider>
               <Toaster />
             </TooltipProvider>
           </PlatformProvider>
