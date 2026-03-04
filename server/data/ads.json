@@ -1,0 +1,115 @@
+{
+  "config": {
+    "frequency": 5,
+    "enabled": true,
+    "placements": ["feed", "sidebar", "profile"],
+    "maxAdsPerPage": 10,
+    "refreshIntervalMs": 300000
+  },
+  "units": [
+    {
+      "id": "house-premium",
+      "type": "native",
+      "title": "Upgrade to Creator Pro",
+      "description": "Keep 100% of your earnings. We charge fans, not you. Priority support included.",
+      "imageUrl": "/ads/premium-banner.png",
+      "targetUrl": "/settings?tab=subscription",
+      "cta": "Upgrade Now",
+      "sponsored": true,
+      "placement": ["feed"],
+      "priority": 10,
+      "gradient": "from-amber-600/90 via-amber-500/80 to-orange-600/90"
+    },
+    {
+      "id": "house-referral",
+      "type": "native",
+      "title": "Refer a Friend",
+      "description": "Earn rewards for every friend you refer. Share your link and start earning today.",
+      "imageUrl": "/ads/referral-banner.png",
+      "targetUrl": "/referrals",
+      "cta": "Start Earning",
+      "sponsored": true,
+      "placement": ["feed", "sidebar"],
+      "priority": 8,
+      "gradient": "from-purple-600/90 via-violet-600/80 to-indigo-600/90"
+    },
+    {
+      "id": "house-starz",
+      "type": "native",
+      "title": "Starz Membership",
+      "description": "Unlock FanzAI, FanzMeet, Starz Studio and more. Exclusive access awaits.",
+      "imageUrl": "/ads/starz-banner.png",
+      "targetUrl": "/starz-elite",
+      "cta": "Join Starz",
+      "sponsored": true,
+      "placement": ["feed", "sidebar"],
+      "priority": 9,
+      "gradient": "from-pink-600/90 via-rose-600/80 to-red-700/90"
+    },
+    {
+      "id": "house-verify",
+      "type": "banner",
+      "title": "Get Verified",
+      "description": "Boost your visibility with the verified creator badge.",
+      "imageUrl": "/ads/verify-banner.png",
+      "targetUrl": "/compliance",
+      "cta": "Apply Now",
+      "sponsored": true,
+      "placement": ["feed", "sidebar"],
+      "priority": 7,
+      "gradient": "from-blue-600/90 via-blue-500/80 to-sky-600/90"
+    },
+    {
+      "id": "house-live",
+      "type": "native",
+      "title": "Go Live Tonight",
+      "description": "Earn tips in real-time with live streaming. Your fans are waiting.",
+      "imageUrl": "/ads/live-banner.png",
+      "targetUrl": "/streams/create",
+      "cta": "Start Stream",
+      "sponsored": true,
+      "placement": ["feed"],
+      "priority": 6,
+      "gradient": "from-rose-600/90 via-pink-600/80 to-red-600/90"
+    },
+    {
+      "id": "house-custom",
+      "type": "native",
+      "title": "Custom Content Requests",
+      "description": "Earn more with personalized content for your biggest fans.",
+      "imageUrl": "/ads/custom-banner.png",
+      "targetUrl": "/creator/custom-requests",
+      "cta": "Enable Requests",
+      "sponsored": true,
+      "placement": ["feed"],
+      "priority": 5,
+      "gradient": "from-cyan-600/90 via-teal-600/80 to-emerald-600/90"
+    },
+    {
+      "id": "house-vault",
+      "type": "banner",
+      "title": "Content Vault",
+      "description": "Store and organize your content securely in the cloud.",
+      "imageUrl": "/ads/vault-banner.png",
+      "targetUrl": "/creator/vault",
+      "cta": "Open Vault",
+      "sponsored": true,
+      "placement": ["sidebar"],
+      "priority": 4,
+      "gradient": "from-slate-600/90 via-zinc-600/80 to-neutral-600/90"
+    },
+    {
+      "id": "house-analytics",
+      "type": "banner",
+      "title": "Track Your Growth",
+      "description": "Powerful analytics to understand what your fans love.",
+      "imageUrl": "/ads/analytics-banner.png",
+      "targetUrl": "/creator/analytics",
+      "cta": "View Stats",
+      "sponsored": true,
+      "placement": ["sidebar"],
+      "priority": 3,
+      "gradient": "from-green-600/90 via-emerald-600/80 to-teal-600/90"
+    }
+  ]
+}
