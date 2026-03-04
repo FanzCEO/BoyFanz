@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Link } from 'wouter';
 import { FeedAd, SidebarAd } from '@/components/ads/AdBanner';
 import {
+import { useAdInsertion } from '@/hooks/useAdInsertion';
   Heart,
   MessageCircle,
   Share,
@@ -294,6 +295,7 @@ const PostCard = ({ post }: { post: Post }) => {
 };
 
 export default function PostsFeed() {
+  const { renderAdAtPosition } = useAdInsertion();
   const { user } = useAuth();
 
   const { data: posts = [], isLoading } = useQuery<Post[]>({
