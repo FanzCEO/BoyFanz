@@ -99,23 +99,18 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install
 
       - name: 🧹 Lint Code
-        run: pnpm lint --max-warnings=0
+        run: npm run lint --max-warnings=0
 
       - name: 🔍 Type Check
-        run: pnpm typecheck
+        run: npm run typecheck
 
       - name: 🧪 Unit Tests with Coverage
         run: |
-          pnpm test --coverage --watchAll=false
+          npm run test --coverage --watchAll=false
           echo "COVERAGE_THRESHOLD=85" >> $GITHUB_ENV
 
       - name: 📊 Coverage Gate (85% minimum)
@@ -140,7 +135,7 @@ jobs:
       - name: 📱 Mobile Compatibility Check
         run: |
           # Run mobile-specific tests if they exist
-          pnpm test:mobile || echo "No mobile tests configured"
+          npm run test:mobile || echo "No mobile tests configured"
         continue-on-error: true
 
   fanz-compliance:
