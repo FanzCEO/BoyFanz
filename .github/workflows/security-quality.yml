@@ -37,7 +37,7 @@ jobs:
         run: npm ci --include=dev
 
       - name: 🔍 Secret Scanning with GitLeaks
-        uses: trufflesecurity/truffhog@main
+        uses: trufflesecurity/trufflehog@main
         with:
           path: ./
           base: ${{ github.event.repository.default_branch }}
